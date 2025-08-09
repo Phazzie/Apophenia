@@ -1,0 +1,11 @@
+import { Command } from '../types';
+
+export interface ExecutionContext {
+  // This can be expanded with any context the commands might need
+  // For example, access to other stores or services
+}
+
+export interface CommandExecutor {
+  command: string;
+  execute: (command: Command, context: ExecutionContext) => Promise<void>;
+}

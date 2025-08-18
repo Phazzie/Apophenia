@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useGameStateStore } from '../stores/gameStateStore';
 import { GameState } from '../types';
 import { generateConcept } from '../services/gameService';
@@ -23,31 +23,42 @@ const genreConfig = {
 };
 
 const StartScreen: React.FC = () => {
-  const setGameState = useGameStateStore((state) => state.setGameState);
-  const updateWorldState = useWorldStateStore((state) => state.updateWorldState);
-  const addStorySegment = useStoryHistoryStore((state) => state.addStorySegment);
+  const { setGameState, reset: resetGameState } = useGameStateStore();
+  const { worldState, reset: resetWorldState } = useWorldStateStore();
+  const { storyHistory, addStorySegment, reset: resetStoryHistory } = useStoryHistoryStore();
+  const [hasSavedGame, setHasSavedGame] = useState(false);
 
-  const handleStartGame = async () => {
+  useEffect(() => {
+    // Check for a saved game. If story has more than the initial empty state, a game exists.
+    // We also check for a protagonist, as another indicator.
+    if (storyHistory.length > 0 && worldState.protagonist) {
+      setHasSavedGame(true);
+    }
+  }, [storyHistory, worldState.protagonist]);
+
+  const handleNewGame = async () => {
+    // Clear all previous game data from stores
+    resetGameState();
+    resetWorldState();
+    resetStoryHistory();
+
     setGameState(GameState.GENERATING_CONCEPT);
 
-    // 1. Generate the initial concept
     const concept = await generateConcept(genreConfig);
-    updateWorldState(concept);
+    useWorldStateStore.getState().updateWorldState(concept); // Update world state directly
 
-    // 2. Add the first story segment
     addStorySegment({
       id: `seg-0`,
       text: concept.setting || 'The world is a bleak and unforgiving place.',
       images: {},
     });
 
-    // 3. Get the first set of choices
-    // In a real flow, we'd probably have an "intro" flow.
-    // For now, we'll just kick off the first "next step" with a generic prompt.
-    setGameState(GameState.LOADING);
-    // This part would be handled by the game loop, triggered by a choice.
-    // For the very first step, we might need a dedicated "startGame" flow.
-    // For now, we'll transition to playing and let the GameScreen handle the first step.
+    setGameState(GameState.PLAYING);
+  };
+
+  const handleContinue = () => {
+    // The stores are already rehydrated by the persist middleware.
+    // We just need to navigate to the game screen.
     setGameState(GameState.PLAYING);
   };
 
@@ -55,7 +66,8 @@ const StartScreen: React.FC = () => {
     <div className="start-screen">
       <h1>Cosmic Narrative</h1>
       <p>An AI-driven story experience.</p>
-      <button onClick={handleStartGame}>Begin</button>
+      <button onClick={handleNewGame}>New Game</button>
+      {hasSavedGame && <button onClick={handleContinue}>Continue</button>}
     </div>
   );
 };

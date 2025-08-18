@@ -11,6 +11,7 @@ const GameScreen: React.FC = () => {
   const { storyHistory } = useStoryHistoryStore();
   const { worldState } = useWorldStateStore();
   const [isLoading, setIsLoading] = useState(false);
+  const [saveMessageVisible, setSaveMessageVisible] = useState(false);
 
   const lastStorySegment = storyHistory[storyHistory.length - 1];
 
@@ -38,6 +39,15 @@ const GameScreen: React.FC = () => {
     await executeCommandQueue(commands);
     setIsLoading(false);
     // The displayChoices command will set the state back to PLAYING
+  };
+
+  const handleSave = () => {
+    // The saving is automatic via the persist middleware.
+    // This button is just for user feedback.
+    setSaveMessageVisible(true);
+    setTimeout(() => {
+      setSaveMessageVisible(false);
+    }, 2000);
   };
 
   return (
@@ -70,6 +80,10 @@ const GameScreen: React.FC = () => {
             )}
           </>
         )}
+        <div className="game-actions">
+          <button onClick={handleSave} disabled={isLoading}>Save Game</button>
+          {saveMessageVisible && <span className="save-message">Game Saved!</span>}
+        </div>
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { GameState } from '../types';
 
 interface GameStateStore {
@@ -7,17 +8,30 @@ interface GameStateStore {
   intrusiveThought?: Choice;
   setGameState: (gameState: GameState) => void;
   setChoices: (choices: Choice[], intrusiveThought?: Choice) => void;
+  reset: () => void;
 }
 
-export const useGameStateStore = create<GameStateStore>((set) => ({
+const initialState = {
   gameState: GameState.MENU,
   choices: [],
   intrusiveThought: undefined,
-  setGameState: (gameState) => set({ gameState }),
-  setChoices: (choices, intrusiveThought) =>
-    set({
-      choices,
-      intrusiveThought,
-      gameState: GameState.PLAYING, // Setting choices implies we are in the PLAYING state
+};
+
+export const useGameStateStore = create<GameStateStore>()(
+  persist(
+    (set) => ({
+      ...initialState,
+      setGameState: (gameState) => set({ gameState }),
+      setChoices: (choices, intrusiveThought) =>
+        set({
+          choices,
+          intrusiveThought,
+          gameState: GameState.PLAYING, // Setting choices implies we are in the PLAYING state
+        }),
+      reset: () => set(initialState),
     }),
-}));
+    {
+      name: 'cosmic-narrative-gamestate', // unique name for localStorage
+    }
+  )
+);

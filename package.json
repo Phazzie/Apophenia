@@ -1,0 +1,24 @@
+{
+  "name": "ai-narrative-game",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "./node_modules/.bin/vite",
+    "build": "./node_modules/.bin/tsc && ./node_modules/.bin/vite build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "zod": "^3.23.8",
+    "genkit": "^1.16.1",
+    "@genkit-ai/googleai": "^1.16.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "vite": "^5.2.11",
+    "@vitejs/plugin-react": "^4.3.0"
+  }
+}

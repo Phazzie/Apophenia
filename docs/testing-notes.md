@@ -1,0 +1,1 @@
+Testing framework: Jest (TypeScript via ts-jest assumed). If the project uses Vitest, these tests are compatible with minor changes (e.g., replace jest.mock with vi.mock and adapt globals).

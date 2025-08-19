@@ -178,12 +178,53 @@ const commandSchema = z.discriminatedUnion('type', [
 
 const commandArraySchema = z.array(commandSchema);
 
+// Schemas for Core Game Types
+const worldStateSchema = z.object({
+  protagonist: z.string(),
+  setting: z.string(),
+  dilemma: z.string(),
+  summary: z.string(),
+  psychologicalStatus: z.enum(['Stable', 'Uneasy', 'Paranoid', 'Fragmented']),
+  systemHealth: z.number(),
+  uiDistortion: z.object({
+    transform: z.string(),
+    filter: z.string(),
+    transition: z.string(),
+  }),
+});
+
+const storySegmentSchema = z.object({
+  id: z.string(),
+  text: z.string(),
+  images: z.object({
+    main: z.string().optional(),
+    inset: z.array(z.string()).optional(),
+    mainStatus: z.enum(['loading', 'loaded']).optional(),
+  }),
+});
+
+const genreConfigSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string(),
+  theme: z.object({
+    '--background-color': z.string(),
+    '--text-color': z.string(),
+    '--accent-color': z.string(),
+    '--font-family': z.string(),
+  }),
+  startScreenImagePrompt: z.string(),
+  conceptPrompt: z.string(),
+  aiSystemInstruction: z.string(),
+});
+
+
 // Schema for the Next Step Flow input
 const nextStepInputSchema = z.object({
   playerChoice: z.string(),
-  worldState: z.any(), // Using any() for simplicity, could be tightened
-  history: z.array(z.any()), // Using any() for simplicity
-  genreConfig: z.any(), // Using any() for simplicity
+  worldState: worldStateSchema,
+  history: z.array(storySegmentSchema),
+  genreConfig: genreConfigSchema,
 });
 
 /**

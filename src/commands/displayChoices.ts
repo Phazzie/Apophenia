@@ -6,9 +6,9 @@ export const displayChoicesExecutor: CommandExecutor = {
   command: 'displayChoices',
   execute: async (command) => {
     // Set the choices in the game state store for the UI to render
-    useGameStateStore
-      .getState()
-      .setChoices(command.payload.choices, command.payload.intrusiveThought);
+    const { setChoices, setGameState } = useGameStateStore.getState();
+    setChoices(command.payload.choices, command.payload.intrusiveThought);
+    setGameState(GameState.PLAYING);
 
     // If there's a predicted image, trigger the pregeneration command
     if (command.payload.predictedImagePrompt) {

@@ -26,7 +26,6 @@ export const useGameStateStore = create<GameStateStore>()(
         set({
           choices,
           intrusiveThought,
-          gameState: GameState.PLAYING, // Setting choices implies we are in the PLAYING state
         }),
       reset: () => set(initialState),
     }),

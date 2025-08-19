@@ -1,10 +1,15 @@
 import { CommandExecutor } from './command.types';
 import { useGameStateStore } from '../stores/gameStateStore';
 import { executeCommandQueue } from '../services/commandExecutor';
+import { Command, GameState } from '../types';
 
 export const displayChoicesExecutor: CommandExecutor = {
   command: 'displayChoices',
-  execute: async (command) => {
+  execute: async (command: Command) => {
+    if (command.type !== 'displayChoices') {
+      return;
+    }
+
     // Set the choices in the game state store for the UI to render
     const { setChoices, setGameState } = useGameStateStore.getState();
     setChoices(command.payload.choices, command.payload.intrusiveThought);

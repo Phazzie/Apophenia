@@ -19,7 +19,6 @@ const withAIFlowHandling = <T extends any[], R>(
   flowName: string,
   fallback: () => R
 ) => {
-<<<<<<< HEAD
   return async (...args: T): Promise<R> => {
     try {
       return await flow(...args);
@@ -28,35 +27,36 @@ const withAIFlowHandling = <T extends any[], R>(
       return fallback();
     }
   };
-=======
-  return async (...args: T): Promise<R> => {
-    try {
-      return await flow(...args);
-    } catch (error) {
-      console.error(`Error calling ${flowName}:`, error);
-      return fallback();
-    }
-  };
->>>>>>> remotes/origin/feat/full-app-implementation
 };
 
 // --- Fallback Value Generators ---
 
-const getNextStepFallback = (): Command[] => [
-  {
-    type: 'displayText',
-    payload: { content: 'The connection wavers. The signal is lost in static. You are alone.' },
-  },
-  {
-    type: 'displayChoices',
-    payload: {
-      choices: [
-        { text: 'Try to reconnect', isIntrusive: false },
-        { text: 'Wait', isIntrusive: false },
-      ],
+const getNextStepFallback = (): Command[] => {
+  const segmentId = crypto.randomUUID();
+  return [
+    {
+      type: 'createSegment',
+      payload: { id: segmentId },
     },
-  },
-];
+    {
+      type: 'displayText',
+      payload: {
+        content:
+          'The connection wavers. The signal is lost in static. You are alone.',
+        segmentId: segmentId,
+      },
+    },
+    {
+      type: 'displayChoices',
+      payload: {
+        choices: [
+          { text: 'Try to reconnect', isIntrusive: false },
+          { text: 'Wait', isIntrusive: false },
+        ],
+      },
+    },
+  ];
+};
 
 const generateConceptFallback = (): Partial<WorldState> => ({
   protagonist: 'A jaded detective',
@@ -71,8 +71,12 @@ const generateImageFallback = (): string => `https://picsum.photos/seed/${Math.r
 // --- Service Functions ---
 
 export const getNextStep = withAIFlowHandling(
-  async (playerChoice: string, worldState: WorldState, history: any[], genreConfig: GenreConfig) =>
-    nextStepFlow({ playerChoice, worldState, history, genreConfig }),
+  async (
+    playerChoice: string,
+    worldState: WorldState,
+    history: StorySegment[],
+    genreConfig: GenreConfig
+  ) => nextStepFlow({ playerChoice, worldState, history, genreConfig }),
   'nextStepFlow',
   getNextStepFallback
 );

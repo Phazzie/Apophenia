@@ -4,6 +4,12 @@
 
 import { genkit, defineFlow, z } from 'genkit';
 import { googleAI } from '@genkit-ai/googleai';
+import {
+  commandArraySchema,
+  genreConfigSchema,
+  storySegmentSchema,
+  worldStateSchema,
+} from '../../types';
 
 // Initialize Genkit
 // This should be done once in your application's entry point.
@@ -146,79 +152,6 @@ export const generateImageFlow = defineFlow(
 // Next Step Flow (Core Game Loop)
 //================================================================================
 
-// Schemas for Commands
-const displayTextPayloadSchema = z.object({ content: z.string() });
-const waitPayloadSchema = z.object({ duration: z.number() });
-const generateAmbiancePayloadSchema = z.object({ description: z.string() });
-const generateImagePayloadSchema = z.object({ styleModifier: z.string() });
-const updateWorldStatePayloadSchema = z.object({
-  protagonist: z.string().optional(),
-  setting: z.string().optional(),
-  dilemma: z.string().optional(),
-  summary: z.string().optional(),
-  psychologicalStatus: z.enum(['Stable', 'Uneasy', 'Paranoid', 'Fragmented']).optional(),
-  systemHealth: z.number().optional(),
-});
-const choiceSchema = z.object({ text: z.string(), isIntrusive: z.boolean() });
-const displayChoicesPayloadSchema = z.object({
-  choices: z.array(choiceSchema),
-  intrusiveThought: choiceSchema.optional(),
-  predictedImagePrompt: z.string().optional(),
-});
-
-// Discriminated union for all command types
-const commandSchema = z.discriminatedUnion('type', [
-  z.object({ type: z.literal('displayText'), payload: displayTextPayloadSchema }),
-  z.object({ type: z.literal('wait'), payload: waitPayloadSchema }),
-  z.object({ type: z.literal('generateAmbiance'), payload: generateAmbiancePayloadSchema }),
-  z.object({ type: z.literal('generateImage'), payload: generateImagePayloadSchema }),
-  z.object({ type: z.literal('updateWorldState'), payload: updateWorldStatePayloadSchema }),
-  z.object({ type: z.literal('displayChoices'), payload: displayChoicesPayloadSchema }),
-]);
-
-const commandArraySchema = z.array(commandSchema);
-
-// Schemas for Core Game Types
-const worldStateSchema = z.object({
-  protagonist: z.string(),
-  setting: z.string(),
-  dilemma: z.string(),
-  summary: z.string(),
-  psychologicalStatus: z.enum(['Stable', 'Uneasy', 'Paranoid', 'Fragmented']),
-  systemHealth: z.number(),
-  uiDistortion: z.object({
-    transform: z.string(),
-    filter: z.string(),
-    transition: z.string(),
-  }),
-});
-
-const storySegmentSchema = z.object({
-  id: z.string(),
-  text: z.string(),
-  images: z.object({
-    main: z.string().optional(),
-    inset: z.array(z.string()).optional(),
-    mainStatus: z.enum(['loading', 'loaded']).optional(),
-  }),
-});
-
-const genreConfigSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  description: z.string(),
-  theme: z.object({
-    '--background-color': z.string(),
-    '--text-color': z.string(),
-    '--accent-color': z.string(),
-    '--font-family': z.string(),
-  }),
-  startScreenImagePrompt: z.string(),
-  conceptPrompt: z.string(),
-  aiSystemInstruction: z.string(),
-});
-
-
 // Schema for the Next Step Flow input
 const nextStepInputSchema = z.object({
   playerChoice: z.string(),
@@ -256,19 +189,22 @@ export const nextStepFlow = defineFlow(
       The response must be a valid JSON array matching the provided schema.
 
       **Available Commands:**
-      - \`displayText\`: Shows a piece of text to the user. Use this for narration.
+      - \`createSegment\`: Creates a new, empty story segment. MUST be called before any \`displayText\` or \`generateImage\` for a new scene.
+      - \`displayText\`: Shows text to the user. Must target a \`segmentId\`.
       - \`displayChoices\`: Presents the player with choices. This should always be the last command.
       - \`updateWorldState\`: Changes the internal state of the world (e.g., psychologicalStatus).
-      - \`generateImage\`: Triggers an image generation based on the current context. Use a style modifier.
+      - \`generateImage\`: Triggers an image generation. The payload must include a detailed visual \`prompt\` and a \`segmentId\`.
       - \`generateAmbiance\`: Describes an ambient sound to be played.
       - \`wait\`: Pauses the game for a specified duration in milliseconds.
 
       **Instructions:**
-      1. Narrate the outcome of the player's choice.
-      2. Update the world state if necessary to reflect changes.
-      3. Create a new situation for the player.
-      4. End by presenting 2-3 new choices for the player to make.
-      5. One of the choices can be an "intrusive thought" which is more dangerous or irrational.
+      1. **Always start a new scene by calling `createSegment` first.** Get the new ID for the segment.
+      2. Narrate the outcome of the player's choice using \`displayText\`, targeting the new segment's ID.
+      3. If the scene needs an image, call \`generateImage\` with a detailed prompt, targeting the new segment's ID.
+      4. Update the world state if necessary to reflect changes.
+      5. Create a new situation for the player.
+      6. End by presenting 2-3 new choices for the player to make using \`displayChoices\`.
+      7. One of the choices can be an "intrusive thought" which is more dangerous or irrational.
 
       Generate the next command sequence now.
       `,

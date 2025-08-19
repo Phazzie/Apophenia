@@ -1,16 +1,18 @@
 import { CommandExecutor } from './command.types';
 import { useGameStateStore } from '../stores/gameStateStore';
-import { GameState } from '../types';
 import { executeCommandQueue } from '../services/commandExecutor';
 
 export const displayChoicesExecutor: CommandExecutor = {
   command: 'displayChoices',
   execute: async (command) => {
-    // In a real app, this would update the UI with choices.
-    // For now, it will just log the choices.
-    console.log('Displaying choices:', command.payload.choices);
+    // Set the choices in the game state store for the UI to render
+    useGameStateStore
+      .getState()
+      .setChoices(command.payload.choices, command.payload.intrusiveThought);
 
+    // If there's a predicted image, trigger the pregeneration command
     if (command.payload.predictedImagePrompt) {
+      // This is a non-blocking call
       executeCommandQueue([
         {
           type: 'pregenerateImage',
@@ -18,7 +20,5 @@ export const displayChoicesExecutor: CommandExecutor = {
         },
       ]);
     }
-
-    useGameStateStore.getState().setGameState(GameState.PLAYING);
   },
 };

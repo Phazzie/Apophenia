@@ -5,6 +5,7 @@ import { useWorldStateStore } from '../stores/worldStateStore';
 import { getNextStep } from '../services/gameService';
 import { executeCommandQueue } from '../services/commandExecutor';
 import { Choice, GameState } from '../types';
+import { cosmicHorrorGenre as genreConfig } from '../config/gameConfig';
 
 const GameScreen: React.FC = () => {
   const { choices, intrusiveThought, gameState, setGameState } = useGameStateStore();
@@ -26,19 +27,22 @@ const GameScreen: React.FC = () => {
     setIsLoading(true);
     setGameState(GameState.LOADING);
 
-    // Mock genreConfig for now
-    const mockGenreConfig = { name: 'Cosmic Horror', style: 'Lovecraftian' };
-
-    const commands = await getNextStep(
-      choice.text,
-      worldState,
-      storyHistory,
-      mockGenreConfig as any
-    );
-
-    await executeCommandQueue(commands);
-    setIsLoading(false);
-    // The displayChoices command will set the state back to PLAYING
+    try {
+      const commands = await getNextStep(
+        choice.text,
+        worldState,
+        storyHistory,
+        genreConfig
+      );
+      await executeCommandQueue(commands);
+      // The displayChoices command will set the state back to PLAYING
+    } catch (err) {
+      console.error('Failed to process choice:', err);
+      // Recover UI responsiveness if a command or flow fails
+      setGameState(GameState.PLAYING);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSave = () => {

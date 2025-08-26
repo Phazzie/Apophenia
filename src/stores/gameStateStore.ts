@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { GameState } from '../types';
+import { GameState, Choice } from '../types';
 
 interface GameStateStore {
   gameState: GameState;

@@ -29,6 +29,7 @@ export interface GenreConfig {
   id: string;
   name: string;
   description: string;
+  style: string;
   theme: {
     '--background-color': string;
     '--text-color': string;

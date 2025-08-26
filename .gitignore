@@ -9,8 +9,14 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+dev_server.log
+*.log
 
 # Vite cache
 .vite/
 # Jules scratch
 jules-scratch/
+
+# Environment files
+.env.local
+.env.*.local

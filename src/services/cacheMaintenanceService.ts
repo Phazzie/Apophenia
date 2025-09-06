@@ -5,7 +5,7 @@ import { useImageCacheStore } from '../stores/imageCacheStore';
  * Handles periodic cleanup and optimization of various caches
  */
 export class CacheMaintenanceService {
-  private static cleanupInterval: NodeJS.Timeout | null = null;
+  private static cleanupInterval: ReturnType<typeof setInterval> | null = null;
   
   /**
    * Start periodic cache maintenance

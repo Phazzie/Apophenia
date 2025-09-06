@@ -42,23 +42,42 @@ describe('gameService', () => {
   let consoleErrorSpy: jest.SpyInstance;
 
   const mockWorldState: WorldState = {
-    // Provide minimal plausible shape; adapt if project has stricter typing
-    location: 'Station',
-    inventory: [],
-    flags: {},
-  } as unknown as WorldState;
+    protagonist: 'Test Detective',
+    setting: 'A dark alley in the city',
+    dilemma: 'A mysterious case',
+    summary: 'The investigation begins',
+    psychologicalStatus: 'Uneasy',
+    systemHealth: 85,
+    uiDistortion: {
+      transform: 'scale(1.02)',
+      filter: 'blur(0.5px)',
+      transition: 'all 0.3s ease',
+    },
+  };
 
   const mockGenreConfig: GenreConfig = {
-    // Provide minimal plausible shape
-    genre: 'sci-fi',
-    tone: 'noir',
-  } as unknown as GenreConfig;
+    id: 'test-genre',
+    name: 'Test Genre',
+    description: 'A test genre for testing',
+    style: 'Test style',
+    theme: {
+      '--background-color': '#000',
+      '--text-color': '#fff',
+      '--accent-color': '#f00',
+      '--font-family': 'Arial',
+    },
+    startScreenImagePrompt: 'Test image prompt',
+    conceptPrompt: 'Test concept prompt',
+    aiSystemInstruction: 'Test instruction',
+  };
 
   const mockLastSegment: StorySegment = {
     id: 'seg-1',
-    content: 'A shadow moves across the bulkhead.',
-    choices: [],
-  } as unknown as StorySegment;
+    text: 'A shadow moves across the bulkhead.',
+    images: {
+      main: 'test-image.jpg',
+    },
+  };
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -79,7 +98,7 @@ describe('gameService', () => {
       ];
       (nextStepFlow as jest.Mock).mockResolvedValueOnce(commands);
 
-      const result = await getNextStep('Open the door', mockWorldState, [{ action: 'start' }], mockGenreConfig);
+      const result = await getNextStep('Open the door', mockWorldState, [{ id: 'seg-1', text: 'Started the game', images: {} }], mockGenreConfig);
 
       expect(nextStepFlow).toHaveBeenCalledWith({
         playerChoice: 'Open the door',

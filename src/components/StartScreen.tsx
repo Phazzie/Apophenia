@@ -32,9 +32,7 @@ const StartScreen: React.FC = () => {
   useEffect(() => {
     // Check for a saved game. If story has more than the initial empty state, a game exists.
     // We also check for a protagonist, as another indicator.
-    if (storyHistory.length > 0 && worldState.protagonist) {
-      setHasSavedGame(true);
-    }
+    setHasSavedGame(storyHistory.length > 0 && Boolean(worldState.protagonist));
   }, [storyHistory, worldState.protagonist]);
 
   const handleNewGame = async () => {

@@ -12,7 +12,6 @@ const ai = genkit({
   plugins: [
     googleAI(),
   ],
-  logSinks: [ 'firebase' ], // Example logging sink
   enableTracingAndMetrics: true,
 });
 

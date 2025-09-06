@@ -16,7 +16,7 @@ const initialState = {
 
 export const useStoryHistoryStore = create<StoryHistoryStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       ...initialState,
       addStorySegment: (segment) =>
         set((state) => ({ storyHistory: [...state.storyHistory, segment] })),
@@ -40,7 +40,10 @@ export const useStoryHistoryStore = create<StoryHistoryStore>()(
             segment.id === segmentId ? { ...segment, text: newText } : segment
           ),
         })),
-      reset: () => set(initialState),
+      reset: () => {
+        get().clearStorage?.(); // Clear persisted state
+        set(initialState);
+      },
     }),
     {
       name: 'cosmic-narrative-storyhistory', // unique name for localStorage

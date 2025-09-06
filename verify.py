@@ -9,8 +9,8 @@ def run_verification(page):
     # 1. Arrange: Go to the application's URL.
     page.goto("http://localhost:5173")
 
-    # 2. Act: Find the "Begin" button and click it.
-    begin_button = page.get_by_role("button", name="Begin")
+    # 2. Act: Find the "New Game" button and click it.
+    begin_button = page.get_by_role("button", name="New Game")
     expect(begin_button).to_be_visible()
     begin_button.click()
 

@@ -46,7 +46,7 @@ const getNextStepFallback = (): GameCommand[] => [
   },
 ];
 
-const generateConceptFallback = (): Partial<WorldState> => ({
+const generateConceptFallback = (): { protagonist: string; setting: string; dilemma: string } => ({
   protagonist: 'A jaded detective',
   setting: 'A rain-slicked city in the near future',
   dilemma: 'A case that defies logic',
@@ -57,7 +57,7 @@ const generateImageFallback = (): string => `https://picsum.photos/seed/${Math.r
 // --- Service Functions ---
 
 export const getNextStep = withAIFlowHandling(
-  async (playerChoice: string, worldState: WorldState, history: any[], genreConfig: GenreConfig) =>
+  async (playerChoice: string, worldState: WorldState, history: StorySegment[], genreConfig: GenreConfig) =>
     nextStepFlow({ playerChoice, worldState, history, genreConfig }),
   'nextStepFlow',
   getNextStepFallback

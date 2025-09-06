@@ -49,10 +49,9 @@ export const useImageCacheStore = create<ImageCacheStore>((set, get) => ({
           return a.accessCount - b.accessCount; // Then least used
         });
         
-        // Remove oldest entries until we're under the size limit
-        const entriesToKeep = sorted.slice(-(MAX_CACHE_SIZE - 1));
+        // Keep the most recent MAX_CACHE_SIZE entries (new entry is already included)
+        const entriesToKeep = sorted.slice(-MAX_CACHE_SIZE);
         const evictedCache = Object.fromEntries(entriesToKeep);
-        evictedCache[prompt] = newEntry; // Add the new entry
         
         console.log(`Image cache evicted ${entries.length - MAX_CACHE_SIZE} entries`);
         return { imageCache: evictedCache };

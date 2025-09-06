@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { GameState } from '../types';
+import { GameState, Choice } from '../types';
 
 interface GameStateStore {
   gameState: GameState;
@@ -19,7 +19,7 @@ const initialState = {
 
 export const useGameStateStore = create<GameStateStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       ...initialState,
       setGameState: (gameState) => set({ gameState }),
       setChoices: (choices, intrusiveThought) =>
@@ -27,7 +27,10 @@ export const useGameStateStore = create<GameStateStore>()(
           choices,
           intrusiveThought,
         }),
-      reset: () => set(initialState),
+      reset: () => {
+        get().clearStorage?.(); // Clear persisted state
+        set(initialState);
+      },
     }),
     {
       name: 'cosmic-narrative-gamestate', // unique name for localStorage

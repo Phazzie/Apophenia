@@ -1,11 +1,10 @@
 import {
-  hauntingFlow,
   generateConceptFlow,
   generateImageFlow,
   nextStepFlow,
 } from './ai/genkit'; // Using the real Genkit flow
 import { summarizeHistoryFlow } from './flows/summaryFlow';
-import { GenreConfig, WorldState, StorySegment, Command } from '../types';
+import { GenreConfig, WorldState, StorySegment, GameCommand } from '../types';
 
 /**
  * A higher-order function to wrap AI flow calls with consistent error handling.
@@ -19,7 +18,6 @@ const withAIFlowHandling = <T extends any[], R>(
   flowName: string,
   fallback: () => R
 ) => {
-<<<<<<< HEAD
   return async (...args: T): Promise<R> => {
     try {
       return await flow(...args);
@@ -28,21 +26,11 @@ const withAIFlowHandling = <T extends any[], R>(
       return fallback();
     }
   };
-=======
-  return async (...args: T): Promise<R> => {
-    try {
-      return await flow(...args);
-    } catch (error) {
-      console.error(`Error calling ${flowName}:`, error);
-      return fallback();
-    }
-  };
->>>>>>> remotes/origin/feat/full-app-implementation
 };
 
 // --- Fallback Value Generators ---
 
-const getNextStepFallback = (): Command[] => [
+const getNextStepFallback = (): GameCommand[] => [
   {
     type: 'displayText',
     payload: { content: 'The connection wavers. The signal is lost in static. You are alone.' },
@@ -63,8 +51,6 @@ const generateConceptFallback = (): Partial<WorldState> => ({
   setting: 'A rain-slicked city in the near future',
   dilemma: 'A case that defies logic',
 });
-
-const getHauntingWhisperFallback = (): string => 'A whisper from the static...';
 
 const generateImageFallback = (): string => `https://picsum.photos/seed/${Math.random()}/1920/1080`;
 
@@ -90,12 +76,6 @@ export const generateConcept = withAIFlowHandling(
   generateConceptFlow,
   'generateConceptFlow',
   generateConceptFallback
-);
-
-export const getHauntingWhisper = withAIFlowHandling(
-  async () => hauntingFlow({}),
-  'hauntingFlow',
-  getHauntingWhisperFallback
 );
 
 export const generateImage = withAIFlowHandling(

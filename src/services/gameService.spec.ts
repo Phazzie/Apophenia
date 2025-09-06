@@ -12,7 +12,6 @@ import type { GenreConfig, WorldState, StorySegment } from '../types';
 // Import the module under test after mocks so it picks up mocked implementations
 // We need to mock relative modules used by the service.
 jest.mock('./ai/genkit', () => ({
-  hauntingFlow: jest.fn(),
   generateConceptFlow: jest.fn(),
   generateImageFlow: jest.fn(),
   nextStepFlow: jest.fn(),
@@ -27,12 +26,10 @@ import {
   getNextStep,
   summarizeHistory,
   generateConcept,
-  getHauntingWhisper,
   generateImage,
 } from './gameService';
 
 import {
-  hauntingFlow,
   generateConceptFlow,
   generateImageFlow,
   nextStepFlow,
@@ -178,25 +175,6 @@ describe('gameService', () => {
         setting: 'A rain-slicked city in the near future',
         dilemma: 'A case that defies logic',
       });
-    });
-  });
-
-  describe('getHauntingWhisper', () => {
-    it('returns whisper from hauntingFlow on success', async () => {
-      (hauntingFlow as jest.Mock).mockResolvedValueOnce('The air tastes of ozone...');
-      const result = await getHauntingWhisper();
-      expect(hauntingFlow).toHaveBeenCalledWith({});
-      expect(result).toBe('The air tastes of ozone...');
-    });
-
-    it('returns fallback whisper when hauntingFlow throws', async () => {
-      (hauntingFlow as jest.Mock).mockRejectedValueOnce(new Error('timeout'));
-      const result = await getHauntingWhisper();
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Error calling hauntingFlow:',
-        expect.any(Error)
-      );
-      expect(result).toBe('A whisper from the static...');
     });
   });
 

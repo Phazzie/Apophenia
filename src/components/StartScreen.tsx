@@ -4,6 +4,7 @@ import { GameState } from '../types';
 import { generateConcept } from '../services/gameService';
 import { useWorldStateStore } from '../stores/worldStateStore';
 import { useStoryHistoryStore } from '../stores/storyHistoryStore';
+import { GameStateManager } from '../services/gameStateManager';
 
 // A mock genre config for now. In a real app, this might be selectable.
 const genreConfig = {
@@ -37,10 +38,8 @@ const StartScreen: React.FC = () => {
   }, [storyHistory, worldState.protagonist]);
 
   const handleNewGame = async () => {
-    // Clear all previous game data from stores
-    resetGameState();
-    resetWorldState();
-    resetStoryHistory();
+    // Clear all previous game data from stores using unified reset
+    GameStateManager.resetAllStores();
 
     setGameState(GameState.GENERATING_CONCEPT);
 

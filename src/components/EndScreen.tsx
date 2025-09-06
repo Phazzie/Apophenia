@@ -2,18 +2,18 @@ import React from 'react';
 import { useGameStateStore } from '../stores/gameStateStore';
 import { useWorldStateStore } from '../stores/worldStateStore';
 import { useStoryHistoryStore } from '../stores/storyHistoryStore';
+import { GameStateManager } from '../services/gameStateManager';
 import { GameState } from '../types';
 
 const EndScreen: React.FC = () => {
-  const resetGameState = useGameStateStore((state) => state.reset);
-  const resetWorldState = useWorldStateStore((state) => state.reset);
-  const resetStoryHistory = useStoryHistoryStore((state) => state.reset);
+  const { setGameState } = useGameStateStore();
 
   const handleRestart = () => {
-    // Reset all stores to their initial state
-    resetGameState();
-    resetWorldState();
-    resetStoryHistory();
+    // Reset all stores to their initial state using unified reset
+    GameStateManager.resetAllStores();
+    
+    // Return to menu
+    setGameState(GameState.MENU);
   };
 
   return (

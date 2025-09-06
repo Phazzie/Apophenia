@@ -9,7 +9,7 @@ export const pregenerateImageExecutor: CommandExecutor = {
     if (!prompt) return;
 
     // Check if the image is already cached
-    const cachedImage = useImageCacheStore.getState().imageCache[prompt];
+    const cachedImage = useImageCacheStore.getState().getFromCache(prompt);
     if (cachedImage) return;
 
     // Generate the image and add it to the cache

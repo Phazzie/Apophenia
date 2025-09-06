@@ -23,7 +23,56 @@ export interface WorldState {
 export interface Command {
   type: string;
   payload?: any;
+  meta?: {
+    segmentId?: string;
+    correlationId?: string;
+    timestamp?: number;
+  };
 }
+
+// Specific command types with proper payloads
+export interface DisplayTextCommand extends Command {
+  type: 'displayText';
+  payload: {
+    content: string;
+  };
+}
+
+export interface WaitCommand extends Command {
+  type: 'wait';
+  payload: {
+    duration: number;
+  };
+}
+
+export interface GenerateImageCommand extends Command {
+  type: 'generateImage';
+  payload: {
+    styleModifier: string;
+  };
+}
+
+export interface PregenerateImageCommand extends Command {
+  type: 'pregenerateImage';
+  payload: {
+    prompt: string;
+  };
+}
+
+export interface UpdateWorldStateCommand extends Command {
+  type: 'updateWorldState';
+  payload: Partial<WorldState>;
+}
+
+// Union type for all commands
+export type GameCommand = 
+  | DisplayTextCommand
+  | DisplayChoicesCommand
+  | GenerateAmbianceCommand
+  | WaitCommand
+  | GenerateImageCommand
+  | PregenerateImageCommand
+  | UpdateWorldStateCommand;
 
 export interface GenreConfig {
   id: string;

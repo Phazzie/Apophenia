@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { useGameStateStore } from '../stores/gameStateStore';
-import { GameState } from '../types';
+import { GameState, GenreConfig } from '../types';
 import { generateConcept } from '../services/gameService';
 import { useWorldStateStore } from '../stores/worldStateStore';
 import { useStoryHistoryStore } from '../stores/storyHistoryStore';
 import { GameStateManager } from '../services/gameStateManager';
 
 // A mock genre config for now. In a real app, this might be selectable.
-const genreConfig = {
+const genreConfig: GenreConfig = {
   id: 'cosmic-horror',
   name: 'Cosmic Horror',
-  description: 'A story about the terrifying and unknowable entities that exist beyond human comprehension.',
+  description:
+    'A story about the terrifying and unknowable entities that exist beyond human comprehension.',
   style: 'Lovecraftian, atmospheric, psychological',
   theme: {
     '--background-color': '#0d1117',
@@ -18,9 +19,11 @@ const genreConfig = {
     '--accent-color': '#58a6ff',
     '--font-family': '"Courier New", Courier, monospace',
   },
-  startScreenImagePrompt: 'A lone lighthouse against a stormy, cosmic sky, with swirling nebulae instead of clouds.',
+  startScreenImagePrompt:
+    'A lone lighthouse against a stormy, cosmic sky, with swirling nebulae instead of clouds.',
   conceptPrompt: 'Generate a cosmic horror story concept.',
-  aiSystemInstruction: 'You are a master of cosmic horror, weaving tales of dread and insignificance.',
+  aiSystemInstruction:
+    'You are a master of cosmic horror, weaving tales of dread and insignificance.',
 };
 
 const StartScreen: React.FC = () => {
@@ -45,7 +48,7 @@ const StartScreen: React.FC = () => {
     useWorldStateStore.getState().updateWorldState(concept); // Update world state directly
 
     addStorySegment({
-      id: `seg-0`,
+      id: crypto.randomUUID(),
       text: concept.setting || 'The world is a bleak and unforgiving place.',
       images: {},
     });

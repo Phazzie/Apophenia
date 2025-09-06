@@ -1,30 +1,58 @@
 import { CommandExecutor } from './command.types';
 import { useStoryHistoryStore } from '../stores/storyHistoryStore';
 import { generateImage } from '../services/gameService';
+import { Command } from '../types';
 
 export const generateImageExecutor: CommandExecutor = {
   command: 'generateImage',
-  execute: async (command) => {
-    const lastSegment = useStoryHistoryStore.getState().storyHistory.slice(-1)[0];
+  execute: async (command: Command) => {
+    if (command.type !== 'generateImage') {
+      return;
+    }
+
+    const { storyHistory, updateSegmentById } = useStoryHistoryStore.getState();
+    const { segmentId, prompt } = command.payload;
+
+    const segment = storyHistory.find((s) => s.id === segmentId);
+    if (!segment) return;
 
     // Set loading state immediately
-    useStoryHistoryStore.getState().updateLastStorySegment({
+    updateSegmentById(segmentId, {
       images: {
-        ...lastSegment.images,
+        ...segment.images,
         mainStatus: 'loading',
       },
     });
 
     // Generate the image asynchronously
-    generateImage(command.payload.styleModifier).then(imageUrl => {
-      const currentLastSegment = useStoryHistoryStore.getState().storyHistory.slice(-1)[0];
-      useStoryHistoryStore.getState().updateLastStorySegment({
+    try {
+      const imageUrl = await generateImage(prompt);
+      // We need to get the segment again in case other image properties (e.g., insets) have changed.
+      const currentSegment = useStoryHistoryStore
+        .getState()
+        .storyHistory.find((s) => s.id === segmentId);
+      if (!currentSegment) return;
+
+      updateSegmentById(segmentId, {
         images: {
-          ...currentLastSegment.images,
+          ...currentSegment.images,
           main: imageUrl,
           mainStatus: 'loaded',
         },
       });
-    });
+    } catch (error) {
+      console.error('Image generation failed:', error);
+      const currentSegment = useStoryHistoryStore
+        .getState()
+        .storyHistory.find((s) => s.id === segmentId);
+      if (!currentSegment) return;
+      // Optionally, update segment with error state
+      updateSegmentById(segmentId, {
+        images: {
+          ...currentSegment.images,
+          mainStatus: 'loaded', // Reset from loading
+        },
+      });
+    }
   },
 };

@@ -4,7 +4,7 @@ import {
   nextStepFlow,
 } from './ai/genkit'; // Using the real Genkit flow
 import { summarizeHistoryFlow } from './flows/summaryFlow';
-import { GenreConfig, WorldState, StorySegment, GameCommand } from '../types';
+import { GenreConfig, WorldState, StorySegment, Command } from '../types';
 
 /**
  * A higher-order function to wrap AI flow calls with consistent error handling.
@@ -30,21 +30,32 @@ const withAIFlowHandling = <T extends any[], R>(
 
 // --- Fallback Value Generators ---
 
-const getNextStepFallback = (): GameCommand[] => [
-  {
-    type: 'displayText',
-    payload: { content: 'The connection wavers. The signal is lost in static. You are alone.' },
-  },
-  {
-    type: 'displayChoices',
-    payload: {
-      choices: [
-        { text: 'Try to reconnect', isIntrusive: false },
-        { text: 'Wait', isIntrusive: false },
-      ],
+const getNextStepFallback = (): Command[] => {
+  const segmentId = crypto.randomUUID();
+  return [
+    {
+      type: 'createSegment',
+      payload: { id: segmentId },
     },
-  },
-];
+    {
+      type: 'displayText',
+      payload: {
+        content:
+          'The connection wavers. The signal is lost in static. You are alone.',
+        segmentId: segmentId,
+      },
+    },
+    {
+      type: 'displayChoices',
+      payload: {
+        choices: [
+          { text: 'Try to reconnect', isIntrusive: false },
+          { text: 'Wait', isIntrusive: false },
+        ],
+      },
+    },
+  ];
+};
 
 const generateConceptFallback = (): { protagonist: string; setting: string; dilemma: string } => ({
   protagonist: 'A jaded detective',
@@ -57,8 +68,12 @@ const generateImageFallback = (): string => `https://picsum.photos/seed/${Math.r
 // --- Service Functions ---
 
 export const getNextStep = withAIFlowHandling(
-  async (playerChoice: string, worldState: WorldState, history: StorySegment[], genreConfig: GenreConfig) =>
-    nextStepFlow({ playerChoice, worldState, history, genreConfig }),
+  async (
+    playerChoice: string,
+    worldState: WorldState,
+    history: StorySegment[],
+    genreConfig: GenreConfig
+  ) => nextStepFlow({ playerChoice, worldState, history, genreConfig }),
   'nextStepFlow',
   getNextStepFallback
 );

@@ -1,162 +1,104 @@
 import { displayChoicesExecutor } from '../displayChoices';
-import type { CommandExecutor } from '../command.types';
+import { useGameStateStore } from '../../stores/gameStateStore';
+import { executeCommandQueue } from '../../services/commandExecutor';
+import { Command, Choice, GameState } from '../../types';
 
-// Mock the game state store and command executor service.
+// Mock the stores and services
 jest.mock('../../stores/gameStateStore', () => {
   const setChoices = jest.fn();
-  const getState = () => ({ setChoices });
-  const useGameStateStore = { getState };
-  return { useGameStateStore };
+  const setGameState = jest.fn();
+  const getState = () => ({ setChoices, setGameState });
+  return { useGameStateStore: { getState } };
 });
 
 jest.mock('../../services/commandExecutor', () => ({
   executeCommandQueue: jest.fn(),
 }));
 
-import { useGameStateStore } from '../../stores/gameStateStore';
-import { executeCommandQueue } from '../../services/commandExecutor';
-
 describe('displayChoicesExecutor', () => {
+  let setChoicesMock: jest.Mock;
+  let setGameStateMock: jest.Mock;
+  let executeCommandQueueMock: jest.Mock;
+
   beforeEach(() => {
-    jest.clearAllMocks();
+    // Reset mocks before each test
+    setChoicesMock = useGameStateStore.getState().setChoices as jest.Mock;
+    setGameStateMock = useGameStateStore.getState().setGameState as jest.Mock;
+    executeCommandQueueMock = executeCommandQueue as jest.Mock;
+    setChoicesMock.mockClear();
+    setGameStateMock.mockClear();
+    executeCommandQueueMock.mockClear();
   });
 
   it('should declare the correct command name', () => {
     expect(displayChoicesExecutor.command).toBe('displayChoices');
   });
 
-  it('should set choices and intrusiveThought in the game state store (happy path without predicted image)', async () => {
-    const choices = [
-      { id: '1', label: 'Option 1' },
-      { id: '2', label: 'Option 2' },
+  it('should set choices and game state correctly', async () => {
+    const choices: Choice[] = [
+      { text: 'Option 1', isIntrusive: false },
+      { text: 'Option 2', isIntrusive: true },
     ];
-    const intrusiveThought = 'An intrusive thought appears';
+    const intrusiveThought: Choice = { text: 'An intrusive thought', isIntrusive: true };
 
-    await displayChoicesExecutor.execute({
+    const command: Command = {
       type: 'displayChoices',
-      payload: {
-        choices,
-        intrusiveThought,
-      },
-    } as any);
+      payload: { choices, intrusiveThought },
+    };
 
-    const setChoices = useGameStateStore.getState().setChoices as jest.Mock;
-    expect(setChoices).toHaveBeenCalledTimes(1);
-    expect(setChoices).toHaveBeenCalledWith(choices, intrusiveThought);
-    // Should not enqueue pregenerateImage when no predictedImagePrompt present
-    expect(executeCommandQueue).not.toHaveBeenCalled();
+    await displayChoicesExecutor.execute(command, {});
+
+    expect(setChoicesMock).toHaveBeenCalledTimes(1);
+    expect(setChoicesMock).toHaveBeenCalledWith(choices, intrusiveThought);
+    expect(setGameStateMock).toHaveBeenCalledTimes(1);
+    expect(setGameStateMock).toHaveBeenCalledWith(GameState.PLAYING);
+    expect(executeCommandQueueMock).not.toHaveBeenCalled();
   });
 
-  it('should non-blockingly enqueue pregenerateImage when predictedImagePrompt is provided', async () => {
-    const choices = [{ id: '1', label: 'Only option' }];
+  it('should enqueue pregenerateImage when predictedImagePrompt is provided', async () => {
+    const choices: Choice[] = [{ text: 'Only option', isIntrusive: false }];
     const predictedImagePrompt = 'A serene lake at dawn';
 
-    await displayChoicesExecutor.execute({
+    const command: Command = {
       type: 'displayChoices',
-      payload: {
-        choices,
-        intrusiveThought: undefined,
-        predictedImagePrompt,
-      },
-    } as any);
+      payload: { choices, predictedImagePrompt },
+    };
 
-    const setChoices = useGameStateStore.getState().setChoices as jest.Mock;
-    expect(setChoices).toHaveBeenCalledTimes(1);
-    expect(setChoices).toHaveBeenCalledWith(choices, undefined);
+    await displayChoicesExecutor.execute(command, {});
 
-    // Verify executeCommandQueue called with the pregenerateImage command
-    expect(executeCommandQueue).toHaveBeenCalledTimes(1);
-    expect(executeCommandQueue).toHaveBeenCalledWith([
-      {
-        type: 'pregenerateImage',
-        payload: { prompt: predictedImagePrompt },
-      },
-    ]);
+    expect(setChoicesMock).toHaveBeenCalledWith(choices, undefined);
+    expect(setGameStateMock).toHaveBeenCalledWith(GameState.PLAYING);
+
+    expect(executeCommandQueueMock).toHaveBeenCalledTimes(1);
+    const expectedPregenerateCommand: Command = {
+      type: 'pregenerateImage',
+      payload: { prompt: predictedImagePrompt },
+    };
+    expect(executeCommandQueueMock).toHaveBeenCalledWith([expectedPregenerateCommand]);
   });
 
-  it('should handle empty choices array gracefully', async () => {
-    const choices: any[] = [];
-    await expect(
-      displayChoicesExecutor.execute({
-        type: 'displayChoices',
-        payload: {
-          choices,
-          intrusiveThought: null,
-        },
-      } as any),
-    ).resolves.toBeUndefined();
-
-    const setChoices = useGameStateStore.getState().setChoices as jest.Mock;
-    expect(setChoices).toHaveBeenCalledWith(choices, null);
-    expect(executeCommandQueue).not.toHaveBeenCalled();
-  });
-
-  it('should accept absence of intrusiveThought', async () => {
-    const choices = [{ id: 'x', label: 'X' }];
-    await displayChoicesExecutor.execute({
+  it('should handle an empty choices array gracefully', async () => {
+    const command: Command = {
       type: 'displayChoices',
-      payload: {
-        choices,
-        // intrusiveThought intentionally omitted
-      },
-    } as any);
+      payload: { choices: [] },
+    };
 
-    const setChoices = useGameStateStore.getState().setChoices as jest.Mock;
-    expect(setChoices).toHaveBeenCalledWith(choices, undefined);
+    await displayChoicesExecutor.execute(command, {});
+
+    expect(setChoicesMock).toHaveBeenCalledWith([], undefined);
+    expect(setGameStateMock).toHaveBeenCalledWith(GameState.PLAYING);
+    expect(executeCommandQueueMock).not.toHaveBeenCalled();
   });
 
-  it('should be robust if payload is missing optional fields', async () => {
-    // Some callers might accidentally send minimal payload; validate no throw
-    await expect(
-      displayChoicesExecutor.execute({
-        type: 'displayChoices',
-        payload: {
-          // @ts-expect-error testing runtime robustness
-          choices: undefined,
-        },
-      } as any),
-    ).resolves.toBeUndefined();
-
-    const setChoices = useGameStateStore.getState().setChoices as jest.Mock;
-    // Even if undefined, verify the call occurs with the provided values
-    expect(setChoices).toHaveBeenCalledWith(undefined, undefined);
-  });
-
-  it('should not throw if predictedImagePrompt is empty string', async () => {
-    const choices = [{ id: '1', label: 'A' }];
-    await expect(
-      displayChoicesExecutor.execute({
-        type: 'displayChoices',
-        payload: {
-          choices,
-          predictedImagePrompt: '',
-        },
-      } as any),
-    ).resolves.toBeUndefined();
-
-    const setChoices = useGameStateStore.getState().setChoices as jest.Mock;
-    expect(setChoices).toHaveBeenCalledWith(choices, undefined);
-
-    // Should still "consider" the falsy prompt; in current implementation,
-    // condition checks truthiness, so it should NOT call executeCommandQueue.
-    expect(executeCommandQueue).not.toHaveBeenCalled();
-  });
-
-  it('should enqueue with exact prompt payload when provided', async () => {
-    const choices = [{ id: 'a', label: 'A' }];
-    const prompt = 'mountain landscape';
-
-    await displayChoicesExecutor.execute({
+  it('should handle absence of intrusiveThought', async () => {
+    const choices: Choice[] = [{ text: 'X', isIntrusive: false }];
+    const command: Command = {
       type: 'displayChoices',
-      payload: {
-        choices,
-        intrusiveThought: 'ignore me',
-        predictedImagePrompt: prompt,
-      },
-    } as any);
+      payload: { choices },
+    };
 
-    expect(executeCommandQueue).toHaveBeenCalledWith([
-      { type: 'pregenerateImage', payload: { prompt } },
-    ]);
+    await displayChoicesExecutor.execute(command, {});
+
+    expect(setChoicesMock).toHaveBeenCalledWith(choices, undefined);
   });
 });

@@ -4,7 +4,7 @@ import { useStoryHistoryStore } from '../stores/storyHistoryStore';
 import { useWorldStateStore } from '../stores/worldStateStore';
 import { getNextStep } from '../services/gameService';
 import { executeCommandQueue } from '../services/commandExecutor';
-import { Choice, GameState } from '../types';
+import { Choice, GameState, GenreConfig } from '../types';
 
 const GameScreen: React.FC = () => {
   const { choices, intrusiveThought, gameState, setGameState } = useGameStateStore();
@@ -26,14 +26,30 @@ const GameScreen: React.FC = () => {
     setIsLoading(true);
     setGameState(GameState.LOADING);
 
-    // Mock genreConfig for now
-    const mockGenreConfig = { name: 'Cosmic Horror', style: 'Lovecraftian' };
+    // A complete mock genre config for now
+    const mockGenreConfig: GenreConfig = {
+      id: 'cosmic-horror',
+      name: 'Cosmic Horror',
+      description: 'Stories of cosmic dread and the insignificance of humanity.',
+      style: 'Lovecraftian, atmospheric, psychological',
+      theme: {
+        '--background-color': '#0d0d0f',
+        '--text-color': '#c5c5c5',
+        '--accent-color': '#6b0f1a',
+        '--font-family': "'Courier New', Courier, monospace",
+      },
+      startScreenImagePrompt:
+        'A vast, empty cosmos with a single, terrifying, unknowable entity lurking in the void.',
+      conceptPrompt: 'Generate a cosmic horror story concept.',
+      aiSystemInstruction:
+        'You are a master of cosmic horror, in the style of H.P. Lovecraft.',
+    };
 
     const commands = await getNextStep(
       choice.text,
       worldState,
       storyHistory,
-      mockGenreConfig as any
+      mockGenreConfig
     );
 
     await executeCommandQueue(commands);

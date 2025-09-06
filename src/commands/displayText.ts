@@ -1,22 +1,20 @@
 import { CommandExecutor } from './command.types';
 import { useStoryHistoryStore } from '../stores/storyHistoryStore';
+import { Command } from '../types';
 
 export const displayTextExecutor: CommandExecutor = {
   command: 'displayText',
-  execute: async (command) => {
-    const { storyHistory, addStorySegment, updateLastStorySegment } = useStoryHistoryStore.getState();
-    
-    if (storyHistory.length === 0) {
-      // Create initial segment if none exists
-      addStorySegment({
-        id: `seg-${Date.now()}`,
-        text: command.payload.content,
-        images: {}
-      });
-    } else {
-      const lastSegment = storyHistory[storyHistory.length - 1];
-      updateLastStorySegment({
-        text: lastSegment.text + command.payload.content,
+  execute: async (command: Command) => {
+    if (command.type !== 'displayText') {
+      return;
+    }
+
+    const { storyHistory, updateSegmentById } = useStoryHistoryStore.getState();
+    const segment = storyHistory.find((s: any) => s.id === command.payload.segmentId);
+
+    if (segment) {
+      updateSegmentById(command.payload.segmentId, {
+        text: segment.text + command.payload.content,
       });
     }
   },

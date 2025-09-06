@@ -1,24 +1,28 @@
 import { CommandExecutor } from './command.types';
 import { useGameStateStore } from '../stores/gameStateStore';
-import { GameState } from '../types';
 import { executeCommandQueue } from '../services/commandExecutor';
+import { GameState, DisplayChoicesCommand } from '../types';
 
 export const displayChoicesExecutor: CommandExecutor = {
   command: 'displayChoices',
   execute: async (command) => {
-    // In a real app, this would update the UI with choices.
-    // For now, it will just log the choices.
-    console.log('Displaying choices:', command.payload.choices);
+    // Cast to DisplayChoicesCommand since this executor only handles that type
+    const displayCommand = command as DisplayChoicesCommand;
+    
+    // Set the choices in the game state store for the UI to render
+    const { setChoices, setGameState } = useGameStateStore.getState();
+    setChoices(displayCommand.payload.choices, displayCommand.payload.intrusiveThought);
+    setGameState(GameState.PLAYING);
 
-    if (command.payload.predictedImagePrompt) {
+    // If there's a predicted image, trigger the pregeneration command
+    if (displayCommand.payload.predictedImagePrompt) {
+      // This is a non-blocking call
       executeCommandQueue([
         {
           type: 'pregenerateImage',
-          payload: { prompt: command.payload.predictedImagePrompt },
+          payload: { prompt: displayCommand.payload.predictedImagePrompt },
         },
       ]);
     }
-
-    useGameStateStore.getState().setGameState(GameState.PLAYING);
   },
 };

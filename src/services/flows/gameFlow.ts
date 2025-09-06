@@ -52,10 +52,6 @@ export const nextStepFlow = async (
   ];
 };
 
-export const hauntingFlow = async (): Promise<string> => {
-  return 'A whisper from the static...';
-};
-
 export const generateImageFlow = async (prompt: string): Promise<string> => {
   console.log('Generating image with prompt:', prompt);
   // In a real app, this would call the image generation model.

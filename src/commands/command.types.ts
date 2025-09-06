@@ -1,4 +1,4 @@
-import { Command } from '../types';
+import { GameCommand } from '../types';
 
 export interface ExecutionContext {
   // This can be expanded with any context the commands might need
@@ -7,5 +7,5 @@ export interface ExecutionContext {
 
 export interface CommandExecutor {
   command: string;
-  execute: (command: Command, context: ExecutionContext) => Promise<void>;
+  execute: (command: GameCommand, context?: ExecutionContext) => Promise<void>;
 }

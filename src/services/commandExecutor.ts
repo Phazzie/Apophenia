@@ -1,4 +1,4 @@
-import { Command } from '../types';
+import { GameCommand } from '../types';
 import { commandExecutors } from '../commands';
 import { ExecutionContext } from '../commands/command.types';
 
@@ -8,7 +8,7 @@ const NON_BLOCKING_COMMANDS = [
   'generateAmbiance',
 ];
 
-export const executeCommandQueue = async (commands: Command[]) => {
+export const executeCommandQueue = async (commands: GameCommand[]) => {
   const context: ExecutionContext = {};
 
   for (const command of commands) {

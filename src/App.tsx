@@ -1,15 +1,26 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useGameStateStore } from './stores/gameStateStore';
 import { useWorldStateStore } from './stores/worldStateStore';
 import { GameState } from './types';
-// Mock components for now
-const StartScreen = () => <div>Start Screen</div>;
-const GameScreen = () => <div>Game Screen</div>;
-const EndScreen = () => <div>End Screen</div>;
+import StartScreen from './components/StartScreen';
+import GameScreen from './components/GameScreen';
+import EndScreen from './components/EndScreen';
+import { GameErrorBoundary } from './components/ErrorBoundary';
+import { GameStateManager } from './services/gameStateManager';
 
 const App: React.FC = () => {
   const { gameState } = useGameStateStore();
   const { worldState } = useWorldStateStore();
+
+  // Initialize game services on app start
+  useEffect(() => {
+    GameStateManager.initialize();
+    
+    // Cleanup on unmount
+    return () => {
+      GameStateManager.cleanup();
+    };
+  }, []);
 
   const renderGameState = () => {
     switch (gameState) {
@@ -27,9 +38,11 @@ const App: React.FC = () => {
   };
 
   return (
-    <div id="app-container" style={worldState.uiDistortion}>
-      {renderGameState()}
-    </div>
+    <GameErrorBoundary>
+      <div id="app-container" style={worldState.uiDistortion}>
+        {renderGameState()}
+      </div>
+    </GameErrorBoundary>
   );
 };
 

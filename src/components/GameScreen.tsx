@@ -45,16 +45,22 @@ const GameScreen: React.FC = () => {
         'You are a master of cosmic horror, in the style of H.P. Lovecraft.',
     };
 
-    const commands = await getNextStep(
-      choice.text,
-      worldState,
-      storyHistory,
-      mockGenreConfig
-    );
-
-    await executeCommandQueue(commands);
-    setIsLoading(false);
-    // The displayChoices command will set the state back to PLAYING
+    try {
+      const commands = await getNextStep(
+        choice.text,
+        worldState,
+        storyHistory,
+        mockGenreConfig
+      );
+      await executeCommandQueue(commands);
+      // The displayChoices command will set the state back to PLAYING
+    } catch (err) {
+      console.error('Failed to process choice:', err);
+      // Recover UI responsiveness if a command or flow fails
+      setGameState(GameState.PLAYING);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSave = () => {

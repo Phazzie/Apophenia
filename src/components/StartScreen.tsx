@@ -31,29 +31,42 @@ const StartScreen: React.FC = () => {
   const { worldState, reset: resetWorldState } = useWorldStateStore();
   const { storyHistory, addStorySegment, reset: resetStoryHistory } = useStoryHistoryStore();
   const [hasSavedGame, setHasSavedGame] = useState(false);
+  const [isStarting, setIsStarting] = useState(false);
 
   useEffect(() => {
+<<<<<<< HEAD
+    useEffect(() => {
     // Check for a saved game. If story has more than the initial empty state, a game exists.
     // We also check for a protagonist, as another indicator.
     setHasSavedGame(storyHistory.length > 0 && Boolean(worldState.protagonist));
   }, [storyHistory, worldState.protagonist]);
+  }, [storyHistory, worldState.protagonist]);
 
   const handleNewGame = async () => {
-    // Clear all previous game data from stores using unified reset
-    GameStateManager.resetAllStores();
+    if (isStarting) return; // Guard against double-clicks
+    setIsStarting(true);
+
+    // Clear all previous game data from stores using unified GameStateManager
+    await GameStateManager.resetGame();
 
     setGameState(GameState.GENERATING_CONCEPT);
 
     const concept = await generateConcept(genreConfig);
-    useWorldStateStore.getState().updateWorldState(concept); // Update world state directly
+    const settingText =
+      concept.setting && concept.setting.trim().length > 0
+        ? concept.setting
+        : 'The world is a bleak and unforgiving place.';
+
+    useWorldStateStore.getState().updateWorldState({ ...concept, setting: settingText });
 
     addStorySegment({
       id: crypto.randomUUID(),
-      text: concept.setting || 'The world is a bleak and unforgiving place.',
+      text: settingText,
       images: {},
     });
 
     setGameState(GameState.PLAYING);
+    setIsStarting(false);
   };
 
   const handleContinue = () => {
@@ -66,7 +79,9 @@ const StartScreen: React.FC = () => {
     <div className="start-screen">
       <h1>Cosmic Narrative</h1>
       <p>An AI-driven story experience.</p>
-      <button onClick={handleNewGame}>New Game</button>
+      <button onClick={handleNewGame} disabled={isStarting}>
+        {isStarting ? 'Starting...' : 'New Game'}
+      </button>
       {hasSavedGame && <button onClick={handleContinue}>Continue</button>}
     </div>
   );

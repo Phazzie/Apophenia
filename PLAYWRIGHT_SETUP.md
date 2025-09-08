@@ -21,4 +21,4 @@ python verify.py
 
 ## Note
 
-This is optional for development. The main application will work without Playwright installed.
+This is optional for development and not part of the default CI pipeline. The main application works without Playwright installed.

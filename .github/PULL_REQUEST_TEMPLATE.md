@@ -2,7 +2,7 @@
 - What changed and why.
 
 ## Checklist
-- [ ] Aligned with CUSTOM_INSTRUCTIONS.md
+- [ ] Aligned with repository guidelines
 - [ ] Added/updated CHANGELOG.md (Unreleased)
 - [ ] Build/lint/tests PASS locally (if applicable)
 - [ ] No secrets committed

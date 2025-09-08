@@ -1,80 +1,22 @@
-# 🚀 APOPHENIA DEPLOYMENT PLAN
-**Target: Fully Functional MVP in 6-8 Hours**
-
-## Overview
-Transform the current 75% complete codebase into a deployed, playable AI-driven narrative game. The architecture is solid—we need AI integration, basic styling, and deployment.
+# 🚀 Apophenia Deployment Plan (Updated)
+Target: Deploy frontend + backend with real AI text (Gemini) and a server-side image endpoint.
 
 ---
 
-## 🎯 PHASE 1: CRITICAL FOUNDATION (2-3 hours)
+## Phase 1: Environment
 
-### 1.1 Environment Setup (30 minutes)
-**Priority: CRITICAL | Effort: LOW**
+Environment variables (see `.env.example`):
+- VITE_GEMINI_API_KEY (frontend read, used by current text flows)
+- VITE_IMAGE_API_KEY (placeholder)
+Backend will use its own env (e.g., GOOGLE_GENAI_API_KEY) and must not expose secrets to the client.
 
-```bash
-# Create environment files
-touch .env.example .env.local
+## Phase 2: AI
 
-# .env.example
-echo "VITE_GOOGLE_AI_API_KEY=your_api_key_here" > .env.example
-echo "VITE_IMAGE_API_KEY=your_image_api_key_here" >> .env.example
-
-# Update .gitignore
-echo ".env.local" >> .gitignore
-echo ".env" >> .gitignore
-```
-
-**Files to modify:**
-- `src/services/config.ts` → Environment variable integration
-- `.env.example` → Template for required keys
-- `.gitignore` → Protect secrets
-
-**Definition of Done:**
-- [ ] API keys loaded from environment variables
-- [ ] No hardcoded secrets in repository
-- [ ] Clear setup instructions for new developers
-
-### 1.2 Real AI Integration (2-2.5 hours)
-**Priority: CRITICAL | Effort: MEDIUM**
-
-**Replace mocked flows with real Google AI calls:**
-
-```typescript
-// src/services/ai/genkit.ts - COMPLETE IMPLEMENTATION
-import { GoogleGenerativeAI } from '@google/generative-ai';
-
-const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GOOGLE_AI_API_KEY);
-
-export const generateConceptFlow = async (genreConfig: GenreConfig) => {
-  const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-  // Implementation with proper prompts and response parsing
-};
-
-export const nextStepFlow = async (input: NextStepInput) => {
-  const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-  // Implementation returning proper Command arrays
-};
-
-export const generateImageFlow = async (prompt: string) => {
-  // Integration with image generation service
-  // Fallback to placeholder if service unavailable
-};
-```
-
-**Files to modify:**
-- `src/services/ai/genkit.ts` → Complete AI integration
-- `src/services/gameService.ts` → Remove fallback handling  
-- `package.json` → Add Google AI SDK dependency
-
-**Definition of Done:**
-- [ ] Real story generation working
-- [ ] Image generation integrated (with fallbacks)
-- [ ] Proper error handling for AI failures
-- [ ] Response parsing and validation
+Status: Text generation implemented with `@google/generative-ai` (Gemini 1.5 Flash) and robust error handling. Image generation is stubbed with Unsplash fallback. Next step is a server-side image endpoint.
 
 ---
 
-## 🎨 PHASE 2: USER EXPERIENCE (2-3 hours)
+## Phase 3: User Experience
 
 ### 2.1 Essential CSS Styling (1.5-2 hours)
 **Priority: HIGH | Effort: MEDIUM**
@@ -163,9 +105,7 @@ const GameScreen: React.FC = () => {
 
 ---
 
-## 🔧 PHASE 3: OPTIMIZATION & DEPLOYMENT (1.5-2 hours)
-
-### 3.1 Performance Optimization (30 minutes)
+## Phase 4: Optimization
 **Priority: MEDIUM | Effort: LOW**
 
 ```typescript
@@ -191,41 +131,25 @@ const CACHE_CONFIG = {
 - [ ] Reduced bundle size
 - [ ] Fast loading times
 
-### 3.2 Deployment Setup (1-1.5 hours)
-**Priority: CRITICAL | Effort: MEDIUM**
+### Deployment: DigitalOcean App Platform
 
-**Vercel deployment with environment variables:**
+Components:
+- Frontend: Vite static build
+- Backend: Express service providing POST /api/generateImage
 
-```bash
-# Install Vercel CLI
-npm i -g vercel
+Steps:
+1) Create DO App with two components from GitHub repo
+2) Frontend build command: `npm ci && npm run build` (root)
+3) Backend build command: `npm ci && npm run build` (backend/), start: `npm start`
+4) Set env vars for backend: `GOOGLE_GENAI_API_KEY`
+5) Set public env vars for frontend: `VITE_BACKEND_URL` pointing to backend service URL
 
-# Configure project
-vercel init
-
-# Set environment variables
-vercel env add VITE_GOOGLE_AI_API_KEY
-vercel env add VITE_IMAGE_API_KEY
-
-# Deploy
-vercel --prod
-```
-
-**Files to create:**
-- `vercel.json` → Deployment configuration
-- `.vercelignore` → Exclude unnecessary files
-- `docs/DEPLOYMENT.md` → Deployment instructions
-
-**Definition of Done:**
-- [ ] Successful production deployment
-- [ ] Environment variables configured
-- [ ] Custom domain (optional)
-- [ ] SSL certificate working
-- [ ] Build process optimized
+Health checks:
+- Backend `/health` returns 200 JSON `{ status: 'ok' }`
 
 ---
 
-## 🎮 PHASE 4: MVP VALIDATION (30 minutes)
+## Phase 5: MVP Validation
 
 ### 4.1 End-to-End Testing
 **Smoke test the complete flow:**
@@ -285,17 +209,10 @@ touch src/styles/game.css
 # Test on mobile devices
 ```
 
-#### **Task 4: Deploy to Vercel (1 hour)**
-```bash
-# 1. Setup Vercel project
-vercel init
-
-# 2. Configure environment variables
-# Add API keys to Vercel dashboard
-
-# 3. Deploy and test
-vercel --prod
-```
+#### Task: Deploy to DigitalOcean
+- Link repo in DO App Platform
+- Configure two components as above
+- Add env vars and deploy
 
 ---
 
@@ -332,18 +249,7 @@ vercel --prod
 
 ---
 
-## 📞 READY TO EXECUTE?
-
-This plan transforms your solid foundation into a deployed MVP in **6-8 focused hours**. The architecture is excellent—now we just need to:
-
-1. **Connect real AI** (biggest effort)
-2. **Add visual polish** (biggest impact)
-3. **Deploy securely** (biggest milestone)
-
-**Recommended execution order:**
-1. Start with environment setup (quick win)
-2. Tackle AI integration (unblocks everything)
-3. Add basic styling (major UX improvement)
-4. Deploy early and iterate (reduces risk)
+## Notes
+This document reflects the current codebase: text AI integrated, image AI pending via backend. Replace older Vercel-centric steps with DO App Platform.
 
 Ready to make this happen? Let's start with the environment setup—that's a 30-minute task that will set up everything else for success.

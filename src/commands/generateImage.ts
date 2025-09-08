@@ -1,7 +1,7 @@
-import { CommandExecutor } from './command.types';
-import { useStoryHistoryStore } from '../stores/storyHistoryStore';
 import { generateImage } from '../services/gameService';
+import { useStoryHistoryStore } from '../stores/storyHistoryStore';
 import { Command } from '../types';
+import { CommandExecutor } from './command.types';
 
 export const generateImageExecutor: CommandExecutor = {
   command: 'generateImage',
@@ -14,7 +14,10 @@ export const generateImageExecutor: CommandExecutor = {
     const { segmentId, prompt } = command.payload;
 
     const segment = storyHistory.find((s) => s.id === segmentId);
-    if (!segment) return;
+    if (!segment) {
+      console.error(`generateImage: Segment with id ${segmentId} not found. Story history length: ${storyHistory.length}`);
+      return;
+    }
 
     // Set loading state immediately
     updateSegmentById(segmentId, {

@@ -12,30 +12,6 @@ export enum GameState {
 // Zod Schemas as the Single Source of Truth
 
 // Core Game Types
-export const worldStateSchema = z.object({
-  protagonist: z.string(),
-  setting: z.string(),
-  dilemma: z.string(),
-  summary: z.string(),
-  psychologicalStatus: z.enum(['Stable', 'Uneasy', 'Paranoid', 'Fragmented']),
-  systemHealth: z.number(),
-  uiDistortion: z.object({
-    transform: z.string(),
-    filter: z.string(),
-    transition: z.string(),
-  }),
-});
-
-export const storySegmentSchema = z.object({
-  id: z.string(),
-  text: z.string(),
-  images: z.object({
-    main: z.string().optional(),
-    inset: z.array(z.string()).optional(),
-    mainStatus: z.enum(['loading', 'loaded']).optional(),
-  }),
-});
-
 export const genreConfigSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -50,6 +26,31 @@ export const genreConfigSchema = z.object({
   startScreenImagePrompt: z.string(),
   conceptPrompt: z.string(),
   aiSystemInstruction: z.string(),
+});
+
+export const worldStateSchema = z.object({
+  protagonist: z.string(),
+  setting: z.string(),
+  dilemma: z.string(),
+  summary: z.string(),
+  psychologicalStatus: z.enum(['Stable', 'Uneasy', 'Paranoid', 'Fragmented']),
+  systemHealth: z.number(),
+  uiDistortion: z.object({
+    transform: z.string(),
+    filter: z.string(),
+    transition: z.string(),
+  }),
+  genreConfig: genreConfigSchema,
+});
+
+export const storySegmentSchema = z.object({
+  id: z.string(),
+  text: z.string(),
+  images: z.object({
+    main: z.string().optional(),
+    inset: z.array(z.string()).optional(),
+    mainStatus: z.enum(['loading', 'loaded']).optional(),
+  }),
 });
 
 export const choiceSchema = z.object({ text: z.string(), isIntrusive: z.boolean() });
@@ -99,3 +100,4 @@ export type StorySegment = z.infer<typeof storySegmentSchema>;
 export type GenreConfig = z.infer<typeof genreConfigSchema>;
 export type Choice = z.infer<typeof choiceSchema>;
 export type Command = z.infer<typeof commandSchema>;
+export type GameCommand = Command; // Alias for backward compatibility

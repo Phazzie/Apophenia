@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { useGameStateStore } from '../stores/gameStateStore';
-import { GameState, GenreConfig } from '../types';
 import { generateConcept } from '../services/gameService';
-import { useWorldStateStore } from '../stores/worldStateStore';
-import { useStoryHistoryStore } from '../stores/storyHistoryStore';
 import { GameStateManager } from '../services/gameStateManager';
+import { useGameStateStore } from '../stores/gameStateStore';
+import { useStoryHistoryStore } from '../stores/storyHistoryStore';
+import { useWorldStateStore } from '../stores/worldStateStore';
+import { GameState, GenreConfig } from '../types';
 
 // A mock genre config for now. In a real app, this might be selectable.
 const genreConfig: GenreConfig = {
@@ -27,19 +27,16 @@ const genreConfig: GenreConfig = {
 };
 
 const StartScreen: React.FC = () => {
-  const { setGameState, reset: resetGameState } = useGameStateStore();
-  const { worldState, reset: resetWorldState } = useWorldStateStore();
-  const { storyHistory, addStorySegment, reset: resetStoryHistory } = useStoryHistoryStore();
+  const { setGameState } = useGameStateStore();
+  const { worldState, setGenreConfig } = useWorldStateStore();
+  const { storyHistory } = useStoryHistoryStore();
   const [hasSavedGame, setHasSavedGame] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
 
   useEffect(() => {
-<<<<<<< HEAD
-    useEffect(() => {
     // Check for a saved game. If story has more than the initial empty state, a game exists.
     // We also check for a protagonist, as another indicator.
     setHasSavedGame(storyHistory.length > 0 && Boolean(worldState.protagonist));
-  }, [storyHistory, worldState.protagonist]);
   }, [storyHistory, worldState.protagonist]);
 
   const handleNewGame = async () => {
@@ -47,9 +44,12 @@ const StartScreen: React.FC = () => {
     setIsStarting(true);
 
     // Clear all previous game data from stores using unified GameStateManager
-    await GameStateManager.resetGame();
+    GameStateManager.resetAllStores();
 
     setGameState(GameState.GENERATING_CONCEPT);
+
+    // Set the genre for the new game
+    setGenreConfig(genreConfig);
 
     const concept = await generateConcept(genreConfig);
     const settingText =
@@ -57,9 +57,9 @@ const StartScreen: React.FC = () => {
         ? concept.setting
         : 'The world is a bleak and unforgiving place.';
 
-    useWorldStateStore.getState().updateWorldState({ ...concept, setting: settingText });
+    useWorldStateStore.getState().updateWorldState({ ...concept, setting: settingText, genreConfig });
 
-    addStorySegment({
+    useStoryHistoryStore.getState().addStorySegment({
       id: crypto.randomUUID(),
       text: settingText,
       images: {},

@@ -26,8 +26,9 @@ export const useStoryHistoryStore = create<StoryHistoryStore>()(
           ),
         })),
       reset: () => {
-        get().clearStorage?.(); // Clear persisted state
         set(initialState);
+        // Clear persisted state by resetting localStorage
+        localStorage.removeItem('cosmic-narrative-storyhistory');
       },
     }),
     {

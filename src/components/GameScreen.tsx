@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from 'react';
+import { executeCommandQueue } from '../services/commandExecutor';
+import { triggerSummary } from '../services/flows/gameFlow';
+import { getNextStep } from '../services/gameService';
+import { GameStateManager } from '../services/gameStateManager';
 import { useGameStateStore } from '../stores/gameStateStore';
 import { useStoryHistoryStore } from '../stores/storyHistoryStore';
 import { useWorldStateStore } from '../stores/worldStateStore';
-import { getNextStep } from '../services/gameService';
-import { executeCommandQueue } from '../services/commandExecutor';
-import { Choice, GameState, GenreConfig } from '../types';
+import { Choice, GameState } from '../types';
 
 const GameScreen: React.FC = () => {
-  const { choices, intrusiveThought, gameState, setGameState } = useGameStateStore();
+  const { choices, intrusiveThought, gameState, setGameState, isGenerating, setIsGenerating } =
+    useGameStateStore();
   const { storyHistory } = useStoryHistoryStore();
   const { worldState } = useWorldStateStore();
-  const [isLoading, setIsLoading] = useState(false);
   const [saveMessageVisible, setSaveMessageVisible] = useState(false);
 
   const lastStorySegment = storyHistory[storyHistory.length - 1];
@@ -23,34 +25,17 @@ const GameScreen: React.FC = () => {
   }, [storyHistory, worldState.setting]);
 
   const handleChoice = async (choice: Choice) => {
-    setIsLoading(true);
-    setGameState(GameState.LOADING);
+    setIsGenerating(true);
 
-    // A complete mock genre config for now
-    const mockGenreConfig: GenreConfig = {
-      id: 'cosmic-horror',
-      name: 'Cosmic Horror',
-      description: 'Stories of cosmic dread and the insignificance of humanity.',
-      style: 'Lovecraftian, atmospheric, psychological',
-      theme: {
-        '--background-color': '#0d0d0f',
-        '--text-color': '#c5c5c5',
-        '--accent-color': '#6b0f1a',
-        '--font-family': "'Courier New', Courier, monospace",
-      },
-      startScreenImagePrompt:
-        'A vast, empty cosmos with a single, terrifying, unknowable entity lurking in the void.',
-      conceptPrompt: 'Generate a cosmic horror story concept.',
-      aiSystemInstruction:
-        'You are a master of cosmic horror, in the style of H.P. Lovecraft.',
-    };
+    // Trigger the summary flow in the background
+    triggerSummary(worldState, storyHistory);
 
     try {
       const commands = await getNextStep(
         choice.text,
         worldState,
         storyHistory,
-        mockGenreConfig
+        worldState.genreConfig
       );
       await executeCommandQueue(commands);
       // The displayChoices command will set the state back to PLAYING
@@ -59,7 +44,7 @@ const GameScreen: React.FC = () => {
       // Recover UI responsiveness if a command or flow fails
       setGameState(GameState.PLAYING);
     } finally {
-      setIsLoading(false);
+      setIsGenerating(false);
     }
   };
 
@@ -72,21 +57,46 @@ const GameScreen: React.FC = () => {
     }, 2000);
   };
 
+  const handleNewGame = () => {
+    GameStateManager.resetAllStores();
+    // The reset will automatically set the gameState to MENU, triggering a re-render to the StartScreen
+  };
+
   return (
     <div className="game-screen">
       <div className="story-panel">
         {lastStorySegment?.images?.main && (
-          <img src={lastStorySegment.images.main} alt="Current Scene" className="main-image" />
+          <div className="image-container">
+            <img src={lastStorySegment.images.main} alt="Current Scene" className="main-image" />
+            {lastStorySegment.images.mainStatus === 'loading' && (
+              <div className="image-loading-overlay">
+                <div className="loading-spinner"></div>
+                <p>Generating scene...</p>
+              </div>
+            )}
+          </div>
         )}
-        <p className="story-text">{lastStorySegment?.text}</p>
+        <div className="story-text-container">
+          <p className="story-text">{lastStorySegment?.text}</p>
+          {gameState === GameState.GENERATING_CONCEPT && (
+            <div className="text-loading-indicator">
+              <div className="loading-spinner small"></div>
+              <span>AI is crafting your story...</span>
+            </div>
+          )}
+        </div>
       </div>
       <div className="choice-panel">
-        {isLoading || gameState === GameState.LOADING ? (
-          <p>Loading...</p>
+        {isGenerating ? (
+          <div className="loading-container">
+            <div className="loading-spinner"></div>
+            <p>Processing your choice...</p>
+            <p className="loading-subtitle">The AI is weaving the next part of your story</p>
+          </div>
         ) : (
           <>
             {choices.map((choice, index) => (
-              <button key={index} onClick={() => handleChoice(choice)} disabled={isLoading}>
+              <button key={index} onClick={() => handleChoice(choice)} disabled={isGenerating}>
                 {choice.text}
               </button>
             ))}
@@ -94,7 +104,7 @@ const GameScreen: React.FC = () => {
               <button
                 key="intrusive"
                 onClick={() => handleChoice(intrusiveThought)}
-                disabled={isLoading}
+                disabled={isGenerating}
                 className="intrusive-thought"
               >
                 {intrusiveThought.text}
@@ -103,7 +113,12 @@ const GameScreen: React.FC = () => {
           </>
         )}
         <div className="game-actions">
-          <button onClick={handleSave} disabled={isLoading}>Save Game</button>
+          <button onClick={handleSave} disabled={isGenerating}>
+            Save Game
+          </button>
+          <button onClick={handleNewGame} disabled={isGenerating}>
+            New Game
+          </button>
           {saveMessageVisible && <span className="save-message">Game Saved!</span>}
         </div>
       </div>

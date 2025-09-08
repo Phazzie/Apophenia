@@ -1,26 +1,29 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { WorldState } from '../types';
+import { cosmicHorrorGenre } from '../config/gameConfig';
+import { GenreConfig, WorldState } from '../types';
 
 interface WorldStateStore {
   worldState: WorldState;
   updateWorldState: (updates: Partial<WorldState>) => void;
   setWorldState: (worldState: WorldState) => void;
+  setGenreConfig: (genreConfig: GenreConfig) => void;
   reset: () => void;
 }
 
-const initialState = {
+const initialState: WorldState = {
   protagonist: '',
   setting: '',
   dilemma: '',
   summary: '',
-  psychologicalStatus: 'Stable',
+  psychologicalStatus: 'Stable' as const,
   systemHealth: 100,
   uiDistortion: {
     transform: 'none',
     filter: 'none',
     transition: 'all 1s ease-in-out',
   },
+  genreConfig: cosmicHorrorGenre, // Default genre
 };
 
 export const useWorldStateStore = create<WorldStateStore>()(
@@ -31,6 +34,10 @@ export const useWorldStateStore = create<WorldStateStore>()(
       updateWorldState: (updates) =>
         set((state) => ({
           worldState: { ...state.worldState, ...updates },
+        })),
+      setGenreConfig: (genreConfig) =>
+        set((state) => ({
+          worldState: { ...state.worldState, genreConfig },
         })),
       reset: () => set({ worldState: initialState }),
     }),

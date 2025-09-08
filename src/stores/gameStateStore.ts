@@ -1,13 +1,15 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { GameState, Choice } from '../types';
+import { Choice, GameState } from '../types';
 
 interface GameStateStore {
   gameState: GameState;
   choices: Choice[];
   intrusiveThought?: Choice;
+  isGenerating: boolean;
   setGameState: (gameState: GameState) => void;
   setChoices: (choices: Choice[], intrusiveThought?: Choice) => void;
+  setIsGenerating: (isGenerating: boolean) => void;
   reset: () => void;
 }
 
@@ -15,6 +17,7 @@ const initialState = {
   gameState: GameState.MENU,
   choices: [],
   intrusiveThought: undefined,
+  isGenerating: false,
 };
 
 export const useGameStateStore = create<GameStateStore>()(
@@ -27,9 +30,11 @@ export const useGameStateStore = create<GameStateStore>()(
           choices,
           intrusiveThought,
         }),
+      setIsGenerating: (isGenerating) => set({ isGenerating }),
       reset: () => {
-        get().clearStorage?.(); // Clear persisted state
         set(initialState);
+        // Clear persisted state by resetting localStorage
+        localStorage.removeItem('cosmic-narrative-gamestate');
       },
     }),
     {

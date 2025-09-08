@@ -1,6 +1,6 @@
-import { CommandExecutor } from './command.types';
 import { useStoryHistoryStore } from '../stores/storyHistoryStore';
 import { Command } from '../types';
+import { CommandExecutor } from './command.types';
 
 export const displayTextExecutor: CommandExecutor = {
   command: 'displayText',
@@ -16,6 +16,9 @@ export const displayTextExecutor: CommandExecutor = {
       updateSegmentById(command.payload.segmentId, {
         text: segment.text + command.payload.content,
       });
+    } else {
+      console.error(`displayText: Segment with id ${command.payload.segmentId} not found. Story history length: ${storyHistory.length}`);
+      // Could optionally create a segment here, but for now we'll log the error
     }
   },
 };

@@ -1,15 +1,15 @@
 import {
-    GoogleGenerativeAI,
-    HarmBlockThreshold,
-    HarmCategory,
+  GoogleGenerativeAI,
+  HarmBlockThreshold,
+  HarmCategory,
 } from '@google/generative-ai';
 import {
-    Command,
-    GameCommand,
-    GenreConfig,
-    StorySegment,
-    WorldState,
-    commandArraySchema,
+  Command,
+  GameCommand,
+  GenreConfig,
+  StorySegment,
+  WorldState,
+  commandArraySchema,
 } from '../../types';
 import { API_KEYS } from '../config';
 
@@ -71,7 +71,7 @@ async function runAIFlow(
       {
         type: 'displayChoices',
         payload: {
-          choices: [{ text: 'Try to force the way forward.', segmentId: 'retry-last-action' }],
+          choices: [{ text: 'Try to force the way forward.', isIntrusive: false, segmentId: 'retry-last-action' }],
         },
       },
     ];

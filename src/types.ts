@@ -53,7 +53,12 @@ export const storySegmentSchema = z.object({
   }),
 });
 
-export const choiceSchema = z.object({ text: z.string(), isIntrusive: z.boolean() });
+export const choiceSchema = z.object({
+  text: z.string(),
+  isIntrusive: z.boolean(),
+  // Optional segment identifier for command routing (e.g., retry-last-action)
+  segmentId: z.string().optional(),
+});
 
 // Command Payloads Schemas
 // Implementing Phase 2 & 3 changes now for a unified type system from the start.

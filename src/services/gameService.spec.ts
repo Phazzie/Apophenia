@@ -3,16 +3,16 @@
  */
 
 import {
-    generateConcept,
-    generateImage,
-    getNextStep,
-    summarizeHistory,
+  generateConcept,
+  generateImage,
+  getNextStep,
+  summarizeHistory,
 } from './gameService';
 
 import {
-    generateConceptFlow,
-    generateImageFlow,
-    nextStepFlow,
+  generateConceptFlow,
+  generateImageFlow,
+  nextStepFlow,
 } from './ai/genkit';
 
 import type { Command, GenreConfig, StorySegment, WorldState } from '../types';
@@ -44,6 +44,22 @@ describe('gameService', () => {
       transform: 'none',
       filter: 'none',
       transition: 'all 1s ease-in-out',
+    },
+    // Include genreConfig to satisfy WorldState type requirements
+    genreConfig: {
+      id: 'test-genre',
+      name: 'Test Genre',
+      description: 'A genre for testing.',
+      style: 'Test style',
+      theme: {
+        '--background-color': '#fff',
+        '--text-color': '#000',
+        '--accent-color': '#f00',
+        '--font-family': 'sans-serif',
+      },
+      startScreenImagePrompt: 'A test image prompt.',
+      conceptPrompt: 'A test concept prompt.',
+      aiSystemInstruction: 'You are a test AI.',
     },
   };
 
@@ -110,7 +126,7 @@ describe('gameService', () => {
         {
           type: 'displayChoices',
           payload: {
-            choices: [{ text: 'Try to force the way forward.', segmentId: 'retry-last-action' }],
+            choices: [{ text: 'Try to force the way forward.', isIntrusive: false, segmentId: 'retry-last-action' }],
           },
         },
       ];

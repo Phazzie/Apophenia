@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { executeCommandQueue } from '../services/commandExecutor';
 import { triggerSummary } from '../services/flows/gameFlow';
 import { getNextStep } from '../services/gameService';
@@ -14,17 +14,16 @@ const GameScreen: React.FC = () => {
   const { storyHistory } = useStoryHistoryStore();
   const { worldState } = useWorldStateStore();
   const [saveMessageVisible, setSaveMessageVisible] = useState(false);
+  const autoStartedRef = useRef(false);
 
   const lastStorySegment = storyHistory[storyHistory.length - 1];
+  const combinedChoices = intrusiveThought
+    ? [...choices, { ...intrusiveThought, isIntrusive: true }]
+    : choices;
 
-  // Effect to fetch the first step if history is minimal
-  useEffect(() => {
-    if (storyHistory.length === 1 && storyHistory[0].text === worldState.setting) {
-      handleChoice({ text: 'Begin the story', isIntrusive: false });
-    }
-  }, [storyHistory, worldState.setting]);
-
-  const handleChoice = async (choice: Choice) => {
+  const handleChoice = useCallback(async (choice: Choice) => {
+    // Prevent duplicate actions while generating
+    if (isGenerating) return;
     setIsGenerating(true);
 
     // Trigger the summary flow in the background
@@ -46,21 +45,37 @@ const GameScreen: React.FC = () => {
     } finally {
       setIsGenerating(false);
     }
-  };
+  }, [isGenerating, setIsGenerating, worldState, storyHistory, setGameState]);
+
+  // Effect to fetch the first step if history is minimal
+  useEffect(() => {
+    if (
+      !autoStartedRef.current &&
+      storyHistory.length === 1 &&
+      storyHistory[0].text === worldState.setting
+    ) {
+      autoStartedRef.current = true;
+      void handleChoice({ text: 'Begin the story', isIntrusive: false });
+    }
+  }, [storyHistory, worldState.setting, handleChoice]);
 
   const handleSave = () => {
     // The saving is automatic via the persist middleware.
     // This button is just for user feedback.
     setSaveMessageVisible(true);
-    setTimeout(() => {
-      setSaveMessageVisible(false);
-    }, 2000);
   };
 
   const handleNewGame = () => {
     GameStateManager.resetAllStores();
     // The reset will automatically set the gameState to MENU, triggering a re-render to the StartScreen
   };
+
+  // Auto-hide the save message after a short delay
+  useEffect(() => {
+    if (!saveMessageVisible) return;
+    const id = window.setTimeout(() => setSaveMessageVisible(false), 2000);
+    return () => window.clearTimeout(id);
+  }, [saveMessageVisible]);
 
   return (
     <div className="game-screen">
@@ -94,23 +109,16 @@ const GameScreen: React.FC = () => {
             <p className="loading-subtitle">The AI is weaving the next part of your story</p>
           </div>
         ) : (
-          <>
-            {choices.map((choice, index) => (
-              <button key={index} onClick={() => handleChoice(choice)} disabled={isGenerating}>
-                {choice.text}
-              </button>
-            ))}
-            {intrusiveThought && (
-              <button
-                key="intrusive"
-                onClick={() => handleChoice(intrusiveThought)}
-                disabled={isGenerating}
-                className="intrusive-thought"
-              >
-                {intrusiveThought.text}
-              </button>
-            )}
-          </>
+          combinedChoices.map((choice, index) => (
+            <button
+              key={index}
+              onClick={() => void handleChoice(choice)}
+              disabled={isGenerating}
+              className={choice.isIntrusive ? 'intrusive-thought' : undefined}
+            >
+              {choice.text}
+            </button>
+          ))
         )}
         <div className="game-actions">
           <button onClick={handleSave} disabled={isGenerating}>

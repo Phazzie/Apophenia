@@ -3,6 +3,25 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog, and this project adheres to Semantic Versioning.
 
+## [0.3.0] - 2025-09-08
+### Added
+- **New Game Functionality**: Players can now start a new game from the game screen via a "New Game" button, which properly resets all application state.
+- **UI Loading Indicators**: The game screen now displays a loading spinner while waiting for the AI to generate the next part of the story, improving user feedback.
+- Created a `.env.example` file to document required environment variables for easier developer onboarding.
+- Stubbed out a `processImageGeneration` function to prepare for a future real AI image generation service.
+
+### Changed
+- **Core Logic**: The game now correctly uses the `GenreConfig` selected by the player on the start screen, persisting it in the `worldStateStore`. The hardcoded genre configuration on the game screen has been removed.
+- **AI Fallbacks**: The fallback logic for concept generation (`generateConceptFlow`) has been improved to provide a more generic, genre-neutral response on failure.
+
+### Fixed
+- **Critical Stability**: Implemented robust error handling around the primary AI narrative generation (`runAIFlow`). The application no longer crashes on API failures and instead provides the user with a graceful recovery option.
+- **Testing**: Re-enabled and rewrote previously skipped tests in `gameService.spec.ts` to validate the new error handling and recovery paths.
+- **Dependencies**: Resolved moderate severity security vulnerabilities reported by `npm audit`.
+
+### Security
+- No new security changes in this version.
+
 ## [0.2.0] - 2025-09-08
 ### Added
 - Integrated Google Generative AI (`@google/generative-ai`) for dynamic narrative generation.

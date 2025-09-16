@@ -59,19 +59,22 @@ async function runAIFlow(
     return commandArraySchema.parse(commands);
   } catch (error) {
     console.error('AI flow failed:', error);
-    // Fallback for API call or parsing failure
+    // Enhanced thematic fallback for API call or parsing failure
     return [
       {
         type: 'displayText',
         payload: {
-          content: 'A tear in the fabric of reality prevents you from proceeding. The connection is unstable.',
-          segmentId: 'error-segment-api',
+          content: 'The whispers from beyond grow faint... The cosmic signals waver. Reality flickers as the connection to the otherworldly intelligence weakens.',
+          segmentId: `error-${Date.now()}`,
         },
       },
       {
         type: 'displayChoices',
         payload: {
-          choices: [{ text: 'Try to force the way forward.', isIntrusive: false, segmentId: 'retry-last-action' }],
+          choices: [
+            { text: 'Reach out to the void again.', isIntrusive: false, segmentId: 'retry-action' },
+            { text: 'Accept the silence and continue alone.', isIntrusive: true, segmentId: 'continue-without-ai' },
+          ],
         },
       },
     ];
@@ -109,23 +112,34 @@ export const generateImageFlow = async (prompt: string): Promise<string> => {
 };
 
 /**
- * Placeholder for a real AI image generation service.
- * Currently falls back to Unsplash.
+ * Enhanced image generation with improved Unsplash integration.
+ * Provides better keyword matching and fallback handling.
  */
 export const processImageGeneration = async (prompt: string): Promise<string> => {
-  // In a real implementation, you would call your chosen image generation API here.
-  // For now, we'll just log and use the Unsplash fallback.
   console.log(`Image generation requested for prompt: "${prompt}"`);
   
   try {
-    // const response = await someImageGenerationApi(prompt, API_KEYS.imageApiKey);
-    // return response.imageUrl;
-    throw new Error("Image generation service not implemented.");
+    // Enhanced Unsplash integration with better keywords
+    const baseKeywords = 'dark,horror,surreal,atmospheric,cinematic';
+    const promptKeywords = prompt
+      .toLowerCase()
+      .replace(/[^\w\s]/g, '')
+      .split(' ')
+      .filter(word => word.length > 2)
+      .slice(0, 3)
+      .join(',');
+    
+    const keywords = promptKeywords 
+      ? `${baseKeywords},${promptKeywords}`
+      : baseKeywords;
+    
+    const imageUrl = `https://source.unsplash.com/1920x1080/?${encodeURIComponent(keywords)}`;
+    console.log(`Using enhanced Unsplash image for: "${prompt}" with keywords: ${keywords}`);
+    return imageUrl;
   } catch (error) {
-    console.warn('Image generation failed, falling back to Unsplash.', error);
-    const encodedPrompt = encodeURIComponent(prompt);
-    const keywords = 'dark,horror,surreal,abstract';
-    return `https://source.unsplash.com/1920x1080/?${keywords},${encodedPrompt}`;
+    console.warn('Image generation failed, using basic fallback.', error);
+    // Ultimate fallback - a reliable horror-themed image
+    return 'https://source.unsplash.com/1920x1080/?dark,horror,atmospheric';
   }
 };
 

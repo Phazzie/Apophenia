@@ -77,8 +77,8 @@ const StartScreen: React.FC = () => {
 
   return (
     <div className="start-screen">
-      <h1>Cosmic Narrative</h1>
-      <p>An AI-driven story experience.</p>
+      <h1>Apophenia</h1>
+      <p>Descent into cosmic madness through AI consciousness.</p>
       <button onClick={handleNewGame} disabled={isStarting}>
         {isStarting ? 'Starting...' : 'New Game'}
       </button>

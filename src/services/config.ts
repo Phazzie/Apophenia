@@ -16,6 +16,16 @@ export const API_KEYS = {
     (import.meta.env?.VITE_GOOGLE_IMAGEN_KEY || ''),
 };
 
+// Configuration getter function
+export const getConfig = () => {
+  return {
+    geminiApiKey: API_KEYS.googleGenAI,
+    imageApiKey: API_KEYS.googleImagen || API_KEYS.googleNanoBanana,
+    nanoBananaKey: API_KEYS.googleNanoBanana,
+    imagenKey: API_KEYS.googleImagen,
+  };
+};
+
 // AI Model Configuration
 export const AI_MODELS = {
   // Primary text generation with advanced reasoning

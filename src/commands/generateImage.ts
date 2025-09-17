@@ -2,6 +2,7 @@ import { generateImage } from '../services/gameService';
 import { useStoryHistoryStore } from '../stores/storyHistoryStore';
 import { Command } from '../types';
 import { CommandExecutor } from './command.types';
+import { imageGenerationService } from '../services/ai/imageGeneration';
 
 export const generateImageExecutor: CommandExecutor = {
   command: 'generateImage',
@@ -27,9 +28,21 @@ export const generateImageExecutor: CommandExecutor = {
       },
     });
 
-    // Generate the image asynchronously
+    // Generate the image asynchronously using new multi-variation service
     try {
-      const imageUrl = await generateImage(prompt);
+      // Generate multiple variations and select the best one
+      const result = await imageGenerationService.generateImageVariations(prompt, 3);
+      
+      let imageUrl: string;
+      if (result.variations.length > 0) {
+        // Use the first variation (could implement selection logic here)
+        imageUrl = result.variations[0].url;
+        console.log(`Generated ${result.variations.length} image variations, selected: ${result.variations[0].quality}`);
+      } else {
+        // Fallback to original service
+        imageUrl = await generateImage(prompt);
+      }
+
       // We need to get the segment again in case other image properties (e.g., insets) have changed.
       const currentSegment = useStoryHistoryStore
         .getState()
@@ -49,11 +62,15 @@ export const generateImageExecutor: CommandExecutor = {
         .getState()
         .storyHistory.find((s) => s.id === segmentId);
       if (!currentSegment) return;
-      // Optionally, update segment with error state
+      
+      // Set error state with thematic fallback
+      const fallbackUrl = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjYwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMWExYTFlIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJtb25vc3BhY2UiIGZvbnQtc2l6ZT0iMjAiIGZpbGw9IiNlOTQ1NjAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5UaGUgd2hpc3BlcnMgZnJvbSBiZXlvbmQgZ3JvdyBmYWludC4uLjwvdGV4dD48L3N2Zz4=';
+      
       updateSegmentById(segmentId, {
         images: {
           ...currentSegment.images,
-          mainStatus: 'loaded', // Reset from loading
+          main: fallbackUrl,
+          mainStatus: 'loaded',
         },
       });
     }

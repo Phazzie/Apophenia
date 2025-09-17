@@ -29,16 +29,16 @@ export const getConfig = () => {
 // AI Model Configuration
 export const AI_MODELS = {
   // Primary text generation with advanced reasoning
-  PRIMARY_TEXT: 'gemini-2.5-pro',
-  FALLBACK_TEXT: 'gemini-2.5-flash',
+  PRIMARY_TEXT: 'gemini-2.0-flash-exp', // Nano Banana is actually Gemini 2.0 Flash Experimental
+  FALLBACK_TEXT: 'gemini-1.5-flash',
   
   // Image generation pipeline  
-  PRIMARY_IMAGE: 'nano-banana-v1', // Custom Nano Banana service
-  FALLBACK_IMAGE: 'imagen-4.0-generate-001',
+  PRIMARY_IMAGE: 'gemini-2.0-flash-exp', // Nano Banana = Gemini 2.0 Flash Experimental
+  FALLBACK_IMAGE: 'imagen-3.0-generate-001',
   
   // Configuration for different use cases
   CONCEPT_GENERATION: {
-    model: 'gemini-2.5-pro',
+    model: 'gemini-2.0-flash-exp', // Nano Banana
     temperature: 1.2,
     topK: 40,
     topP: 0.95,
@@ -47,7 +47,7 @@ export const AI_MODELS = {
     thinkingBudget: 'high',
   },
   STORY_PROGRESSION: {
-    model: 'gemini-2.5-pro', 
+    model: 'gemini-2.0-flash-exp', // Nano Banana
     temperature: 1.0,
     topK: 0,
     topP: 0.95,
@@ -57,7 +57,7 @@ export const AI_MODELS = {
     thinkingBudget: 'high', // Maximum reasoning power for story progression
   },
   SUMMARIZATION: {
-    model: 'gemini-2.5-flash', // Faster for summarization
+    model: 'gemini-1.5-flash', // Fallback for summarization
     temperature: 0.3,
     topK: 20,
     topP: 0.8,

@@ -82,8 +82,10 @@ describe('Revolutionary AI Features Test Suite', () => {
     
     test('should maintain history when temporal revision is disabled', async () => {
       // Mock the feature as disabled
-      jest.spyOn(require('../../config'), 'REVOLUTIONARY_FEATURES', 'get')
-        .mockReturnValue({ TEMPORAL_REVISION: { enabled: false } });
+      const mockConfig = { TEMPORAL_REVISION: { enabled: false } };
+      jest.doMock('../../config', () => ({
+        REVOLUTIONARY_FEATURES: mockConfig
+      }));
         
       const result = await engine.reviseHistory('test choice', mockStoryHistory, mockWorldState);
       expect(result).toEqual(mockStoryHistory);
@@ -153,8 +155,10 @@ describe('Revolutionary AI Features Test Suite', () => {
     });
     
     test('should return null when meta consciousness is disabled', async () => {
-      jest.spyOn(require('../../config'), 'REVOLUTIONARY_FEATURES', 'get')
-        .mockReturnValue({ META_CONSCIOUSNESS: { enabled: false } });
+      const mockConfig = { META_CONSCIOUSNESS: { enabled: false } };
+      jest.doMock('../../config', () => ({
+        REVOLUTIONARY_FEATURES: mockConfig
+      }));
         
       const result = await engine.checkForMetaEvent([], mockWorldState);
       expect(result).toBeNull();

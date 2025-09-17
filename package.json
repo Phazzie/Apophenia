@@ -3,7 +3,14 @@
   "version": "1.0.0",
   "private": true,
   "description": "An AI-driven interactive cosmic horror narrative game",
-  "keywords": ["ai", "interactive-fiction", "horror", "narrative", "game", "react"],
+  "keywords": [
+    "ai",
+    "interactive-fiction",
+    "horror",
+    "narrative",
+    "game",
+    "react"
+  ],
   "author": "Phazzie",
   "repository": {
     "type": "git",
@@ -19,6 +26,7 @@
   },
   "dependencies": {
     "@genkit-ai/googleai": "^1.16.1",
+    "@google-ai/generativelanguage": "^3.4.0",
     "@google/generative-ai": "^0.24.1",
     "genkit": "^1.16.1",
     "react": "^18.3.1",

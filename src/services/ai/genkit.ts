@@ -59,7 +59,7 @@ async function runAIFlowWithFallback(
                  useCase === 'summary' ? AI_MODELS.SUMMARIZATION :
                  AI_MODELS.STORY_PROGRESSION;
 
-  // Try primary model first (Gemini 2.0 Flash Exp)
+  // Try primary model first (Gemini 2.5 Pro)
   try {
     const model = genAI.getGenerativeModel({
       model: config.model,
@@ -91,7 +91,7 @@ async function runAIFlowWithFallback(
   } catch (primaryError) {
     console.warn('Primary model failed, trying fallback:', primaryError);
     
-    // Fallback to Gemini 1.5 Flash
+    // Fallback to Gemini 2.5 Flash
     try {
       const fallbackModel = genAI.getGenerativeModel({
         model: AI_MODELS.FALLBACK_TEXT,

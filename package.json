@@ -1,14 +1,36 @@
 {
-  "name": "ai-narrative-game",
-  "version": "0.1.0",
+  "name": "apophenia-cosmic-narrative",
+  "version": "1.0.0",
   "private": true,
+  "description": "An AI-driven interactive cosmic horror narrative game",
+  "keywords": [
+    "ai",
+    "interactive-fiction",
+    "horror",
+    "narrative",
+    "game",
+    "react"
+  ],
+  "author": "Phazzie",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Phazzie/Apophenia.git"
+  },
+  "homepage": "https://apophenia-cosmic-narrative.vercel.app",
   "scripts": {
     "dev": "./node_modules/.bin/vite",
     "build": "./node_modules/.bin/tsc && ./node_modules/.bin/vite build",
-    "test": "jest"
+    "preview": "./node_modules/.bin/vite preview",
+    "test": "jest",
+    "deploy": "npm run build && vercel --prod",
+    "deploy:gh-pages": "npm run build && npx gh-pages -d dist",
+    "deploy:netlify": "npm run build && echo 'Upload dist/ folder to Netlify'",
+    "start": "npm run dev",
+    "preview": "./node_modules/.bin/vite preview"
   },
   "dependencies": {
     "@genkit-ai/googleai": "^1.16.1",
+    "@google-ai/generativelanguage": "^3.4.0",
     "@google/generative-ai": "^0.24.1",
     "genkit": "^1.16.1",
     "react": "^18.3.1",
@@ -17,10 +39,13 @@
     "zustand": "^4.5.2"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.4.0",
     "@types/jest": "^30.0.0",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.0",
+    "gh-pages": "^6.1.1",
+    "identity-obj-proxy": "^3.0.0",
     "jest": "^30.0.5",
     "jest-environment-jsdom": "^30.0.5",
     "ts-jest": "^29.4.1",

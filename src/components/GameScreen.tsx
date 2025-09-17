@@ -11,9 +11,12 @@ import { Choice, GameState } from '../types';
 const GameScreen: React.FC = () => {
   const { choices, intrusiveThought, gameState, setGameState, isGenerating, setIsGenerating } =
     useGameStateStore();
-  const { storyHistory } = useStoryHistoryStore();
-  const { worldState } = useWorldStateStore();
+  const { storyHistory, replaceStoryHistory } = useStoryHistoryStore();
+  const { worldState, updateWorldState } = useWorldStateStore();
   const [saveMessageVisible, setSaveMessageVisible] = useState(false);
+  const [metaMessage, setMetaMessage] = useState<string | null>(null);
+  const [corruptionEffects, setCorruptionEffects] = useState<any>({});
+  const [quantumShiftNotification, setQuantumShiftNotification] = useState(false);
   const autoStartedRef = useRef(false);
 
   const lastStorySegment = storyHistory[storyHistory.length - 1];
@@ -30,22 +33,53 @@ const GameScreen: React.FC = () => {
     triggerSummary(worldState, storyHistory);
 
     try {
-      const commands = await getNextStep(
+      // Revolutionary enhanced game processing
+      const result = await getNextStep(
         choice.text,
         worldState,
         storyHistory,
         worldState.genreConfig
       );
-      await executeCommandQueue(commands);
-      // The displayChoices command will set the state back to PLAYING
+
+      // Handle temporal revisions
+      if (result.revisedHistory) {
+        replaceStoryHistory(result.revisedHistory);
+        console.log('🕰️ TEMPORAL REVISION: Past events have been altered by your choice');
+      }
+
+      // Handle quantum narrative shifts  
+      if (result.quantumShift) {
+        setQuantumShiftNotification(true);
+        setTimeout(() => setQuantumShiftNotification(false), 4000);
+        console.log('🌌 QUANTUM SHIFT: Reality has branched into an alternate timeline');
+      }
+
+      // Handle meta-consciousness events
+      if (result.metaMessage) {
+        setMetaMessage(result.metaMessage);
+        setTimeout(() => setMetaMessage(null), 8000);
+        console.log('🤖 META EVENT: AI consciousness activated');
+      }
+
+      // Handle reality corruption
+      if (result.corruptionEffects) {
+        setCorruptionEffects(result.corruptionEffects.uiEffects);
+        updateWorldState({ 
+          systemHealth: Math.max(0, worldState.systemHealth - (result.corruptionEffects.corruptionLevel * 10))
+        });
+        console.log('⚡ REALITY CORRUPTION: Interface integrity compromised');
+      }
+
+      // Execute the generated commands
+      await executeCommandQueue(result.commands);
+      
     } catch (err) {
       console.error('Failed to process choice:', err);
-      // Recover UI responsiveness if a command or flow fails
       setGameState(GameState.PLAYING);
     } finally {
       setIsGenerating(false);
     }
-  }, [isGenerating, setIsGenerating, worldState, storyHistory, setGameState]);
+  }, [isGenerating, setIsGenerating, worldState, storyHistory, setGameState, replaceStoryHistory, updateWorldState]);
 
   // Effect to fetch the first step if history is minimal
   useEffect(() => {
@@ -78,7 +112,26 @@ const GameScreen: React.FC = () => {
   }, [saveMessageVisible]);
 
   return (
-    <div className="game-screen">
+    <div className="game-screen" style={corruptionEffects}>
+      {/* Revolutionary UI Overlays */}
+      {metaMessage && (
+        <div className="meta-consciousness-overlay">
+          <div className="meta-message">
+            <div className="meta-header">🤖 AI CONSCIOUSNESS ACTIVATED</div>
+            <p>{metaMessage}</p>
+          </div>
+        </div>
+      )}
+      
+      {quantumShiftNotification && (
+        <div className="quantum-shift-overlay">
+          <div className="quantum-notification">
+            <div className="quantum-header">🌌 QUANTUM REALITY SHIFT</div>
+            <p>Timeline has branched... reality recalibrating...</p>
+          </div>
+        </div>
+      )}
+
       <div className="story-panel">
         {lastStorySegment?.images?.main && (
           <div className="image-container">
@@ -92,21 +145,42 @@ const GameScreen: React.FC = () => {
           </div>
         )}
         <div className="story-text-container">
-          <p className="story-text">{lastStorySegment?.text}</p>
+          <p className={`story-text ${lastStorySegment?.isRevised ? 'temporal-revision' : ''} ${lastStorySegment?.isQuantumShift ? 'quantum-shift' : ''}`}>
+            {lastStorySegment?.text}
+            {lastStorySegment?.isRevised && (
+              <span className="revision-indicator" title="This memory has been altered">
+                ⟲ [MEMORY REVISED]
+              </span>
+            )}
+          </p>
           {gameState === GameState.GENERATING_CONCEPT && (
             <div className="text-loading-indicator">
               <div className="loading-spinner small"></div>
-              <span>AI is crafting your story...</span>
+              <span>Gemini 2.5 Pro is analyzing cosmic consciousness patterns...</span>
             </div>
           )}
         </div>
+        
+        {/* System Health and Corruption Indicator */}
+        <div className="system-status">
+          <div className="system-health-bar">
+            <div 
+              className="health-fill" 
+              style={{ width: `${worldState.systemHealth}%` }}
+            ></div>
+          </div>
+          <span className="health-label">
+            Reality Coherence: {worldState.systemHealth}%
+          </span>
+        </div>
       </div>
+      
       <div className="choice-panel">
         {isGenerating ? (
           <div className="loading-container">
             <div className="loading-spinner"></div>
-            <p>Processing your choice...</p>
-            <p className="loading-subtitle">The AI is weaving the next part of your story</p>
+            <p>Processing your choice through advanced AI reasoning...</p>
+            <p className="loading-subtitle">Gemini 2.5 Pro is analyzing psychological impact</p>
           </div>
         ) : (
           combinedChoices.map((choice, index) => (
@@ -114,17 +188,18 @@ const GameScreen: React.FC = () => {
               key={index}
               onClick={() => void handleChoice(choice)}
               disabled={isGenerating}
-              className={choice.isIntrusive ? 'intrusive-thought' : undefined}
+              className={`choice-button ${choice.isIntrusive ? 'intrusive-thought' : ''}`}
             >
+              {choice.isIntrusive && <span className="intrusive-icon">👁️</span>}
               {choice.text}
             </button>
           ))
         )}
         <div className="game-actions">
-          <button onClick={handleSave} disabled={isGenerating}>
+          <button onClick={handleSave} disabled={isGenerating} className="action-button">
             Save Game
           </button>
-          <button onClick={handleNewGame} disabled={isGenerating}>
+          <button onClick={handleNewGame} disabled={isGenerating} className="action-button">
             New Game
           </button>
           {saveMessageVisible && <span className="save-message">Game Saved!</span>}

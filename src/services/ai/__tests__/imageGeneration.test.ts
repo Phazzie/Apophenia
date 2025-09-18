@@ -1,56 +1,63 @@
-import { imageGenerationService, ImageVariation } from '../imageGeneration';
+import { imageGenerationService } from '../imageGeneration';
+import { API_KEYS } from '../../config';
 
-jest.mock('../imageGeneration');
+// Ensure API keys are not set for these tests to force fallbacks
+jest.mock('../../config', () => ({
+  ...jest.requireActual('../../config'),
+  API_KEYS: {
+    googleGenAI: '',
+    googleNanoBanana: '',
+    googleImagen: '',
+  },
+}));
 
-describe('ImageGenerationService', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  test('should generate multiple image variations', async () => {
-    const mockVariations: ImageVariation[] = [
-      { url: 'test1.jpg', prompt: 'horror prompt 1', quality: 'nano_banana' },
-      { url: 'test2.jpg', prompt: 'horror prompt 2', quality: 'imagen' },
-      { url: 'test3.jpg', prompt: 'horror prompt 3', quality: 'unsplash' }
-    ];
-
-    (imageGenerationService.generateImageVariations as jest.Mock).mockResolvedValue({
-      variations: mockVariations,
-      selectedIndex: 0
-    });
-
-    const result = await imageGenerationService.generateImageVariations('test prompt', 3);
+describe('ImageGenerationService Fallbacks', () => {
+  test('should fallback to Unsplash when no API keys are provided', async () => {
+    const result = await imageGenerationService.generateImageVariations('a dark and stormy night', 3);
 
     expect(result.variations).toHaveLength(3);
-    expect(result.variations[0].quality).toBe('nano_banana');
-    expect(result.selectedIndex).toBe(0);
+    result.variations.forEach(variation => {
+      expect(variation.url).toContain('unsplash.com');
+      expect(variation.quality).toBe('unsplash');
+    });
+  });
+});
+
+describe('ImageGenerationService with Gemini', () => {
+  beforeAll(() => {
+    jest.mock('../../config', () => ({
+      ...jest.requireActual('../../config'),
+      API_KEYS: {
+        googleGenAI: 'fake-api-key',
+        googleNanoBanana: '',
+        googleImagen: '',
+      },
+    }));
   });
 
-  test('should handle API failures gracefully', async () => {
-    (imageGenerationService.generateImageVariations as jest.Mock).mockRejectedValue(
-      new Error('API Error')
-    );
-
-    try {
-      await imageGenerationService.generateImageVariations('test prompt', 3);
-    } catch (error) {
-      expect(error).toBeInstanceOf(Error);
-    }
+  afterAll(() => {
+    jest.unmock('../../config');
   });
 
-  test('should provide fallback to unsplash when other services fail', async () => {
-    const fallbackVariations: ImageVariation[] = [
-      { url: 'unsplash1.jpg', prompt: 'test prompt (horror)', quality: 'unsplash' }
-    ];
-
-    (imageGenerationService.generateImageVariations as jest.Mock).mockResolvedValue({
-      variations: fallbackVariations,
-      selectedIndex: 0
+  test('should call generateImageWithGemini when API key is provided', async () => {
+    // Mock the generateImageWithGemini function
+    const mockGenerateImageWithGemini = jest.spyOn(imageGenerationService, 'generateImageWithGemini');
+    mockGenerateImageWithGemini.mockResolvedValue({
+      url: 'http://fake-gemini-image.com/1',
+      quality: 'gemini',
+      prompt: 'a dark and stormy night'
     });
 
-    const result = await imageGenerationService.generateImageVariations('test prompt', 1);
+    const result = await imageGenerationService.generateImageVariations('a dark and stormy night', 3);
 
-    expect(result.variations).toHaveLength(1);
-    expect(result.variations[0].quality).toBe('unsplash');
+    expect(result.variations).toHaveLength(3);
+    expect(mockGenerateImageWithGemini).toHaveBeenCalledTimes(3);
+    result.variations.forEach(variation => {
+      expect(variation.url).toContain('fake-gemini-image.com');
+      expect(variation.quality).toBe('gemini');
+    });
+
+    // Restore the original function
+    mockGenerateImageWithGemini.mockRestore();
   });
 });

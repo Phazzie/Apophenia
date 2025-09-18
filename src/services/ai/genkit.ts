@@ -16,17 +16,6 @@ import { API_KEYS, AI_MODELS } from '../config';
 
 const genAI = new GoogleGenerativeAI(API_KEYS.googleGenAI);
 
-// Placeholder for image client - will be properly implemented with correct package
-const imageClient = {
-  generateImage: async (request: any) => {
-    // Mock implementation for now - will be replaced with real ImageGenerationClient
-    return [{
-      generatedImages: [{
-        bytesBase64Encoded: 'mockBase64Data'
-      }]
-    }];
-  }
-};
 
 const safetySettings = [
   {
@@ -97,7 +86,7 @@ async function runAIFlowWithFallback(
         model: AI_MODELS.FALLBACK_TEXT,
         systemInstruction,
         generationConfig: {
-          temperature: 1,
+          temperature: 1.0,
           topK: 0,
           topP: 0.95,
           maxOutputTokens: 8192,
@@ -265,23 +254,13 @@ export const processAdvancedImageGeneration = async (
   }
   
   try {
-    // Primary: Nano Banana (when available)
-    if (API_KEYS.googleNanoBanana) {
-      console.log('Attempting Nano Banana image generation...');
-      const nanoBananaUrl = await generateWithNanoBanana(horrorEnhancedPrompt);
-      if (nanoBananaUrl) {
-        console.log('Nano Banana image generation successful');
-        return nanoBananaUrl;
-      }
-    }
-    
-    // Fallback: Google Imagen 
-    if (API_KEYS.googleImagen || API_KEYS.googleGenAI) {
-      console.log('Using Google Imagen for image generation...');
-      const imagenUrl = await generateWithImagen(horrorEnhancedPrompt);
-      if (imagenUrl) {
-        console.log('Google Imagen generation successful');
-        return imagenUrl;
+    // Primary: Gemini 2.5 Flash
+    if (API_KEYS.googleGenAI) {
+      console.log('Attempting Gemini 2.5 Flash image generation...');
+      const imageUrl = await generateImageWithGemini(horrorEnhancedPrompt);
+      if (imageUrl) {
+        console.log('Gemini 2.5 Flash image generation successful');
+        return imageUrl;
       }
     }
     
@@ -330,15 +309,9 @@ async function generateMultipleImageVariations(basePrompt: string): Promise<stri
  */
 async function generateSingleVariation(prompt: string): Promise<string> {
   try {
-    // Try Nano Banana first
-    if (API_KEYS.googleNanoBanana) {
-      const result = await generateWithNanoBanana(prompt);
-      if (result) return result;
-    }
-    
-    // Fallback to Imagen
-    if (API_KEYS.googleImagen || API_KEYS.googleGenAI) {
-      const result = await generateWithImagen(prompt);
+    // Try Gemini 2.5 Flash
+    if (API_KEYS.googleGenAI) {
+      const result = await generateImageWithGemini(prompt);
       if (result) return result;
     }
     
@@ -348,62 +321,21 @@ async function generateSingleVariation(prompt: string): Promise<string> {
   }
 }
 
-/**
- * Enhanced Nano Banana implementation with proper API structure
- */
-async function generateWithNanoBanana(prompt: string): Promise<string | null> {
+
+
+async function generateImageWithGemini(prompt: string): Promise<string | null> {
   try {
-    // Updated to use proper Nano Banana API endpoint structure
-    const response = await fetch('https://api.nanobana.com/v1/generate', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${API_KEYS.googleNanoBanana}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        prompt: prompt,
-        style: 'cosmic_horror',
-        aspect_ratio: '16:9',
-        quality: 'high',
-        safety_filter: 'permissive'
-      })
-    });
-    
-    if (response.ok) {
-      const data = await response.json();
-      return data.images?.[0]?.url || null;
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-image-preview" });
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    for (const part of response.candidates[0].content.parts) {
+      if (part.inlineData) {
+        return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+      }
     }
     return null;
   } catch (error) {
-    console.warn('Nano Banana generation failed:', error);
-    return null;
-  }
-}
-
-/**
- * Real Google Imagen implementation using the official client
- */
-async function generateWithImagen(prompt: string): Promise<string | null> {
-  try {
-    const request = {
-      model: AI_MODELS.FALLBACK_IMAGE,
-      prompt: prompt,
-      sampleCount: 1,
-      aspectRatio: 'ASPECT_RATIO_16_9',
-      safetyFilterLevel: 'BLOCK_SOME',
-    };
-
-    const response = await imageClient.generateImage(request);
-    
-    if (response && response[0]?.generatedImages?.[0]) {
-      // Convert base64 to data URL
-      const base64Data = response[0].generatedImages[0].bytesBase64Encoded;
-      return `data:image/png;base64,${base64Data}`;
-    }
-    
-    return null;
-  } catch (error) {
-    console.warn('Google Imagen generation failed:', error);
+    console.warn('Gemini image generation failed:', error);
     return null;
   }
 }

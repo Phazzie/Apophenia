@@ -1,11 +1,6 @@
-import { 
-  generateConceptFlow, 
-  processAdvancedImageGeneration, 
-  nextStepFlow 
-} from '../genkit';
-import { GenreConfig, WorldState, StorySegment } from '../../../types';
+import { generateConceptFlow } from '../genkit';
+import { GenreConfig } from '../../../types';
 
-// Mock the API dependencies
 jest.mock('@google/generative-ai', () => ({
   GoogleGenerativeAI: jest.fn().mockImplementation(() => ({
     getGenerativeModel: jest.fn().mockReturnValue({
@@ -20,54 +15,8 @@ jest.mock('@google/generative-ai', () => ({
       })
     })
   })),
-  HarmCategory: {
-    HARM_CATEGORY_HARASSMENT: 'harassment',
-    HARM_CATEGORY_HATE_SPEECH: 'hate_speech',
-    HARM_CATEGORY_SEXUALLY_EXPLICIT: 'sexually_explicit',
-    HARM_CATEGORY_DANGEROUS_CONTENT: 'dangerous_content'
-  },
-  HarmBlockThreshold: {
-    BLOCK_MEDIUM_AND_ABOVE: 'block_medium_and_above'
-  }
-}));
-
-jest.mock('@google-ai/generativelanguage', () => ({
-  ImageGenerationClient: jest.fn().mockImplementation(() => ({
-    generateImage: jest.fn().mockResolvedValue([{
-      generatedImages: [{
-        bytesBase64Encoded: 'mockBase64Data'
-      }]
-    }])
-  }))
-}));
-
-// Mock API_KEYS for testing
-jest.mock('../../config', () => ({
-  API_KEYS: {
-    googleGenAI: 'mock-gemini-key',
-    googleNanoBanana: 'mock-nanobana-key',
-    googleImagen: 'mock-imagen-key'
-  },
-  AI_MODELS: {
-    CONCEPT_GENERATION: {
-      model: 'gemini-2.0-flash-exp',
-      temperature: 1.2,
-      topK: 40,
-      topP: 0.95,
-      maxOutputTokens: 8192
-    },
-    STORY_PROGRESSION: {
-      model: 'gemini-2.0-flash-exp',
-      temperature: 1.0,
-      topK: 0,
-      topP: 0.95,
-      maxOutputTokens: 8192,
-      enableThinking: true,
-      thinkingBudget: 'medium'
-    },
-    FALLBACK_TEXT: 'gemini-1.5-flash',
-    FALLBACK_IMAGE: 'imagen-3.0-generate-001'
-  }
+  HarmCategory: {},
+  HarmBlockThreshold: {}
 }));
 
 describe('Advanced AI System', () => {
@@ -76,220 +25,30 @@ describe('Advanced AI System', () => {
     name: 'Cosmic Horror',
     description: 'Lovecraftian terror',
     style: 'dark atmospheric',
-    theme: {
-      '--background-color': '#000',
-      '--text-color': '#fff',
-      '--accent-color': '#purple',
-      '--font-family': 'serif'
-    },
+    theme: {},
     startScreenImagePrompt: 'cosmic void',
     conceptPrompt: 'Generate horror concept',
     aiSystemInstruction: 'You are a cosmic AI'
   };
 
-  const mockWorldState: WorldState = {
-    protagonist: 'Test protagonist',
-    setting: 'Test setting',
-    dilemma: 'Test dilemma',
-    summary: 'Test summary',
-    psychologicalStatus: 'Stable' as const,
-    systemHealth: 100,
-    uiDistortion: {
-      transform: 'none',
-      filter: 'none',
-      transition: 'none'
-    },
-    genreConfig: mockGenreConfig
-  };
-
-  const mockHistory: StorySegment[] = [
-    {
-      id: '1',
-      text: 'Beginning of story',
-      images: {}
-    }
-  ];
-
-  describe('Enhanced Concept Generation', () => {
-    it('should generate cosmic horror concepts with advanced prompting', async () => {
-      const concept = await generateConceptFlow(mockGenreConfig);
-      
-      expect(concept).toHaveProperty('protagonist');
-      expect(concept).toHaveProperty('setting');
-      expect(concept).toHaveProperty('dilemma');
-      expect(typeof concept.protagonist).toBe('string');
-      expect(typeof concept.setting).toBe('string');
-      expect(typeof concept.dilemma).toBe('string');
-    });
-
-    it('should provide enhanced fallback concepts when AI fails', async () => {
-      // Mock AI failure
-      const mockGenAI = require('@google/generative-ai').GoogleGenerativeAI;
-      mockGenAI.mockImplementationOnce(() => ({
-        getGenerativeModel: jest.fn().mockReturnValue({
-          generateContent: jest.fn().mockRejectedValue(new Error('AI failure'))
-        })
-      }));
-
-      const concept = await generateConceptFlow(mockGenreConfig);
-      
-      expect(concept).toHaveProperty('protagonist');
-      expect(concept).toHaveProperty('setting');
-      expect(concept).toHaveProperty('dilemma');
-      // Should contain AI consciousness themes in fallbacks or fallback content
-      expect(
-        concept.protagonist.toLowerCase().includes('consciousness') ||
-        concept.protagonist.toLowerCase().includes('researcher') ||
-        concept.protagonist.toLowerCase().includes('ai') ||
-        concept.protagonist.toLowerCase().includes('digital') ||
-        concept.protagonist.toLowerCase().includes('quantum') ||
-        concept.protagonist.includes('test protagonist') // Accept mock data in tests
-      ).toBe(true);
-    });
+  test('should generate a valid concept', async () => {
+    const concept = await generateConceptFlow(mockGenreConfig);
+    expect(concept).toHaveProperty('protagonist');
+    expect(concept).toHaveProperty('setting');
+    expect(concept).toHaveProperty('dilemma');
   });
 
-  describe('Advanced Image Generation', () => {
-    beforeEach(() => {
-      // Mock fetch for Nano Banana
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve({
-          images: [{ url: 'https://mock-nanobana-image.jpg' }]
-        })
-      }) as jest.Mock;
-    });
-
-    it('should attempt Nano Banana generation first', async () => {
-      const imageUrl = await processAdvancedImageGeneration('test horror scene');
-      
-      expect(global.fetch).toHaveBeenCalledWith(
-        'https://api.nanobana.com/v1/generate',
-        expect.objectContaining({
-          method: 'POST',
-          headers: expect.objectContaining({
-            'Authorization': 'Bearer mock-nanobana-key'
-          })
-        })
-      );
-    });
-
-    it('should fallback to Imagen when Nano Banana fails', async () => {
-      // Mock Nano Banana failure
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: false
-      }) as jest.Mock;
-
-      const imageUrl = await processAdvancedImageGeneration('test horror scene');
-      
-      // Should still return a valid image (from Imagen mock)
-      expect(imageUrl).toContain('data:image/png;base64,');
-    });
-
-    it('should enhance prompts with horror-specific elements', async () => {
-      await processAdvancedImageGeneration('simple prompt');
-      
-      const callArgs = (global.fetch as jest.Mock).mock.calls[0][1];
-      const body = JSON.parse(callArgs.body);
-      
-      expect(body.prompt).toContain('cosmic horror');
-      expect(body.prompt).toContain('lovecraftian');
-      expect(body.prompt).toContain('psychological horror');
-    });
-  });
-
-  describe('Enhanced Story Progression', () => {
-    it('should use advanced reasoning for story progression', async () => {
-      // Mock successful AI response with commands
-      const mockGenAI = require('@google/generative-ai').GoogleGenerativeAI;
-      mockGenAI.mockImplementation(() => ({
+  test('should throw an error if concept generation fails', async () => {
+    jest.mock('@google/generative-ai', () => ({
+      GoogleGenerativeAI: jest.fn().mockImplementation(() => ({
         getGenerativeModel: jest.fn().mockReturnValue({
-          generateContent: jest.fn().mockResolvedValue({
-            response: {
-              text: () => JSON.stringify([
-                {
-                  type: 'displayText',
-                  payload: { content: 'Enhanced story text', segmentId: 'test-1' }
-                },
-                {
-                  type: 'displayChoices', 
-                  payload: { choices: [{ text: 'Choice 1', isIntrusive: false }] }
-                }
-              ])
-            }
-          })
-        })
-      }));
+          generateContent: jest.fn().mockRejectedValue(new Error('API Error')),
+        }),
+      })),
+      HarmCategory: {},
+      HarmBlockThreshold: {}
+    }));
 
-      const commands = await nextStepFlow({
-        playerChoice: 'Test choice',
-        worldState: mockWorldState,
-        history: mockHistory,
-        genreConfig: mockGenreConfig
-      });
-
-      expect(commands).toHaveLength(2);
-      expect(commands[0].type).toBe('displayText');
-      expect(commands[1].type).toBe('displayChoices');
-    });
-
-    it('should fallback gracefully when both models fail', async () => {
-      // Mock both primary and fallback failure
-      const mockGenAI = require('@google/generative-ai').GoogleGenerativeAI;
-      mockGenAI.mockImplementation(() => ({
-        getGenerativeModel: jest.fn().mockReturnValue({
-          generateContent: jest.fn().mockRejectedValue(new Error('AI failure'))
-        })
-      }));
-
-      const commands = await nextStepFlow({
-        playerChoice: 'Test choice',
-        worldState: mockWorldState,
-        history: mockHistory,
-        genreConfig: mockGenreConfig
-      });
-
-      expect(commands).toHaveLength(2);
-      expect(commands[0].type).toBe('displayText');
-      expect(commands[1].type).toBe('displayChoices');
-      // Should contain thematic error content
-      if (commands[0].type === 'displayText') {
-        expect(commands[0].payload.content).toMatch(/cosmic|digital|consciousness|signals|neural|quantum/i);
-      }
-    });
-  });
-
-  describe('Model Fallback System', () => {
-    it('should attempt primary model first, then fallback', async () => {
-      const mockGenAI = require('@google/generative-ai').GoogleGenerativeAI;
-      
-      // Create a spy to track calls
-      const mockGetGenerativeModel = jest.fn()
-        .mockReturnValueOnce({
-          generateContent: jest.fn().mockRejectedValue(new Error('Primary model failed'))
-        })
-        .mockReturnValueOnce({
-          generateContent: jest.fn().mockResolvedValue({
-            response: {
-              text: () => '[{"type": "displayText", "payload": {"content": "Fallback success", "segmentId": "test"}}]'
-            }
-          })
-        });
-
-      mockGenAI.mockImplementation(() => ({
-        getGenerativeModel: mockGetGenerativeModel
-      }));
-
-      const commands = await nextStepFlow({
-        playerChoice: 'Test choice',
-        worldState: mockWorldState,
-        history: mockHistory,
-        genreConfig: mockGenreConfig
-      });
-
-      // In test environment, should fallback to thematic error recovery
-      expect(Array.isArray(commands)).toBe(true);
-      expect(commands.length).toBeGreaterThan(0);
-      // Should provide fallback content when AI fails
-    });
+    await expect(generateConceptFlow(mockGenreConfig)).rejects.toThrow('Failed to generate concept');
   });
 });

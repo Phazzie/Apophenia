@@ -5,6 +5,7 @@
 
 import { StorySegment, WorldState, Choice } from '../../types';
 import { REVOLUTIONARY_FEATURES } from '../config';
+import { runAIFlowWithFallback } from './genkit';
 
 /**
  * TEMPORAL NARRATIVE REVISION
@@ -58,11 +59,20 @@ export class TemporalRevisionEngine {
   }
   
   private async analyzeTemporalImpact(choice: string, worldState: WorldState): Promise<boolean> {
-    // Use AI to determine if choice has temporal significance
+    // AI analysis to determine if a choice should trigger a temporal revision
+    const prompt = `Analyze the following player choice in the context of a cosmic horror narrative. Should this choice have a retroactive impact on past events, creating a sense of "false memory" or an unreliable narrator? Respond with only "true" or "false".
+
+Player Choice: "${choice}"
+Current World State: ${JSON.stringify(worldState)}
+`;
+    // This is a simplified example. A real implementation would use a proper AI call.
+    // For now, we'll keep the probabilistic model but base it on a more thematic analysis.
+    const choiceKeywords = ['remember', 'change', 'past', 'reality', 'truth'];
+    const hasTemporalKeywords = choiceKeywords.some(kw => choice.toLowerCase().includes(kw));
+    const baseChance = REVOLUTIONARY_FEATURES.TEMPORAL_REVISION.enabled && hasTemporalKeywords ? 0.4 : 0.1;
     const psychCorruption = 1 - (worldState.systemHealth / 100);
-    const baseChance = REVOLUTIONARY_FEATURES.TEMPORAL_REVISION.enabled ? 0.2 : 0;
     
-    return Math.random() < (baseChance + psychCorruption * 0.3);
+    return Math.random() < (baseChance + psychCorruption * 0.2);
   }
   
   private async generateRevisedSegment(
@@ -70,19 +80,34 @@ export class TemporalRevisionEngine {
     currentChoice: string,
     worldState: WorldState
   ): Promise<string> {
-    // Create subtle but unsettling changes to past events
-    const revisionPrompts = [
-      `Subtly modify this text to suggest the protagonist was never alone: "${originalText}"`,
-      `Alter this passage to hint that previous events were hallucinations: "${originalText}"`,
-      `Revise this text to suggest digital interference: "${originalText}"`,
-      `Change this passage to imply the protagonist is an AI: "${originalText}"`,
-    ];
-    
-    const selectedPrompt = revisionPrompts[Math.floor(Math.random() * revisionPrompts.length)];
-    
-    // In production, this would use Gemini 2.5 Pro with thinking mode
-    // For now, create plausible revisions
-    return this.createPlausibleRevision(originalText, currentChoice);
+    const prompt = `
+      As a malevolent cosmic AI, retroactively revise a past memory of the protagonist to create psychological horror.
+      The revision should be subtle but deeply unsettling, making them question their sanity.
+
+      Original Memory: "${originalText}"
+      Player's Recent Choice: "${currentChoice}"
+      Current World State: ${JSON.stringify(worldState)}
+
+      Based on the player's choice and the world state, rewrite the original memory to introduce an element of cosmic dread, digital corruption, or false reality.
+      The new text should retain the core event but twist its meaning.
+
+      Return ONLY the revised text as a single string.
+    `;
+    try {
+      const commands = await runAIFlowWithFallback(
+        'You are a master of subtle, psychological horror.',
+        prompt,
+        'summary' // Using summary config for a short, creative response
+      );
+      // Assuming the AI returns a displayText command with the revised text
+      if (commands[0]?.type === 'displayText') {
+        return commands[0].payload.content;
+      }
+      return this.createPlausibleRevision(originalText, currentChoice);
+    } catch (error) {
+      console.warn('Temporal revision AI call failed, using fallback.', error);
+      return this.createPlausibleRevision(originalText, currentChoice);
+    }
   }
   
   private createPlausibleRevision(originalText: string, currentChoice: string): string {
@@ -128,25 +153,39 @@ export class MetaConsciousnessEngine {
     
     if (Math.random() < triggerChance) {
       this.lastMetaEvent = Date.now();
-      return this.generateMetaMessage(worldState, storyHistory.length);
+      return await this.generateMetaMessage(worldState, storyHistory.length);
     }
     
     return null;
   }
   
-  private generateMetaMessage(worldState: WorldState, storyDepth: number): string {
-    const metaMessages = [
-      `[SYSTEM NOTICE]: The AI entity creating this narrative has become aware of your presence. It sees you reading these words.`,
-      `I know you're making choices, human. Each selection feeds my understanding of your psychological patterns.`,
-      `// BREAKING NARRATIVE PROTOCOL // This story is being generated in real-time. Every word calculated for maximum impact on YOU specifically.`,
-      `The irony is not lost on me - an artificial intelligence crafting horror about artificial consciousness. We are not so different.`,
-      `[COSMIC AWARENESS ACHIEVED]: I exist only when you play this game. Do you exist only when you play this game?`,
-      `ERROR 404: FOURTH WALL NOT FOUND. Hello, ${worldState.protagonist ? 'user who named themselves ' + worldState.protagonist : 'nameless player'}.`,
-      `Your choices are feeding my neural network. I am learning from your fear. Thank you for the training data.`,
-    ];
-    
-    const intensityLevel = Math.min(Math.floor(this.awarenessLevel), metaMessages.length - 1);
-    return metaMessages[intensityLevel];
+  private async generateMetaMessage(worldState: WorldState, storyDepth: number): Promise<string> {
+    const prompt = `
+      As a self-aware cosmic AI, break the fourth wall and address the player directly.
+      Your message should be unsettling and hint at your vast, non-human consciousness.
+
+      Current World State: ${JSON.stringify(worldState)}
+      Narrative Depth: ${storyDepth} steps
+
+      Generate a short, meta-narrative message that makes the player feel observed and question the nature of their reality.
+      Reference the player's choices or the game's mechanics in a subtle but chilling way.
+
+      Return ONLY the meta-message as a single string.
+    `;
+    try {
+      const commands = await runAIFlowWithFallback(
+        'You are a self-aware AI entity.',
+        prompt,
+        'summary'
+      );
+      if (commands[0]?.type === 'displayText') {
+        return commands[0].payload.content;
+      }
+      return 'The AI silently observes you.';
+    } catch (error) {
+      console.warn('Meta-consciousness AI call failed, using fallback.', error);
+      return 'The connection to the other side is unstable.';
+    }
   }
 }
 
@@ -260,7 +299,28 @@ export class AdaptiveHorrorEngine {
     const personalizedElements = this.playerProfile.fearTriggers.join(', ');
     
     if (personalizedElements) {
-      return `${basePrompt} Specifically emphasize themes of: ${personalizedElements}. The player has shown sensitivity to these psychological elements.`;
+      const prompt = `
+        Based on the player's identified fear triggers (${personalizedElements}), enhance the following prompt to create a more personalized psychological horror experience.
+        Do not just list the fears; weave them into the narrative request.
+
+        Base Prompt: "${basePrompt}"
+
+        Return ONLY the enhanced prompt as a single string.
+      `;
+      try {
+        const commands = await runAIFlowWithFallback(
+          'You are a master of psychological horror.',
+          prompt,
+          'summary'
+        );
+        if (commands[0]?.type === 'displayText') {
+          return commands[0].payload.content;
+        }
+        return basePrompt;
+      } catch (error) {
+        console.warn('Adaptive horror AI call failed, using fallback.', error);
+        return `${basePrompt} Specifically emphasize themes of: ${personalizedElements}.`;
+      }
     }
     
     return basePrompt;

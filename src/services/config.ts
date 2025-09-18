@@ -5,15 +5,9 @@
 const isTestEnvironment = typeof process !== 'undefined' && process.env.NODE_ENV === 'test';
 
 export const API_KEYS = {
-  googleGenAI: isTestEnvironment ? 
-    (process.env.VITE_GEMINI_API_KEY || '') : 
-    (import.meta.env?.VITE_GEMINI_API_KEY || ''),
-  googleNanoBanana: isTestEnvironment ? 
-    (process.env.VITE_GOOGLE_NANO_BANANA_KEY || '') : 
-    (import.meta.env?.VITE_GOOGLE_NANO_BANANA_KEY || ''),
-  googleImagen: isTestEnvironment ? 
-    (process.env.VITE_GOOGLE_IMAGEN_KEY || '') : 
-    (import.meta.env?.VITE_GOOGLE_IMAGEN_KEY || ''),
+  googleGenAI: isTestEnvironment
+    ? process.env.VITE_GEMINI_API_KEY || ''
+    : import.meta.env.VITE_GEMINI_API_KEY || '',
 };
 
 // Configuration getter function
@@ -26,29 +20,38 @@ export const getConfig = () => {
   };
 };
 
+import { AIModelConfig } from '../types';
+
 // AI Model Configuration
-export const AI_MODELS = {
+export const AI_MODELS: {
+  PRIMARY_TEXT: string;
+  FALLBACK_TEXT: string;
+  PRIMARY_IMAGE: string;
+  FALLBACK_IMAGE: string;
+  CONCEPT_GENERATION: AIModelConfig;
+  STORY_PROGRESSION: AIModelConfig;
+  SUMMARIZATION: AIModelConfig;
+  IMAGE_GENERATION: AIModelConfig;
+} = {
   // Primary text generation with advanced reasoning
-  PRIMARY_TEXT: 'gemini-2.0-flash-exp', // Nano Banana is actually Gemini 2.0 Flash Experimental
-  FALLBACK_TEXT: 'gemini-1.5-flash',
+  PRIMARY_TEXT: 'gemini-2.5-pro',
+  FALLBACK_TEXT: 'gemini-2.5-flash',
   
   // Image generation pipeline  
-  PRIMARY_IMAGE: 'gemini-2.0-flash-exp', // Nano Banana = Gemini 2.0 Flash Experimental
-  FALLBACK_IMAGE: 'imagen-3.0-generate-001',
+  PRIMARY_IMAGE: 'gemini-2.5-flash-image-preview',
+  FALLBACK_IMAGE: 'imagen-3.0-generate-001', // Placeholder, will be updated
   
   // Configuration for different use cases
   CONCEPT_GENERATION: {
-    model: 'gemini-2.0-flash-exp', // Nano Banana
-    temperature: 1.2,
+    model: 'gemini-2.5-flash',
+    temperature: 1.1,
     topK: 40,
     topP: 0.95,
     maxOutputTokens: 8192,
-    enableThinking: true,
-    thinkingBudget: 'high',
   },
   STORY_PROGRESSION: {
-    model: 'gemini-2.0-flash-exp', // Nano Banana
-    temperature: 1.0,
+    model: 'gemini-2.5-pro',
+    temperature: 0.9,
     topK: 0,
     topP: 0.95,
     maxOutputTokens: 8192,
@@ -57,12 +60,19 @@ export const AI_MODELS = {
     thinkingBudget: 'high', // Maximum reasoning power for story progression
   },
   SUMMARIZATION: {
-    model: 'gemini-1.5-flash', // Fallback for summarization
+    model: 'gemini-1.5-flash', // Keep 1.5 for less critical tasks
     temperature: 0.3,
     topK: 20,
     topP: 0.8,
     maxOutputTokens: 2048,
     enableThinking: false,
+  },
+  IMAGE_GENERATION: {
+    model: 'gemini-2.5-flash',
+    temperature: 0.9,
+    topK: 0,
+    topP: 0.95,
+    maxOutputTokens: 8192,
   }
 };
 

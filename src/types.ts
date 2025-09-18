@@ -110,5 +110,17 @@ export type WorldState = z.infer<typeof worldStateSchema>;
 export type StorySegment = z.infer<typeof storySegmentSchema>;
 export type GenreConfig = z.infer<typeof genreConfigSchema>;
 export type Choice = z.infer<typeof choiceSchema>;
+export const aiModelConfigSchema = z.object({
+  model: z.string(),
+  temperature: z.number(),
+  topK: z.number(),
+  topP: z.number(),
+  maxOutputTokens: z.number(),
+  enableThinking: z.boolean().optional(),
+  thinkingBudget: z.string().optional(),
+});
+
+export type AIModelConfig = z.infer<typeof aiModelConfigSchema>;
+
 export type Command = z.infer<typeof commandSchema>;
 export type GameCommand = Command; // Alias for backward compatibility

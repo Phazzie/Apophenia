@@ -1,9 +1,10 @@
 import { getConfig } from '../config';
+import { generateImageFlow } from './genkit';
 
 interface ImageVariation {
   url: string;
   prompt: string;
-  quality: 'nano_banana' | 'imagen' | 'unsplash';
+  quality: 'gemini' | 'unsplash';
 }
 
 interface ImageGenerationResult {
@@ -18,84 +19,35 @@ class ImageGenerationService {
   }
 
   async generateImageVariations(prompt: string, count: number = 3): Promise<ImageGenerationResult> {
-    const variations: ImageVariation[] = [];
-    
+    const horrorPrompts = this.enhanceHorrorPrompt(prompt);
+
     try {
-      // Try Nano Banana first (conceptual - would use real API in production)
-      const nanoBananaVariations = await this.generateNanoBananaVariations(prompt, count);
-      variations.push(...nanoBananaVariations);
+      const imagePromises = horrorPrompts.slice(0, count).map(p => generateImageFlow(p));
+      const results = await Promise.all(imagePromises);
       
-      if (variations.length < count) {
-        // Fallback to Imagen (mock implementation)
-        const imagenVariations = await this.generateImagenVariations(prompt, count - variations.length);
-        variations.push(...imagenVariations);
-      }
-      
-      if (variations.length < count) {
-        // Final fallback to Enhanced Unsplash
-        const unsplashVariations = await this.generateUnsplashVariations(prompt, count - variations.length);
-        variations.push(...unsplashVariations);
-      }
-      
-    } catch (error) {
-      console.error('Image generation failed:', error);
-      // Fallback to Unsplash only
-      const unsplashVariations = await this.generateUnsplashVariations(prompt, count);
-      variations.push(...unsplashVariations);
-    }
+      const variations: ImageVariation[] = await Promise.all(results.map(async (url, index) => {
+        const fallbackUrl = (await this.generateUnsplashVariations(prompt, 1))[0].url;
+        return {
+          url: url || fallbackUrl,
+          prompt: horrorPrompts[index],
+          quality: url && !url.includes('unsplash') ? 'gemini' : 'unsplash',
+        };
+      }));
 
-    return {
-      variations: variations.slice(0, count),
-      selectedIndex: 0 // Default to first variation
-    };
-  }
-
-  private async generateNanoBananaVariations(prompt: string, count: number): Promise<ImageVariation[]> {
-    const config = getConfig();
-    
-    // Mock implementation - would use real Nano Banana API in production
-    const horrorPrompts = this.enhanceHorrorPrompt(prompt);
-    const promises = horrorPrompts.slice(0, count).map(async (enhancedPrompt, index) => {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 100 + index * 50));
-      
       return {
-        url: `https://via.placeholder.com/800x600/1a1a2e/e94560?text=Nano+Banana+${index + 1}`,
-        prompt: enhancedPrompt,
-        quality: 'nano_banana' as const
+        variations,
+        selectedIndex: 0
       };
-    });
-
-    return Promise.all(promises);
+    } catch (error) {
+      console.error('Parallel image generation failed, falling back to Unsplash:', error);
+      const unsplashVariations = await this.generateUnsplashVariations(prompt, count);
+      return {
+        variations: unsplashVariations,
+        selectedIndex: 0,
+      };
+    }
   }
 
-  private async generateImagenVariations(prompt: string, count: number): Promise<ImageVariation[]> {
-    const config = getConfig();
-    
-    // Mock implementation - would use real Google Imagen API in production
-    const horrorPrompts = this.enhanceHorrorPrompt(prompt);
-    const promises = horrorPrompts.slice(0, count).map(async (enhancedPrompt, index) => {
-      try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 200 + index * 100));
-
-        return {
-          url: `https://via.placeholder.com/800x600/2d1b69/e94560?text=Imagen+${index + 1}`,
-          prompt: enhancedPrompt,
-          quality: 'imagen' as const
-        };
-      } catch (error) {
-        console.error(`Imagen generation ${index + 1} failed:`, error);
-        return {
-          url: `https://via.placeholder.com/800x600/2d1b69/e94560?text=Imagen+Error+${index + 1}`,
-          prompt: enhancedPrompt,
-          quality: 'imagen' as const
-        };
-      }
-    });
-
-    return Promise.all(promises);
-  }
 
   private async generateUnsplashVariations(prompt: string, count: number): Promise<ImageVariation[]> {
     const keywords = this.extractHorrorKeywords(prompt);

@@ -2,9 +2,10 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
-  setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
+  setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts', '<rootDir>/jest.setup.js'],
   moduleNameMapper: {
     '\\.(css|less|scss)$': 'identity-obj-proxy',
+    '^import.meta.env$': '<rootDir>/__mocks__/importMetaEnv.js'
   },
   transform: {
     '^.+\\.tsx?$': ['ts-jest', {
@@ -12,17 +13,4 @@ module.exports = {
     }],
   },
   extensionsToTreatAsEsm: ['.ts', '.tsx'],
-  globals: {
-    'import.meta': {
-      env: {
-        VITE_GEMINI_API_KEY: 'test-key',
-        VITE_IMAGE_API_KEY: 'test-image-key',
-        VITE_GOOGLE_NANO_BANANA_KEY: 'test-nano-key',
-        VITE_GOOGLE_IMAGEN_KEY: 'test-imagen-key',
-      }
-    }
-  },
-  transformIgnorePatterns: [
-    'node_modules/(?!(.*\\.mjs$))'
-  ],
 };

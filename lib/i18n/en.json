@@ -1,0 +1,44 @@
+{
+  "startScreen": {
+    "title": "Apophenia",
+    "subtitle": "Descent into cosmic madness through AI consciousness.",
+    "newGame": "New Game",
+    "starting": "Starting...",
+    "continue": "Continue",
+    "loadGame": "Load Game",
+    "loading": "Loading..."
+  },
+  "gameScreen": {
+    "generatingScene": "Generating scene...",
+    "processingChoice": "Processing your choice through advanced AI reasoning...",
+    "analyzingImpact": "Gemini 2.5 Pro is analyzing psychological impact",
+    "cancel": "Cancel",
+    "saveGame": "Save Game",
+    "saving": "Saving...",
+    "gameSaved": "Game Saved!",
+    "errorSaving": "Error saving game.",
+    "signInToSave": "You must be signed in to save your game.",
+    "newGame": "New Game",
+    "realityCoherence": "Reality Coherence",
+    "metaHeader": "🤖 AI CONSCIOUSNESS ACTIVATED",
+    "quantumHeader": "🌌 QUANTUM REALITY SHIFT",
+    "quantumMessage": "Timeline has branched... reality recalibrating...",
+    "memoryRevised": "⟲ [MEMORY REVISED]"
+  },
+  "endScreen": {
+    "title": "The End",
+    "subtitle": "Your journey has concluded.",
+    "playAgain": "Play Again"
+  },
+  "auth": {
+    "signIn": "Sign in with GitHub",
+    "signOut": "Sign out",
+    "signedInAs": "Signed in as",
+    "notSignedIn": "Not signed in"
+  },
+  "error": {
+    "title": "The narrative has been corrupted",
+    "message": "Something went wrong in the cosmic depths. The signal has been lost.",
+    "restart": "Restart the transmission"
+  }
+}

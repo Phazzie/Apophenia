@@ -1,15 +1,16 @@
 {
-  "name": "apophenia-cosmic-narrative",
+  "name": "apophenia-cosmic-narrative-next",
   "version": "1.0.0",
   "private": true,
-  "description": "An AI-driven interactive cosmic horror narrative game",
+  "description": "An AI-driven interactive cosmic horror narrative game (Next.js version)",
   "keywords": [
     "ai",
     "interactive-fiction",
     "horror",
     "narrative",
     "game",
-    "react"
+    "react",
+    "nextjs"
   ],
   "author": "Phazzie",
   "repository": {
@@ -18,38 +19,40 @@
   },
   "homepage": "https://apophenia-cosmic-narrative.vercel.app",
   "scripts": {
-    "dev": "./node_modules/.bin/vite",
-    "build": "./node_modules/.bin/tsc && ./node_modules/.bin/vite build",
-    "preview": "./node_modules/.bin/vite preview",
-    "test": "jest",
-    "deploy": "npm run build && vercel --prod",
-    "deploy:gh-pages": "npm run build && npx gh-pages -d dist",
-    "deploy:netlify": "npm run build && echo 'Upload dist/ folder to Netlify'",
-    "start": "npm run dev",
-    "preview": "./node_modules/.bin/vite preview"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test": "vitest",
+    "deploy": "npm run build && vercel --prod"
   },
   "dependencies": {
     "@genkit-ai/googleai": "^1.16.1",
     "@google-ai/generativelanguage": "^3.4.0",
     "@google/generative-ai": "^0.24.1",
+    "@vercel/kv": "^1.0.1",
     "genkit": "^1.16.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "next": "14.2.3",
+    "next-auth": "^4.24.7",
     "zod": "^3.23.8",
     "zustand": "^4.5.2"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.4.0",
-    "@types/jest": "^30.0.0",
+    "@testing-library/react": "^15.0.5",
+    "@vitejs/plugin-react": "^4.3.0",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
-    "@vitejs/plugin-react": "^4.3.0",
+    "@types/node": "20.12.12",
     "gh-pages": "^6.1.1",
     "identity-obj-proxy": "^3.0.0",
-    "jest": "^30.0.5",
-    "jest-environment-jsdom": "^30.0.5",
-    "ts-jest": "^29.4.1",
+    "jsdom": "^24.0.0",
     "typescript": "^5.4.5",
-    "vite": "^7.1.5"
+    "tailwindcss": "^3.4.3",
+    "postcss": "^8.4.38",
+    "autoprefixer": "^10.4.19",
+    "vitest": "^1.5.0"
   }
 }

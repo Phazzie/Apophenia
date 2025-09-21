@@ -1,19 +1,19 @@
 // Environment configuration for Apophenia
 // API keys are loaded from environment variables for security
 
-// Simple environment variable access that works in both Vite and Jest
+// Conditional environment handling for Vite vs Jest
 const isTestEnvironment = typeof process !== 'undefined' && process.env.NODE_ENV === 'test';
 
-export const API_KEYS = {
-  googleGenAI: isTestEnvironment ? 
-    (process.env.VITE_GEMINI_API_KEY || '') : 
-    (import.meta.env?.VITE_GEMINI_API_KEY || ''),
-  googleNanoBanana: isTestEnvironment ? 
-    (process.env.VITE_GOOGLE_NANO_BANANA_KEY || '') : 
-    (import.meta.env?.VITE_GOOGLE_NANO_BANANA_KEY || ''),
-  googleImagen: isTestEnvironment ? 
-    (process.env.VITE_GOOGLE_IMAGEN_KEY || '') : 
-    (import.meta.env?.VITE_GOOGLE_IMAGEN_KEY || ''),
+export const API_KEYS = isTestEnvironment ? {
+  // Jest test environment - use process.env
+  googleGenAI: process.env.VITE_GEMINI_API_KEY || 'test-key',
+  googleNanoBanana: process.env.VITE_GOOGLE_NANO_BANANA_KEY || 'test-nano-key',
+  googleImagen: process.env.VITE_GOOGLE_IMAGEN_KEY || 'test-imagen-key',
+} : {
+  // Vite browser environment - use import.meta.env
+  googleGenAI: (import.meta as any).env?.VITE_GEMINI_API_KEY || '',
+  googleNanoBanana: (import.meta as any).env?.VITE_GOOGLE_NANO_BANANA_KEY || '',
+  googleImagen: (import.meta as any).env?.VITE_GOOGLE_IMAGEN_KEY || '',
 };
 
 // Configuration getter function

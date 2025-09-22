@@ -4,7 +4,7 @@
  */
 
 import { StorySegment, WorldState, Choice } from '../../types';
-import { REVOLUTIONARY_FEATURES } from '../config';
+import { REVOLUTIONARY_FEATURES } from '../../services/config';
 
 /**
  * TEMPORAL NARRATIVE REVISION

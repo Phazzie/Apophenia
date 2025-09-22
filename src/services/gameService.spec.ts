@@ -13,13 +13,13 @@ import {
   generateConceptFlow,
   generateImageFlow,
   nextStepFlow,
-} from './ai/genkit';
+} from './ai/secureGenkit';
 
 import type { Command, GenreConfig, StorySegment, WorldState } from '../types';
 import { summarizeHistoryFlow } from './flows/summaryFlow';
 
 // Mock the flow modules
-jest.mock('./ai/genkit', () => ({
+jest.mock('./ai/secureGenkit', () => ({
   generateConceptFlow: jest.fn(),
   generateImageFlow: jest.fn(),
   nextStepFlow: jest.fn(),
@@ -122,27 +122,18 @@ describe('gameService', () => {
     });
 
     it('returns error-recovery commands when nextStepFlow throws', async () => {
-      const errorCommands: Command[] = [
-        {
-          type: 'displayText',
-          payload: {
-            content: 'A tear in the fabric of reality prevents you from proceeding. The connection is unstable.',
-            segmentId: 'error-segment-api',
-          },
-        },
-        {
-          type: 'displayChoices',
-          payload: {
-            choices: [{ text: 'Try to force the way forward.', isIntrusive: false, segmentId: 'retry-last-action' }],
-          },
-        },
-      ];
-      (nextStepFlow as jest.Mock).mockResolvedValueOnce(errorCommands);
+      (nextStepFlow as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
 
       const result = await getNextStep('Open the door', mockWorldState, [], mockGenreConfig);
 
-      // Result now includes revolutionary features structure
-      expect(result.commands).toEqual(errorCommands);
+      // Should return fallback commands from secure genkit
+      expect(result.commands).toHaveLength(2);
+      expect(result.commands[0].type).toBe('displayText');
+      expect(result.commands[0].payload.content).toContain('cosmic forces continue to manifest');
+      expect(result.commands[1].type).toBe('displayChoices');
+      expect(result.commands[1].payload.choices).toHaveLength(3);
+      
+      // Result includes revolutionary features structure
       expect(result).toHaveProperty('revisedHistory');
       expect(result).toHaveProperty('metaMessage');
       expect(result).toHaveProperty('quantumShift');

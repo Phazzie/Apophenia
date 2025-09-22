@@ -1,3 +1,7 @@
+// SECURITY NOTE: This file is deprecated in favor of secure backend API
+// API keys are no longer exposed to the frontend
+// See SECURE_DEPLOYMENT.md for the new secure architecture
+
 // Environment configuration for Apophenia
 // API keys are loaded from environment variables for security
 
@@ -9,9 +13,10 @@ export const API_KEYS = isTestEnvironment ? {
   googleGenAI: process.env.VITE_GEMINI_API_KEY || 'test-key',
   googleImagen: process.env.VITE_GOOGLE_IMAGEN_KEY || 'test-imagen-key',
 } : {
-  // Vite browser environment - use import.meta.env
-  googleGenAI: (import.meta as any).env?.VITE_GEMINI_API_KEY || '',
-  googleImagen: (import.meta as any).env?.VITE_GOOGLE_IMAGEN_KEY || '',
+  // DEPRECATED: Frontend no longer needs API keys
+  // All API calls now go through secure backend
+  googleGenAI: '',
+  googleImagen: '',
 };
 
 // Configuration getter function

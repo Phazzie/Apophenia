@@ -12,7 +12,7 @@ export const getConfig = () => ({
 
 export const AI_MODELS = {
   PRIMARY_TEXT: 'gemini-2.5-flash-experimental',
-  FALLBACK_TEXT: 'gemini-1.5-flash',
+  FALLBACK_TEXT: 'gemini-2.5-flash',
   PRIMARY_IMAGE: 'imagen-3.0-generate-001',
   FALLBACK_IMAGE: 'imagen-2.0-generate-001',
   CONCEPT_GENERATION: {
@@ -34,7 +34,7 @@ export const AI_MODELS = {
     thinkingBudget: 'high',
   },
   SUMMARIZATION: {
-    model: 'gemini-1.5-flash',
+    model: 'gemini-2.5-flash',
     temperature: 0.3,
     topK: 20,
     topP: 0.8,

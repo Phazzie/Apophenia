@@ -27,7 +27,7 @@ export const getConfig = () => {
 export const AI_MODELS = {
   // Primary text generation with advanced reasoning
   PRIMARY_TEXT: 'gemini-2.5-flash-experimental', // Latest experimental Gemini model
-  FALLBACK_TEXT: 'gemini-1.5-flash',
+  FALLBACK_TEXT: 'gemini-2.5-flash',
   
   // Image generation pipeline  
   PRIMARY_IMAGE: 'imagen-3.0-generate-001', // Google Imagen for image generation
@@ -54,7 +54,7 @@ export const AI_MODELS = {
     thinkingBudget: 'high', // Maximum reasoning power for story progression
   },
   SUMMARIZATION: {
-    model: 'gemini-1.5-flash', // Stable model for summarization
+    model: 'gemini-2.5-flash', // Stable Gemini 2.5 model for summarization
     temperature: 0.3,
     topK: 20,
     topP: 0.8,

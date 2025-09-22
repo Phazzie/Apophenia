@@ -14,7 +14,6 @@
       "VITE_GEMINI_API_KEY": "@vite-gemini-api-key"
     }
   },
-  "functions": {},
   "routes": [
     {
       "src": "/(.*)",

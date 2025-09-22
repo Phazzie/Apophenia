@@ -65,7 +65,7 @@ jest.mock('../../config', () => ({
       enableThinking: true,
       thinkingBudget: 'medium'
     },
-    FALLBACK_TEXT: 'gemini-1.5-flash',
+    FALLBACK_TEXT: 'gemini-2.5-flash',
     FALLBACK_IMAGE: 'imagen-3.0-generate-001'
   }
 }));

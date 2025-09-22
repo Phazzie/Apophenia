@@ -7,12 +7,10 @@ const isTestEnvironment = typeof process !== 'undefined' && process.env.NODE_ENV
 export const API_KEYS = isTestEnvironment ? {
   // Jest test environment - use process.env
   googleGenAI: process.env.VITE_GEMINI_API_KEY || 'test-key',
-  googleNanoBanana: process.env.VITE_GOOGLE_NANO_BANANA_KEY || 'test-nano-key',
   googleImagen: process.env.VITE_GOOGLE_IMAGEN_KEY || 'test-imagen-key',
 } : {
   // Vite browser environment - use import.meta.env
   googleGenAI: (import.meta as any).env?.VITE_GEMINI_API_KEY || '',
-  googleNanoBanana: (import.meta as any).env?.VITE_GOOGLE_NANO_BANANA_KEY || '',
   googleImagen: (import.meta as any).env?.VITE_GOOGLE_IMAGEN_KEY || '',
 };
 
@@ -20,8 +18,7 @@ export const API_KEYS = isTestEnvironment ? {
 export const getConfig = () => {
   return {
     geminiApiKey: API_KEYS.googleGenAI,
-    imageApiKey: API_KEYS.googleImagen || API_KEYS.googleNanoBanana,
-    nanoBananaKey: API_KEYS.googleNanoBanana,
+    imageApiKey: API_KEYS.googleImagen,
     imagenKey: API_KEYS.googleImagen,
   };
 };
@@ -29,16 +26,16 @@ export const getConfig = () => {
 // AI Model Configuration
 export const AI_MODELS = {
   // Primary text generation with advanced reasoning
-  PRIMARY_TEXT: 'gemini-2.0-flash-exp', // Nano Banana is actually Gemini 2.0 Flash Experimental
+  PRIMARY_TEXT: 'gemini-2.5-flash-experimental', // Latest experimental Gemini model
   FALLBACK_TEXT: 'gemini-1.5-flash',
   
   // Image generation pipeline  
-  PRIMARY_IMAGE: 'gemini-2.0-flash-exp', // Nano Banana = Gemini 2.0 Flash Experimental
-  FALLBACK_IMAGE: 'imagen-3.0-generate-001',
+  PRIMARY_IMAGE: 'imagen-3.0-generate-001', // Google Imagen for image generation
+  FALLBACK_IMAGE: 'imagen-2.0-generate-001',
   
   // Configuration for different use cases
   CONCEPT_GENERATION: {
-    model: 'gemini-2.0-flash-exp', // Nano Banana
+    model: 'gemini-2.5-flash-experimental', // Latest experimental model
     temperature: 1.2,
     topK: 40,
     topP: 0.95,
@@ -47,7 +44,7 @@ export const AI_MODELS = {
     thinkingBudget: 'high',
   },
   STORY_PROGRESSION: {
-    model: 'gemini-2.0-flash-exp', // Nano Banana
+    model: 'gemini-2.5-flash-experimental', // Latest experimental model
     temperature: 1.0,
     topK: 0,
     topP: 0.95,
@@ -57,7 +54,7 @@ export const AI_MODELS = {
     thinkingBudget: 'high', // Maximum reasoning power for story progression
   },
   SUMMARIZATION: {
-    model: 'gemini-1.5-flash', // Fallback for summarization
+    model: 'gemini-1.5-flash', // Stable model for summarization
     temperature: 0.3,
     topK: 20,
     topP: 0.8,
@@ -73,9 +70,9 @@ if (!API_KEYS.googleGenAI) {
   );
 }
 
-if (!API_KEYS.googleNanoBanana && !API_KEYS.googleImagen) {
+if (!API_KEYS.googleImagen) {
   console.warn(
-    'Warning: Google Nano Banana or Imagen API keys not set. Image generation will use Unsplash fallback.'
+    'Warning: Google Imagen API key not set. Image generation will use Unsplash fallback.'
   );
 }
 

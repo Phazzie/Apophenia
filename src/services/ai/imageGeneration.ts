@@ -3,7 +3,7 @@ import { getConfig } from '../config';
 interface ImageVariation {
   url: string;
   prompt: string;
-  quality: 'nano_banana' | 'imagen' | 'unsplash';
+  quality: 'imagen' | 'unsplash';
 }
 
 interface ImageGenerationResult {
@@ -13,7 +13,7 @@ interface ImageGenerationResult {
 
 class ImageGenerationService {
   constructor() {
-    // Mock implementation for Nano Banana and Imagen
+    // Mock implementation for Google Imagen
     // In production, would use actual Google AI clients
   }
 
@@ -21,18 +21,12 @@ class ImageGenerationService {
     const variations: ImageVariation[] = [];
     
     try {
-      // Try Nano Banana first (conceptual - would use real API in production)
-      const nanoBananaVariations = await this.generateNanoBananaVariations(prompt, count);
-      variations.push(...nanoBananaVariations);
+      // Try Google Imagen first (mock implementation)
+      const imagenVariations = await this.generateImagenVariations(prompt, count);
+      variations.push(...imagenVariations);
       
       if (variations.length < count) {
-        // Fallback to Imagen (mock implementation)
-        const imagenVariations = await this.generateImagenVariations(prompt, count - variations.length);
-        variations.push(...imagenVariations);
-      }
-      
-      if (variations.length < count) {
-        // Final fallback to Enhanced Unsplash
+        // Fallback to Enhanced Unsplash
         const unsplashVariations = await this.generateUnsplashVariations(prompt, count - variations.length);
         variations.push(...unsplashVariations);
       }
@@ -50,24 +44,6 @@ class ImageGenerationService {
     };
   }
 
-  private async generateNanoBananaVariations(prompt: string, count: number): Promise<ImageVariation[]> {
-    const config = getConfig();
-    
-    // Mock implementation - would use real Nano Banana API in production
-    const horrorPrompts = this.enhanceHorrorPrompt(prompt);
-    const promises = horrorPrompts.slice(0, count).map(async (enhancedPrompt, index) => {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 100 + index * 50));
-      
-      return {
-        url: `https://via.placeholder.com/800x600/1a1a2e/e94560?text=Nano+Banana+${index + 1}`,
-        prompt: enhancedPrompt,
-        quality: 'nano_banana' as const
-      };
-    });
-
-    return Promise.all(promises);
-  }
 
   private async generateImagenVariations(prompt: string, count: number): Promise<ImageVariation[]> {
     const config = getConfig();

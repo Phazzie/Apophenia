@@ -9,7 +9,7 @@ describe('ImageGenerationService', () => {
 
   test('should generate multiple image variations', async () => {
     const mockVariations: ImageVariation[] = [
-      { url: 'test1.jpg', prompt: 'horror prompt 1', quality: 'nano_banana' },
+      { url: 'test1.jpg', prompt: 'horror prompt 1', quality: 'imagen' },
       { url: 'test2.jpg', prompt: 'horror prompt 2', quality: 'imagen' },
       { url: 'test3.jpg', prompt: 'horror prompt 3', quality: 'unsplash' }
     ];
@@ -22,7 +22,7 @@ describe('ImageGenerationService', () => {
     const result = await imageGenerationService.generateImageVariations('test prompt', 3);
 
     expect(result.variations).toHaveLength(3);
-    expect(result.variations[0].quality).toBe('nano_banana');
+    expect(result.variations[0].quality).toBe('imagen');
     expect(result.selectedIndex).toBe(0);
   });
 

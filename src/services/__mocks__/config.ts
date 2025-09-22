@@ -1,24 +1,22 @@
 // Mock configuration for Jest tests
 export const API_KEYS = {
   googleGenAI: 'test-key',
-  googleNanoBanana: 'test-nano-key',
   googleImagen: 'test-imagen-key',
 };
 
 export const getConfig = () => ({
   geminiApiKey: API_KEYS.googleGenAI,
-  imageApiKey: API_KEYS.googleImagen || API_KEYS.googleNanoBanana,
-  nanoBananaKey: API_KEYS.googleNanoBanana,
+  imageApiKey: API_KEYS.googleImagen,
   imagenKey: API_KEYS.googleImagen,
 });
 
 export const AI_MODELS = {
-  PRIMARY_TEXT: 'gemini-2.0-flash-exp',
+  PRIMARY_TEXT: 'gemini-2.5-flash-experimental',
   FALLBACK_TEXT: 'gemini-1.5-flash',
-  PRIMARY_IMAGE: 'gemini-2.0-flash-exp',
-  FALLBACK_IMAGE: 'imagen-3.0-generate-001',
+  PRIMARY_IMAGE: 'imagen-3.0-generate-001',
+  FALLBACK_IMAGE: 'imagen-2.0-generate-001',
   CONCEPT_GENERATION: {
-    model: 'gemini-2.0-flash-exp',
+    model: 'gemini-2.5-flash-experimental',
     temperature: 1.2,
     topK: 40,
     topP: 0.95,
@@ -27,7 +25,7 @@ export const AI_MODELS = {
     thinkingBudget: 'high',
   },
   STORY_PROGRESSION: {
-    model: 'gemini-2.0-flash-exp',
+    model: 'gemini-2.5-flash-experimental',
     temperature: 1.0,
     topK: 0,
     topP: 0.95,

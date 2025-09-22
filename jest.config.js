@@ -8,21 +8,22 @@ module.exports = {
   },
   transform: {
     '^.+\\.tsx?$': ['ts-jest', {
-      useESM: true,
+      useESM: false,
     }],
-  },
-  extensionsToTreatAsEsm: ['.ts', '.tsx'],
-  globals: {
-    'import.meta': {
-      env: {
-        VITE_GEMINI_API_KEY: 'test-key',
-        VITE_IMAGE_API_KEY: 'test-image-key',
-        VITE_GOOGLE_NANO_BANANA_KEY: 'test-nano-key',
-        VITE_GOOGLE_IMAGEN_KEY: 'test-imagen-key',
-      }
-    }
   },
   transformIgnorePatterns: [
     'node_modules/(?!(.*\\.mjs$))'
   ],
+  testMatch: [
+    '<rootDir>/src/**/__tests__/**/*.test.{ts,tsx}',
+    '<rootDir>/src/**/*.spec.{ts,tsx}'
+  ],
+  testPathIgnorePatterns: [
+    '<rootDir>/src/services/ai/__tests__/testUtils.helper.ts'
+  ],
+  // Use manual mocks
+  moduleNameMapper: {
+    '^../config$': '<rootDir>/src/services/__mocks__/config.ts',
+    '\\.(css|less|scss)$': 'identity-obj-proxy',
+  },
 };

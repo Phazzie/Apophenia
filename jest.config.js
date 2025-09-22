@@ -4,11 +4,15 @@ module.exports = {
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
   moduleNameMapper: {
+    '^../config$': '<rootDir>/src/services/__mocks__/config.ts',
     '\\.(css|less|scss)$': 'identity-obj-proxy',
   },
   transform: {
     '^.+\\.tsx?$': ['ts-jest', {
-      useESM: false,
+      useESM: true,
+      tsconfig: {
+        jsx: 'react-jsx',
+      }
     }],
   },
   transformIgnorePatterns: [
@@ -21,9 +25,14 @@ module.exports = {
   testPathIgnorePatterns: [
     '<rootDir>/src/services/ai/__tests__/testUtils.helper.ts'
   ],
-  // Use manual mocks
-  moduleNameMapper: {
-    '^../config$': '<rootDir>/src/services/__mocks__/config.ts',
-    '\\.(css|less|scss)$': 'identity-obj-proxy',
-  },
+  // Mock import.meta.env for Vite compatibility
+  globals: {
+    'import.meta': {
+      env: {
+        VITE_GEMINI_API_KEY: 'test-key',
+        VITE_GOOGLE_NANO_BANANA_KEY: 'test-nano-key',
+        VITE_GOOGLE_IMAGEN_KEY: 'test-imagen-key',
+      }
+    }
+  }
 };

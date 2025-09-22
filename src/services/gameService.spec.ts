@@ -105,13 +105,20 @@ describe('gameService', () => {
 
       const result = await getNextStep('Open the door', mockWorldState, mockStoryHistory, mockGenreConfig);
 
+      // With revolutionary features enabled, the playerChoice gets enhanced
       expect(nextStepFlow).toHaveBeenCalledWith({
-        playerChoice: 'Open the door',
+        playerChoice: 'Player chose: Open the door. Continue the cosmic horror narrative.',
         worldState: mockWorldState,
         history: mockStoryHistory,
         genreConfig: mockGenreConfig,
       });
-      expect(result).toEqual(commands);
+      
+      // Result now includes additional revolutionary features data
+      expect(result.commands).toEqual(commands);
+      expect(result).toHaveProperty('revisedHistory');
+      expect(result).toHaveProperty('metaMessage');
+      expect(result).toHaveProperty('quantumShift');
+      expect(result).toHaveProperty('corruptionEffects');
     });
 
     it('returns error-recovery commands when nextStepFlow throws', async () => {
@@ -134,7 +141,12 @@ describe('gameService', () => {
 
       const result = await getNextStep('Open the door', mockWorldState, [], mockGenreConfig);
 
-      expect(result).toEqual(errorCommands);
+      // Result now includes revolutionary features structure
+      expect(result.commands).toEqual(errorCommands);
+      expect(result).toHaveProperty('revisedHistory');
+      expect(result).toHaveProperty('metaMessage');
+      expect(result).toHaveProperty('quantumShift');
+      expect(result).toHaveProperty('corruptionEffects');
     });
   });
 

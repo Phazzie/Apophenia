@@ -62,9 +62,9 @@ export const REVOLUTIONARY_FEATURES = {
     description: 'Story choices retroactively change past events',
     maxQuantumDepth: 2,
   },
-  ADAPTIVE_HORROR_PROFILER: {
+  ADAPTIVE_HORROR: {
     enabled: true,
-    description: 'AI analyzes player responses to customize horror elements',
+    description: 'AI learns from player choices to craft personalized psychological horror',
     analysisDepth: 'deep',
   },
   REALITY_CORRUPTION: {

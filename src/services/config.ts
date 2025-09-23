@@ -30,17 +30,17 @@ export const getConfig = () => {
 
 // AI Model Configuration
 export const AI_MODELS = {
-  // Primary text generation with advanced reasoning
-  PRIMARY_TEXT: 'gemini-2.5-flash-experimental', // Latest experimental Gemini model
+  // Primary text generation with advanced reasoning - UPGRADED TO 2.5 PRO
+  PRIMARY_TEXT: 'gemini-2.5-pro', // Latest Pro model with 1M token context
   FALLBACK_TEXT: 'gemini-2.5-flash',
   
-  // Image generation pipeline  
-  PRIMARY_IMAGE: 'imagen-3.0-generate-001', // Google Imagen for image generation
-  FALLBACK_IMAGE: 'imagen-2.0-generate-001',
+  // Image generation pipeline - UPGRADED TO FLASH IMAGE PREVIEW
+  PRIMARY_IMAGE: 'gemini-2.5-flash-image-preview', // New image generation model
+  FALLBACK_IMAGE: 'imagen-3.0-generate-001',
   
-  // Configuration for different use cases
+  // Configuration for different use cases with 1M token context optimization
   CONCEPT_GENERATION: {
-    model: 'gemini-2.5-flash-experimental', // Latest experimental model
+    model: 'gemini-2.5-pro', // Pro model with massive context
     temperature: 1.2,
     topK: 40,
     topP: 0.95,
@@ -49,7 +49,7 @@ export const AI_MODELS = {
     thinkingBudget: 'high',
   },
   STORY_PROGRESSION: {
-    model: 'gemini-2.5-flash-experimental', // Latest experimental model
+    model: 'gemini-2.5-pro', // Pro model with full conversation history
     temperature: 1.0,
     topK: 0,
     topP: 0.95,
@@ -57,14 +57,42 @@ export const AI_MODELS = {
     // Enable thinking mode for complex reasoning
     enableThinking: true,
     thinkingBudget: 'high', // Maximum reasoning power for story progression
+    // NEW: Full conversation context utilization
+    contextOptimization: 'full_history', // Use entire game history for context
   },
   SUMMARIZATION: {
-    model: 'gemini-2.5-flash', // Stable Gemini 2.5 model for summarization
+    model: 'gemini-2.5-pro', // Pro model for complex summarization
     temperature: 0.3,
     topK: 20,
     topP: 0.8,
-    maxOutputTokens: 2048,
-    enableThinking: false,
+    maxOutputTokens: 4096, // Increased for detailed summaries
+    enableThinking: true, // Enable reasoning for better summaries
+    thinkingBudget: 'medium',
+  },
+  // NEW: Advanced features enabled by 1M token context
+  MEGA_CONTEXT_FEATURES: {
+    model: 'gemini-2.5-pro',
+    temperature: 0.9,
+    topK: 30,
+    topP: 0.9,
+    maxOutputTokens: 8192,
+    enableThinking: true,
+    thinkingBudget: 'maximum',
+    // Utilize full 1M token context window
+    contextWindow: 1000000, // 1 million tokens
+    // Advanced context utilization strategies
+    contextStrategies: {
+      // Remember entire game session for consistency
+      fullSessionMemory: true,
+      // Track all player choices and their consequences
+      choiceConsequenceMapping: true,
+      // Maintain detailed character development arcs
+      characterEvolutionTracking: true,
+      // Cross-reference all story elements for consistency
+      narrativeConsistencyCheck: true,
+      // Advanced psychological profiling across entire session
+      deepPsychologicalAnalysis: true,
+    }
   }
 };
 

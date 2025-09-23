@@ -3,7 +3,7 @@
 
 // Configuration for API endpoints
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://your-backend-api.com' // Replace with your deployed backend URL
+  ? 'https://your-backend-api.ondigitalocean.app' // Replace with your DigitalOcean App Platform URL
   : 'http://localhost:3001';
 
 // API client class

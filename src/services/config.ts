@@ -121,5 +121,41 @@ export const REVOLUTIONARY_FEATURES = {
     enabled: true,
     description: 'AI narrator develops distinct personality traits during gameplay',
     personalityEvolution: true,
+  },
+  
+  // Neural Echo Chambers - persistent memory fragments across playthroughs
+  NEURAL_ECHO_CHAMBERS: {
+    enabled: true,
+    description: 'AI creates persistent memory fragments that haunt players across multiple playthroughs',
+    maxEchoes: 20,
+    echoIntensity: 0.3,
+    bleedProbability: 0.15,
+  },
+  
+  // Semantic Choice Archaeology - deep psychological profiling through linguistics
+  SEMANTIC_CHOICE_ARCHAEOLOGY: {
+    enabled: true,
+    description: 'Advanced NLP analysis builds deep psychological profiles through choice linguistics',
+    analysisDepth: 'comprehensive',
+    profileComplexity: 'deep',
+    targetingPrecision: 'high',
+  },
+  
+  // Breaking the Fifth Wall - browser environment manipulation
+  FIFTH_WALL_BREACH: {
+    enabled: true,
+    description: 'AI manipulates browser environment to create horror outside game boundaries',
+    maxBreachIntensity: 0.8,
+    browserManipulation: true,
+    phantomInteractions: true,
+  },
+  
+  // Adaptive Narrative DNA - evolving story genetics
+  ADAPTIVE_NARRATIVE_DNA: {
+    enabled: true,
+    description: 'Creates evolving narrative genetics unique to each player',
+    maxGeneMarkers: 50,
+    mutationRate: 0.2,
+    expressionComplexity: 'high',
   }
 };

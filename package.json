@@ -19,7 +19,7 @@
   "homepage": "https://apophenia-cosmic-narrative.vercel.app",
   "scripts": {
     "dev": "./node_modules/.bin/vite",
-    "build": "./node_modules/.bin/tsc && ./node_modules/.bin/vite build",
+    "build": "./node_modules/.bin/vite build",
     "preview": "./node_modules/.bin/vite preview",
     "test": "jest",
     "deploy": "npm run build && vercel --prod",

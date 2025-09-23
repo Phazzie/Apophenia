@@ -60,9 +60,6 @@ ls -la .env.example package.json vercel.json
    # Required for full functionality
    VITE_GEMINI_API_KEY=your-google-gemini-api-key
    
-   # Optional for enhanced features
-   VITE_IMAGE_API_KEY=your-image-service-api-key
-   
    # App Platform specific
    NODE_ENV=production
    ```
@@ -517,9 +514,6 @@ Let me know if you want me to implement any/all of those now.
 ```env
 # Core functionality
 VITE_GEMINI_API_KEY=your-google-gemini-api-key
-
-# Optional enhancements
-VITE_IMAGE_API_KEY=your-image-service-key
 
 # Production settings
 NODE_ENV=production

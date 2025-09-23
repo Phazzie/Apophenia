@@ -33,8 +33,7 @@ npm run dev
 cp .env.example .env.local
 
 # Critical: Configure these for full functionality
-# VITE_GEMINI_API_KEY=your-google-api-key-here  
-# VITE_IMAGE_API_KEY=your-image-api-key-here
+# VITE_GEMINI_API_KEY=your-google-api-key-here
 
 # Without keys: App runs with mock data and graceful error handling
 ```

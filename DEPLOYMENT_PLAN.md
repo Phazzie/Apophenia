@@ -17,7 +17,7 @@ touch .env.example .env.local
 
 # .env.example
 echo "VITE_GOOGLE_AI_API_KEY=your_api_key_here" > .env.example
-echo "VITE_IMAGE_API_KEY=your_image_api_key_here" >> .env.example
+echo "VITE_GEMINI_API_KEY=your_gemini_api_key_here" >> .env.example
 
 # Update .gitignore
 echo ".env.local" >> .gitignore
@@ -43,7 +43,7 @@ echo ".env" >> .gitignore
 // src/services/ai/genkit.ts - COMPLETE IMPLEMENTATION
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GOOGLE_AI_API_KEY);
+const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
 
 export const generateConceptFlow = async (genreConfig: GenreConfig) => {
   const model = genAI.getGenerativeModel({ model: "gemini-pro" });
@@ -205,7 +205,7 @@ vercel init
 
 # Set environment variables
 vercel env add VITE_GOOGLE_AI_API_KEY
-vercel env add VITE_IMAGE_API_KEY
+# Gemini API key is already configured above
 
 # Deploy
 vercel --prod

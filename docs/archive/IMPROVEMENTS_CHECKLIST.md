@@ -30,6 +30,6 @@ This document outlines the next set of prioritized improvements to move the Apop
 
 **Objective:** Lay the groundwork for a real AI image generation service, making it easy to plug in a real implementation later.
 
-- [ ] **Configuration**: Add a `VITE_IMAGE_API_KEY` placeholder to the `.env.example` file.
+- [ ] **Configuration**: Gemini API handles both text and image generation via `VITE_GEMINI_API_KEY`.
 - [ ] **Placeholder Flow**: Create a new, empty, asynchronous function named `processImageGeneration(prompt: string)` in `src/services/ai/genkit.ts`.
 - [ ] **Integration**: Update the existing `generateImageFlow` to call `processImageGeneration`. For now, it can just return the Unsplash URL as a fallback.

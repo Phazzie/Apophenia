@@ -31,7 +31,7 @@ module.exports = {
     'import.meta': {
       env: {
         VITE_GEMINI_API_KEY: 'test-key',
-        VITE_GOOGLE_IMAGEN_KEY: 'test-imagen-key',
+        VITE_GEMINI_API_KEY: 'test-key',
       }
     }
   }

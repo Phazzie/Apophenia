@@ -11,7 +11,7 @@ const isTestEnvironment = typeof process !== 'undefined' && process.env.NODE_ENV
 export const API_KEYS = isTestEnvironment ? {
   // Jest test environment - use process.env
   googleGenAI: process.env.VITE_GEMINI_API_KEY || 'test-key',
-  googleImagen: process.env.VITE_GOOGLE_IMAGEN_KEY || 'test-imagen-key',
+  googleImagen: process.env.VITE_GEMINI_API_KEY || 'test-key', // Gemini also handles images
 } : {
   // DEPRECATED: Frontend no longer needs API keys
   // All API calls now go through secure backend
@@ -105,7 +105,7 @@ if (!API_KEYS.googleGenAI) {
 
 if (!API_KEYS.googleImagen) {
   console.warn(
-    'Warning: Google Imagen API key not set. Image generation will use Unsplash fallback.'
+    'Warning: VITE_GEMINI_API_KEY not set. Image generation will use Unsplash fallback.'
   );
 }
 

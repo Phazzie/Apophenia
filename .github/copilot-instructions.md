@@ -50,7 +50,6 @@ cp .env.example .env.local
 
 # Edit .env.local with your keys:
 VITE_GEMINI_API_KEY=your-google-api-key-here
-VITE_IMAGE_API_KEY=your-image-api-key-here
 ```
 
 **Without API keys**: App still runs with mock data and error handling.
@@ -153,7 +152,6 @@ npm run build
 
 # Configure environment variables in deployment platform:
 VITE_GEMINI_API_KEY=your-google-api-key
-VITE_IMAGE_API_KEY=your-image-api-key
 ```
 
 **Security**: Never commit API keys. Use environment variables for all secrets.

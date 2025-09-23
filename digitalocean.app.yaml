@@ -15,6 +15,9 @@ static_sites:
       - key: VITE_API_BASE_URL
         scope: BUILD_TIME
         value: /api
+      - key: VITE_GEMINI_API_KEY
+        scope: BUILD_TIME
+        type: SECRET
 services:
   - name: apophenia
     github:
@@ -32,6 +35,9 @@ services:
     envs:
       - key: NODE_ENV
         value: production
+      - key: GEMINI_API_KEY
+        scope: RUN_TIME
+        type: SECRET
 alerts:
   - rule: DEPLOYMENT_FAILED
   - rule: DOMAIN_FAILED

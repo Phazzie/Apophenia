@@ -52,7 +52,6 @@ cp .env.example .env.local
 
 # Configure API keys (optional but recommended)
 echo "VITE_GEMINI_API_KEY=your-google-gemini-api-key" >> .env.local
-echo "VITE_IMAGE_API_KEY=your-image-service-key" >> .env.local
 
 # Start development with hot module replacement
 npm run dev
@@ -93,8 +92,7 @@ npm run start:prod   # Start production server locally
 
 # Production-ready environment setup
 NODE_ENV=production
-VITE_GEMINI_API_KEY=your-production-api-key
-VITE_IMAGE_API_KEY=your-production-image-key
+VITE_GEMINI_API_KEY=your-production-gemini-key
 VITE_API_BASE_URL=https://your-api.domain.com
 VITE_ENABLE_ANALYTICS=true
 VITE_LOG_LEVEL=error
@@ -205,7 +203,7 @@ vercel init apophenia-narrative
 
 # Configure environment variables (secure)
 vercel env add VITE_GEMINI_API_KEY production
-vercel env add VITE_IMAGE_API_KEY production
+# Gemini API key handles both text and image generation
 
 # Deploy with custom domain
 vercel --prod --yes
@@ -283,7 +281,6 @@ CMD ["sh", "-c", "node server.js & nginx -g 'daemon off;'"]
 # Production environment template
 NODE_ENV=production
 VITE_GEMINI_API_KEY=${GEMINI_API_KEY}
-VITE_IMAGE_API_KEY=${IMAGE_API_KEY}
 VITE_ANALYTICS_ID=${ANALYTICS_ID}
 VITE_ERROR_TRACKING=${ERROR_TRACKING_DSN}
 VITE_API_BASE_URL=https://api.yournarrative.com

@@ -12,7 +12,6 @@ vercel --prod
 
 # Set environment variables in Vercel dashboard:
 # VITE_GEMINI_API_KEY=your-gemini-key
-# VITE_IMAGE_API_KEY=your-image-key
 ```
 
 ### 2. Netlify
@@ -22,8 +21,7 @@ npm run build
 
 # Deploy dist/ folder to Netlify
 # Set environment variables in site settings:
-# VITE_GEMINI_API_KEY=your-gemini-key  
-# VITE_IMAGE_API_KEY=your-image-key
+# VITE_GEMINI_API_KEY=your-gemini-key
 ```
 
 ### 3. GitHub Pages
@@ -37,7 +35,6 @@ npm run deploy:gh-pages
 Create `.env.local` file:
 ```
 VITE_GEMINI_API_KEY=your-google-gemini-key
-VITE_IMAGE_API_KEY=your-google-ai-key
 ```
 
 **Note**: App works without API keys using fallback content.

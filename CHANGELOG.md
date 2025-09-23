@@ -37,7 +37,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Skipped obsolete unit tests in `gameService.spec.ts` that were failing after the removal of fallback logic, bringing the test suite back to a passing state.
 
 ### Security
-- Removed hardcoded Google GenAI API key from `src/services/config.ts`. The key is now securely loaded from the `VITE_GOOGLE_GENAI_API_KEY` environment variable.
+- Removed hardcoded Google GenAI API key from `src/services/config.ts`. The key is now securely loaded from the `VITE_GEMINI_API_KEY` environment variable.
 
 ## [Unreleased]
 

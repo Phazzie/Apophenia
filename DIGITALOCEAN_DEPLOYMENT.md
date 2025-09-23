@@ -433,6 +433,83 @@ doctl serverless functions get apophenia/web --url
 
 ---
 
+## Using the DigitalOcean App Spec (App Platform)
+
+A production–friendly `digitalocean.app.yaml` is included in the repo. This defines two services:
+
+1. `apophenia-frontend` (static build of the Vite app)
+2. `apophenia-api` (Express server in `server.js` that keeps the Gemini key private)
+
+### File: `digitalocean.app.yaml`
+(Already added to repository.) Update the placeholder secret before first deploy.
+
+Replace:
+```
+value: "REPLACE_WITH_REAL_KEY"
+```
+With your actual Gemini API key (or set it securely in the DO dashboard after creation and remove the inline value).
+
+### Deploy via CLI
+```bash
+# 1. Install doctl
+brew install doctl                # macOS (Homebrew)
+# or
+sudo snap install doctl           # Ubuntu (Snap) OR download from GitHub releases
+
+# 2. Authenticate
+export DIGITALOCEAN_TOKEN=your_do_personal_access_token
+# or interactively:
+doctl auth init
+
+# 3. Validate auth
+doctl account get
+
+# 4. Create the app from the spec
+doctl apps create --spec digitalocean.app.yaml
+
+# 5. List apps & capture APP_ID
+doctl apps list
+
+# 6. Watch deployment
+doctl apps deployments list <APP_ID>
+
+# 7. View logs (build & runtime)
+doctl apps logs <APP_ID> --type build
+
+doctl apps logs <APP_ID> --type run --component apophenia-api
+
+# 8. Update after changes
+doctl apps update <APP_ID> --spec digitalocean.app.yaml
+```
+
+### Environment Variable Management
+After initial creation, remove the hard‑coded secret in the YAML (or never commit it) and manage via dashboard or:
+```bash
+doctl apps update <APP_ID> --spec digitalocean.app.yaml \
+  --env GEMINI_API_KEY=your_key_here
+```
+
+### Health & Readiness
+Current health endpoint: `GET /api/health`
+Optionally add `/api/ready` if you introduce async warm‑up (model priming, cache hydration, etc.).
+
+### Frontend → Backend Calls
+The YAML sets:
+```
+VITE_API_BASE_URL=/api
+```
+Ensure the frontend uses that base path when calling the Express endpoints so App Platform routing works.
+
+### Next Improvements (Optional)
+- Add basic rate limiting middleware to `server.js`
+- Serve `dist/` from Express for single-service deployment (if you prefer consolidation)
+- Add `/api/ready` endpoint
+- Add caching layer for repeated AI prompts
+
+Let me know if you want me to implement any/all of those now.
+
+---
+
 ## 🔧 Environment Variables Configuration
 
 ### Required Variables

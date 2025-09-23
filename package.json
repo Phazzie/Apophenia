@@ -29,7 +29,8 @@
     "server": "node server.js",
     "server:dev": "nodemon server.js",
     "fullstack:dev": "concurrently \"npm run server:dev\" \"npm run dev\"",
-    "build:all": "npm run build && echo 'Frontend built. Deploy server.js separately for backend.'"
+    "build:all": "npm run build && echo 'Frontend built. Deploy server.js separately for backend.'",
+    "start:prod": "node server.js"
   },
   "dependencies": {
     "@genkit-ai/googleai": "^1.16.1",

@@ -1,0 +1,37 @@
+name: apophenia-deploy-test
+region: nyc
+static_sites:
+  - name: apophenia-frontend
+    github:
+      repo: Phazzie/Apophenia
+      branch: feature/ai-director-refactor
+      deploy_on_push: true
+    source_dir: .
+    build_command: npm install && npm run build
+    output_dir: dist
+    routes:
+      - path: /
+    envs:
+      - key: VITE_API_BASE_URL
+        scope: BUILD_TIME
+        value: /api
+services:
+  - name: apophenia
+    github:
+      repo: Phazzie/Apophenia
+      branch: feature/ai-director-refactor
+      deploy_on_push: true
+    source_dir: /
+    run_command: npm run start:prod
+    http_port: 3001
+    environment_slug: node-js
+    instance_size_slug: apps-s-1vcpu-1gb
+    instance_count: 2
+    routes:
+      - path: /api
+    envs:
+      - key: NODE_ENV
+        value: production
+alerts:
+  - rule: DEPLOYMENT_FAILED
+  - rule: DOMAIN_FAILED

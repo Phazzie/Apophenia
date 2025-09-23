@@ -1,0 +1,19 @@
+{
+  "mcp": {
+    "inputs": [],
+    "servers": {
+      "mcpDigitalOcean": {
+        "command": "npx",
+        "args": [
+          "@digitalocean/mcp",
+          "--services",
+          "apps"
+        ],
+        "env": {
+          // The token was redacted for security. Set this value in your environment or VS Code secrets.
+          "DIGITALOCEAN_API_TOKEN": "REDACTED_REPLACE_IN_SECURE_STORE"
+        }
+      }
+    }
+  }
+}

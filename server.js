@@ -4,8 +4,31 @@
 
 const express = require('express');
 const cors = require('cors');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+let genAI;
+try {
+  const { GoogleGenerativeAI } = require('@google/generative-ai');
+  // Initialize Google AI with server-side API key if available
+  if (process.env.GEMINI_API_KEY) {
+    genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+  } else {
+    console.warn('GEMINI_API_KEY not set. AI features will be disabled or use fallback behavior.');
+    genAI = null; // fallback - flows should handle null genAI gracefully
+  }
+} catch (err) {
+  console.error('Failed to initialize GoogleGenerativeAI:', err);
+  genAI = null;
+}
 require('dotenv').config();
+
+// Global error handlers to ensure platform logs capture startup/runtime errors
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  // allow platform to capture stack trace then exit
+  process.exit(1);
+});
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled Rejection:', reason);
+});
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -13,9 +36,6 @@ const PORT = process.env.PORT || 3001;
 // Middleware
 app.use(cors());
 app.use(express.json());
-
-// Initialize Google AI with server-side API key
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -429,6 +449,37 @@ Return JSON with this structure:
     res.status(500).json({ error: 'Failed to establish continuity' });
   }
 });
+
+// Optional readiness endpoint (lightweight now, can expand later)
+app.get('/api/ready', (req, res) => {
+  // In future: check external dependencies, warmed caches, etc.
+  res.json({ ready: true, timestamp: Date.now() });
+});
+
+// Ensure root path responds (App Platform may probe '/'). Redirect to /api/ready.
+app.get('/', (req, res) => {
+  // Simple OK for health checks at root
+  res.json({ ready: true, path: '/', timestamp: Date.now() });
+});
+
+// Optional static file serving for unified deployment scenario
+if (process.env.SERVE_STATIC === 'true') {
+  const path = require('path');
+  const distPath = path.join(__dirname, 'dist');
+  app.use(express.static(distPath));
+
+  // SPA fallback
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api/')) return next();
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
+}
+
+// MCP server routes
+const mcpRoutes = require('./server/mcpServer');
+
+// Mount MCP control routes under /mcp
+app.use('/mcp', mcpRoutes);
 
 // Start server
 app.listen(PORT, () => {

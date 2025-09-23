@@ -3,6 +3,7 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
+  setupFiles: ['whatwg-fetch'],
   moduleNameMapper: {
     '^../../services/config$': '<rootDir>/src/services/__mocks__/config.ts',
     '^../config$': '<rootDir>/src/services/__mocks__/config.ts',
@@ -31,7 +32,7 @@ module.exports = {
     'import.meta': {
       env: {
         VITE_GEMINI_API_KEY: 'test-key',
-        VITE_GEMINI_API_KEY: 'test-key',
+        VITE_GROK_API_KEY: 'test-key',
       }
     }
   }

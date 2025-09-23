@@ -2,12 +2,14 @@
 export const API_KEYS = {
   googleGenAI: 'test-key',
   googleImagen: 'test-imagen-key',
+  grokAI: 'test-grok-key',
 };
 
 export const getConfig = () => ({
   geminiApiKey: API_KEYS.googleGenAI,
   imageApiKey: API_KEYS.googleImagen,
   imagenKey: API_KEYS.googleImagen,
+  grokApiKey: API_KEYS.grokAI,
 });
 
 export const AI_MODELS = {

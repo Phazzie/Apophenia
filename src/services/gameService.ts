@@ -1,10 +1,12 @@
 import { Command, GenreConfig, StorySegment, WorldState } from '../types';
 import {
-    generateConceptFlow,
     generateImageFlow,
-    nextStepFlow,
     processAdvancedImageGeneration,
 } from './ai/secureGenkit';
+import { 
+    generateConceptWithSelectedModel, 
+    generateNextStepWithSelectedModel 
+} from './ai/unifiedAIService';
 import { summarizeHistoryFlow } from './flows/summaryFlow';
 import {
   temporalRevision,
@@ -65,12 +67,12 @@ export const getNextStep = async (
     `Player chose: ${playerChoice}. Continue the cosmic horror narrative.`
   );
   
-  const commands = await nextStepFlow({ 
-    playerChoice: personalizedPrompt, 
-    worldState, 
-    history: quantumResult.history, 
-    genreConfig 
-  });
+  const commands = await generateNextStepWithSelectedModel(
+    personalizedPrompt,
+    worldState,
+    quantumResult.history,
+    genreConfig
+  );
   
   return {
     commands,
@@ -91,7 +93,7 @@ export const summarizeHistory = async (
 export const generateConcept = async (
   genreConfig: GenreConfig
 ): Promise<{ protagonist: string; setting: string; dilemma: string }> => {
-  return generateConceptFlow(genreConfig);
+  return generateConceptWithSelectedModel(genreConfig);
 };
 
 export const generateImage = async (prompt: string): Promise<string> => {

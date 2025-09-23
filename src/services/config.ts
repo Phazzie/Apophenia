@@ -12,11 +12,12 @@ export const API_KEYS = isTestEnvironment ? {
   // Jest test environment - use process.env
   googleGenAI: process.env.VITE_GEMINI_API_KEY || 'test-key',
   googleImagen: process.env.VITE_GEMINI_API_KEY || 'test-key', // Gemini also handles images
+  grokAI: process.env.VITE_GROK_API_KEY || 'test-key',
 } : {
-  // DEPRECATED: Frontend no longer needs API keys
-  // All API calls now go through secure backend
-  googleGenAI: '',
-  googleImagen: '',
+  // Browser environment - use import.meta.env
+  googleGenAI: import.meta.env.VITE_GEMINI_API_KEY || '',
+  googleImagen: import.meta.env.VITE_GEMINI_API_KEY || '',
+  grokAI: import.meta.env.VITE_GROK_API_KEY || '',
 };
 
 // Configuration getter function
@@ -25,31 +26,34 @@ export const getConfig = () => {
     geminiApiKey: API_KEYS.googleGenAI,
     imageApiKey: API_KEYS.googleImagen,
     imagenKey: API_KEYS.googleImagen,
+    grokApiKey: API_KEYS.grokAI,
   };
 };
 
-// AI Model Configuration
+// AI Model Configuration - UPGRADED TO GROK-4 FAST REASONING AS PRIMARY
 export const AI_MODELS = {
-  // Primary text generation with advanced reasoning - UPGRADED TO 2.5 PRO
-  PRIMARY_TEXT: 'gemini-2.5-pro', // Latest Pro model with 1M token context
-  FALLBACK_TEXT: 'gemini-2.5-flash',
+  // Primary text generation with Grok-4 Fast Reasoning - 2M token context with thinking
+  PRIMARY_TEXT: 'grok-4-fast-reasoning', // Latest Grok model with 2M token context
+  FALLBACK_TEXT: 'gemini-2.5-pro', // Gemini Pro as reliable fallback
+  SECONDARY_FALLBACK: 'gemini-2.5-flash', // Final fallback
   
-  // Image generation pipeline - UPGRADED TO FLASH IMAGE PREVIEW
+  // Image generation pipeline - Keep Gemini for images as Grok doesn't do images yet
   PRIMARY_IMAGE: 'gemini-2.5-flash-image-preview', // New image generation model
   FALLBACK_IMAGE: 'imagen-3.0-generate-001',
   
-  // Configuration for different use cases with 1M token context optimization
+  // Configuration for different use cases with 2M token context optimization
   CONCEPT_GENERATION: {
-    model: 'gemini-2.5-pro', // Pro model with massive context
+    model: 'grok-4-fast-reasoning', // Grok-4 with massive 2M token context
     temperature: 1.2,
     topK: 40,
     topP: 0.95,
     maxOutputTokens: 8192,
     enableThinking: true,
     thinkingBudget: 'high',
+    contextWindow: 2000000, // 2 million tokens
   },
   STORY_PROGRESSION: {
-    model: 'gemini-2.5-pro', // Pro model with full conversation history
+    model: 'grok-4-fast-reasoning', // Grok-4 with full 2M token conversation history
     temperature: 1.0,
     topK: 0,
     topP: 0.95,
@@ -57,49 +61,63 @@ export const AI_MODELS = {
     // Enable thinking mode for complex reasoning
     enableThinking: true,
     thinkingBudget: 'high', // Maximum reasoning power for story progression
-    // NEW: Full conversation context utilization
-    contextOptimization: 'full_history', // Use entire game history for context
+    // NEW: Complete 2M token context utilization
+    contextOptimization: 'complete_history', // Use entire game history + thinking
+    contextWindow: 2000000, // 2 million tokens
   },
   SUMMARIZATION: {
-    model: 'gemini-2.5-pro', // Pro model for complex summarization
+    model: 'grok-4-fast-reasoning', // Grok-4 for complex summarization
     temperature: 0.3,
     topK: 20,
     topP: 0.8,
     maxOutputTokens: 4096, // Increased for detailed summaries
     enableThinking: true, // Enable reasoning for better summaries
     thinkingBudget: 'medium',
+    contextWindow: 2000000, // Full context for comprehensive summaries
   },
-  // NEW: Advanced features enabled by 1M token context
+  // NEW: Revolutionary features enabled by 2M token context
   MEGA_CONTEXT_FEATURES: {
-    model: 'gemini-2.5-pro',
+    model: 'grok-4-fast-reasoning',
     temperature: 0.9,
     topK: 30,
     topP: 0.9,
     maxOutputTokens: 8192,
     enableThinking: true,
     thinkingBudget: 'maximum',
-    // Utilize full 1M token context window
-    contextWindow: 1000000, // 1 million tokens
-    // Advanced context utilization strategies
+    // Utilize full 2M token context window - DOUBLED from Gemini
+    contextWindow: 2000000, // 2 million tokens (vs 1M for Gemini)
+    // Advanced context utilization strategies enhanced for 2M tokens
     contextStrategies: {
-      // Remember entire game session for consistency
-      fullSessionMemory: true,
-      // Track all player choices and their consequences
-      choiceConsequenceMapping: true,
-      // Maintain detailed character development arcs
-      characterEvolutionTracking: true,
-      // Cross-reference all story elements for consistency
-      narrativeConsistencyCheck: true,
-      // Advanced psychological profiling across entire session
-      deepPsychologicalAnalysis: true,
+      // Remember COMPLETE game session for perfect consistency
+      completeSessionMemory: true,
+      // Track ALL player choices and their cascading consequences
+      comprehensiveChoiceMapping: true,
+      // Maintain detailed character development across entire narrative
+      deepCharacterEvolution: true,
+      // Cross-reference ALL story elements for perfect consistency
+      totalNarrativeConsistency: true,
+      // Advanced psychological profiling across ENTIRE session
+      masterPsychologicalAnalysis: true,
+      // NEW: Multi-session personality development
+      crossSessionPersonalityTracking: true,
+      // NEW: Deep thematic coherence across massive context
+      thematicCoherenceEngine: true,
+      // NEW: Foreshadowing and callback system
+      narrativeForeshadowingSystem: true,
     }
   }
 };
 
 // Validation - warn if API keys are not set
+if (!API_KEYS.grokAI) {
+  console.warn(
+    'Warning: VITE_GROK_API_KEY is not set in your .env file. Story generation will use Gemini fallback.'
+  );
+}
+
 if (!API_KEYS.googleGenAI) {
   console.warn(
-    'Warning: VITE_GEMINI_API_KEY is not set in your .env file. Story generation will use fallbacks.'
+    'Warning: VITE_GEMINI_API_KEY is not set in your .env file. Fallback story generation may be limited.'
   );
 }
 

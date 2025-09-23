@@ -105,6 +105,25 @@ export const commandSchema = z.discriminatedUnion('type', [
 
 export const commandArraySchema = z.array(commandSchema);
 
+// AI Model Selector Types
+export const aiModelSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  provider: z.string(),
+  contextWindow: z.number(),
+  supportsThinking: z.boolean(),
+  supportsImages: z.boolean(),
+  isDefault: z.boolean(),
+});
+
+export const modelTestResultSchema = z.object({
+  success: z.boolean(),
+  model: z.string(),
+  contextWindow: z.number(),
+  responseTime: z.number().optional(),
+  error: z.string().optional(),
+});
+
 // Inferred TypeScript Types from Zod Schemas
 export type WorldState = z.infer<typeof worldStateSchema>;
 export type StorySegment = z.infer<typeof storySegmentSchema>;
@@ -112,3 +131,5 @@ export type GenreConfig = z.infer<typeof genreConfigSchema>;
 export type Choice = z.infer<typeof choiceSchema>;
 export type Command = z.infer<typeof commandSchema>;
 export type GameCommand = Command; // Alias for backward compatibility
+export type AIModel = z.infer<typeof aiModelSchema>;
+export type ModelTestResult = z.infer<typeof modelTestResultSchema>;

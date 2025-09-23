@@ -122,7 +122,10 @@ describe('gameService', () => {
     });
 
     it('returns error-recovery commands when nextStepFlow throws', async () => {
-      (nextStepFlow as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
+      // Setup fresh mock for this test only
+      const nextStepFlowMock = nextStepFlow as jest.Mock;
+      nextStepFlowMock.mockReset();
+      nextStepFlowMock.mockRejectedValue(new Error('Network error'));
 
       const result = await getNextStep('Open the door', mockWorldState, [], mockGenreConfig);
 
@@ -138,6 +141,9 @@ describe('gameService', () => {
       expect(result).toHaveProperty('metaMessage');
       expect(result).toHaveProperty('quantumShift');
       expect(result).toHaveProperty('corruptionEffects');
+      
+      // Reset mock after test
+      nextStepFlowMock.mockReset();
     });
   });
 

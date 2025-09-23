@@ -10,7 +10,10 @@ module.exports = {
   },
   transform: {
     '^.+\\.tsx?$': ['ts-jest', {
-      useESM: false,
+      useESM: true,
+      tsconfig: {
+        jsx: 'react-jsx',
+      }
     }],
   },
   transformIgnorePatterns: [
@@ -23,4 +26,13 @@ module.exports = {
   testPathIgnorePatterns: [
     '<rootDir>/src/services/ai/__tests__/testUtils.helper.ts'
   ],
+  // Mock import.meta.env for Vite compatibility
+  globals: {
+    'import.meta': {
+      env: {
+        VITE_GEMINI_API_KEY: 'test-key',
+        VITE_GOOGLE_IMAGEN_KEY: 'test-imagen-key',
+      }
+    }
+  }
 };

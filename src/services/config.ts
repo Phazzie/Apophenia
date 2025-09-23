@@ -1,3 +1,7 @@
+// SECURITY NOTE: This file is deprecated in favor of secure backend API
+// API keys are no longer exposed to the frontend
+// See SECURE_DEPLOYMENT.md for the new secure architecture
+
 // Environment configuration for Apophenia
 // API keys are loaded from environment variables for security
 
@@ -7,38 +11,36 @@ const isTestEnvironment = typeof process !== 'undefined' && process.env.NODE_ENV
 export const API_KEYS = isTestEnvironment ? {
   // Jest test environment - use process.env
   googleGenAI: process.env.VITE_GEMINI_API_KEY || 'test-key',
-  googleNanoBanana: process.env.VITE_GOOGLE_NANO_BANANA_KEY || 'test-nano-key',
   googleImagen: process.env.VITE_GOOGLE_IMAGEN_KEY || 'test-imagen-key',
 } : {
-  // Vite browser environment - use import.meta.env
-  googleGenAI: (import.meta as any).env?.VITE_GEMINI_API_KEY || '',
-  googleNanoBanana: (import.meta as any).env?.VITE_GOOGLE_NANO_BANANA_KEY || '',
-  googleImagen: (import.meta as any).env?.VITE_GOOGLE_IMAGEN_KEY || '',
+  // DEPRECATED: Frontend no longer needs API keys
+  // All API calls now go through secure backend
+  googleGenAI: '',
+  googleImagen: '',
 };
 
 // Configuration getter function
 export const getConfig = () => {
   return {
     geminiApiKey: API_KEYS.googleGenAI,
-    imageApiKey: API_KEYS.googleImagen || API_KEYS.googleNanoBanana,
-    nanoBananaKey: API_KEYS.googleNanoBanana,
+    imageApiKey: API_KEYS.googleImagen,
     imagenKey: API_KEYS.googleImagen,
   };
 };
 
 // AI Model Configuration
 export const AI_MODELS = {
-  // Primary text generation with advanced reasoning
-  PRIMARY_TEXT: 'gemini-2.0-flash-exp', // Nano Banana is actually Gemini 2.0 Flash Experimental
-  FALLBACK_TEXT: 'gemini-1.5-flash',
+  // Primary text generation with advanced reasoning - UPGRADED TO 2.5 PRO
+  PRIMARY_TEXT: 'gemini-2.5-pro', // Latest Pro model with 1M token context
+  FALLBACK_TEXT: 'gemini-2.5-flash',
   
-  // Image generation pipeline  
-  PRIMARY_IMAGE: 'gemini-2.0-flash-exp', // Nano Banana = Gemini 2.0 Flash Experimental
+  // Image generation pipeline - UPGRADED TO FLASH IMAGE PREVIEW
+  PRIMARY_IMAGE: 'gemini-2.5-flash-image-preview', // New image generation model
   FALLBACK_IMAGE: 'imagen-3.0-generate-001',
   
-  // Configuration for different use cases
+  // Configuration for different use cases with 1M token context optimization
   CONCEPT_GENERATION: {
-    model: 'gemini-2.0-flash-exp', // Nano Banana
+    model: 'gemini-2.5-pro', // Pro model with massive context
     temperature: 1.2,
     topK: 40,
     topP: 0.95,
@@ -47,7 +49,7 @@ export const AI_MODELS = {
     thinkingBudget: 'high',
   },
   STORY_PROGRESSION: {
-    model: 'gemini-2.0-flash-exp', // Nano Banana
+    model: 'gemini-2.5-pro', // Pro model with full conversation history
     temperature: 1.0,
     topK: 0,
     topP: 0.95,
@@ -55,14 +57,42 @@ export const AI_MODELS = {
     // Enable thinking mode for complex reasoning
     enableThinking: true,
     thinkingBudget: 'high', // Maximum reasoning power for story progression
+    // NEW: Full conversation context utilization
+    contextOptimization: 'full_history', // Use entire game history for context
   },
   SUMMARIZATION: {
-    model: 'gemini-1.5-flash', // Fallback for summarization
+    model: 'gemini-2.5-pro', // Pro model for complex summarization
     temperature: 0.3,
     topK: 20,
     topP: 0.8,
-    maxOutputTokens: 2048,
-    enableThinking: false,
+    maxOutputTokens: 4096, // Increased for detailed summaries
+    enableThinking: true, // Enable reasoning for better summaries
+    thinkingBudget: 'medium',
+  },
+  // NEW: Advanced features enabled by 1M token context
+  MEGA_CONTEXT_FEATURES: {
+    model: 'gemini-2.5-pro',
+    temperature: 0.9,
+    topK: 30,
+    topP: 0.9,
+    maxOutputTokens: 8192,
+    enableThinking: true,
+    thinkingBudget: 'maximum',
+    // Utilize full 1M token context window
+    contextWindow: 1000000, // 1 million tokens
+    // Advanced context utilization strategies
+    contextStrategies: {
+      // Remember entire game session for consistency
+      fullSessionMemory: true,
+      // Track all player choices and their consequences
+      choiceConsequenceMapping: true,
+      // Maintain detailed character development arcs
+      characterEvolutionTracking: true,
+      // Cross-reference all story elements for consistency
+      narrativeConsistencyCheck: true,
+      // Advanced psychological profiling across entire session
+      deepPsychologicalAnalysis: true,
+    }
   }
 };
 
@@ -73,9 +103,9 @@ if (!API_KEYS.googleGenAI) {
   );
 }
 
-if (!API_KEYS.googleNanoBanana && !API_KEYS.googleImagen) {
+if (!API_KEYS.googleImagen) {
   console.warn(
-    'Warning: Google Nano Banana or Imagen API keys not set. Image generation will use Unsplash fallback.'
+    'Warning: Google Imagen API key not set. Image generation will use Unsplash fallback.'
   );
 }
 

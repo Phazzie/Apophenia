@@ -4,7 +4,7 @@ import {
     generateImageFlow,
     nextStepFlow,
     processAdvancedImageGeneration,
-} from './ai/genkit';
+} from './ai/secureGenkit';
 import { summarizeHistoryFlow } from './flows/summaryFlow';
 import {
   temporalRevision,
@@ -109,8 +109,7 @@ export const generateMultipleImages = async (
   const variations = await Promise.all(
     Array(variationCount).fill(0).map((_, index) => 
       processAdvancedImageGeneration(
-        `${prompt}, variation ${index + 1}, cosmic horror aesthetic`, 
-        true
+        `${prompt}, variation ${index + 1}, cosmic horror aesthetic`
       )
     )
   );

@@ -177,25 +177,171 @@ npm run dev
 
 ## Advanced AI Agent Capabilities
 
-### System-wide Refactoring
-AI agents can safely perform large-scale changes by:
-1. Understanding the command system architecture
-2. Maintaining type safety across changes
-3. Preserving the flow → command → executor pattern
-4. Testing changes incrementally
+### System-wide Architecture Understanding
 
-### Creative Problem Solving
-AI agents excel at:
-- Proposing architectural improvements
-- Optimizing AI service integration
-- Designing new game mechanics
-- Solving complex async coordination issues
+AI agents working on Apophenia must understand and preserve the core architectural principles:
 
-### Error Analysis and Resolution
-AI agents can:
-- Trace errors through the command system
-- Identify state synchronization issues
-- Debug AI service integration problems
-- Propose systematic solutions
+```typescript
+// Command System Flow
+type GameFlow = {
+  userAction: UserChoice | GameAction,
+  aiProcessing: ConceptGeneration | StoryProgression | ImageGeneration,
+  commandGeneration: Command[],
+  stateUpdate: StoreUpdate,
+  uiRendering: ComponentRerender
+}
+
+// Critical Architectural Constraints
+const ARCHITECTURE_RULES = {
+  commandPattern: 'All game actions must be commands with discriminated unions',
+  stateImmutability: 'Zustand stores must never be directly mutated',
+  typesafety: 'Zero any types allowed, full TypeScript strict mode',
+  asyncHandling: 'Non-blocking operations with proper error boundaries',
+  segmentIdentification: 'Always update by segmentId, never by array index'
+} as const;
+```
+
+### Expert-Level Refactoring Patterns
+
+```typescript
+// 1. Adding New AI Features (Safe Pattern)
+interface NewAICommand extends BaseCommand {
+  type: 'NEW_AI_FEATURE';
+  payload: {
+    segmentId: string;
+    correlationId: string;
+    aiFeatureData: FeatureData;
+    metadata: CommandMetadata;
+  };
+}
+
+// 2. State Update Pattern (Always Use)
+const safeStateUpdate = (segmentId: string, update: Partial<StorySegment>) => {
+  useGameStore.getState().updateSegment(segmentId, update);
+  // Never: segments[segments.length - 1] = update; (WRONG)
+};
+
+// 3. Error Recovery Pattern
+const withAIErrorRecovery = async <T>(
+  operation: () => Promise<T>,
+  fallback: () => T
+): Promise<T> => {
+  try {
+    return await operation();
+  } catch (error) {
+    console.error('AI operation failed:', error);
+    return fallback();
+  }
+};
+```
+
+### Advanced Problem-Solving Scenarios
+
+#### Scenario 1: AI Service Integration
+```typescript
+// Problem: Adding a new AI service (e.g., Claude, GPT-4)
+// Solution: Follow the established pattern
+
+// 1. Extend service interface
+interface AIService {
+  generateStory(context: StoryContext): Promise<StoryResponse>;
+  generateChoices(context: ChoiceContext): Promise<Choice[]>;
+  generateImage(prompt: string): Promise<ImageResponse>;
+}
+
+// 2. Implement service with fallbacks
+class ClaudeAIService implements AIService {
+  async generateStory(context: StoryContext): Promise<StoryResponse> {
+    return withAIErrorRecovery(
+      () => this.callClaude(context),
+      () => getGenericStoryFallback()
+    );
+  }
+}
+
+// 3. Register in service factory
+const createAIService = (provider: AIProvider): AIService => {
+  switch (provider) {
+    case 'claude': return new ClaudeAIService();
+    case 'gemini': return new GeminiAIService(); 
+    default: return new FallbackAIService();
+  }
+};
+```
+
+#### Scenario 2: Performance Optimization
+```typescript
+// Problem: AI calls are too slow, affecting UX
+// Solution: Implement intelligent caching and prefetching
+
+class AIResponseCache {
+  private cache = new Map<string, CacheEntry>();
+  private readonly TTL = 30 * 60 * 1000; // 30 minutes
+  
+  async getOrGenerate<T>(
+    key: string,
+    generator: () => Promise<T>
+  ): Promise<T> {
+    const cached = this.cache.get(key);
+    if (cached && Date.now() - cached.timestamp < this.TTL) {
+      return cached.data;
+    }
+    
+    const result = await generator();
+    this.cache.set(key, { data: result, timestamp: Date.now() });
+    return result;
+  }
+}
+
+// Usage in flows
+const cachedStoryGeneration = async (context: StoryContext) => {
+  const cacheKey = hashStoryContext(context);
+  return aiCache.getOrGenerate(cacheKey, () => 
+    generateStoryWithAI(context)
+  );
+};
+```
+
+#### Scenario 3: Complex State Synchronization
+```typescript
+// Problem: Multiple async operations updating the same story segment
+// Solution: Use correlation IDs and atomic updates
+
+class GameStateManager {
+  private pendingOperations = new Map<string, Promise<void>>();
+  
+  async executeAtomicUpdate(
+    segmentId: string,
+    operation: (segment: StorySegment) => Promise<Partial<StorySegment>>
+  ): Promise<void> {
+    const operationId = `${segmentId}-${Date.now()}`;
+    
+    // Prevent concurrent modifications
+    await this.pendingOperations.get(segmentId);
+    
+    const updatePromise = this.performUpdate(segmentId, operation);
+    this.pendingOperations.set(segmentId, updatePromise);
+    
+    try {
+      await updatePromise;
+    } finally {
+      this.pendingOperations.delete(segmentId);
+    }
+  }
+  
+  private async performUpdate(
+    segmentId: string,
+    operation: (segment: StorySegment) => Promise<Partial<StorySegment>>
+  ): Promise<void> {
+    const gameStore = useGameStore.getState();
+    const segment = gameStore.getSegmentById(segmentId);
+    
+    if (!segment) throw new Error(`Segment ${segmentId} not found`);
+    
+    const updates = await operation(segment);
+    gameStore.updateSegment(segmentId, updates);
+  }
+}
+```
 
 Remember: **AI agents have broader reasoning capabilities than Copilot**. Use this to understand system behavior, propose architectural improvements, and solve complex integration challenges.

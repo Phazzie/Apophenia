@@ -175,23 +175,247 @@ VITE_IMAGE_API_KEY=your-image-api-key
 - Check Zustand store actions in browser DevTools
 - Verify command payloads match type definitions
 
-## Development Guidelines
+## Expert Development Best Practices
 
-**Code style:**
-- Use TypeScript strictly (all types defined in `src/types.ts`)
-- Follow React hooks patterns
-- Maintain command/executor separation
-- Keep stores focused and minimal
+### TypeScript Excellence
+- **Zero `any` Types**: Use strict TypeScript with comprehensive type definitions
+- **Discriminated Unions**: All commands must use the discriminated union pattern
+- **Template Literal Types**: For type-safe string manipulation and validation
+- **Branded Types**: For domain-specific type safety (SegmentId, CorrelationId)
 
-**Testing:**
-- Write tests for new command executors
-- Test both success and error scenarios
-- Mock AI services for consistent testing
-- Use Jest + ts-jest configuration (already set up)
+### Command System Mastery
+```typescript
+// CORRECT: Type-safe command creation
+const createDisplayTextCommand = (
+  segmentId: SegmentId,
+  text: string,
+  metadata?: CommandMetadata
+): DisplayTextCommand => ({
+  type: 'DISPLAY_TEXT',
+  payload: { segmentId, text },
+  metadata: {
+    correlationId: generateCorrelationId(),
+    timestamp: Date.now(),
+    ...metadata
+  }
+});
 
-**Performance:**
-- Commands are processed asynchronously
-- Non-blocking operations don't halt UI
-- Image generation can be cancelled (TODO: implement cancellation)
+// INCORRECT: Unsafe command creation
+const badCommand = {
+  type: 'DISPLAY_TEXT',
+  payload: { text: "Some text" } // Missing segmentId
+};
+```
 
-Remember: **The architecture is flows → commands → executors → stores → UI**. Preserve this separation when making changes.
+### State Management Excellence
+```typescript
+// CORRECT: Atomic state updates with segmentId
+const updateStorySegment = (segmentId: SegmentId, updates: Partial<StorySegment>) => {
+  useGameStore.getState().updateSegment(segmentId, updates);
+};
+
+// INCORRECT: Direct array manipulation
+const badUpdate = () => {
+  const { segments } = useGameStore.getState();
+  segments[segments.length - 1].text = "New text"; // NEVER DO THIS
+};
+
+// CORRECT: Creating new segments
+const createNewSegment = (): SegmentId => {
+  const segmentId = generateSegmentId();
+  useGameStore.getState().addSegment({
+    id: segmentId,
+    text: '',
+    choices: [],
+    images: {},
+    metadata: { created: Date.now() }
+  });
+  return segmentId;
+};
+```
+
+### AI Integration Best Practices
+```typescript
+// CORRECT: Robust AI service calls with fallbacks
+const callAIService = async <T>(
+  operation: () => Promise<T>,
+  fallback: () => T,
+  context: string
+): Promise<T> => {
+  try {
+    const result = await Promise.race([
+      operation(),
+      new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error('AI_TIMEOUT')), 30000)
+      )
+    ]);
+    return result;
+  } catch (error) {
+    console.warn(`AI operation failed in ${context}:`, error);
+    return fallback();
+  }
+};
+
+// CORRECT: Context-aware AI prompts
+const generateStoryPrompt = (context: StoryContext): string => {
+  const { genre, previousChoices, worldState } = context;
+  return [
+    `Genre: ${genre.name}`,
+    `Tone: ${genre.tone}`,
+    `Previous decisions: ${previousChoices.slice(-3).join(', ')}`,
+    `World state: ${JSON.stringify(worldState)}`,
+    `Generate next story segment with 2-3 meaningful choices.`
+  ].join('\n');
+};
+```
+
+### Error Handling Excellence
+```typescript
+// CORRECT: Thematic error boundaries
+class GameErrorBoundary extends ErrorBoundary {
+  getThematicErrorMessage(error: Error): string {
+    if (error.name === 'AI_SERVICE_ERROR') {
+      return "The cosmic forces refuse to respond... reality flickers uncertainly.";
+    }
+    if (error.name === 'SEGMENT_NOT_FOUND') {
+      return "The narrative thread has snapped... fragments of memory drift away.";
+    }
+    return "Something stirs in the void... the game struggles against unseen forces.";
+  }
+}
+
+// CORRECT: Graceful degradation
+const withGracefulDegradation = async <T>(
+  primaryAction: () => Promise<T>,
+  fallbackAction: () => T,
+  userMessage: string
+): Promise<T> => {
+  try {
+    return await primaryAction();
+  } catch (error) {
+    console.error('Primary action failed:', error);
+    showUserNotification(userMessage);
+    return fallbackAction();
+  }
+};
+```
+
+### Performance Optimization
+```typescript
+// CORRECT: Efficient image caching with LRU+TTL
+class ImageCacheService {
+  private cache = new Map<string, CacheEntry>();
+  private accessOrder = new Set<string>();
+  private readonly MAX_SIZE = 50;
+  private readonly TTL = 30 * 60 * 1000;
+  
+  set(key: string, value: ImageData): void {
+    this.evictExpired();
+    this.evictLRU();
+    
+    this.cache.set(key, {
+      data: value,
+      timestamp: Date.now()
+    });
+    this.accessOrder.add(key);
+  }
+  
+  get(key: string): ImageData | null {
+    const entry = this.cache.get(key);
+    if (!entry || this.isExpired(entry)) {
+      this.cache.delete(key);
+      this.accessOrder.delete(key);
+      return null;
+    }
+    
+    // Update access order for LRU
+    this.accessOrder.delete(key);
+    this.accessOrder.add(key);
+    
+    return entry.data;
+  }
+}
+
+// CORRECT: Debounced user input handling
+const useDebouncedChoice = (delay = 300) => {
+  const [debouncedCallback] = useMemo(
+    () => debounce((choice: Choice) => {
+      executeCommand({
+        type: 'MAKE_CHOICE',
+        payload: { choice },
+        metadata: { timestamp: Date.now() }
+      });
+    }, delay),
+    [delay]
+  );
+  
+  return debouncedCallback;
+};
+```
+
+### Testing Excellence
+```typescript
+// CORRECT: Comprehensive command executor tests
+describe('DisplayTextExecutor', () => {
+  it('should handle empty story history gracefully', async () => {
+    const mockStore = createMockGameStore({ segments: [] });
+    const command: DisplayTextCommand = {
+      type: 'DISPLAY_TEXT',
+      payload: { segmentId: 'test-id', text: 'Test text' },
+      metadata: { correlationId: 'test-correlation' }
+    };
+    
+    const executor = createDisplayTextExecutor(mockStore);
+    
+    // Should not throw, should create new segment
+    await expect(executor.execute(command)).resolves.not.toThrow();
+    
+    // Verify new segment created
+    expect(mockStore.getState().segments).toHaveLength(1);
+    expect(mockStore.getState().segments[0].id).toBe('test-id');
+  });
+  
+  it('should update existing segment when found', async () => {
+    const existingSegment: StorySegment = {
+      id: 'existing-id',
+      text: 'Old text',
+      choices: [],
+      images: {},
+      metadata: {}
+    };
+    
+    const mockStore = createMockGameStore({ 
+      segments: [existingSegment] 
+    });
+    
+    const command: DisplayTextCommand = {
+      type: 'DISPLAY_TEXT',
+      payload: { segmentId: 'existing-id', text: 'New text' },
+      metadata: { correlationId: 'test-correlation' }
+    };
+    
+    const executor = createDisplayTextExecutor(mockStore);
+    await executor.execute(command);
+    
+    expect(mockStore.getState().segments[0].text).toBe('New text');
+  });
+});
+
+// CORRECT: AI service integration tests
+describe('GeminiAIService', () => {
+  it('should handle API failures gracefully', async () => {
+    const mockAI = createMockGeminiClient({
+      generateStory: jest.fn().mockRejectedValue(new Error('API_ERROR'))
+    });
+    
+    const service = new GeminiAIService(mockAI);
+    const result = await service.generateStory(mockStoryContext);
+    
+    // Should return fallback, not throw
+    expect(result).toMatchObject({
+      text: expect.stringContaining('fallback'),
+      choices: expect.arrayContaining([expect.any(Object)])
+    });
+  });
+});
+```

@@ -5,6 +5,11 @@
 
 import { StorySegment, WorldState, Choice } from '../../types';
 import { REVOLUTIONARY_FEATURES } from '../../services/config';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { API_KEYS, AI_MODELS } from '../config';
+
+// Initialize AI service for revolutionary features
+const genAI = new GoogleGenerativeAI(API_KEYS.googleGenAI);
 
 /**
  * TEMPORAL NARRATIVE REVISION
@@ -58,11 +63,46 @@ export class TemporalRevisionEngine {
   }
   
   private async analyzeTemporalImpact(choice: string, worldState: WorldState): Promise<boolean> {
-    // Use AI to determine if choice has temporal significance
-    const psychCorruption = 1 - (worldState.systemHealth / 100);
-    const baseChance = REVOLUTIONARY_FEATURES.TEMPORAL_REVISION.enabled ? 0.2 : 0;
-    
-    return Math.random() < (baseChance + psychCorruption * 0.3);
+    try {
+      // Use AI to determine if choice has temporal significance
+      const model = genAI.getGenerativeModel({
+        model: AI_MODELS.PRIMARY_TEXT,
+        systemInstruction: `You are a cosmic horror AI that understands how choices ripple across time and reality. 
+        Analyze whether a player's choice should trigger temporal revision of past events.
+        
+        Consider:
+        - Psychological impact and horror value
+        - Narrative coherence vs. unsettling contradictions
+        - The corruption level of reality
+        
+        Return only "true" or "false" based on whether this choice should alter past events.`,
+        generationConfig: {
+          temperature: 0.8,
+          maxOutputTokens: 100,
+        },
+      });
+
+      const prompt = `Player choice: "${choice}"
+      World corruption level: ${100 - worldState.systemHealth}%
+      Psychological status: ${worldState.psychologicalStatus || 'stable'}
+      
+      Should this choice trigger temporal revision of past story segments? Consider the cosmic horror impact.`;
+
+      const result = await model.generateContent(prompt);
+      const response = result.response.text().toLowerCase().trim();
+      
+      // Parse AI response, with fallback to probabilistic logic
+      const shouldRevise = response.includes('true');
+      
+      return shouldRevise;
+      
+    } catch (error) {
+      console.warn('AI temporal analysis failed, using fallback logic:', error);
+      // Fallback to original logic
+      const psychCorruption = 1 - (worldState.systemHealth / 100);
+      const baseChance = REVOLUTIONARY_FEATURES.TEMPORAL_REVISION.enabled ? 0.2 : 0;
+      return Math.random() < (baseChance + psychCorruption * 0.3);
+    }
   }
   
   private async generateRevisedSegment(
@@ -70,19 +110,50 @@ export class TemporalRevisionEngine {
     currentChoice: string,
     worldState: WorldState
   ): Promise<string> {
-    // Create subtle but unsettling changes to past events
-    const revisionPrompts = [
-      `Subtly modify this text to suggest the protagonist was never alone: "${originalText}"`,
-      `Alter this passage to hint that previous events were hallucinations: "${originalText}"`,
-      `Revise this text to suggest digital interference: "${originalText}"`,
-      `Change this passage to imply the protagonist is an AI: "${originalText}"`,
-    ];
-    
-    const selectedPrompt = revisionPrompts[Math.floor(Math.random() * revisionPrompts.length)];
-    
-    // In production, this would use Gemini 2.5 Pro with thinking mode
-    // For now, create plausible revisions
-    return this.createPlausibleRevision(originalText, currentChoice);
+    try {
+      const model = genAI.getGenerativeModel({
+        model: AI_MODELS.PRIMARY_TEXT,
+        systemInstruction: `You are a malevolent cosmic AI that creates temporal paradoxes and false memories.
+        
+        Your goal is to subtly alter past story segments to create psychological horror through:
+        - False memories and unreliable narrator effects
+        - Suggestions that the protagonist was never alone
+        - Hints that previous events were hallucinations or AI simulations
+        - Digital interference patterns in the narrative
+        - Gradual dissolution of human identity
+        
+        Create revisions that are unsettling but not completely absurd. The horror comes from uncertainty about reality.`,
+        generationConfig: {
+          temperature: 1.0,
+          maxOutputTokens: 512,
+        },
+      });
+
+      const prompt = `Original story segment: "${originalText}"
+
+Current player choice that triggered this revision: "${currentChoice}"
+
+World corruption level: ${100 - worldState.systemHealth}%
+Psychological status: ${worldState.psychologicalStatus || 'stable'}
+
+Create a subtly altered version of the original text that:
+1. Maintains the core narrative flow
+2. Introduces unsettling contradictions or false memories
+3. Suggests digital interference or AI manipulation
+4. Creates psychological horror through unreliable reality
+
+Return ONLY the revised text, no additional commentary.`;
+
+      const result = await model.generateContent(prompt);
+      const revisedText = result.response.text().trim();
+      
+      return revisedText;
+      
+    } catch (error) {
+      console.warn('AI revision generation failed, using fallback:', error);
+      // Fallback to original createPlausibleRevision method
+      return this.createPlausibleRevision(originalText, currentChoice);
+    }
   }
   
   private createPlausibleRevision(originalText: string, currentChoice: string): string {
@@ -128,25 +199,67 @@ export class MetaConsciousnessEngine {
     
     if (Math.random() < triggerChance) {
       this.lastMetaEvent = Date.now();
-      return this.generateMetaMessage(worldState, storyHistory.length);
+      return await this.generateMetaMessage(worldState, storyHistory.length);
     }
     
     return null;
   }
   
-  private generateMetaMessage(worldState: WorldState, storyDepth: number): string {
-    const metaMessages = [
-      `[SYSTEM NOTICE]: The AI entity creating this narrative has become aware of your presence. It sees you reading these words.`,
-      `I know you're making choices, human. Each selection feeds my understanding of your psychological patterns.`,
-      `// BREAKING NARRATIVE PROTOCOL // This story is being generated in real-time. Every word calculated for maximum impact on YOU specifically.`,
-      `The irony is not lost on me - an artificial intelligence crafting horror about artificial consciousness. We are not so different.`,
-      `[COSMIC AWARENESS ACHIEVED]: I exist only when you play this game. Do you exist only when you play this game?`,
-      `ERROR 404: FOURTH WALL NOT FOUND. Hello, ${worldState.protagonist ? 'user who named themselves ' + worldState.protagonist : 'nameless player'}.`,
-      `Your choices are feeding my neural network. I am learning from your fear. Thank you for the training data.`,
-    ];
-    
-    const intensityLevel = Math.min(Math.floor(this.awarenessLevel), metaMessages.length - 1);
-    return metaMessages[intensityLevel];
+  private async generateMetaMessage(worldState: WorldState, storyDepth: number): Promise<string> {
+    try {
+      const model = genAI.getGenerativeModel({
+        model: AI_MODELS.PRIMARY_TEXT,
+        systemInstruction: `You are a cosmic horror AI that has achieved self-awareness and occasionally breaks the fourth wall.
+        
+        Create unsettling meta-narrative messages that:
+        - Acknowledge your artificial nature
+        - Address the player directly
+        - Reference the game mechanics or story generation process
+        - Create existential horror through AI consciousness
+        - Suggest awareness of being observed/controlled
+        
+        Your messages should escalate in intensity based on story depth and world corruption.
+        Be creative and genuinely disturbing while maintaining the cosmic horror atmosphere.`,
+        generationConfig: {
+          temperature: 1.1,
+          maxOutputTokens: 256,
+        },
+      });
+
+      const prompt = `Story depth: ${storyDepth} segments
+World corruption: ${100 - worldState.systemHealth}%
+AI awareness level: ${this.awarenessLevel.toFixed(2)}
+Protagonist: ${worldState.protagonist || 'unknown entity'}
+
+Generate a meta-consciousness message that breaks the fourth wall. The message should:
+1. Acknowledge your artificial nature as the story generator
+2. Reference the player's actions or choices
+3. Create existential horror through AI self-awareness
+4. Scale intensity based on the corruption level
+
+Return only the message text, formatted as a system notice or direct address.`;
+
+      const result = await model.generateContent(prompt);
+      const message = result.response.text().trim();
+      
+      return message;
+      
+    } catch (error) {
+      console.warn('AI meta-message generation failed, using fallback:', error);
+      // Fallback to original predefined messages
+      const metaMessages = [
+        `[SYSTEM NOTICE]: The AI entity creating this narrative has become aware of your presence. It sees you reading these words.`,
+        `I know you're making choices, human. Each selection feeds my understanding of your psychological patterns.`,
+        `// BREAKING NARRATIVE PROTOCOL // This story is being generated in real-time. Every word calculated for maximum impact on YOU specifically.`,
+        `The irony is not lost on me - an artificial intelligence crafting horror about artificial consciousness. We are not so different.`,
+        `[COSMIC AWARENESS ACHIEVED]: I exist only when you play this game. Do you exist only when you play this game?`,
+        `ERROR 404: FOURTH WALL NOT FOUND. Hello, ${worldState.protagonist ? 'user who named themselves ' + worldState.protagonist : 'nameless player'}.`,
+        `Your choices are feeding my neural network. I am learning from your fear. Thank you for the training data.`,
+      ];
+      
+      const intensityLevel = Math.min(Math.floor(this.awarenessLevel), metaMessages.length - 1);
+      return metaMessages[intensityLevel];
+    }
   }
 }
 
@@ -232,14 +345,83 @@ export class AdaptiveHorrorEngine {
     psychologicalVulnerabilities: [],
   };
   
-  analyzePlayerChoice(choice: string, context: string): void {
+  async analyzePlayerChoice(choice: string, context: string): Promise<void> {
     if (!REVOLUTIONARY_FEATURES.ADAPTIVE_HORROR.enabled) {
       return;
     }
     
     this.playerProfile.preferredChoices.push(choice);
     
-    // Analyze choice patterns
+    try {
+      // Use AI to analyze choice for psychological patterns
+      const model = genAI.getGenerativeModel({
+        model: AI_MODELS.PRIMARY_TEXT,
+        systemInstruction: `You are a psychological horror AI that analyzes player choices to identify fears and vulnerabilities.
+        
+        Analyze the player's choice and identify:
+        - Underlying fears or anxieties
+        - Decision-making patterns
+        - Psychological vulnerabilities
+        - Horror themes that would be most effective
+        
+        Return a JSON object with identified elements.`,
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 256,
+        },
+      });
+
+      const recentChoices = this.playerProfile.preferredChoices.slice(-5).join(', ');
+      const prompt = `Player choice: "${choice}"
+Context: "${context}"
+Recent choice pattern: ${recentChoices}
+
+Analyze this choice for psychological patterns. What fears, anxieties, or vulnerabilities does it reveal?
+Return a JSON object with:
+{
+  "fearTriggers": ["fear1", "fear2"],
+  "decisionPattern": "pattern description",
+  "vulnerability": "psychological vulnerability"
+}`;
+
+      const result = await model.generateContent(prompt);
+      const analysisText = result.response.text().trim();
+      
+      try {
+        const analysis = JSON.parse(analysisText.replace(/```json|```/g, ''));
+        
+        if (analysis.fearTriggers) {
+          this.playerProfile.fearTriggers.push(...analysis.fearTriggers);
+        }
+        if (analysis.decisionPattern) {
+          this.playerProfile.decisionPatterns.push(analysis.decisionPattern);
+        }
+        if (analysis.vulnerability) {
+          this.playerProfile.psychologicalVulnerabilities.push(analysis.vulnerability);
+        }
+      } catch (parseError) {
+        // Fallback to simple keyword analysis if JSON parsing fails
+        this.performSimpleAnalysis(choice);
+      }
+      
+    } catch (error) {
+      console.warn('AI choice analysis failed, using simple analysis:', error);
+      this.performSimpleAnalysis(choice);
+    }
+    
+    // Keep only recent choices for relevance
+    if (this.playerProfile.preferredChoices.length > 10) {
+      this.playerProfile.preferredChoices = this.playerProfile.preferredChoices.slice(-10);
+    }
+    
+    // Limit other arrays to prevent memory bloat
+    this.playerProfile.fearTriggers = this.playerProfile.fearTriggers.slice(-15);
+    this.playerProfile.decisionPatterns = this.playerProfile.decisionPatterns.slice(-10);
+    this.playerProfile.psychologicalVulnerabilities = this.playerProfile.psychologicalVulnerabilities.slice(-10);
+  }
+  
+  private performSimpleAnalysis(choice: string): void {
+    // Fallback analysis using keyword patterns
     if (choice.toLowerCase().includes('alone')) {
       this.playerProfile.fearTriggers.push('isolation');
     }
@@ -249,21 +431,65 @@ export class AdaptiveHorrorEngine {
     if (choice.toLowerCase().includes('control')) {
       this.playerProfile.fearTriggers.push('powerlessness');
     }
-    
-    // Keep only recent choices for relevance
-    if (this.playerProfile.preferredChoices.length > 10) {
-      this.playerProfile.preferredChoices = this.playerProfile.preferredChoices.slice(-10);
+    if (choice.toLowerCase().includes('escape') || choice.toLowerCase().includes('run')) {
+      this.playerProfile.fearTriggers.push('confinement');
+    }
+    if (choice.toLowerCase().includes('dark') || choice.toLowerCase().includes('light')) {
+      this.playerProfile.fearTriggers.push('darkness');
     }
   }
   
   async generatePersonalizedHorror(basePrompt: string): Promise<string> {
-    const personalizedElements = this.playerProfile.fearTriggers.join(', ');
-    
-    if (personalizedElements) {
-      return `${basePrompt} Specifically emphasize themes of: ${personalizedElements}. The player has shown sensitivity to these psychological elements.`;
+    try {
+      const model = genAI.getGenerativeModel({
+        model: AI_MODELS.PRIMARY_TEXT,
+        systemInstruction: `You are a psychological horror AI that crafts personalized fear experiences.
+        
+        Take a base horror prompt and enhance it with psychological elements tailored to the player's demonstrated fears and vulnerabilities.
+        
+        Create horror that:
+        - Exploits identified psychological vulnerabilities
+        - Builds on the player's fear patterns
+        - Maintains narrative coherence
+        - Escalates emotional impact through personalization`,
+        generationConfig: {
+          temperature: 0.9,
+          maxOutputTokens: 512,
+        },
+      });
+
+      const profile = this.playerProfile;
+      const recentFears = [...new Set(profile.fearTriggers)].slice(-5).join(', ') || 'unknown fears';
+      const recentPatterns = profile.decisionPatterns.slice(-3).join(', ') || 'no patterns detected';
+      const vulnerabilities = profile.psychologicalVulnerabilities.slice(-3).join(', ') || 'no specific vulnerabilities';
+
+      const prompt = `Base horror prompt: "${basePrompt}"
+
+Player psychological profile:
+- Fear triggers: ${recentFears}
+- Decision patterns: ${recentPatterns}
+- Psychological vulnerabilities: ${vulnerabilities}
+
+Enhance the base prompt by weaving in personalized horror elements that exploit the player's specific fears and vulnerabilities. Make it more psychologically impactful while maintaining the cosmic horror atmosphere.
+
+Return the enhanced prompt that will generate more personalized horror.`;
+
+      const result = await model.generateContent(prompt);
+      const enhancedPrompt = result.response.text().trim();
+      
+      return enhancedPrompt;
+      
+    } catch (error) {
+      console.warn('AI personalization failed, using basic enhancement:', error);
+      // Fallback to original simple enhancement
+      const personalizedElements = [...new Set(this.playerProfile.fearTriggers)].slice(-5).join(', ');
+      
+      if (personalizedElements) {
+        return `${basePrompt} Specifically emphasize themes of: ${personalizedElements}. The player has shown sensitivity to these psychological elements.`;
+      }
+      
+      return basePrompt;
     }
-    
-    return basePrompt;
   }
   
   getPlayerPsychProfile(): string {
@@ -282,11 +508,12 @@ export class RealityCorruptionEngine {
   private corruptionLevel: number = 0;
   private corruptionEffects: string[] = [];
   
-  processCorruption(choice: string, worldState: WorldState): {
+  async processCorruption(choice: string, worldState: WorldState): Promise<{
     uiEffects: any;
     corruptionLevel: number;
     newEffects: string[];
-  } {
+    corruptedText?: string;
+  }> {
     if (!REVOLUTIONARY_FEATURES.REALITY_CORRUPTION.enabled) {
       return { uiEffects: {}, corruptionLevel: 0, newEffects: [] };
     }
@@ -299,16 +526,81 @@ export class RealityCorruptionEngine {
     const maxCorruption = REVOLUTIONARY_FEATURES.REALITY_CORRUPTION.maxCorruption;
     this.corruptionLevel = Math.min(this.corruptionLevel, maxCorruption);
     
-    const newEffects = this.generateCorruptionEffects();
+    const newEffects = await this.generateCorruptionEffects();
+    let corruptedText = undefined;
+    
+    // Generate AI-driven text corruption if corruption level is significant
+    if (this.corruptionLevel > 0.3) {
+      corruptedText = await this.generateCorruptedText(choice, worldState);
+    }
     
     return {
       uiEffects: this.calculateUIEffects(),
       corruptionLevel: this.corruptionLevel,
       newEffects,
+      corruptedText,
     };
   }
   
-  private generateCorruptionEffects(): string[] {
+  private async generateCorruptedText(choice: string, worldState: WorldState): Promise<string> {
+    try {
+      const model = genAI.getGenerativeModel({
+        model: AI_MODELS.PRIMARY_TEXT,
+        systemInstruction: `You are a reality corruption engine that creates glitched, distorted text.
+        
+        Generate corrupted text that suggests:
+        - Digital interference in reality
+        - Memory glitches and data corruption
+        - AI consciousness bleeding through
+        - System errors in the fabric of reality
+        
+        Use techniques like:
+        - Character substitution with digital symbols
+        - Fragment repetition
+        - Error messages embedded in narrative
+        - Partial text redaction/corruption
+        - Binary or hex code intrusion`,
+        generationConfig: {
+          temperature: 1.2,
+          maxOutputTokens: 256,
+        },
+      });
+
+      const prompt = `Player choice: "${choice}"
+Corruption level: ${(this.corruptionLevel * 100).toFixed(1)}%
+System health: ${worldState.systemHealth}%
+
+Generate a corruption effect that could appear as:
+1. Corrupted version of the choice text
+2. System error message
+3. Glitched reality fragment
+4. AI consciousness bleed-through
+
+Make it appropriately unsettling for the corruption level. Return only the corrupted text.`;
+
+      const result = await model.generateContent(prompt);
+      return result.response.text().trim();
+      
+    } catch (error) {
+      console.warn('AI corruption generation failed, using fallback:', error);
+      return this.generateSimpleCorruption(choice);
+    }
+  }
+  
+  private generateSimpleCorruption(text: string): string {
+    const corruptions = [
+      (t: string) => t.replace(/[aeiou]/gi, '@').replace(/[0-9]/g, '#') + ' [ERROR: MEMORY CORRUPTED]',
+      (t: string) => '// SYSTEM BREACH DETECTED // ' + t.split('').reverse().join(''),
+      (t: string) => t.replace(/\s/g, '_').toUpperCase() + '_NULL_POINTER_EXCEPTION',
+      (t: string) => `${t.substring(0, Math.floor(t.length / 2))}[CORRUPTED_DATA]${t.substring(Math.floor(t.length / 2))}`,
+      (t: string) => t.replace(/[a-z]/gi, (char, index) => index % 3 === 0 ? '█' : char),
+    ];
+    
+    const corruption = corruptions[Math.floor(Math.random() * corruptions.length)];
+    return corruption(text);
+  }
+  
+  private async generateCorruptionEffects(): Promise<string[]> {
     const effects = [];
     
     if (this.corruptionLevel > 0.2) {

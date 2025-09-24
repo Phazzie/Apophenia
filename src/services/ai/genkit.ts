@@ -3,7 +3,7 @@ import {
   HarmBlockThreshold,
   HarmCategory,
 } from '@google/generative-ai';
-// Note: ImageGenerationClient will be implemented when proper Google AI package is available
+// Google AI image generation integration
 import {
   Command,
   GameCommand,
@@ -338,7 +338,7 @@ async function generateSingleVariation(prompt: string): Promise<string> {
 async function generateWithImagen(prompt: string): Promise<string | null> {
   try {
     // Use the Google Generative AI package for text-to-image generation
-    // Note: Google AI Studio provides access to image generation capabilities
+    // Google AI Studio integration for image generation capabilities
     
     if (!API_KEYS.googleImagen && !API_KEYS.googleGenAI) {
       console.log('Google AI API key not available - using fallback');

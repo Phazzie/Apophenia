@@ -37,7 +37,7 @@ export const useImageCacheStore = create<ImageCacheStore>((set, get) => ({
       
       const newCache = { ...state.imageCache, [prompt]: newEntry };
       
-      // Check if we need to evict entries
+      // Evict entries if cache size limit is exceeded
       const entries = Object.entries(newCache);
       
       if (entries.length > MAX_CACHE_SIZE) {

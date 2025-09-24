@@ -71,7 +71,7 @@ const StartScreen: React.FC = () => {
 
   const handleContinue = () => {
     // The stores are already rehydrated by the persist middleware.
-    // We just need to navigate to the game screen.
+    // Navigate to the game screen.
     setGameState(GameState.PLAYING);
   };
 

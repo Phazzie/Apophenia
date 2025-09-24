@@ -1,4 +1,6 @@
 import { getConfig } from '../config';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { API_KEYS } from '../config';
 
 interface ImageVariation {
   url: string;
@@ -12,9 +14,14 @@ interface ImageGenerationResult {
 }
 
 class ImageGenerationService {
+  private imageClient: ReturnType<GoogleGenerativeAI['getGenerativeModel']> | null = null;
+
   constructor() {
-    // Enhanced Google Imagen integration with production-ready fallbacks
-    // Supports real AI image generation with curated horror imagery fallback
+    // Initialize Google Imagen client if API key is available
+    if (API_KEYS.googleImagen || API_KEYS.googleGenAI) {
+      const genAI = new GoogleGenerativeAI(API_KEYS.googleImagen || API_KEYS.googleGenAI);
+      this.imageClient = genAI.getGenerativeModel({ model: "imagen-3.0-generate-001" });
+    }
   }
 
   async generateImageVariations(prompt: string, count: number = 3): Promise<ImageGenerationResult> {
@@ -46,31 +53,60 @@ class ImageGenerationService {
 
 
   private async generateImagenVariations(prompt: string, count: number): Promise<ImageVariation[]> {
-    const config = getConfig();
+    const variations: ImageVariation[] = [];
     
-    // Mock implementation - would use real Google Imagen API in production
+    if (!this.imageClient) {
+      console.log('Google Imagen client not available - skipping AI generation');
+      return variations;
+    }
+
     const horrorPrompts = this.enhanceHorrorPrompt(prompt);
-    const promises = horrorPrompts.slice(0, count).map(async (enhancedPrompt, index) => {
+    
+    // Generate images sequentially to avoid API rate limits
+    for (let i = 0; i < Math.min(count, horrorPrompts.length); i++) {
       try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 200 + index * 100));
-
-        return {
-          url: `https://via.placeholder.com/800x600/2d1b69/e94560?text=Imagen+${index + 1}`,
-          prompt: enhancedPrompt,
-          quality: 'imagen' as const
-        };
+        const enhancedPrompt = horrorPrompts[i];
+        console.log(`Generating Imagen variation ${i + 1}: ${enhancedPrompt}`);
+        
+        const result = await this.imageClient.generateContent(enhancedPrompt);
+        const response = result.response;
+        
+        // Check if the response contains image data
+        if (response.candidates && response.candidates.length > 0) {
+          const candidate = response.candidates[0];
+          
+          if (candidate.content && candidate.content.parts) {
+            for (const part of candidate.content.parts) {
+              if (part.inlineData && part.inlineData.mimeType && part.inlineData.mimeType.startsWith('image/')) {
+                const base64Data = part.inlineData.data;
+                const mimeType = part.inlineData.mimeType;
+                const dataUrl = `data:${mimeType};base64,${base64Data}`;
+                
+                variations.push({
+                  url: dataUrl,
+                  prompt: enhancedPrompt,
+                  quality: 'imagen' as const
+                });
+                
+                console.log(`Imagen variation ${i + 1} generated successfully`);
+                break;
+              }
+            }
+          }
+        }
+        
+        // Add a small delay between requests to be respectful to the API
+        if (i < count - 1) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+        
       } catch (error) {
-        console.error(`Imagen generation ${index + 1} failed:`, error);
-        return {
-          url: `https://via.placeholder.com/800x600/2d1b69/e94560?text=Imagen+Error+${index + 1}`,
-          prompt: enhancedPrompt,
-          quality: 'imagen' as const
-        };
+        console.error(`Imagen generation ${i + 1} failed:`, error);
+        // Continue with next variation instead of failing completely
       }
-    });
+    }
 
-    return Promise.all(promises);
+    return variations;
   }
 
   private async generateUnsplashVariations(prompt: string, count: number): Promise<ImageVariation[]> {

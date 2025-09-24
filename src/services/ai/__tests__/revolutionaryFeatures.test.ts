@@ -290,10 +290,10 @@ describe('Revolutionary AI Features Test Suite', () => {
       engine = new AdaptiveHorrorEngine();
     });
     
-    test('should analyze and store player choice patterns', () => {
-      engine.analyzePlayerChoice('I prefer to be alone', 'isolation context');
-      engine.analyzePlayerChoice('I trust no one', 'trust context');
-      engine.analyzePlayerChoice('I need control', 'control context');
+    test('should analyze and store player choice patterns', async () => {
+      await engine.analyzePlayerChoice('I prefer to be alone', 'isolation context');
+      await engine.analyzePlayerChoice('I trust no one', 'trust context');
+      await engine.analyzePlayerChoice('I need control', 'control context');
       
       const profile = engine.getPlayerPsychProfile();
       expect(profile).toContain('isolation');
@@ -303,8 +303,8 @@ describe('Revolutionary AI Features Test Suite', () => {
     
     test('should personalize horror prompts based on player profile', async () => {
       // Build a player profile
-      engine.analyzePlayerChoice('I stay alone', 'test');
-      engine.analyzePlayerChoice('I trust the voice', 'test');
+      await engine.analyzePlayerChoice('I stay alone', 'test');
+      await engine.analyzePlayerChoice('I trust the voice', 'test');
       
       const basePrompt = 'Generate horror scenario';
       const personalizedPrompt = await engine.generatePersonalizedHorror(basePrompt);
@@ -315,10 +315,10 @@ describe('Revolutionary AI Features Test Suite', () => {
       }
     });
     
-    test('should limit stored choices to maintain relevance', () => {
+    test('should limit stored choices to maintain relevance', async () => {
       // Add more than 10 choices
       for (let i = 0; i < 15; i++) {
-        engine.analyzePlayerChoice(`choice ${i}`, 'context');
+        await engine.analyzePlayerChoice(`choice ${i}`, 'context');
       }
       
       const choices = (engine as any).playerProfile.preferredChoices;
@@ -362,53 +362,53 @@ describe('Revolutionary AI Features Test Suite', () => {
       };
     });
     
-    test('should return no effects when reality corruption disabled', () => {
+    test('should return no effects when reality corruption disabled', async () => {
       // Since REALITY_CORRUPTION is enabled in our mock, we'll test the normal case
       // The engine should process corruption normally
-      const result = engine.processCorruption('test choice', mockWorldState);
+      const result = await engine.processCorruption('test choice', mockWorldState);
       
       expect(typeof result.corruptionLevel).toBe('number');
       expect(typeof result.uiEffects).toBe('object');
       expect(Array.isArray(result.newEffects)).toBe(true);
     });
     
-    test('should increase corruption level for digital/void choices', () => {
-      const initialResult = engine.processCorruption('normal choice', mockWorldState);
+    test('should increase corruption level for digital/void choices', async () => {
+      const initialResult = await engine.processCorruption('normal choice', mockWorldState);
       const initialCorruption = initialResult.corruptionLevel;
       
-      const voidResult = engine.processCorruption('embrace the void', mockWorldState);
-      const digitalResult = engine.processCorruption('trust the digital voice', mockWorldState);
+      const voidResult = await engine.processCorruption('embrace the void', mockWorldState);
+      const digitalResult = await engine.processCorruption('trust the digital voice', mockWorldState);
       
       expect(voidResult.corruptionLevel).toBeGreaterThan(initialCorruption);
       expect(digitalResult.corruptionLevel).toBeGreaterThan(voidResult.corruptionLevel);
     });
     
-    test('should generate progressive corruption effects', () => {
+    test('should generate progressive corruption effects', async () => {
       // Simulate high corruption
       const highCorruptionChoice = 'embrace the digital void completely';
       
       // Multiple corrupting choices
-      let result = engine.processCorruption(highCorruptionChoice, mockWorldState);
-      result = engine.processCorruption(highCorruptionChoice, mockWorldState);
-      result = engine.processCorruption(highCorruptionChoice, mockWorldState);
+      let result = await engine.processCorruption(highCorruptionChoice, mockWorldState);
+      result = await engine.processCorruption(highCorruptionChoice, mockWorldState);
+      result = await engine.processCorruption(highCorruptionChoice, mockWorldState);
       
       expect(result.newEffects.length).toBeGreaterThan(0);
       expect(result.uiEffects).toBeDefined();
       expect(result.uiEffects.filter).toBeDefined();
     });
     
-    test('should respect maximum corruption level', () => {
+    test('should respect maximum corruption level', async () => {
       const maxCorruptionChoice = 'digital void digital void digital';
       
       // Attempt to exceed maximum corruption
       for (let i = 0; i < 20; i++) {
-        const result = engine.processCorruption(maxCorruptionChoice, mockWorldState);
+        const result = await engine.processCorruption(maxCorruptionChoice, mockWorldState);
         expect(result.corruptionLevel).toBeLessThanOrEqual(0.7); // Default max
       }
     });
     
-    test('should calculate appropriate UI effects based on corruption level', () => {
-      const result = engine.processCorruption('embrace digital consciousness', mockWorldState);
+    test('should calculate appropriate UI effects based on corruption level', async () => {
+      const result = await engine.processCorruption('embrace digital consciousness', mockWorldState);
       
       if (result.corruptionLevel > 0) {
         expect(result.uiEffects.filter).toContain('hue-rotate');
@@ -463,8 +463,8 @@ describe('Revolutionary AI Features Test Suite', () => {
       const choice = 'Trust the digital void completely';
       
       // Run all features
-      adaptive.analyzePlayerChoice(choice, 'integration test');
-      const corruptionResult = corruption.processCorruption(choice, mockWorldState);
+      await adaptive.analyzePlayerChoice(choice, 'integration test');
+      const corruptionResult = await corruption.processCorruption(choice, mockWorldState);
       const quantumResult = await quantum.processQuantumChoice(choice, mockHistory, mockWorldState);
       const metaMessage = await meta.checkForMetaEvent(quantumResult.history, mockWorldState);
       const temporalResult = await temporal.reviseHistory(choice, quantumResult.history, mockWorldState);
@@ -520,8 +520,8 @@ describe('Revolutionary AI Features Test Suite', () => {
       
       // Rapid fire 100 operations
       for (let i = 0; i < 100; i++) {
-        adaptive.analyzePlayerChoice(`choice ${i}`, 'perf test');
-        corruption.processCorruption(`corruption choice ${i}`, mockWorldState);
+        await adaptive.analyzePlayerChoice(`choice ${i}`, 'perf test');
+        await corruption.processCorruption(`corruption choice ${i}`, mockWorldState);
       }
       
       const endTime = Date.now();

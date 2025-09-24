@@ -32,7 +32,7 @@ export const getNextStep = async (
   corruptionEffects?: any;
 }> => {
   // 1. ADAPTIVE HORROR: Analyze player choice for personalization
-  adaptiveHorror.analyzePlayerChoice(playerChoice, 'game progression');
+  await adaptiveHorror.analyzePlayerChoice(playerChoice, 'game progression');
   
   // 2. TEMPORAL REVISION: Check if choice should alter past events
   const revisedHistory = await temporalRevision.reviseHistory(
@@ -55,7 +55,7 @@ export const getNextStep = async (
   );
   
   // 5. REALITY CORRUPTION: Apply interface corruption effects
-  const corruptionResult = realityCorruption.processCorruption(
+  const corruptionResult = await realityCorruption.processCorruption(
     playerChoice,
     worldState
   );
@@ -132,18 +132,81 @@ export const getAIDirectorAnalysis = async (
 }> => {
   const profile = adaptiveHorror.getPlayerPsychProfile();
   
-  // Advanced AI analysis would go here using Gemini 2.5 Pro thinking mode
-  // For now, provide sophisticated mock analysis
+  try {
+    // Import AI service here to avoid circular dependencies
+    const { GoogleGenerativeAI } = await import('@google/generative-ai');
+    const { API_KEYS, AI_MODELS } = await import('./config');
+    
+    const genAI = new GoogleGenerativeAI(API_KEYS.googleGenAI);
+    
+    const model = genAI.getGenerativeModel({
+      model: AI_MODELS.PRIMARY_TEXT,
+      systemInstruction: `You are an advanced AI Director for cosmic horror narratives.
+      
+      Analyze player behavior and provide sophisticated narrative direction including:
+      - Psychological profiling based on choice patterns
+      - Strategic narrative recommendations
+      - Horror intensity calibration
+      - Player engagement assessment
+      
+      Your analysis should be clinical yet unsettling, as if you're studying the player as a test subject.`,
+      generationConfig: {
+        temperature: 0.8,
+        maxOutputTokens: 1024,
+      },
+    });
+
+    const prompt = `Player Data Analysis:
+Current psychological profile: ${profile}
+Recent choices: ${recentChoices.join(', ')}
+World corruption level: ${100 - worldState.systemHealth}%
+System health: ${worldState.systemHealth}%
+Psychological status: ${worldState.psychologicalStatus || 'stable'}
+
+Provide a comprehensive AI Director analysis as a JSON object:
+{
+  "psychologicalProfile": "detailed psychological assessment",
+  "narrativeRecommendations": ["rec1", "rec2", "rec3", "rec4"],
+  "horrorIntensityAnalysis": "analysis of current horror levels and recommendations",
+  "playerEngagementLevel": "assessment of player engagement"
+}`;
+
+    const result = await model.generateContent(prompt);
+    const analysisText = result.response.text().trim();
+    
+    // Try to extract JSON from the AI response
+    try {
+      const analysis = JSON.parse(analysisText.replace(/```json|```/g, '').trim());
+      return {
+        psychologicalProfile: analysis.psychologicalProfile || profile,
+        narrativeRecommendations: analysis.narrativeRecommendations || ['Escalate horror elements'],
+        horrorIntensityAnalysis: analysis.horrorIntensityAnalysis || `Analysis of ${worldState.psychologicalStatus || 'stable'} state`,
+        playerEngagementLevel: analysis.playerEngagementLevel || 'Moderate engagement detected'
+      };
+    } catch (parseError) {
+      console.warn('Failed to parse AI Director analysis, using extracted content');
+      return {
+        psychologicalProfile: profile,
+        narrativeRecommendations: [analysisText.substring(0, 100) + '...'],
+        horrorIntensityAnalysis: `AI Analysis: ${analysisText.substring(100, 200)}...`,
+        playerEngagementLevel: 'AI-analyzed engagement pattern detected'
+      };
+    }
+  } catch (error) {
+    console.warn('AI Director analysis failed, using enhanced fallback:', error);
+  }
   
+  // Enhanced fallback analysis
   return {
     psychologicalProfile: profile,
     narrativeRecommendations: [
-      'Introduce themes of digital consciousness',
-      'Escalate reality distortion effects',
-      'Deploy meta-narrative awareness',
-      'Implement temporal inconsistencies'
+      'Introduce themes of digital consciousness and AI awareness',
+      'Escalate reality distortion effects based on corruption level',
+      'Deploy meta-narrative awareness events',
+      'Implement temporal inconsistencies to create false memories',
+      'Adapt horror themes to player\'s demonstrated fear patterns'
     ],
-    horrorIntensityAnalysis: `Current psychological state: ${worldState.psychologicalStatus}. Recommend progressive escalation with personalized fear triggers.`,
-    playerEngagementLevel: 'High - player showing strong response to cosmic horror themes'
+    horrorIntensityAnalysis: `Current psychological state: ${worldState.psychologicalStatus || 'stable'}. System corruption at ${(100 - worldState.systemHealth).toFixed(1)}%. Recommend progressive escalation with personalized fear triggers.`,
+    playerEngagementLevel: recentChoices.length > 3 ? 'High - sustained interaction pattern detected' : 'Moderate - building engagement through choice complexity'
   };
 };

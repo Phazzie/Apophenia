@@ -50,6 +50,12 @@ export const storySegmentSchema = z.object({
     main: z.string().optional(),
     inset: z.array(z.string()).optional(),
     mainStatus: z.enum(['loading', 'loaded']).optional(),
+    variations: z.array(z.object({
+      url: z.string(),
+      prompt: z.string(),
+      quality: z.enum(['xai', 'imagen', 'unsplash'])
+    })).optional(),
+    selectedVariationIndex: z.number().optional(),
   }),
   // Revolutionary features
   isRevised: z.boolean().optional(),
@@ -88,6 +94,12 @@ export const displayChoicesPayloadSchema = z.object({
 });
 export const pregenerateImagePayloadSchema = z.object({ prompt: z.string() });
 
+export const generateMultipleImagesPayloadSchema = z.object({ 
+  prompt: z.string(), 
+  segmentId: z.string(), 
+  count: z.number().min(1).max(10).default(3) 
+});
+
 // Discriminated Union for Commands
 export const commandSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('createSegment'), payload: createSegmentPayloadSchema }),
@@ -95,6 +107,7 @@ export const commandSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('wait'), payload: waitPayloadSchema }),
   z.object({ type: z.literal('generateAmbiance'), payload: generateAmbiancePayloadSchema }),
   z.object({ type: z.literal('generateImage'), payload: generateImagePayloadSchema }),
+  z.object({ type: z.literal('generateMultipleImages'), payload: generateMultipleImagesPayloadSchema }),
   z.object({ type: z.literal('updateWorldState'), payload: updateWorldStatePayloadSchema }),
   z.object({ type: z.literal('displayChoices'), payload: displayChoicesPayloadSchema }),
   z.object({

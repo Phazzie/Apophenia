@@ -159,26 +159,48 @@ export const generateConcept = async (
 };
 
 export const generateImage = async (prompt: string): Promise<string> => {
-  return generateImageFlow(prompt);
+  const result = await generateImageFlow(prompt);
+  return Array.isArray(result) ? result[0] : result;
 };
 
 /**
- * Revolutionary multi-variation image generation
+ * Enhanced multi-variation image generation using X.AI API
  * Generates multiple horror image variations for enhanced immersion
  */
 export const generateMultipleImages = async (
   prompt: string, 
   variationCount: number = 3
 ): Promise<string[]> => {
-  const variations = await Promise.all(
-    Array(variationCount).fill(0).map((_, index) => 
-      processAdvancedImageGeneration(
-        `${prompt}, variation ${index + 1}, cosmic horror aesthetic`
-      )
-    )
-  );
+  console.log(`Generating ${variationCount} image variations using X.AI API...`);
   
-  return variations;
+  try {
+    // Use the new X.AI batch generation capability
+    const result = await processAdvancedImageGeneration(
+      prompt, 
+      { generateMultiple: true, count: variationCount }
+    );
+    
+    if (Array.isArray(result)) {
+      console.log(`Successfully generated ${result.length} X.AI image variations`);
+      return result;
+    } else {
+      console.log('Single image returned, wrapping in array');
+      return [result];
+    }
+  } catch (error) {
+    console.error('X.AI batch image generation failed:', error);
+    
+    // Fallback to individual generation
+    const variations = await Promise.all(
+      Array(variationCount).fill(0).map((_, index) => 
+        processAdvancedImageGeneration(
+          `${prompt}, variation ${index + 1}, cosmic horror aesthetic`
+        )
+      )
+    );
+    
+    return variations.filter(v => typeof v === 'string') as string[];
+  }
 };
 
 /**

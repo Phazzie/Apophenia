@@ -135,19 +135,97 @@ export class XAIAPIClient {
   }
 
   /**
-   * Attempt image generation with Grok (will likely fail, but attempt for future compatibility)
+   * Generate images using X.AI's image generation API
+   * Supports generating multiple images in a single request
    */
-  async generateImage(prompt: string): Promise<string | null> {
+  async generateImage(prompt: string, options: {
+    count?: number;
+    size?: '1024x1024' | '1024x1792' | '1792x1024';
+    quality?: 'standard' | 'hd';
+    response_format?: 'url' | 'b64_json';
+  } = {}): Promise<string | string[] | null> {
     if (!this.apiKey) {
       console.log('X.AI API key not configured - cannot attempt image generation');
       return null;
     }
 
+    const {
+      count = 1,
+      size = '1024x1024',
+      quality = 'standard',
+      response_format = 'url'
+    } = options;
+
     try {
-      console.log('Attempting image generation with Grok-4 (experimental)...');
+      console.log(`Attempting X.AI image generation: ${count} image(s), size: ${size}, quality: ${quality}`);
       
-      // Try to use Grok for image generation (this will likely fail currently)
-      // but we're implementing it for future compatibility when X.AI adds image support
+      // Use X.AI's image generation endpoint (similar to OpenAI's DALL-E API structure)
+      const imageRequest = {
+        model: 'grok-vision', // X.AI's image generation model
+        prompt: prompt,
+        n: count,
+        size: size,
+        quality: quality,
+        response_format: response_format
+      };
+
+      const response = await fetch(`${this.baseURL}/images/generations`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(imageRequest),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.warn('X.AI image generation failed:', response.status, errorData);
+        
+        // If the endpoint doesn't exist, fall back to the experimental text-based approach
+        if (response.status === 404 || response.status === 400) {
+          console.log('X.AI dedicated image endpoint not available, trying experimental approach...');
+          return this.generateImageExperimental(prompt);
+        }
+        
+        throw new Error(`X.AI Image API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+      }
+
+      const data = await response.json();
+      console.log('X.AI image generation successful:', { count: data.data?.length || 0 });
+      
+      if (!data.data || data.data.length === 0) {
+        console.warn('No image data returned from X.AI API');
+        return null;
+      }
+
+      // Extract URLs or base64 data based on response format
+      const imageResults = data.data.map((item: any) => {
+        if (response_format === 'url') {
+          return item.url;
+        } else {
+          return `data:image/png;base64,${item.b64_json}`;
+        }
+      });
+
+      // Return single string for single image, array for multiple
+      return count === 1 ? imageResults[0] : imageResults;
+      
+    } catch (error) {
+      console.log('X.AI image generation error:', error instanceof Error ? error.message : 'Unknown error');
+      
+      // Fallback to experimental text-based approach
+      console.log('Falling back to experimental text-based image generation...');
+      return this.generateImageExperimental(prompt);
+    }
+  }
+
+  /**
+   * Experimental fallback approach using text generation
+   * @private
+   */
+  private async generateImageExperimental(prompt: string): Promise<string | null> {
+    try {
       const result = await this.generateText(
         'You are an advanced AI capable of generating images.',
         `Generate an image with the following description: ${prompt}. Return only a data URL or image URL if possible.`,
@@ -162,15 +240,43 @@ export class XAIAPIClient {
       const content = result.content.trim();
       if (content.includes('data:image/') || 
           (content.includes('http') && (content.includes('.jpg') || content.includes('.png') || content.includes('.webp')))) {
-        console.log('Grok-4 image generation successful (experimental)');
+        console.log('X.AI experimental image generation successful');
         return content;
       }
       
-      console.log('Grok-4 does not support image generation, will fallback to Imagen');
+      console.log('X.AI does not support image generation, will fallback to Imagen');
       return null;
       
     } catch (error) {
-      console.log('Grok-4 image generation not available:', error instanceof Error ? error.message : 'Unknown error');
+      console.log('X.AI experimental image generation failed:', error instanceof Error ? error.message : 'Unknown error');
+      return null;
+    }
+  }
+
+  /**
+   * Generate multiple images in a single batch request
+   */
+  async generateMultipleImages(
+    prompt: string, 
+    count: number = 3,
+    options: {
+      size?: '1024x1024' | '1024x1792' | '1792x1024';
+      quality?: 'standard' | 'hd';
+    } = {}
+  ): Promise<string[] | null> {
+    console.log(`Generating ${count} images with X.AI batch request...`);
+    
+    const result = await this.generateImage(prompt, { 
+      count, 
+      ...options 
+    });
+    
+    if (Array.isArray(result)) {
+      return result;
+    } else if (result) {
+      // Single image returned, wrap in array
+      return [result];
+    } else {
       return null;
     }
   }
@@ -206,24 +312,30 @@ export class XAIAPIClient {
           testType: 'text',
         };
       } else {
-        // Test X.AI image generation (experimental)
-        console.log('Testing X.AI image generation (experimental)...');
+        // Test X.AI image generation with multiple images
+        console.log('Testing X.AI image generation API...');
         try {
-          const result = await this.generateImage('A simple test image of a red circle');
+          const result = await this.generateImage('A simple test image of a red circle', { count: 2 });
+          const hasMultipleImages = Array.isArray(result) && result.length > 1;
+          
           return {
             success: result !== null,
-            model: GROK_MODEL,
+            model: 'grok-vision',
             contextWindow: 2000000,
             testType: 'image',
-            error: result === null ? 'X.AI image generation not yet available (will fallback to Imagen)' : undefined
+            error: result === null 
+              ? 'X.AI image generation not yet available (will fallback to Imagen)' 
+              : hasMultipleImages 
+                ? undefined 
+                : 'Single image generation working, batch may be limited'
           };
         } catch (error) {
           return {
             success: false,
-            model: GROK_MODEL,
+            model: 'grok-vision',
             contextWindow: 2000000,
             testType: 'image',
-            error: 'X.AI image generation experimental (will fallback to Imagen)'
+            error: 'X.AI image generation not available (will fallback to Imagen)'
           };
         }
       }

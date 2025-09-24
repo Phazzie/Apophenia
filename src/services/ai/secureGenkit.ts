@@ -65,34 +65,56 @@ export const nextStepFlow = async (input: {
   }
 };
 
-export const generateImageFlow = async (prompt: string): Promise<string> => {
-  try {
-    console.log('Generating image using secure backend API...');
-    const response = await apiClient.generateImage(prompt);
-    return response.fallbackUrl || generateUnsplashFallback(prompt);
-  } catch (error) {
-    console.warn('Backend API unavailable, using Unsplash fallback:', error);
-    return generateUnsplashFallback(prompt);
-  }
+export const generateImageFlow = async (prompt: string, options?: { generateMultiple?: boolean; count?: number }): Promise<string | string[]> => {
+  return processAdvancedImageGeneration(prompt, options);
 };
 
-export const processAdvancedImageGeneration = async (prompt: string): Promise<string> => {
-  console.log('Advanced AI image generation requested for prompt:', prompt);
+export const processAdvancedImageGeneration = async (
+  prompt: string, 
+  options: { generateMultiple?: boolean; count?: number } = {}
+): Promise<string | string[]> => {
+  const { generateMultiple = false, count = 3 } = options;
+  
+  console.log(`Advanced AI image generation requested for prompt: "${prompt}"${generateMultiple ? ` (${count} variations)` : ''}`);
   
   try {
     console.log('Attempting secure backend image generation...');
-    const response = await apiClient.generateImage(prompt);
     
-    if (response.fallbackUrl) {
-      console.log('Using curated horror imagery from backend');
-      return response.fallbackUrl;
+    if (generateMultiple) {
+      // For multiple images, try to generate several variations
+      const imagePromises = Array(count).fill(0).map(async (_, index) => {
+        const variationPrompt = `${prompt}, variation ${index + 1}`;
+        try {
+          const response = await apiClient.generateImage(variationPrompt);
+          return response.fallbackUrl || generateUnsplashFallback(variationPrompt);
+        } catch (error) {
+          return generateUnsplashFallback(variationPrompt);
+        }
+      });
+      
+      const results = await Promise.all(imagePromises);
+      console.log(`Generated ${results.length} image variations via backend`);
+      return results;
+    } else {
+      const response = await apiClient.generateImage(prompt);
+      
+      if (response.fallbackUrl) {
+        console.log('Using curated horror imagery from backend');
+        return response.fallbackUrl;
+      }
     }
   } catch (error) {
     console.warn('Backend image generation failed:', error);
   }
   
   console.log('Using enhanced Unsplash integration');
-  return generateUnsplashFallback(prompt);
+  if (generateMultiple) {
+    return Array(count).fill(0).map((_, index) => 
+      generateUnsplashFallback(`${prompt}, variation ${index + 1}`)
+    );
+  } else {
+    return generateUnsplashFallback(prompt);
+  }
 };
 
 // Enhanced Unsplash fallback with horror-specific keywords

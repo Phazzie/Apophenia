@@ -4,6 +4,7 @@ import { GameCommand } from '../types';
 
 const NON_BLOCKING_COMMANDS = [
   'generateImage',
+  'generateMultipleImages',
   'pregenerateImage',
   'generateAmbiance',
 ];

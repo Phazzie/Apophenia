@@ -239,34 +239,51 @@ Example format:
   }
 };
 
-export const generateImageFlow = async (prompt: string): Promise<string> => {
-  return processAdvancedImageGeneration(prompt);
+export const generateImageFlow = async (prompt: string, options?: { generateMultiple?: boolean; count?: number }): Promise<string | string[]> => {
+  return processAdvancedImageGeneration(prompt, options);
 };
 
 /**
- * Advanced image generation with Google Imagen
+ * Advanced image generation with X.AI and Google Imagen
  * Generates high-quality horror images for enhanced experience
+ * Supports both single and multiple image generation
  */
 export const processAdvancedImageGeneration = async (
   prompt: string, 
-  generateMultiple: boolean = false
-): Promise<string> => {
-  console.log(`Advanced AI image generation requested for prompt: "${prompt}"`);
+  options: { generateMultiple?: boolean; count?: number } = {}
+): Promise<string | string[]> => {
+  const { generateMultiple = false, count = 3 } = options;
+  
+  console.log(`Advanced AI image generation requested for prompt: "${prompt}"${generateMultiple ? ` (${count} variations)` : ''}`);
   
   // Enhanced prompt engineering for cosmic horror aesthetic
   const horrorEnhancedPrompt = `${prompt}. Photorealistic cosmic horror style, atmospheric nightmare lighting, surreal otherworldly aesthetics, lovecraftian eldritch elements, psychological horror atmosphere, high contrast cinematic composition, digital consciousness themes, reality distortion effects`;
   
   if (generateMultiple) {
-    return await generateMultipleImageVariations(horrorEnhancedPrompt);
+    try {
+      // Try X.AI batch generation first
+      const multipleImages = await generateMultipleWithXAI(horrorEnhancedPrompt, count);
+      if (multipleImages.length > 0) {
+        console.log(`Generated ${multipleImages.length} images successfully`);
+        return multipleImages;
+      }
+    } catch (error) {
+      console.warn('Batch image generation failed:', error);
+    }
+    
+    // Fallback to single image generation
+    console.log('Falling back to single image generation');
+    const singleImage = await processAdvancedImageGeneration(horrorEnhancedPrompt, { generateMultiple: false });
+    return Array.isArray(singleImage) ? singleImage : [singleImage];
   }
   
   try {
-    // Primary: Grok-4 Fast Reasoning with Imagen fallback
-    console.log('Attempting Grok-4 Fast image generation (with Imagen fallback)...');
-    const grokFirstUrl = await generateWithGrokFirst(horrorEnhancedPrompt);
-    if (grokFirstUrl) {
-      console.log('Image generation successful (Grok-first approach)');
-      return grokFirstUrl;
+    // Primary: X.AI Fast Image Generation with Imagen fallback
+    console.log('Attempting X.AI image generation (with Imagen fallback)...');
+    const xaiFirstUrl = await generateWithGrokFirst(horrorEnhancedPrompt);
+    if (xaiFirstUrl) {
+      console.log('Image generation successful (X.AI-first approach)');
+      return xaiFirstUrl;
     }
     
     // Final fallback: Use enhanced Unsplash integration
@@ -280,32 +297,48 @@ export const processAdvancedImageGeneration = async (
 };
 
 /**
- * Generate multiple image variations using Promise.all for parallel processing
+ * Generate multiple image variations using X.AI batch processing
  */
-async function generateMultipleImageVariations(basePrompt: string): Promise<string> {
-  const variations = [
-    `${basePrompt}, close-up perspective, intimate horror`,
-    `${basePrompt}, wide-angle view, environmental terror`, 
-    `${basePrompt}, dramatic lighting, shadow play emphasis`,
-  ];
-
+async function generateMultipleWithXAI(basePrompt: string, count: number = 3): Promise<string[]> {
+  // Import xaiClient here to avoid circular dependencies
+  const { xaiClient } = await import('./grokService');
+  
   try {
-    console.log('Generating multiple image variations in parallel...');
+    console.log(`Generating ${count} image variations with X.AI batch processing...`);
     
-    // Generate all variations in parallel
-    const imagePromises = variations.map(prompt => 
+    if (API_KEYS.xaiAPI) {
+      const grokResults = await xaiClient.generateMultipleImages(basePrompt, count);
+      if (grokResults && grokResults.length > 0) {
+        console.log(`X.AI generated ${grokResults.length} images successfully!`);
+        return grokResults;
+      }
+    }
+    
+    console.log('X.AI batch image generation not available, falling back to individual generation...');
+    
+    // Fallback to generating multiple images individually
+    const variations = [
+      `${basePrompt}, close-up perspective, intimate horror`,
+      `${basePrompt}, wide-angle view, environmental terror`, 
+      `${basePrompt}, dramatic lighting, shadow play emphasis`,
+    ];
+
+    const imagePromises = variations.slice(0, count).map(prompt => 
       generateSingleVariation(prompt)
     );
     
     const results = await Promise.all(imagePromises);
     
-    // Select the best result (first successful one, or best quality)
-    const successfulResult = results.find(result => result && !result.includes('unsplash'));
-    return successfulResult || results[0] || generateUnsplashFallback(basePrompt);
+    // Filter out null results
+    return results.filter(result => result !== null) as string[];
     
   } catch (error) {
-    console.warn('Parallel image generation failed:', error);
-    return generateUnsplashFallback(basePrompt);
+    console.warn('X.AI batch image generation failed:', error);
+    
+    // Final fallback to Unsplash variations
+    return Array(count).fill(0).map((_, index) => 
+      generateUnsplashFallback(`${basePrompt}, variation ${index + 1}`)
+    );
   }
 }
 
@@ -327,31 +360,32 @@ async function generateSingleVariation(prompt: string): Promise<string> {
 }
 
 /**
- * Enhanced image generation with Grok-first approach and Imagen fallback
+ * Enhanced image generation with X.AI first approach, then Imagen fallback
  */
-async function generateWithGrokFirst(prompt: string): Promise<string | null> {
+async function generateWithGrokFirst(prompt: string, options: { count?: number } = {}): Promise<string | null> {
   // Import xaiClient here to avoid circular dependencies
   const { xaiClient } = await import('./grokService');
   
   try {
-    console.log('Attempting image generation with Grok-4 first...');
+    console.log('Attempting image generation with X.AI first...');
     
-    // Try Grok first (experimental/future compatibility)
+    // Try X.AI first (now with proper API support)
     if (API_KEYS.xaiAPI) {
-      const grokResult = await xaiClient.generateImage(prompt);
+      const grokResult = await xaiClient.generateImage(prompt, options);
       if (grokResult) {
-        console.log('Grok-4 image generation successful!');
-        return grokResult;
+        console.log('X.AI image generation successful!');
+        // If multiple images requested and returned as array, use first one for single image flow
+        return Array.isArray(grokResult) ? grokResult[0] : grokResult;
       }
     }
     
-    console.log('Grok-4 image generation not available, falling back to Imagen...');
+    console.log('X.AI image generation not available, falling back to Imagen...');
     
     // Fallback to Imagen
     return await generateWithImagen(prompt);
     
   } catch (error) {
-    console.warn('Grok image generation failed, falling back to Imagen:', error);
+    console.warn('X.AI image generation failed, falling back to Imagen:', error);
     return await generateWithImagen(prompt);
   }
 }

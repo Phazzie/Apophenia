@@ -4,6 +4,7 @@ import { displayChoicesExecutor } from './displayChoices';
 import { displayTextExecutor } from './displayText';
 import { generateAmbianceExecutor } from './generateAmbiance';
 import { generateImageExecutor } from './generateImage';
+import { generateMultipleImagesExecutor } from './generateMultipleImages';
 import { pregenerateImageExecutor } from './pregenerateImage';
 import { updateWorldStateExecutor } from './updateWorldState';
 import { waitExecutor } from './wait';
@@ -11,6 +12,7 @@ import { waitExecutor } from './wait';
 export const commandExecutors: Record<string, CommandExecutor> = {
   [displayTextExecutor.command]: displayTextExecutor,
   [generateImageExecutor.command]: generateImageExecutor,
+  [generateMultipleImagesExecutor.command]: generateMultipleImagesExecutor,
   [pregenerateImageExecutor.command]: pregenerateImageExecutor,
   [updateWorldStateExecutor.command]: updateWorldStateExecutor,
   [waitExecutor.command]: waitExecutor,

@@ -19,7 +19,7 @@ export class GameStateManager {
       useGameStateStore.getState().reset();
       useWorldStateStore.getState().reset();
       useStoryHistoryStore.getState().reset();
-      // Note: Image cache is not reset as it can be shared across games
+      // Image cache is preserved as it can be shared across games
       console.log('All game stores reset successfully');
     } catch (error) {
       console.error('Error resetting game stores:', error);

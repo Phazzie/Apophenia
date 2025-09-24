@@ -18,7 +18,6 @@ export const displayTextExecutor: CommandExecutor = {
       });
     } else {
       console.error(`displayText: Segment with id ${command.payload.segmentId} not found. Story history length: ${storyHistory.length}`);
-      // Could optionally create a segment here, but for now we'll log the error
     }
   },
 };

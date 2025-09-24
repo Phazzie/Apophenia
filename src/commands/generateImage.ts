@@ -35,7 +35,7 @@ export const generateImageExecutor: CommandExecutor = {
       
       let imageUrl: string;
       if (result.variations.length > 0) {
-        // Use the first variation (could implement selection logic here)
+        // Use the first variation from the generated set
         imageUrl = result.variations[0].url;
         console.log(`Generated ${result.variations.length} image variations, selected: ${result.variations[0].quality}`);
       } else {
@@ -43,7 +43,7 @@ export const generateImageExecutor: CommandExecutor = {
         imageUrl = await generateImage(prompt);
       }
 
-      // We need to get the segment again in case other image properties (e.g., insets) have changed.
+      // Refresh segment data to ensure we have the latest state.
       const currentSegment = useStoryHistoryStore
         .getState()
         .storyHistory.find((s) => s.id === segmentId);

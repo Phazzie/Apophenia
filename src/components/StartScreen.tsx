@@ -9,7 +9,7 @@ import { setSelectedModel } from '../services/ai/unifiedAIService';
 import AIModelSelector from './AIModelSelector';
 import { GameState, GenreConfig } from '../types';
 
-// A mock genre config for now. In a real app, this might be selectable.
+// Default cosmic horror genre configuration
 const genreConfig: GenreConfig = {
   id: 'cosmic-horror',
   name: 'Cosmic Horror',
@@ -80,7 +80,7 @@ const StartScreen: React.FC = () => {
 
   const handleContinue = () => {
     // The stores are already rehydrated by the persist middleware.
-    // We just need to navigate to the game screen.
+    // Navigate to the game screen.
     setGameState(GameState.PLAYING);
   };
 

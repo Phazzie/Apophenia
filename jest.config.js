@@ -31,6 +31,28 @@ module.exports = {
   testPathIgnorePatterns: [
     '<rootDir>/src/services/ai/__tests__/testUtils.helper.ts'
   ],
+  // Coverage configuration - enforce 80% threshold
+  collectCoverage: process.env.CI === 'true' || process.env.COVERAGE === 'true',
+  collectCoverageFrom: [
+    'src/**/*.{ts,tsx}',
+    '!src/**/*.d.ts',
+    '!src/setupTests.ts',
+    '!src/**/__mocks__/**',
+    '!src/**/__tests__/**',
+    '!src/**/*.spec.{ts,tsx}',
+    '!src/**/*.test.{ts,tsx}',
+    '!src/services/ai/__tests__/testUtils.helper.ts'
+  ],
+  coverageThreshold: {
+    global: {
+      lines: 80,
+      functions: 80,
+      branches: 80,
+      statements: 80
+    }
+  },
+  coverageReporters: ['text', 'lcov', 'html', 'json-summary'],
+  coverageDirectory: 'coverage',
   // Mock import.meta.env for Vite compatibility
   globals: {
     'import.meta': {

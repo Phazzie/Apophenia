@@ -3,6 +3,36 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2025-01-XX
+### Added
+- **🧠 Grok-4 Fast Reasoning Integration**: Primary AI model with 2M token context window and advanced reasoning capabilities
+- **🔄 Multi-Model AI System**: Dynamic switching between Grok-4, Gemini 2.5 Pro, and Gemini 2.5 Flash
+- **🎛️ Model Selector Interface**: Comprehensive modal for selecting and configuring AI models
+- **🔍 Test API System**: Built-in connectivity testing for all AI providers with real-time feedback
+- **⚡ Enhanced Premium Features**: 2M token context enables complete session memory, advanced psychological profiling, and narrative consistency engine
+- **🎨 UI Enhancements**: Model selector modal, test API button, improved start screen layout
+- **📦 New Components**: `ModelSelector.tsx`, `TestAPIButton.tsx`, `aiModelStore.ts`
+- **🔧 Unified AI Service**: Routes requests between providers with intelligent fallback system
+
+### Changed
+- **Default AI Model**: Grok-4 Fast Reasoning is now the primary model (fallback to Gemini)
+- **Environment Configuration**: Added `VITE_GROK_API_KEY` for X.AI integration
+- **Context Window**: Upgraded from 1M tokens (Gemini) to 2M tokens (Grok-4) for enhanced narrative consistency
+- **Game Service**: Updated to use unified AI service with model selection
+- **Start Screen**: Added AI model information and selection controls
+
+### Enhanced
+- **Psychological Profiling**: Now tracks complete player history across entire session
+- **Narrative Consistency**: Cross-references all story elements with 2M token context
+- **Memory System**: Complete session memory for perfect story continuity
+- **Error Handling**: Graceful fallbacks when primary AI model unavailable
+
+### Technical
+- **Architecture**: Added unified AI service layer for multi-provider support
+- **State Management**: New Zustand store for AI model selection persistence
+- **Testing**: Updated test suite for new AI service architecture
+- **Types**: Enhanced TypeScript definitions for AI models and testing
+
 ## [0.3.0] - 2025-09-08
 ### Added
 - **New Game Functionality**: Players can now start a new game from the game screen via a "New Game" button, which properly resets all application state.

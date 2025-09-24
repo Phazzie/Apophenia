@@ -49,25 +49,37 @@ npx vite preview
 cp .env.example .env.local
 
 # Edit .env.local with your keys:
+VITE_GROK_API_KEY=your-grok-api-key-here
 VITE_GEMINI_API_KEY=your-google-api-key-here
 ```
 
+**AI Model Priority**: Grok-4 Fast Reasoning (primary) → Gemini 2.5 Pro (fallback) → Gemini 2.5 Flash (final fallback)
 **Without API keys**: App still runs with mock data and error handling.
 
 ### Project Structure Navigation
 ```
 src/
-├── components/          # React UI components
-├── stores/             # Zustand state management (game state, UI state)
+├── components/          # React UI components (ModelSelector, TestAPIButton, etc.)
+├── stores/             # Zustand state management (game state, AI model selection)
+│   ├── aiModelStore.ts    # AI model selection and testing
+│   ├── gameStateStore.ts  # Core game state
+│   └── ...
 ├── services/           # Business logic, AI flows, game controller
+│   ├── ai/               # AI service integrations
+│   │   ├── grokService.ts      # Grok-4 Fast Reasoning (2M context)
+│   │   ├── unifiedAIService.ts # Multi-model routing
+│   │   └── genkit.ts           # Gemini fallback
+│   └── ...
 ├── commands/           # Command executors (displayText, generateImage, etc.)
 ├── types.ts           # Centralized type definitions
 └── App.tsx            # Main application entry
 ```
 
 **Key Files:**
-- `src/App.tsx` - Main UI and game interface
-- `src/stores/gameStore.ts` - Core game state (story segments, choices)
+- `src/App.tsx` - Main UI with TestAPIButton integration
+- `src/components/StartScreen.tsx` - Model selector integration
+- `src/stores/aiModelStore.ts` - AI model selection state
+- `src/services/ai/unifiedAIService.ts` - Multi-model AI routing
 - `src/services/gameService.ts` - Game controller and flow orchestration
 - `src/services/flows/` - AI integration flows (concept, nextStep, etc.)
 - `src/commands/` - Command executors for game actions

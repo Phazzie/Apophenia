@@ -354,9 +354,14 @@ async function generateWithImagen(prompt: string): Promise<string | null> {
       console.warn('Primary Imagen model failed, trying fallback:', primaryError);
       
       // Try fallback Imagen model
-      const genAI = new GoogleGenerativeAI(apiKey);
-      imageModel = genAI.getGenerativeModel({ model: AI_MODELS.FALLBACK_IMAGE });
-      result = await imageModel.generateContent(prompt);
+      try {
+        const genAI = new GoogleGenerativeAI(apiKey);
+        imageModel = genAI.getGenerativeModel({ model: AI_MODELS.FALLBACK_IMAGE });
+        result = await imageModel.generateContent(prompt);
+      } catch (fallbackError) {
+        console.warn('Fallback Imagen model also failed:', fallbackError);
+        return null;
+      }
     }
     
     const response = result.response;

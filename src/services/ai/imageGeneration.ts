@@ -69,7 +69,7 @@ class ImageGenerationService {
         return {
           url: `https://via.placeholder.com/800x600/2d1b69/e94560?text=Imagen+Error+${index + 1}`,
           prompt: enhancedPrompt,
-          quality: 'imagen' as const
+          quality: 'unsplash' as const // Error fallback is not real Imagen generation
         };
       }
     });

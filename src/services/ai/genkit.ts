@@ -16,16 +16,14 @@ import { API_KEYS, AI_MODELS } from '../config';
 
 const genAI = new GoogleGenerativeAI(API_KEYS.googleGenAI);
 
-// Placeholder for image client - will be properly implemented with correct package
-const imageClient = {
-  generateImage: async (request: any) => {
-    // Mock implementation for now - will be replaced with real ImageGenerationClient
-    return [{
-      generatedImages: [{
-        bytesBase64Encoded: 'mockBase64Data'
-      }]
-    }];
+// Google Imagen API client using the Google Generative AI SDK
+const createImageClient = () => {
+  if (!API_KEYS.googleImagen && !API_KEYS.googleGenAI) {
+    return null;
   }
+  
+  const genAI = new GoogleGenerativeAI(API_KEYS.googleImagen || API_KEYS.googleGenAI);
+  return genAI.getGenerativeModel({ model: "imagen-3.0-generate-001" });
 };
 
 const safetySettings = [
@@ -337,30 +335,39 @@ async function generateSingleVariation(prompt: string): Promise<string> {
  */
 async function generateWithImagen(prompt: string): Promise<string | null> {
   try {
-    // Use the Google Generative AI package for text-to-image generation
-    // Note: Google AI Studio provides access to image generation capabilities
+    console.log('Attempting Google Imagen image generation with prompt:', prompt);
     
-    if (!API_KEYS.googleImagen && !API_KEYS.googleGenAI) {
+    const imageClient = createImageClient();
+    if (!imageClient) {
       console.log('Google AI API key not available - using fallback');
       return null;
     }
 
-    // For production use, this would integrate with the official Google AI image generation
-    // Currently using the generative AI package which supports multimodal capabilities
-    const genAI = new GoogleGenerativeAI(API_KEYS.googleGenAI);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-
-    // Enhanced prompt for better image generation results
-    const enhancedPrompt = `Create a detailed description for an image generation AI: ${prompt}. Focus on atmospheric cosmic horror elements, dark lighting, surreal compositions, and otherworldly aesthetics.`;
-
-    const result = await model.generateContent(enhancedPrompt);
-    const description = result.response.text();
+    // Generate image using Google Imagen API
+    const result = await imageClient.generateContent(prompt);
+    const response = result.response;
     
-    // Log the generated description for debugging
-    console.log('Generated image description:', description);
+    // Check if the response contains image data
+    if (response.candidates && response.candidates.length > 0) {
+      const candidate = response.candidates[0];
+      
+      // Look for inline data with image content
+      if (candidate.content && candidate.content.parts) {
+        for (const part of candidate.content.parts) {
+          if (part.inlineData && part.inlineData.mimeType && part.inlineData.mimeType.startsWith('image/')) {
+            const base64Data = part.inlineData.data;
+            const mimeType = part.inlineData.mimeType;
+            const dataUrl = `data:${mimeType};base64,${base64Data}`;
+            
+            console.log('Google Imagen image generation successful');
+            return dataUrl;
+          }
+        }
+      }
+    }
     
-    // In a real implementation, this description would be sent to an image generation service
-    // For now, return null to fall back to Unsplash
+    // If we get here, no image data was found in the response
+    console.warn('Google Imagen response did not contain image data');
     return null;
     
   } catch (error) {

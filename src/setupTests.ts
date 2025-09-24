@@ -21,3 +21,29 @@ process.env.VITE_GEMINI_API_KEY = 'test-key';
 process.env.VITE_IMAGE_API_KEY = 'test-image-key';
 process.env.VITE_GOOGLE_NANO_BANANA_KEY = 'test-nano-key';
 process.env.VITE_GOOGLE_IMAGEN_KEY = 'test-imagen-key';
+
+// Mock localStorage for revolutionary features testing
+const localStorageMock = {
+  getItem: jest.fn(() => null),
+  setItem: jest.fn(),
+  removeItem: jest.fn(),
+  clear: jest.fn(),
+};
+Object.defineProperty(window, 'localStorage', {
+  value: localStorageMock
+});
+
+// Mock document methods for Fifth Wall Breach testing
+Object.defineProperty(document, 'title', {
+  writable: true,
+  value: 'Apophenia'
+});
+
+// Mock browser APIs
+Object.defineProperty(window, 'requestAnimationFrame', {
+  value: (callback: FrameRequestCallback) => setTimeout(callback, 16)
+});
+
+Object.defineProperty(window, 'cancelAnimationFrame', {
+  value: (id: number) => clearTimeout(id)
+});

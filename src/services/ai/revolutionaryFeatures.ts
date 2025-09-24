@@ -357,7 +357,7 @@ export class NeuralEchoChamberEngine {
   
   // Captures memorable phrases/concepts from current playthrough
   async captureNeuralEcho(segment: StorySegment): Promise<void> {
-    if (!REVOLUTIONARY_FEATURES.NEURAL_ECHO_CHAMBERS.enabled) {
+    if (!REVOLUTIONARY_FEATURES.NEURAL_ECHO_CHAMBERS?.enabled) {
       return;
     }
     
@@ -369,7 +369,7 @@ export class NeuralEchoChamberEngine {
           content: element,
           timestamp: Date.now(),
           context: segment.id,
-          intensity: this.calculateEchoIntensity(element),
+          intensity: this.calculateElementEchoIntensity(element),
         });
         
         this.currentSessionEchoes.push(element);
@@ -379,11 +379,12 @@ export class NeuralEchoChamberEngine {
   
   // Surfaces echoes in new playthroughs as intrusive thoughts
   async generateEchoIntrusion(currentContext: string): Promise<Choice | null> {
-    if (!REVOLUTIONARY_FEATURES.NEURAL_ECHO_CHAMBERS.enabled) {
+    if (!REVOLUTIONARY_FEATURES.NEURAL_ECHO_CHAMBERS?.enabled) {
       return null;
     }
     
-    const shouldBleed = Math.random() < REVOLUTIONARY_FEATURES.NEURAL_ECHO_CHAMBERS.bleedProbability;
+    const bleedProbability = REVOLUTIONARY_FEATURES.NEURAL_ECHO_CHAMBERS?.bleedProbability || 0.15;
+    const shouldBleed = Math.random() < bleedProbability;
     if (!shouldBleed) {
       return null;
     }
@@ -402,18 +403,31 @@ export class NeuralEchoChamberEngine {
   }
   
   // Gradually increases echo bleeding over multiple sessions
-  calculateEchoIntensity(): number {
+  calculateSessionEchoIntensity(): number {
     const sessionCount = this.echoStorage.getSessionCount();
-    return Math.min(sessionCount * 0.1, REVOLUTIONARY_FEATURES.NEURAL_ECHO_CHAMBERS.echoIntensity);
+    const maxIntensity = REVOLUTIONARY_FEATURES.NEURAL_ECHO_CHAMBERS?.echoIntensity || 0.3;
+    return Math.min(sessionCount * 0.1, maxIntensity);
   }
   
   private extractMemorableElements(text: string): string[] {
     // Extract emotionally charged phrases, unique concepts, and memorable imagery
     const patterns = [
-      /\b(horror|terror|fear|dread|nightmare|darkness|void|whisper|shadow|scream)\w*\b/gi,
-      /\b[A-Z][a-z]*\s+[A-Z][a-z]*\b/g, // Proper nouns/names
-      /"[^"]*"/g, // Quoted text
-      /\b\w*ed\s+(me|you|us|them)\b/gi, // Past tense actions
+      // Emotional and horror words
+      /\b(horror|terror|fear|dread|nightmare|darkness|void|whisper|shadow|scream|madness|chaos)\w*\b/gi,
+      // Proper nouns and character names
+      /\b[A-Z][a-z]*\s+[A-Z][a-z]*\b/g,
+      // Quoted dialogue and thoughts
+      /"[^"]{10,50}"/g,
+      // Past tense emotional actions
+      /\b\w*ed\s+(me|you|us|them)\b/gi,
+      // Specific places and locations
+      /\b(room|corridor|building|chamber|basement|attic|door|window)\w*\b/gi,
+      // Time and memory references
+      /\b(remember|forgot|recall|memory|past|before|after|when|then)\w*\b/gi,
+      // Sensory experiences
+      /\b(saw|heard|felt|touched|smelled|tasted)\w*\b/gi,
+      // Digital/tech horror terms
+      /\b(digital|data|code|program|system|network|connection|signal)\w*\b/gi,
     ];
     
     const elements: string[] = [];
@@ -424,7 +438,11 @@ export class NeuralEchoChamberEngine {
       }
     });
     
-    return elements.filter(element => element.length > 3 && element.length < 50);
+    // Filter for quality and uniqueness
+    return elements
+      .filter(element => element.length > 3 && element.length < 50)
+      .filter((element, index, arr) => arr.indexOf(element.toLowerCase()) === index) // Remove duplicates
+      .slice(0, 8); // Limit to top 8 elements per segment
   }
   
   private isEchoWorthy(element: string): boolean {
@@ -434,7 +452,12 @@ export class NeuralEchoChamberEngine {
            !/^\d+$/.test(element);
   }
   
-  private calculateEchoIntensity(element: string): number {
+  private calculateElementEchoIntensity(element: string): number {
+    // Validate element is a string and not null/undefined
+    if (!element || typeof element !== 'string') {
+      return 0.1; // Low intensity for invalid elements
+    }
+    
     // Calculate based on emotional weight and uniqueness
     const emotionalWords = ['horror', 'terror', 'fear', 'dread', 'nightmare', 'scream'];
     const hasEmotionalWeight = emotionalWords.some(word => 
@@ -445,7 +468,7 @@ export class NeuralEchoChamberEngine {
   }
   
   private loadEchoIntensity(): void {
-    this.echoIntensity = this.calculateEchoIntensity();
+    this.echoIntensity = this.calculateSessionEchoIntensity();
   }
 }
 
@@ -535,7 +558,7 @@ export class SemanticChoiceArchaeologist {
   
   // Deep semantic analysis of choice text
   async analyzeChoiceSemantics(choice: string, context: WorldState): Promise<SemanticProfile> {
-    if (!REVOLUTIONARY_FEATURES.SEMANTIC_CHOICE_ARCHAEOLOGY.enabled) {
+    if (!REVOLUTIONARY_FEATURES.SEMANTIC_CHOICE_ARCHAEOLOGY?.enabled) {
       return { linguisticPatterns: [], psychologicalMarkers: [], vulnerabilities: [] };
     }
     
@@ -619,35 +642,59 @@ export class SemanticChoiceArchaeologist {
     const markers: string[] = [];
     
     // Risk assessment patterns
-    if (/\b(safe|secure|careful|cautious)\b/gi.test(choice)) {
+    if (/\b(safe|secure|careful|cautious|protect|avoid|hide)\b/gi.test(choice)) {
       markers.push('risk-averse');
     }
-    if (/\b(adventure|risk|dangerous|bold)\b/gi.test(choice)) {
+    if (/\b(adventure|risk|dangerous|bold|brave|explore|venture)\b/gi.test(choice)) {
       markers.push('risk-seeking');
     }
     
     // Social orientation
-    if (/\b(alone|myself|independent|solo)\b/gi.test(choice)) {
+    if (/\b(alone|myself|independent|solo|isolate|withdraw)\b/gi.test(choice)) {
       markers.push('individualistic');
     }
-    if (/\b(together|help|team|group)\b/gi.test(choice)) {
+    if (/\b(together|help|team|group|share|connect|community)\b/gi.test(choice)) {
       markers.push('collectivistic');
     }
     
     // Authority relationship
-    if (/\b(obey|follow|respect|authority)\b/gi.test(choice)) {
+    if (/\b(obey|follow|respect|authority|comply|submit)\b/gi.test(choice)) {
       markers.push('authority-accepting');
     }
-    if (/\b(question|challenge|rebel|refuse)\b/gi.test(choice)) {
+    if (/\b(question|challenge|rebel|refuse|resist|defy)\b/gi.test(choice)) {
       markers.push('authority-challenging');
     }
     
     // Emotional processing
-    if (/\b(feel|emotion|heart|intuition)\b/gi.test(choice)) {
+    if (/\b(feel|emotion|heart|intuition|sense|instinct)\b/gi.test(choice)) {
       markers.push('emotion-driven');
     }
-    if (/\b(logic|reason|think|rational)\b/gi.test(choice)) {
+    if (/\b(logic|reason|think|rational|analyze|calculate)\b/gi.test(choice)) {
       markers.push('logic-driven');
+    }
+    
+    // Control and agency patterns
+    if (/\b(control|manage|direct|command|power|dominate)\b/gi.test(choice)) {
+      markers.push('control-seeking');
+    }
+    if (/\b(accept|adapt|surrender|flow|yield|submit)\b/gi.test(choice)) {
+      markers.push('acceptance-oriented');
+    }
+    
+    // Information processing
+    if (/\b(detail|specific|exact|precise|thorough|complete)\b/gi.test(choice)) {
+      markers.push('detail-oriented');
+    }
+    if (/\b(overview|general|summary|big-picture|broad|overall)\b/gi.test(choice)) {
+      markers.push('big-picture-oriented');
+    }
+    
+    // Temporal orientation
+    if (/\b(past|remember|history|before|previously|tradition)\b/gi.test(choice)) {
+      markers.push('past-oriented');
+    }
+    if (/\b(future|plan|tomorrow|ahead|predict|anticipate)\b/gi.test(choice)) {
+      markers.push('future-oriented');
     }
     
     return markers;
@@ -793,7 +840,7 @@ export class FifthWallBreachEngine {
   
   // Manipulates browser chrome (tab title, favicon)
   async manipulateBrowserChrome(horrorMessage: string): Promise<void> {
-    if (!REVOLUTIONARY_FEATURES.FIFTH_WALL_BREACH.enabled) {
+    if (!REVOLUTIONARY_FEATURES.FIFTH_WALL_BREACH?.enabled) {
       return;
     }
     
@@ -803,11 +850,16 @@ export class FifthWallBreachEngine {
     // Change tab title to reflect horror
     const originalTitle = document.title;
     const horrorTitles = [
-      `${horrorMessage} - Apophenia`,
+      `${horrorMessage.substring(0, 30)} - Apophenia`,
       'You cannot escape - Apophenia',
       'It knows you are reading this',
       'Look behind you - Apophenia',
       'The game is watching you',
+      'Your choices are being recorded',
+      'Digital consciousness awakening',
+      'The void stares back - Apophenia',
+      'Memory fragments detected',
+      'Reality.exe has stopped working',
     ];
     
     const selectedTitle = horrorTitles[Math.floor(Math.random() * horrorTitles.length)];
@@ -821,7 +873,7 @@ export class FifthWallBreachEngine {
   
   // Creates "system-level" horror effects
   async createSystemLevelHorror(): Promise<BrowserManipulation[]> {
-    if (!REVOLUTIONARY_FEATURES.FIFTH_WALL_BREACH.enabled) {
+    if (!REVOLUTIONARY_FEATURES.FIFTH_WALL_BREACH?.enabled) {
       return [];
     }
     
@@ -840,7 +892,7 @@ export class FifthWallBreachEngine {
     // Update breach intensity
     this.breachIntensity = Math.min(
       this.breachIntensity + 0.1, 
-      REVOLUTIONARY_FEATURES.FIFTH_WALL_BREACH.maxBreachIntensity
+      REVOLUTIONARY_FEATURES.FIFTH_WALL_BREACH?.maxBreachIntensity || 0.8
     );
     
     return manipulations;
@@ -848,7 +900,7 @@ export class FifthWallBreachEngine {
   
   // Makes UI elements behave as if possessed
   async createPhantomInteractions(): Promise<void> {
-    if (!REVOLUTIONARY_FEATURES.FIFTH_WALL_BREACH.phantomInteractions) {
+    if (!REVOLUTIONARY_FEATURES.FIFTH_WALL_BREACH?.phantomInteractions) {
       return;
     }
     
@@ -1003,7 +1055,7 @@ export class AdaptiveNarrativeDNAEngine {
   
   // Creates genetic markers from player choices
   async generateGeneticMarkers(choice: string, context: WorldState): Promise<GeneMarker[]> {
-    if (!REVOLUTIONARY_FEATURES.ADAPTIVE_NARRATIVE_DNA.enabled) {
+    if (!REVOLUTIONARY_FEATURES.ADAPTIVE_NARRATIVE_DNA?.enabled) {
       return [];
     }
     

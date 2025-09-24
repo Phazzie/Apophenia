@@ -10,19 +10,25 @@ import {
 } from './gameService';
 
 import {
-  generateConceptFlow,
   generateImageFlow,
-  nextStepFlow,
 } from './ai/secureGenkit';
+
+import {
+  generateConceptWithSelectedModel,
+  generateNextStepWithSelectedModel,
+} from './ai/unifiedAIService';
 
 import type { Command, GenreConfig, StorySegment, WorldState } from '../types';
 import { summarizeHistoryFlow } from './flows/summaryFlow';
 
 // Mock the flow modules
 jest.mock('./ai/secureGenkit', () => ({
-  generateConceptFlow: jest.fn(),
   generateImageFlow: jest.fn(),
-  nextStepFlow: jest.fn(),
+}));
+
+jest.mock('./ai/unifiedAIService', () => ({
+  generateConceptWithSelectedModel: jest.fn(),
+  generateNextStepWithSelectedModel: jest.fn(),
 }));
 
 jest.mock('./flows/summaryFlow', () => ({
@@ -97,21 +103,21 @@ describe('gameService', () => {
   });
 
   describe('getNextStep', () => {
-    it('returns commands from nextStepFlow on success', async () => {
+    it('returns commands from generateNextStepWithSelectedModel on success', async () => {
       const commands: Command[] = [
         { type: 'displayText', payload: { content: 'Hello', segmentId: 'seg-2' } },
       ];
-      (nextStepFlow as jest.Mock).mockResolvedValueOnce(commands);
+      (generateNextStepWithSelectedModel as jest.Mock).mockResolvedValueOnce(commands);
 
       const result = await getNextStep('Open the door', mockWorldState, mockStoryHistory, mockGenreConfig);
 
       // With revolutionary features enabled, the playerChoice gets enhanced
-      expect(nextStepFlow).toHaveBeenCalledWith({
-        playerChoice: 'Player chose: Open the door. Continue the cosmic horror narrative.',
-        worldState: mockWorldState,
-        history: mockStoryHistory,
-        genreConfig: mockGenreConfig,
-      });
+      expect(generateNextStepWithSelectedModel).toHaveBeenCalledWith(
+        'Player chose: Open the door. Continue the cosmic horror narrative.',
+        mockWorldState,
+        mockStoryHistory,
+        mockGenreConfig
+      );
       
       // Result now includes additional revolutionary features data
       expect(result.commands).toEqual(commands);
@@ -121,18 +127,18 @@ describe('gameService', () => {
       expect(result).toHaveProperty('corruptionEffects');
     });
 
-    it('returns error-recovery commands when nextStepFlow throws', async () => {
+    it('returns error-recovery commands when generateNextStepWithSelectedModel throws', async () => {
       // Setup fresh mock for this test only
-      const nextStepFlowMock = nextStepFlow as jest.Mock;
-      nextStepFlowMock.mockReset();
-      nextStepFlowMock.mockRejectedValue(new Error('Network error'));
+      const generateNextStepWithSelectedModelMock = generateNextStepWithSelectedModel as jest.Mock;
+      generateNextStepWithSelectedModelMock.mockReset();
+      generateNextStepWithSelectedModelMock.mockRejectedValue(new Error('Network error'));
 
       const result = await getNextStep('Open the door', mockWorldState, [], mockGenreConfig);
 
       // Should return fallback commands from secure genkit
       expect(result.commands).toHaveLength(2);
       expect(result.commands[0].type).toBe('displayText');
-      expect((result.commands[0].payload as any).content).toContain('cosmic forces continue to manifest');
+      expect((result.commands[0].payload as any).content).toContain('fabric of reality fractures');
       expect(result.commands[1].type).toBe('displayChoices');
       expect((result.commands[1].payload as any).choices).toHaveLength(3);
       
@@ -143,7 +149,7 @@ describe('gameService', () => {
       expect(result).toHaveProperty('corruptionEffects');
       
       // Reset mock after test
-      nextStepFlowMock.mockReset();
+      generateNextStepWithSelectedModelMock.mockReset();
     });
   });
 
@@ -157,11 +163,11 @@ describe('gameService', () => {
   });
 
   describe('generateConcept', () => {
-    it('returns concept from generateConceptFlow on success', async () => {
+    it('returns concept from generateConceptWithSelectedModel on success', async () => {
       const concept = { protagonist: 'A hero', setting: 'A castle', dilemma: 'A dragon' };
-      (generateConceptFlow as jest.Mock).mockResolvedValueOnce(concept);
+      (generateConceptWithSelectedModel as jest.Mock).mockResolvedValueOnce(concept);
       const result = await generateConcept(mockGenreConfig);
-      expect(generateConceptFlow).toHaveBeenCalledWith(mockGenreConfig);
+      expect(generateConceptWithSelectedModel).toHaveBeenCalledWith(mockGenreConfig);
       expect(result).toEqual(concept);
     });
   });

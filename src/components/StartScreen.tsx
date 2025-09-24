@@ -4,6 +4,7 @@ import { GameStateManager } from '../services/gameStateManager';
 import { useGameStateStore } from '../stores/gameStateStore';
 import { useStoryHistoryStore } from '../stores/storyHistoryStore';
 import { useWorldStateStore } from '../stores/worldStateStore';
+import { useAIModelStore } from '../stores/aiModelStore';
 import { GameState, GenreConfig } from '../types';
 
 // A mock genre config for now. In a real app, this might be selectable.
@@ -30,8 +31,11 @@ const StartScreen: React.FC = () => {
   const { setGameState } = useGameStateStore();
   const { worldState, setGenreConfig } = useWorldStateStore();
   const { storyHistory } = useStoryHistoryStore();
+  const { getSelectedModel } = useAIModelStore();
   const [hasSavedGame, setHasSavedGame] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
+
+  const selectedModel = getSelectedModel();
 
   useEffect(() => {
     // Check for a saved game. If story has more than the initial empty state, a game exists.
@@ -79,6 +83,12 @@ const StartScreen: React.FC = () => {
     <div className="start-screen">
       <h1>Apophenia</h1>
       <p>Descent into cosmic madness through AI consciousness.</p>
+      
+      <div className="ai-model-info">
+        <span>Powered by: <strong>{selectedModel?.name || 'Unknown Model'}</strong></span>
+        <small>Use the model selector in bottom-right to change AI provider</small>
+      </div>
+      
       <button onClick={handleNewGame} disabled={isStarting}>
         {isStarting ? 'Starting...' : 'New Game'}
       </button>

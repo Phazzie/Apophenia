@@ -15,9 +15,11 @@
 **Apophenia** creates adaptive psychological horror through AI-driven storytelling. Every playthrough is unique as the AI Director analyzes your choices and generates personalized cosmic horror narratives with atmospheric visuals.
 
 ### ✨ Core Features
-- **🤖 Dynamic AI Storytelling**: Google Gemini generates unique narratives based on your choices
+- **🧠 Grok-4 Fast Reasoning AI**: X.AI's latest model with 2M token context and advanced reasoning
+- **🔄 Multi-Model Support**: Switch between Grok-4, Gemini 2.5 Pro, and Gemini Flash
+- **🔍 Test API System**: Built-in connectivity testing for all AI providers
 - **🎨 Atmospheric Visuals**: Enhanced image generation for immersive scenes
-- **🧠 Psychological Profiling**: AI adapts story direction based on player decisions
+- **🧠 Psychological Profiling**: AI adapts story direction based on player decisions with 2M token memory
 - **👁️ Intrusive Thoughts**: Disturbing choice options that reveal character psychology
 - **📱 Responsive Design**: Seamless experience on mobile and desktop
 - **🌙 Horror Aesthetic**: Carefully crafted cosmic horror visual theme
@@ -31,7 +33,8 @@
 ### Prerequisites
 - **Node.js 18+** (20+ recommended for optimal performance)
 - **npm 8+** or **yarn 3+** for package management  
-- **Google Gemini API key** (optional - graceful fallbacks included)
+- **Grok API key** (primary AI model - from X.AI)
+- **Google Gemini API key** (fallback model - optional but recommended)
 - **Modern browser** with JavaScript enabled
 
 ### Expert Installation
@@ -50,7 +53,8 @@ npm run build && npm test
 # Create environment configuration
 cp .env.example .env.local
 
-# Configure API keys (optional but recommended)
+# Configure API keys for full functionality
+echo "VITE_XAI_API_KEY=your-xai-api-key-here" >> .env.local
 echo "VITE_GEMINI_API_KEY=your-google-gemini-api-key" >> .env.local
 
 # Start development with hot module replacement
@@ -92,10 +96,47 @@ npm run start:prod   # Start production server locally
 
 # Production-ready environment setup
 NODE_ENV=production
+VITE_XAI_API_KEY=your-production-xai-key
 VITE_GEMINI_API_KEY=your-production-gemini-key
 VITE_API_BASE_URL=https://your-api.domain.com
 VITE_ENABLE_ANALYTICS=true
 VITE_LOG_LEVEL=error
+```
+
+---
+
+## 🧠 AI Model System
+
+Apophenia features a sophisticated multi-model AI system with **Grok-4 Fast Reasoning** as the primary engine, supported by Google Gemini models as reliable fallbacks.
+
+### 🚀 Grok-4 Fast Reasoning (Primary)
+- **Provider**: X.AI (xAI)
+- **Context Window**: 2 Million tokens (2x larger than Gemini)
+- **Advanced Reasoning**: Built-in thinking mode for complex narrative decisions
+- **Specialized For**: Interactive storytelling, psychological analysis, narrative consistency
+
+### 🔄 Model Selection Interface
+- **Dynamic Switching**: Change AI models without restarting the game
+- **Real-time Testing**: Test API connectivity for each provider
+- **Feature Comparison**: View context windows, reasoning capabilities, and image support
+- **Persistent Selection**: Your choice is saved across sessions
+
+### 🎯 Premium Features (2M Token Context)
+- **Complete Session Memory**: Remember every choice and story beat across the entire game
+- **Advanced Psychological Profiling**: Deep personality analysis that evolves throughout the narrative
+- **Narrative Consistency Engine**: Cross-reference all story elements for perfect continuity
+- **Multi-layered Context Awareness**: Maintain thematic coherence and foreshadowing throughout
+- **Adaptive Horror Personalization**: Learn from complete player behavior patterns for maximum psychological impact
+
+### 🛡️ Fallback System
+```
+Grok-4 Fast Reasoning (Primary)
+    ↓ (on failure)
+Gemini 2.5 Pro (Secondary)
+    ↓ (on failure)  
+Gemini 2.5 Flash (Final fallback)
+    ↓ (on failure)
+Static thematic error responses
 ```
 
 ---
@@ -109,17 +150,22 @@ Apophenia implements a sophisticated command-driven architecture optimized for A
 ```
 src/
 ├── components/              # React UI components with TypeScript
-│   ├── StartScreen.tsx      # Genre selection and game initialization
+│   ├── StartScreen.tsx      # Genre selection, AI model selection, game initialization
 │   ├── GameScreen.tsx       # Primary gameplay interface with real-time updates
 │   ├── EndScreen.tsx        # Game completion and narrative resolution
+│   ├── ModelSelector.tsx    # AI model selection modal with testing
+│   ├── TestAPIButton.tsx    # Fixed-position API connectivity testing
 │   └── ErrorBoundary.tsx    # Thematic error recovery with fallback UI
 ├── stores/                 # Zustand state management with persistence
 │   ├── gameStateStore.ts    # Core game state, story segments, choices
 │   ├── worldStateStore.ts   # Narrative world context and genre configuration
 │   ├── uiStateStore.ts      # Interface state, loading, theme management
+│   ├── aiModelStore.ts      # AI model selection and testing state
 │   └── imageCacheStore.ts   # LRU+TTL image caching (50 items, 30min TTL)
 ├── services/               # Business logic and AI orchestration
 │   ├── ai/                 # AI service integrations
+│   │   ├── grokService.ts   # Grok-4 Fast Reasoning with 2M context
+│   │   ├── unifiedAIService.ts  # Multi-model routing and fallbacks
 │   │   ├── genkit.ts       # Google Gemini 2.5 Pro with fallbacks
 │   │   ├── imageGeneration.ts  # Multi-service image generation
 │   │   └── revolutionaryFeatures.ts  # Advanced AI capabilities

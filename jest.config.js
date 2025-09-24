@@ -31,6 +31,39 @@ module.exports = {
   testPathIgnorePatterns: [
     '<rootDir>/src/services/ai/__tests__/testUtils.helper.ts'
   ],
+  // Coverage thresholds to ensure quality code
+  collectCoverageFrom: [
+    'src/**/*.{ts,tsx}',
+    '!src/**/*.d.ts',
+    '!src/setupTests.ts',
+    '!src/index.tsx',
+    '!src/vite-env.d.ts',
+    '!src/**/__mocks__/**',
+    '!src/**/__tests__/**',
+    '!src/**/types.ts',
+  ],
+  coverageThreshold: {
+    global: {
+      branches: 30,
+      functions: 30,
+      lines: 30,
+      statements: 30
+    },
+    // Stricter thresholds for critical modules
+    'src/services/ai/': {
+      branches: 60,
+      functions: 60,
+      lines: 60,
+      statements: 60
+    },
+    'src/services/gameService.ts': {
+      branches: 70,
+      functions: 70,
+      lines: 70,
+      statements: 70
+    }
+  },
+  coverageReporters: ['text', 'lcov', 'json-summary'],
   // Mock import.meta.env for Vite compatibility
   globals: {
     'import.meta': {

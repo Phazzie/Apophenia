@@ -16,16 +16,15 @@ import { API_KEYS, AI_MODELS } from '../config';
 
 const genAI = new GoogleGenerativeAI(API_KEYS.googleGenAI);
 
-// Placeholder for image client - will be properly implemented with correct package
-const imageClient = {
-  generateImage: async (request: any) => {
-    // Mock implementation for now - will be replaced with real ImageGenerationClient
-    return [{
-      generatedImages: [{
-        bytesBase64Encoded: 'mockBase64Data'
-      }]
-    }];
+// Real Google Imagen API implementation
+const createImageClient = () => {
+  if (!API_KEYS.googleGenAI) {
+    console.warn('Google AI API key not available for image generation');
+    return null;
   }
+  
+  const genAI = new GoogleGenerativeAI(API_KEYS.googleGenAI);
+  return genAI.getGenerativeModel({ model: "imagen-3.0-generate-001" });
 };
 
 const safetySettings = [
@@ -337,30 +336,52 @@ async function generateSingleVariation(prompt: string): Promise<string> {
  */
 async function generateWithImagen(prompt: string): Promise<string | null> {
   try {
-    // Use the Google Generative AI package for text-to-image generation
-    // Note: Google AI Studio provides access to image generation capabilities
-    
-    if (!API_KEYS.googleImagen && !API_KEYS.googleGenAI) {
-      console.log('Google AI API key not available - using fallback');
+    const imageClient = createImageClient();
+    if (!imageClient) {
+      console.log('Google Imagen client not available, falling back to Unsplash');
       return null;
     }
 
-    // For production use, this would integrate with the official Google AI image generation
-    // Currently using the generative AI package which supports multimodal capabilities
-    const genAI = new GoogleGenerativeAI(API_KEYS.googleGenAI);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    console.log('Generating image with Google Imagen API...');
+    const result = await imageClient.generateContent(prompt);
+    const response = result.response;
 
-    // Enhanced prompt for better image generation results
-    const enhancedPrompt = `Create a detailed description for an image generation AI: ${prompt}. Focus on atmospheric cosmic horror elements, dark lighting, surreal compositions, and otherworldly aesthetics.`;
+    // Extract base64 image data from API response
+    if (response.candidates?.[0]?.content?.parts) {
+      for (const part of response.candidates[0].content.parts) {
+        if (part.inlineData?.mimeType?.startsWith('image/')) {
+          const base64Data = part.inlineData.data;
+          const mimeType = part.inlineData.mimeType;
+          console.log(`Successfully generated image with Imagen API: ${mimeType}`);
+          return `data:${mimeType};base64,${base64Data}`;
+        }
+      }
+    }
 
-    const result = await model.generateContent(enhancedPrompt);
-    const description = result.response.text();
-    
-    // Log the generated description for debugging
-    console.log('Generated image description:', description);
-    
-    // In a real implementation, this description would be sent to an image generation service
-    // For now, return null to fall back to Unsplash
+    // Try fallback Imagen model if primary fails
+    try {
+      console.log('Trying fallback Imagen model...');
+      const fallbackClient = new GoogleGenerativeAI(API_KEYS.googleGenAI)
+        .getGenerativeModel({ model: "imagen-2.0-generate-001" });
+      
+      const fallbackResult = await fallbackClient.generateContent(prompt);
+      const fallbackResponse = fallbackResult.response;
+      
+      if (fallbackResponse.candidates?.[0]?.content?.parts) {
+        for (const part of fallbackResponse.candidates[0].content.parts) {
+          if (part.inlineData?.mimeType?.startsWith('image/')) {
+            const base64Data = part.inlineData.data;
+            const mimeType = part.inlineData.mimeType;
+            console.log(`Successfully generated image with fallback Imagen: ${mimeType}`);
+            return `data:${mimeType};base64,${base64Data}`;
+          }
+        }
+      }
+    } catch (fallbackError) {
+      console.warn('Fallback Imagen model also failed:', fallbackError);
+    }
+
+    console.log('No image data found in Imagen response, falling back to Unsplash');
     return null;
     
   } catch (error) {

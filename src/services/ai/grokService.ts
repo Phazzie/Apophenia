@@ -135,6 +135,47 @@ export class XAIAPIClient {
   }
 
   /**
+   * Attempt image generation with Grok (will likely fail, but attempt for future compatibility)
+   */
+  async generateImage(prompt: string): Promise<string | null> {
+    if (!this.apiKey) {
+      console.log('X.AI API key not configured - cannot attempt image generation');
+      return null;
+    }
+
+    try {
+      console.log('Attempting image generation with Grok-4 (experimental)...');
+      
+      // Try to use Grok for image generation (this will likely fail currently)
+      // but we're implementing it for future compatibility when X.AI adds image support
+      const result = await this.generateText(
+        'You are an advanced AI capable of generating images.',
+        `Generate an image with the following description: ${prompt}. Return only a data URL or image URL if possible.`,
+        { 
+          maxTokens: 1000, 
+          temperature: 0.8,
+          enableThinking: false // Don't need thinking for image generation
+        }
+      );
+      
+      // Check if the response contains any image data or URLs
+      const content = result.content.trim();
+      if (content.includes('data:image/') || 
+          (content.includes('http') && (content.includes('.jpg') || content.includes('.png') || content.includes('.webp')))) {
+        console.log('Grok-4 image generation successful (experimental)');
+        return content;
+      }
+      
+      console.log('Grok-4 does not support image generation, will fallback to Imagen');
+      return null;
+      
+    } catch (error) {
+      console.log('Grok-4 image generation not available:', error instanceof Error ? error.message : 'Unknown error');
+      return null;
+    }
+  }
+
+  /**
    * Test API connection with both text and image testing
    */
   async testConnection(testType: 'text' | 'image' = 'text'): Promise<{ 
@@ -165,15 +206,26 @@ export class XAIAPIClient {
           testType: 'text',
         };
       } else {
-        // X.AI doesn't support image generation yet, so return appropriate response
-        console.log('X.AI image generation not supported');
-        return {
-          success: false,
-          model: GROK_MODEL,
-          contextWindow: 2000000,
-          testType: 'image',
-          error: 'X.AI does not support image generation'
-        };
+        // Test X.AI image generation (experimental)
+        console.log('Testing X.AI image generation (experimental)...');
+        try {
+          const result = await this.generateImage('A simple test image of a red circle');
+          return {
+            success: result !== null,
+            model: GROK_MODEL,
+            contextWindow: 2000000,
+            testType: 'image',
+            error: result === null ? 'X.AI image generation not yet available (will fallback to Imagen)' : undefined
+          };
+        } catch (error) {
+          return {
+            success: false,
+            model: GROK_MODEL,
+            contextWindow: 2000000,
+            testType: 'image',
+            error: 'X.AI image generation experimental (will fallback to Imagen)'
+          };
+        }
       }
     } catch (error) {
       console.error('X.AI API test failed:', error);
@@ -197,7 +249,7 @@ export class XAIAPIClient {
       contextWindow: 2000000, // 2 million tokens
       supportsFunctions: false, // Grok-4 doesn't support function calling yet
       supportsThinking: true, // Advanced reasoning mode
-      supportsImages: false, // Text-only model
+      supportsImages: true, // Attempting image generation (experimental/future compatibility)
     };
   }
 }

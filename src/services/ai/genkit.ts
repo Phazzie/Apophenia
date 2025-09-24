@@ -19,9 +19,9 @@ const genAI = new GoogleGenerativeAI(API_KEYS.googleGenAI);
 // Google Imagen client for real image generation
 const createImageClient = (apiKey: string) => {
   const genAI = new GoogleGenerativeAI(apiKey);
-  // Use Imagen 3.0 as primary image generation model
-  const primaryModel = AI_MODELS.PRIMARY_IMAGE || 'imagen-3.0-generate-001';
-  return genAI.getGenerativeModel({ model: primaryModel });
+  // Use FALLBACK_IMAGE which is now the primary Imagen model (after Grok attempt)
+  const primaryImagenModel = AI_MODELS.FALLBACK_IMAGE || 'imagen-3.0-generate-001';
+  return genAI.getGenerativeModel({ model: primaryImagenModel });
 };
 
 const safetySettings = [
@@ -261,18 +261,16 @@ export const processAdvancedImageGeneration = async (
   }
   
   try {
-    // Primary: Google Imagen (when available)
-    if (API_KEYS.googleImagen) {
-      console.log('Attempting Google Imagen image generation...');
-      const imagenUrl = await generateWithImagen(horrorEnhancedPrompt);
-      if (imagenUrl) {
-        console.log('Google Imagen image generation successful');
-        return imagenUrl;
-      }
+    // Primary: Grok-4 Fast Reasoning with Imagen fallback
+    console.log('Attempting Grok-4 Fast image generation (with Imagen fallback)...');
+    const grokFirstUrl = await generateWithGrokFirst(horrorEnhancedPrompt);
+    if (grokFirstUrl) {
+      console.log('Image generation successful (Grok-first approach)');
+      return grokFirstUrl;
     }
     
-    // Fallback: Use text-to-image capabilities if available
-    console.log('Primary image service unavailable, using enhanced Unsplash integration');
+    // Final fallback: Use enhanced Unsplash integration
+    console.log('All AI image generation methods unavailable, using enhanced Unsplash integration');
     return generateUnsplashFallback(prompt);
     
   } catch (error) {
@@ -329,6 +327,36 @@ async function generateSingleVariation(prompt: string): Promise<string> {
 }
 
 /**
+ * Enhanced image generation with Grok-first approach and Imagen fallback
+ */
+async function generateWithGrokFirst(prompt: string): Promise<string | null> {
+  // Import xaiClient here to avoid circular dependencies
+  const { xaiClient } = await import('./grokService');
+  
+  try {
+    console.log('Attempting image generation with Grok-4 first...');
+    
+    // Try Grok first (experimental/future compatibility)
+    if (API_KEYS.xaiAPI) {
+      const grokResult = await xaiClient.generateImage(prompt);
+      if (grokResult) {
+        console.log('Grok-4 image generation successful!');
+        return grokResult;
+      }
+    }
+    
+    console.log('Grok-4 image generation not available, falling back to Imagen...');
+    
+    // Fallback to Imagen
+    return await generateWithImagen(prompt);
+    
+  } catch (error) {
+    console.warn('Grok image generation failed, falling back to Imagen:', error);
+    return await generateWithImagen(prompt);
+  }
+}
+
+/**
  * Google Imagen implementation using the official Google AI API
  */
 async function generateWithImagen(prompt: string): Promise<string | null> {
@@ -344,22 +372,22 @@ async function generateWithImagen(prompt: string): Promise<string | null> {
     
     console.log('Generating image with Google Imagen API...');
     
-    // Try primary Imagen model first
+    // Try primary Imagen model (now FALLBACK_IMAGE in the new config)
     let imageModel = createImageClient(apiKey);
     let result;
     
     try {
       result = await imageModel.generateContent(prompt);
     } catch (primaryError) {
-      console.warn('Primary Imagen model failed, trying fallback:', primaryError);
+      console.warn('Primary Imagen model failed, trying secondary fallback:', primaryError);
       
-      // Try fallback Imagen model
+      // Try secondary Imagen fallback model
       try {
         const genAI = new GoogleGenerativeAI(apiKey);
-        imageModel = genAI.getGenerativeModel({ model: AI_MODELS.FALLBACK_IMAGE });
+        imageModel = genAI.getGenerativeModel({ model: AI_MODELS.SECONDARY_FALLBACK_IMAGE });
         result = await imageModel.generateContent(prompt);
       } catch (fallbackError) {
-        console.warn('Fallback Imagen model also failed:', fallbackError);
+        console.warn('All Imagen models failed:', fallbackError);
         return null;
       }
     }

@@ -37,9 +37,10 @@ export const AI_MODELS = {
   FALLBACK_TEXT: 'gemini-2.5-pro', // Gemini Pro as reliable fallback
   SECONDARY_FALLBACK: 'gemini-2.5-flash', // Final fallback
   
-  // Image generation pipeline - Use Imagen models for actual image generation
-  PRIMARY_IMAGE: 'imagen-3.0-generate-001', // Primary Imagen model
-  FALLBACK_IMAGE: 'imagen-2.0-generate-001', // Fallback Imagen model
+  // Image generation pipeline - Attempt Grok first, fallback to Imagen
+  PRIMARY_IMAGE: 'grok-4-fast-reasoning', // Primary attempt with Grok-4 (will fallback)
+  FALLBACK_IMAGE: 'imagen-3.0-generate-001', // Primary Imagen model
+  SECONDARY_FALLBACK_IMAGE: 'imagen-2.0-generate-001', // Secondary Imagen fallback
   
   // Configuration for different use cases with 2M token context optimization
   CONCEPT_GENERATION: {

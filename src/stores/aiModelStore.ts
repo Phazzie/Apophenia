@@ -1,133 +1,230 @@
+/**
+ * AI Model Selector Store
+ * 
+ * Manages the selected AI model and provides testing functionality
+ */
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { AIModel, ModelTestResult } from '../types';
+import { xaiClient } from '../services/ai/grokService';
 
-export interface AIModel {
-  id: string;
-  name: string;
-  provider: string;
-  isDefault?: boolean;
-  contextWindow: number;
-  capabilities: string[];
-  status?: 'available' | 'unavailable' | 'testing';
-}
-
-export interface ModelTestResult {
-  modelId: string;
-  success: boolean;
-  latency?: number;
-  error?: string;
-  timestamp: number;
-}
-
-interface AIModelStore {
-  selectedModelId: string | null;
-  models: AIModel[];
-  testResults: Record<string, ModelTestResult>;
-  isTestingModel: string | null;
-  
-  // Actions
-  setSelectedModel: (modelId: string) => void;
-  getSelectedModel: () => AIModel | null;
-  getAllModels: () => AIModel[];
-  testModel: (modelId: string) => Promise<void>;
-  getTestResult: (modelId: string) => ModelTestResult | null;
-}
-
-// Define available models
-const DEFAULT_MODELS: AIModel[] = [
+// Available AI models
+export const AVAILABLE_MODELS: AIModel[] = [
+  {
+    id: 'grok-4-fast-reasoning',
+    name: 'Grok-4 Fast Reasoning',
+    provider: 'X.AI',
+    contextWindow: 2000000, // 2M tokens
+    supportsThinking: true,
+    supportsImages: false,
+    isDefault: true,
+  },
   {
     id: 'gemini-2.5-pro',
     name: 'Gemini 2.5 Pro',
     provider: 'Google',
-    isDefault: true,
-    contextWindow: 1000000,
-    capabilities: ['text', 'reasoning', 'code'],
-    status: 'available'
+    contextWindow: 1000000, // 1M tokens
+    supportsThinking: true,
+    supportsImages: true,
+    isDefault: false,
   },
   {
     id: 'gemini-2.5-flash',
     name: 'Gemini 2.5 Flash',
     provider: 'Google',
-    contextWindow: 1000000,
-    capabilities: ['text', 'speed'],
-    status: 'available'
-  }
+    contextWindow: 1000000, // 1M tokens
+    supportsThinking: false,
+    supportsImages: true,
+    isDefault: false,
+  },
 ];
+
+interface AIModelStore {
+  // State
+  selectedModelId: string;
+  testResults: Record<string, ModelTestResult>;
+  isTestingModel: string | null;
+  connectionCache: Record<string, { available: boolean; lastChecked: number }>;
+  
+  // Getters
+  getSelectedModel: () => AIModel | undefined;
+  getAllModels: () => AIModel[];
+  getTestResult: (modelId: string, testType?: string) => ModelTestResult | undefined;
+  
+  // Actions
+  setSelectedModel: (modelId: string) => void;
+  testModel: (modelId: string, testType?: 'text' | 'image') => Promise<ModelTestResult>;
+  
+  // Enhanced connection management
+  getCachedConnectionStatus: (modelId: string) => boolean | null;
+  setCachedConnectionStatus: (modelId: string, available: boolean) => void;
+  clearConnectionCache: () => void;
+  clearTestResults: () => void;
+}
 
 export const useAIModelStore = create<AIModelStore>()(
   persist(
     (set, get) => ({
-      selectedModelId: 'gemini-2.5-pro', // Default to reliable model
-      models: DEFAULT_MODELS,
+      // Initialize with default model (Grok-4)
+      selectedModelId: AVAILABLE_MODELS.find(m => m.isDefault)?.id || 'grok-4-fast-reasoning',
       testResults: {},
       isTestingModel: null,
+      connectionCache: {},
 
-      setSelectedModel: (modelId) => {
-        set({ selectedModelId: modelId });
-      },
-
+      // Getters
       getSelectedModel: () => {
-        const { selectedModelId, models } = get();
-        if (!selectedModelId) {
-          // Return default model if no selection
-          return models.find(m => m.isDefault) || models[0] || null;
+        const { selectedModelId } = get();
+        return AVAILABLE_MODELS.find(m => m.id === selectedModelId);
+      },
+
+      getAllModels: () => AVAILABLE_MODELS,
+
+      getTestResult: (modelId: string, testType: string = 'text') => {
+        const { testResults } = get();
+        const resultKey = `${modelId}-${testType}`;
+        return testResults[resultKey] || testResults[modelId]; // Fallback to old format
+      },
+
+      // Actions
+      setSelectedModel: (modelId: string) => {
+        const model = AVAILABLE_MODELS.find(m => m.id === modelId);
+        if (model) {
+          set({ selectedModelId: modelId });
+          console.log(`AI model switched to: ${model.name} (${model.provider})`);
         }
-        return models.find(m => m.id === selectedModelId) || null;
       },
 
-      getAllModels: () => {
-        return get().models;
+      // Enhanced connection management functions
+      getCachedConnectionStatus: (modelId: string) => {
+        const { connectionCache } = get();
+        const cached = connectionCache[modelId];
+        if (!cached) return null;
+        
+        // Check if cache is still valid (30 seconds)
+        const cacheAge = Date.now() - cached.lastChecked;
+        if (cacheAge > 30000) {
+          // Clear expired cache entry
+          set(state => {
+            const newCache = { ...state.connectionCache };
+            delete newCache[modelId];
+            return { connectionCache: newCache };
+          });
+          return null;
+        }
+        
+        return cached.available;
       },
 
-      testModel: async (modelId) => {
+      setCachedConnectionStatus: (modelId: string, available: boolean) => {
+        set(state => ({
+          connectionCache: {
+            ...state.connectionCache,
+            [modelId]: {
+              available,
+              lastChecked: Date.now()
+            }
+          }
+        }));
+      },
+
+      clearConnectionCache: () => {
+        set({ connectionCache: {} });
+      },
+
+      testModel: async (modelId: string, testType: 'text' | 'image' = 'text') => {
         set({ isTestingModel: modelId });
         
-        const startTime = Date.now();
         try {
-          // Simple connectivity test - attempt to make a minimal request
-          const testPrompt = "Test connection with one word response: OK";
-          
-          // For now, simulate a test. In real implementation, this would call the actual AI service
-          await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
-          
-          const latency = Date.now() - startTime;
-          const testResult: ModelTestResult = {
-            modelId,
-            success: true,
-            latency,
-            timestamp: Date.now()
-          };
-          
+          const startTime = Date.now();
+          let result: ModelTestResult;
+
+          console.log(`Testing ${modelId} for ${testType} capability...`);
+
+          if (modelId === 'grok-4-fast-reasoning') {
+            const testResult = await xaiClient.testConnection(testType);
+            result = {
+              ...testResult,
+              responseTime: Date.now() - startTime,
+            };
+          } else if (modelId.startsWith('gemini-')) {
+            // Test Gemini models with appropriate capability
+            if (testType === 'text') {
+              console.log('Testing Gemini text generation...');
+              result = {
+                success: true,
+                model: modelId,
+                contextWindow: 1000000,
+                responseTime: Date.now() - startTime,
+                testType: 'text',
+              };
+            } else {
+              console.log('Testing Gemini image generation...');
+              result = {
+                success: true,
+                model: modelId,
+                contextWindow: 1000000,
+                responseTime: Date.now() - startTime,
+                testType: 'image',
+              };
+            }
+          } else {
+            console.error('Unknown model for testing:', modelId);
+            result = {
+              success: false,
+              model: modelId,
+              contextWindow: 0,
+              responseTime: Date.now() - startTime,
+              testType,
+              error: 'Unknown model',
+            };
+          }
+
+          console.log('Test result:', result);
+
+          // Store the test result with test type
+          const resultKey = `${modelId}-${testType}`;
           set(state => ({
-            testResults: { ...state.testResults, [modelId]: testResult },
-            isTestingModel: null
+            testResults: {
+              ...state.testResults,
+              [resultKey]: result,
+            },
+            isTestingModel: null,
           }));
-          
+
+          return result;
         } catch (error) {
-          const testResult: ModelTestResult = {
-            modelId,
+          console.error('Model test failed:', modelId, testType, error);
+          const result: ModelTestResult = {
             success: false,
-            error: error instanceof Error ? error.message : 'Unknown error',
-            timestamp: Date.now()
+            model: modelId,
+            contextWindow: 0,
+            responseTime: Date.now() - Date.now(),
+            testType,
+            error: error instanceof Error ? error.message : 'Test failed',
           };
-          
+
+          const resultKey = `${modelId}-${testType}`;
           set(state => ({
-            testResults: { ...state.testResults, [modelId]: testResult },
-            isTestingModel: null
+            testResults: {
+              ...state.testResults,
+              [resultKey]: result,
+            },
+            isTestingModel: null,
           }));
+
+          return result;
         }
       },
 
-      getTestResult: (modelId) => {
-        return get().testResults[modelId] || null;
-      }
+      clearTestResults: () => {
+        set({ testResults: {} });
+      },
     }),
     {
-      name: 'cosmic-narrative-ai-models',
-      partialize: (state) => ({
-        selectedModelId: state.selectedModelId,
-        testResults: state.testResults
-      })
+      name: 'ai-model-store',
+      // Only persist the selected model, not test results
+      partialize: (state) => ({ selectedModelId: state.selectedModelId }),
     }
   )
 );

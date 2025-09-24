@@ -16,25 +16,41 @@ const getFallbackConcept = (genreConfig: GenreConfig) => ({
   imagePrompt: "Dark abandoned facility, cosmic horror atmosphere, reality distortion"
 });
 
-const getFallbackCommands = (): Command[] => [
-  {
-    type: 'displayText' as const,
-    payload: {
-      content: "The cosmic forces continue to manifest around you, bending reality in impossible ways. You sense that your choices will echo through dimensions you cannot comprehend.",
-      segmentId: `fallback-${Date.now()}`
+const getFallbackCommands = (): Command[] => {
+  const segmentId = `fallback-${Date.now()}`;
+  return [
+    {
+      type: 'createSegment' as const,
+      payload: {
+        id: segmentId
+      }
+    },
+    {
+      type: 'displayText' as const,
+      payload: {
+        content: "The cosmic forces continue to manifest around you, bending reality in impossible ways. You sense that your choices will echo through dimensions you cannot comprehend.",
+        segmentId: segmentId
+      }
+    },
+    {
+      type: 'generateImage' as const,
+      payload: {
+        prompt: "abandoned facility with reality distortions, cosmic horror atmosphere, strange anomalies manifesting, eerie lighting",
+        segmentId: segmentId
+      }
+    },
+    {
+      type: 'displayChoices' as const,
+      payload: {
+        choices: [
+          { text: "Continue investigating the anomalies", isIntrusive: false },
+          { text: "Attempt to retreat to safety", isIntrusive: false },
+          { text: "Embrace the unknown forces", isIntrusive: true }
+        ]
+      }
     }
-  },
-  {
-    type: 'displayChoices' as const,
-    payload: {
-      choices: [
-        { text: "Continue investigating the anomalies", isIntrusive: false },
-        { text: "Attempt to retreat to safety", isIntrusive: false },
-        { text: "Embrace the unknown forces", isIntrusive: true }
-      ]
-    }
-  }
-];
+  ];
+};
 
 export const generateConceptFlow = async (genreConfig: GenreConfig) => {
   try {
@@ -69,10 +85,10 @@ export const generateImageFlow = async (prompt: string): Promise<string> => {
   try {
     console.log('Generating image using secure backend API...');
     const response = await apiClient.generateImage(prompt);
-    return response.fallbackUrl || generateUnsplashFallback(prompt);
+    return response.fallbackUrl || await processAdvancedImageGeneration(prompt);
   } catch (error) {
-    console.warn('Backend API unavailable, using Unsplash fallback:', error);
-    return generateUnsplashFallback(prompt);
+    console.warn('Backend API unavailable, using Google Imagen fallback:', error);
+    return processAdvancedImageGeneration(prompt);
   }
 };
 
@@ -91,7 +107,22 @@ export const processAdvancedImageGeneration = async (prompt: string): Promise<st
     console.warn('Backend image generation failed:', error);
   }
   
-  console.log('Using enhanced Unsplash integration');
+  // Fallback to Google Imagen API when backend is unavailable
+  try {
+    console.log('Backend unavailable, attempting Google Imagen generation...');
+    const { processAdvancedImageGeneration: genkitImageGeneration } = await import('./genkit');
+    const imagenResult = await genkitImageGeneration(prompt);
+    
+    // Check if we got a data URL from Imagen (not Unsplash fallback)
+    if (imagenResult && imagenResult.startsWith('data:image/')) {
+      console.log('Google Imagen generation successful, using AI-generated image');
+      return imagenResult;
+    }
+  } catch (error) {
+    console.warn('Google Imagen generation failed:', error);
+  }
+  
+  console.log('Using enhanced Unsplash integration as final fallback');
   return generateUnsplashFallback(prompt);
 };
 

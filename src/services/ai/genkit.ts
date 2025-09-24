@@ -50,7 +50,7 @@ const safetySettings = [
 /**
  * Advanced AI text generation with model fallback and thinking mode
  */
-async function runAIFlowWithFallback(
+export async function runAIFlowWithFallback(
   systemInstruction: string,
   prompt: string,
   useCase: 'concept' | 'story' | 'summary' = 'story'

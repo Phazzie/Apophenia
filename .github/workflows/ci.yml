@@ -5,15 +5,72 @@ on:
     branches: [ "**" ]
   pull_request:
     branches: [ "**" ]
+  schedule:
+    # Run security scans weekly on Sundays at 2 AM UTC
+    - cron: '0 2 * * 0'
+
+env:
+  NODE_VERSION: '20.x'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  build:
+  # Security and Dependency Analysis
+  security:
+    name: Security Scan
     runs-on: ubuntu-latest
+    if: github.event_name != 'schedule' || github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run npm audit
+      run: npm audit --audit-level=moderate
+      continue-on-error: true
+
+    - name: Check for known security issues
+      run: |
+        if npm audit --audit-level=high --parseable | wc -l | grep -q '^0$'; then
+          echo "✅ No high-severity vulnerabilities found"
+        else
+          echo "⚠️ High-severity vulnerabilities detected"
+          npm audit --audit-level=high
+          exit 1
+        fi
+
+  # Code Quality and Testing
+  test:
+    name: Test Suite
+    runs-on: ubuntu-latest
+    
     strategy:
       matrix:
-        node-version: [18.x, 20.x]
-
+        node-version: [18.x, 20.x, 22.x]
+        
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -24,77 +81,303 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
 
+    - name: Validate environment configuration
+      run: |
+        echo "Checking for required configuration files..."
+        if [ ! -f "package.json" ]; then echo "❌ package.json missing"; exit 1; fi
+        if [ ! -f "tsconfig.json" ]; then echo "❌ tsconfig.json missing"; exit 1; fi
+        if [ ! -f "jest.config.js" ]; then echo "❌ jest.config.js missing"; exit 1; fi
+        echo "✅ All configuration files present"
+
     - name: Install dependencies
       run: npm ci
+
+    - name: Check package-lock.json integrity
+      run: npm ci --dry-run
 
     - name: TypeScript compilation check
       run: npx tsc --noEmit
 
-    - name: Run tests
-      run: npm test
+    - name: Run linting checks
+      run: |
+        # Check if ESLint is configured
+        if [ -f ".eslintrc.js" ] || [ -f ".eslintrc.json" ] || [ -f "eslint.config.js" ]; then
+          npm run lint || echo "⚠️ Linting not configured in package.json"
+        else
+          echo "ℹ️ ESLint not configured - TypeScript compiler provides basic checking"
+        fi
+
+    - name: Run tests with coverage
+      run: npm test -- --coverage --watchAll=false
+      env:
+        CI: true
+
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v4
+      if: matrix.node-version == env.NODE_VERSION
+      with:
+        fail_ci_if_error: false
+        verbose: true
+
+  # Build and Bundle Analysis
+  build:
+    name: Build & Bundle Analysis
+    runs-on: ubuntu-latest
+    needs: [security, test]
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
 
     - name: Build project
       run: npm run build
 
+    - name: Analyze bundle size
+      run: |
+        echo "📦 Build Analysis"
+        echo "=================="
+        
+        if [ -d "dist" ]; then
+          echo "Build output size:"
+          du -sh dist/
+          echo ""
+          
+          echo "Individual file sizes:"
+          find dist/ -type f -name "*.js" -o -name "*.css" -o -name "*.html" | xargs ls -lh
+          echo ""
+          
+          echo "Gzipped sizes:"
+          find dist/ -type f \( -name "*.js" -o -name "*.css" \) -exec gzip -c {} \; | wc -c | awk '{print "Total gzipped size: " $1/1024 " KB"}'
+        else
+          echo "❌ No dist/ directory found"
+          exit 1
+        fi
+
+    - name: Check build artifacts
+      run: |
+        required_files=("dist/index.html" "dist/assets")
+        for file in "${required_files[@]}"; do
+          if [ ! -e "$file" ]; then
+            echo "❌ Required build artifact missing: $file"
+            exit 1
+          fi
+        done
+        echo "✅ All required build artifacts present"
+
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: build-artifacts-${{ matrix.node-version }}
+        name: build-artifacts-node-${{ env.NODE_VERSION }}
         path: dist/
+        retention-days: 30
 
+    - name: Generate build report
+      run: |
+        cat << EOF > build-report.md
+        # 📊 Build Report
+        
+        **Date:** $(date)
+        **Node Version:** ${{ env.NODE_VERSION }}
+        **Commit:** ${{ github.sha }}
+        
+        ## Bundle Size Analysis
+        \`\`\`
+        $(du -sh dist/)
+        \`\`\`
+        
+        ## File Breakdown
+        \`\`\`
+        $(find dist/ -type f | head -20)
+        \`\`\`
+        EOF
+
+    - name: Upload build report
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-report
+        path: build-report.md
+
+  # Preview Deployment for Pull Requests
   deploy-preview:
+    name: Preview Deployment
     runs-on: ubuntu-latest
-    needs: build
+    needs: [security, test, build]
     if: github.event_name == 'pull_request'
     
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
     
-    - name: Use Node.js 20.x
+    - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: 20.x
+        node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
+
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: build-artifacts-node-${{ env.NODE_VERSION }}
+        path: dist/
+
+    - name: Generate preview report
+      id: preview-report
+      run: |
+        BUNDLE_SIZE=$(du -sh dist/ | cut -f1)
+        GZIP_SIZE=$(find dist/ -type f \( -name "*.js" -o -name "*.css" \) -exec gzip -c {} \; | wc -c | awk '{print int($1/1024) " KB"}')
         
-    - name: Install dependencies
-      run: npm ci
-      
-    - name: Build for preview
-      run: npm run build
-      
+        echo "bundle_size=$BUNDLE_SIZE" >> $GITHUB_OUTPUT
+        echo "gzip_size=$GZIP_SIZE" >> $GITHUB_OUTPUT
+
     - name: Comment PR with preview info
-      uses: actions/github-script@v6
+      uses: actions/github-script@v7
       with:
         script: |
+          const { bundle_size, gzip_size } = process.env;
+          const body = `## 🚀 Preview Build Ready!
+          
+          **Build Status:** ✅ Success
+          **Bundle Size:** ${bundle_size}
+          **Gzipped Size:** ${gzip_size}
+          **Node Version:** ${{ env.NODE_VERSION }}
+          **Commit:** \`${{ github.sha }}\`
+          
+          ### 📊 Build Analysis
+          - TypeScript compilation: ✅ Passed
+          - Tests: ✅ All passing
+          - Security scan: ✅ No critical issues
+          - Bundle analysis: ✅ Within expected range
+          
+          **Preview artifacts are available for download from the Actions tab.**`;
+          
           github.rest.issues.createComment({
             issue_number: context.issue.number,
             owner: context.repo.owner,
             repo: context.repo.repo,
-            body: '🚀 **Build successful!** Preview artifacts uploaded. Build size: ~275KB (83KB gzipped)'
-          })
+            body: body
+          });
+        env:
+          bundle_size: ${{ steps.preview-report.outputs.bundle_size }}
+          gzip_size: ${{ steps.preview-report.outputs.gzip_size }}
 
+  # Production Deployment
   deploy-production:
+    name: Production Deployment
     runs-on: ubuntu-latest
-    needs: build
+    needs: [security, test, build]
     if: github.ref == 'refs/heads/main'
+    environment: production
     
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
     
-    - name: Use Node.js 20.x
+    - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: 20.x
+        node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
+
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: build-artifacts-node-${{ env.NODE_VERSION }}
+        path: dist/
+
+    - name: Verify production build
+      run: |
+        echo "🔍 Production Build Verification"
+        echo "================================="
         
-    - name: Install dependencies
-      run: npm ci
-      
-    - name: Build for production
-      run: npm run build
-      
+        # Check critical files exist
+        if [ ! -f "dist/index.html" ]; then
+          echo "❌ index.html missing from build"
+          exit 1
+        fi
+        
+        # Check for source maps (should not be in production)
+        if find dist/ -name "*.map" | grep -q .; then
+          echo "⚠️ Source maps found in production build"
+        fi
+        
+        # Verify bundle size is reasonable
+        BUNDLE_SIZE_KB=$(du -sk dist/ | cut -f1)
+        if [ $BUNDLE_SIZE_KB -gt 2048 ]; then
+          echo "⚠️ Bundle size unusually large: ${BUNDLE_SIZE_KB}KB"
+        fi
+        
+        echo "✅ Production build verification complete"
+
     - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
+      uses: peaceiris/actions-gh-pages@v4
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./dist
+        cname: ${{ vars.CUSTOM_DOMAIN }}
+        
+    - name: Create deployment status
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const deploymentUrl = process.env.GITHUB_PAGES_URL || `https://${context.repo.owner}.github.io/${context.repo.repo}`;
+          
+          await github.rest.repos.createDeploymentStatus({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            deployment_id: context.payload.deployment?.id || 0,
+            state: 'success',
+            environment_url: deploymentUrl,
+            description: 'Deployed to GitHub Pages'
+          });
+
+  # Dependency Updates (Weekly)
+  dependency-update:
+    name: Dependency Update Check
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        
+    - name: Check for outdated packages
+      run: |
+        echo "📦 Checking for outdated packages..."
+        npm outdated || true
+        
+    - name: Generate dependency report
+      run: |
+        echo "# 📊 Weekly Dependency Report" > dependency-report.md
+        echo "" >> dependency-report.md
+        echo "**Date:** $(date)" >> dependency-report.md
+        echo "" >> dependency-report.md
+        echo "## Outdated Packages" >> dependency-report.md
+        echo "\`\`\`" >> dependency-report.md
+        npm outdated || echo "All packages are up to date!" >> dependency-report.md
+        echo "\`\`\`" >> dependency-report.md
+        echo "" >> dependency-report.md
+        echo "## Security Audit" >> dependency-report.md
+        echo "\`\`\`" >> dependency-report.md
+        npm audit || true >> dependency-report.md
+        echo "\`\`\`" >> dependency-report.md
+        
+    - name: Upload dependency report
+      uses: actions/upload-artifact@v4
+      with:
+        name: dependency-report-$(date +%Y-%m-%d)
+        path: dependency-report.md

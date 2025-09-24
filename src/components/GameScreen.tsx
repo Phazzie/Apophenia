@@ -17,6 +17,9 @@ const GameScreen: React.FC = () => {
   const [metaMessage, setMetaMessage] = useState<string | null>(null);
   const [corruptionEffects, setCorruptionEffects] = useState<any>({});
   const [quantumShiftNotification, setQuantumShiftNotification] = useState(false);
+  const [echoMessage, setEchoMessage] = useState<string | null>(null);
+  const [semanticInsight, setSemanticInsight] = useState<string | null>(null);
+  const [narrativeEvolution, setNarrativeEvolution] = useState<any>(null);
   const autoStartedRef = useRef(false);
 
   const lastStorySegment = storyHistory[storyHistory.length - 1];
@@ -68,6 +71,27 @@ const GameScreen: React.FC = () => {
           systemHealth: Math.max(0, worldState.systemHealth - (result.corruptionEffects.corruptionLevel * 10))
         });
         console.log('⚡ REALITY CORRUPTION: Interface integrity compromised');
+      }
+
+      // Handle neural echo chambers
+      if (result.echoMessage) {
+        setEchoMessage(result.echoMessage);
+        setTimeout(() => setEchoMessage(null), 6000);
+        console.log('🧠 NEURAL ECHO: Past decision patterns detected');
+      }
+
+      // Handle semantic insights
+      if (result.semanticInsight) {
+        setSemanticInsight(result.semanticInsight);
+        setTimeout(() => setSemanticInsight(null), 5000);
+        console.log('🔍 SEMANTIC ANALYSIS: Deep psychological patterns revealed');
+      }
+
+      // Handle narrative evolution
+      if (result.narrativeEvolution) {
+        setNarrativeEvolution(result.narrativeEvolution);
+        setTimeout(() => setNarrativeEvolution(null), 7000);
+        console.log('🧬 NARRATIVE EVOLUTION: Story DNA adapted to player patterns');
       }
 
       // Execute the generated commands
@@ -128,6 +152,36 @@ const GameScreen: React.FC = () => {
           <div className="quantum-notification">
             <div className="quantum-header">🌌 QUANTUM REALITY SHIFT</div>
             <p>Timeline has branched... reality recalibrating...</p>
+          </div>
+        </div>
+      )}
+
+      {echoMessage && (
+        <div className="neural-echo-overlay">
+          <div className="echo-notification">
+            <div className="echo-header">🧠 NEURAL ECHO DETECTED</div>
+            <p>{echoMessage}</p>
+          </div>
+        </div>
+      )}
+
+      {semanticInsight && (
+        <div className="semantic-analysis-overlay">
+          <div className="semantic-notification">
+            <div className="semantic-header">🔍 PSYCHOLOGICAL ANALYSIS</div>
+            <p>{semanticInsight}</p>
+          </div>
+        </div>
+      )}
+
+      {narrativeEvolution && (
+        <div className="narrative-evolution-overlay">
+          <div className="evolution-notification">
+            <div className="evolution-header">🧬 NARRATIVE DNA EVOLUTION</div>
+            <p>Generation {narrativeEvolution.generation} | {narrativeEvolution.psychProfile}</p>
+            {narrativeEvolution.hiddenMotivations?.length > 0 && (
+              <p className="motivations">Hidden motivations: {narrativeEvolution.hiddenMotivations.join(', ')}</p>
+            )}
           </div>
         </div>
       )}

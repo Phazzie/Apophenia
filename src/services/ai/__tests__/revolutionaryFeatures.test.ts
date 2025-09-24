@@ -21,6 +21,10 @@ import {
   QuantumNarrativeEngine,
   AdaptiveHorrorEngine,
   RealityCorruptionEngine,
+  NeuralEchoChambers,
+  SemanticChoiceArchaeology,
+  AdaptiveNarrativeDNA,
+  BreakingFifthWall,
 } from '../revolutionaryFeatures';
 import { StorySegment, WorldState } from '../../../types';
 
@@ -531,6 +535,231 @@ describe('Revolutionary AI Features Test Suite', () => {
       
       // Should complete within reasonable time (2 seconds)
       expect(duration).toBeLessThan(2000);
+    });
+  });
+
+  // NEW REVOLUTIONARY FEATURES TESTS
+  describe('Neural Echo Chambers', () => {
+    let engine: NeuralEchoChambers;
+    let mockWorldState: WorldState;
+    
+    beforeEach(() => {
+      engine = new NeuralEchoChambers();
+      mockWorldState = {
+        protagonist: 'Echo Test Subject',
+        setting: 'Memory Palace',
+        dilemma: 'Past vs Present',
+        genreConfig: {
+          id: 'neural-test',
+          name: 'Neural Test',
+          description: 'Neural Echo Test',
+          style: 'Memory-based',
+          theme: {
+            '--background-color': '#000',
+            '--text-color': '#fff',
+            '--accent-color': '#ff6b9d',
+            '--font-family': 'Arial',
+          },
+          startScreenImagePrompt: 'neural echo',
+          conceptPrompt: 'neural concept',
+          aiSystemInstruction: 'neural instruction',
+        },
+        psychologicalStatus: 'Fragmented',
+        systemHealth: 70,
+        summary: 'Neural echo chambers active',
+        uiDistortion: {
+          filter: 'none',
+          transform: 'none',
+          transition: 'none',
+        },
+      };
+    });
+    
+    test('should initialize from persistence without errors', () => {
+      expect(() => engine.initializeFromPersistence()).not.toThrow();
+    });
+    
+    test('should record choices and build cross-session patterns', () => {
+      engine.recordChoice('I choose to trust', 'test context', mockWorldState);
+      engine.recordChoice('I prefer being alone', 'test context', mockWorldState);
+      
+      const echoPrompt = engine.generateEchoPrompt('I trust this choice', mockWorldState);
+      
+      // Should potentially generate echo (may be null due to probability)
+      expect(echoPrompt === null || typeof echoPrompt === 'string').toBe(true);
+      if (echoPrompt) {
+        expect(echoPrompt).toMatch(/ECHO|echo|MEMORY|DÉJÀ VU|Previous/i);
+      }
+    });
+  });
+
+  describe('Semantic Choice Archaeology', () => {
+    let engine: SemanticChoiceArchaeology;
+    
+    beforeEach(() => {
+      engine = new SemanticChoiceArchaeology();
+    });
+    
+    test('should analyze choice semantics and provide psychological insights', () => {
+      const choice = 'I must control this dangerous situation before it escalates';
+      const alternatives = ['I should wait and see', 'I hope someone else helps', 'I will surrender'];
+      
+      const analysis = engine.analyzeChoiceSemantics(choice, alternatives);
+      
+      expect(analysis.psychProfile).toBeDefined();
+      expect(analysis.hiddenMotivations).toBeInstanceOf(Array);
+      expect(analysis.semanticInsight).toBeDefined();
+      expect(typeof analysis.semanticInsight).toBe('string');
+    });
+    
+    test('should detect emotional tones in player choices', () => {
+      const fearChoice = 'I am afraid this might be dangerous';
+      const controlChoice = 'I will take control and manage this situation';
+      const submitChoice = 'I accept whatever happens and surrender';
+      
+      const alternatives = ['neutral option'];
+      
+      const fearAnalysis = engine.analyzeChoiceSemantics(fearChoice, alternatives);
+      const controlAnalysis = engine.analyzeChoiceSemantics(controlChoice, alternatives);
+      const submitAnalysis = engine.analyzeChoiceSemantics(submitChoice, alternatives);
+      
+      // Each should provide different insights
+      expect(fearAnalysis.semanticInsight).not.toEqual(controlAnalysis.semanticInsight);
+      expect(controlAnalysis.semanticInsight).not.toEqual(submitAnalysis.semanticInsight);
+    });
+  });
+
+  describe('Adaptive Narrative DNA', () => {
+    let engine: AdaptiveNarrativeDNA;
+    let mockWorldState: WorldState;
+    
+    beforeEach(() => {
+      engine = new AdaptiveNarrativeDNA();
+      mockWorldState = {
+        protagonist: 'DNA Subject',
+        setting: 'Evolution Chamber',
+        dilemma: 'Adaptation vs Stagnation',
+        genreConfig: {
+          id: 'dna-test',
+          name: 'DNA Test',
+          description: 'Narrative Evolution Test',
+          style: 'Evolutionary',
+          theme: {
+            '--background-color': '#000',
+            '--text-color': '#fff',
+            '--accent-color': '#7c3aed',
+            '--font-family': 'Arial',
+          },
+          startScreenImagePrompt: 'narrative dna',
+          conceptPrompt: 'evolutionary concept',
+          aiSystemInstruction: 'evolutionary instruction',
+        },
+        psychologicalStatus: 'Fragmented',
+        systemHealth: 80,
+        summary: 'Narrative DNA mutation in progress',
+        uiDistortion: {
+          filter: 'none',
+          transform: 'none',
+          transition: 'none',
+        },
+      };
+    });
+    
+    test('should evolve narrative based on player choices and response times', () => {
+      const fastResponseTime = 2000; // 2 seconds
+      const slowResponseTime = 20000; // 20 seconds
+      
+      const initialGeneration = engine['narrativeDNA'].generation;
+      
+      engine.evolveNarrative('quick decision', fastResponseTime, mockWorldState);
+      expect(engine['narrativeDNA'].generation).toBe(initialGeneration + 1);
+      
+      engine.evolveNarrative('slow decision', slowResponseTime, mockWorldState);
+      expect(engine['narrativeDNA'].generation).toBe(initialGeneration + 2);
+    });
+    
+    test('should generate adaptive prompts based on DNA expression', () => {
+      const basePrompt = 'Continue the story';
+      
+      // Evolve DNA several times to see adaptation
+      for (let i = 0; i < 5; i++) {
+        engine.evolveNarrative(`choice ${i}`, 5000, mockWorldState);
+      }
+      
+      const adaptedPrompt = engine.generateAdaptivePrompt(basePrompt, mockWorldState);
+      
+      expect(adaptedPrompt).toContain(basePrompt);
+      // The adapted prompt should be at least as long as the base (may be equal if no modifications applied)
+      expect(adaptedPrompt.length).toBeGreaterThanOrEqual(basePrompt.length);
+    });
+  });
+
+  describe('Breaking the Fifth Wall', () => {
+    let engine: BreakingFifthWall;
+    let mockWorldState: WorldState;
+    
+    beforeEach(() => {
+      engine = new BreakingFifthWall();
+      mockWorldState = {
+        protagonist: 'Fifth Wall Subject',
+        setting: 'Browser Reality',
+        dilemma: 'Digital vs Physical',
+        genreConfig: {
+          id: 'fifth-wall-test',
+          name: 'Fifth Wall Test',
+          description: 'Browser Manipulation Test',
+          style: 'Meta-digital',
+          theme: {
+            '--background-color': '#000',
+            '--text-color': '#fff',
+            '--accent-color': '#ff0000',
+            '--font-family': 'Arial',
+          },
+          startScreenImagePrompt: 'browser reality',
+          conceptPrompt: 'meta concept',
+          aiSystemInstruction: 'meta instruction',
+        },
+        psychologicalStatus: 'Paranoid',
+        systemHealth: 30,
+        summary: 'Fifth wall breaking initiated',
+        uiDistortion: {
+          filter: 'none',
+          transform: 'none',
+          transition: 'none',
+        },
+      };
+    });
+    
+    test('should activate browser effects at sufficient intensity', () => {
+      const originalTitle = document.title;
+      
+      engine.activateBreakage(0.8, mockWorldState); // High intensity
+      
+      // Should be active now
+      expect(engine['isActive']).toBe(true);
+      
+      // Clean up
+      engine.deactivateBreakage();
+      expect(document.title).toBe(originalTitle);
+      expect(engine['isActive']).toBe(false);
+    });
+    
+    test('should not activate below threshold intensity', () => {
+      engine.activateBreakage(0.2, mockWorldState); // Low intensity
+      
+      // Should not activate
+      expect(engine['isActive']).toBe(false);
+    });
+    
+    test('should properly clean up effects when deactivated', () => {
+      const originalTitle = document.title;
+      
+      engine.activateBreakage(0.8, mockWorldState);
+      engine.deactivateBreakage();
+      
+      expect(document.title).toBe(originalTitle);
+      expect(engine['titleInterval']).toBeNull();
+      expect(engine['faviconInterval']).toBeNull();
     });
   });
 });

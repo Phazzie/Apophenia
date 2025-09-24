@@ -16,15 +16,18 @@ import { API_KEYS, AI_MODELS } from '../config';
 
 const genAI = new GoogleGenerativeAI(API_KEYS.googleGenAI);
 
-// Real Google Imagen API implementation
-const createImageClient = () => {
-  if (!API_KEYS.googleGenAI) {
+// Google Imagen client for real image generation with enhanced fallback support
+const createImageClient = (apiKey?: string) => {
+  const key = apiKey || API_KEYS.googleGenAI;
+  if (!key) {
     console.warn('Google AI API key not available for image generation');
     return null;
   }
   
-  const genAI = new GoogleGenerativeAI(API_KEYS.googleGenAI);
-  return genAI.getGenerativeModel({ model: "imagen-3.0-generate-001" });
+  const genAI = new GoogleGenerativeAI(key);
+  // Use FALLBACK_IMAGE from config with fallback to imagen-3.0-generate-001
+  const primaryImagenModel = AI_MODELS.FALLBACK_IMAGE || 'imagen-3.0-generate-001';
+  return genAI.getGenerativeModel({ model: primaryImagenModel });
 };
 
 const safetySettings = [
@@ -264,18 +267,16 @@ export const processAdvancedImageGeneration = async (
   }
   
   try {
-    // Primary: Google Imagen (when available)
-    if (API_KEYS.googleImagen) {
-      console.log('Attempting Google Imagen image generation...');
-      const imagenUrl = await generateWithImagen(horrorEnhancedPrompt);
-      if (imagenUrl) {
-        console.log('Google Imagen image generation successful');
-        return imagenUrl;
-      }
+    // Primary: Grok-4 Fast Reasoning with Imagen fallback
+    console.log('Attempting Grok-4 Fast image generation (with Imagen fallback)...');
+    const grokFirstUrl = await generateWithGrokFirst(horrorEnhancedPrompt);
+    if (grokFirstUrl) {
+      console.log('Image generation successful (Grok-first approach)');
+      return grokFirstUrl;
     }
     
-    // Fallback: Use text-to-image capabilities if available
-    console.log('Primary image service unavailable, using enhanced Unsplash integration');
+    // Final fallback: Use enhanced Unsplash integration
+    console.log('All AI image generation methods unavailable, using enhanced Unsplash integration');
     return generateUnsplashFallback(prompt);
     
   } catch (error) {
@@ -332,55 +333,111 @@ async function generateSingleVariation(prompt: string): Promise<string> {
 }
 
 /**
+ * Enhanced image generation with Grok-first approach and Imagen fallback
+ */
+async function generateWithGrokFirst(prompt: string): Promise<string | null> {
+  // Import xaiClient here to avoid circular dependencies
+  const { xaiClient } = await import('./grokService');
+  
+  try {
+    console.log('Attempting image generation with Grok-4 first...');
+    
+    // Try Grok first (experimental/future compatibility)
+    if (API_KEYS.xaiAPI) {
+      const grokResult = await xaiClient.generateImage(prompt);
+      if (grokResult) {
+        console.log('Grok-4 image generation successful!');
+        return grokResult;
+      }
+    }
+    
+    console.log('Grok-4 image generation not available, falling back to Imagen...');
+    
+    // Fallback to Imagen
+    return await generateWithImagen(prompt);
+    
+  } catch (error) {
+    console.warn('Grok image generation failed, falling back to Imagen:', error);
+    return await generateWithImagen(prompt);
+  }
+}
+
+/**
  * Google Imagen implementation using the official Google AI API
  */
 async function generateWithImagen(prompt: string): Promise<string | null> {
   try {
-    const imageClient = createImageClient();
+    // Check for API key availability (improved from both versions)
+    if (!API_KEYS.googleImagen && !API_KEYS.googleGenAI) {
+      console.log('Google AI API key not available - using fallback');
+      return null;
+    }
+
+    // Use the API key (prefer googleImagen, fallback to googleGenAI)
+    const apiKey = API_KEYS.googleImagen || API_KEYS.googleGenAI;
+    
+    const imageClient = createImageClient(apiKey);
     if (!imageClient) {
       console.log('Google Imagen client not available, falling back to Unsplash');
       return null;
     }
 
     console.log('Generating image with Google Imagen API...');
-    const result = await imageClient.generateContent(prompt);
-    const response = result.response;
-
-    // Extract base64 image data from API response
-    if (response.candidates?.[0]?.content?.parts) {
-      for (const part of response.candidates[0].content.parts) {
-        if (part.inlineData?.mimeType?.startsWith('image/')) {
-          const base64Data = part.inlineData.data;
-          const mimeType = part.inlineData.mimeType;
-          console.log(`Successfully generated image with Imagen API: ${mimeType}`);
-          return `data:${mimeType};base64,${base64Data}`;
-        }
+    
+    // Try primary Imagen model
+    let result;
+    try {
+      result = await imageClient.generateContent(prompt);
+    } catch (primaryError) {
+      console.warn('Primary Imagen model failed, trying secondary fallback:', primaryError);
+      
+      // Try secondary Imagen fallback model if available
+      try {
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const fallbackModel = AI_MODELS.SECONDARY_FALLBACK_IMAGE || 'imagen-2.0-generate-001';
+        const fallbackClient = genAI.getGenerativeModel({ model: fallbackModel });
+        result = await fallbackClient.generateContent(prompt);
+        console.log('Trying fallback Imagen model...');
+      } catch (fallbackError) {
+        console.warn('All Imagen models failed:', fallbackError);
+        return null;
       }
     }
+    
+    const response = result.response;
 
-    // Try fallback Imagen model if primary fails
-    try {
-      console.log('Trying fallback Imagen model...');
-      const fallbackClient = new GoogleGenerativeAI(API_KEYS.googleGenAI)
-        .getGenerativeModel({ model: "imagen-2.0-generate-001" });
+    // Enhanced response parsing (combines both approaches)
+    if (response.candidates && response.candidates[0]) {
+      const candidate = response.candidates[0];
       
-      const fallbackResult = await fallbackClient.generateContent(prompt);
-      const fallbackResponse = fallbackResult.response;
-      
-      if (fallbackResponse.candidates?.[0]?.content?.parts) {
-        for (const part of fallbackResponse.candidates[0].content.parts) {
-          if (part.inlineData?.mimeType?.startsWith('image/')) {
+      // Look for image data in various possible formats
+      if (candidate.content && candidate.content.parts) {
+        for (const part of candidate.content.parts) {
+          // Check for base64 encoded image
+          if (part.inlineData && part.inlineData.data) {
+            const mimeType = part.inlineData.mimeType || 'image/png';
             const base64Data = part.inlineData.data;
-            const mimeType = part.inlineData.mimeType;
-            console.log(`Successfully generated image with fallback Imagen: ${mimeType}`);
-            return `data:${mimeType};base64,${base64Data}`;
+            const dataUrl = `data:${mimeType};base64,${base64Data}`;
+            console.log(`Successfully generated image with Imagen API: ${mimeType}`);
+            return dataUrl;
+          }
+          
+          // Check for image URL
+          if (part.fileData && part.fileData.fileUri) {
+            console.log('Successfully generated image with Google Imagen');
+            return part.fileData.fileUri;
           }
         }
       }
-    } catch (fallbackError) {
-      console.warn('Fallback Imagen model also failed:', fallbackError);
+      
+      // If no direct image data, check for text response with URL
+      const text = response.text();
+      if (text && (text.includes('http') || text.includes('data:'))) {
+        console.log('Successfully generated image with Google Imagen');
+        return text.trim();
+      }
     }
-
+    
     console.log('No image data found in Imagen response, falling back to Unsplash');
     return null;
     

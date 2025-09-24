@@ -21,3 +21,29 @@ jules-scratch/
 .env
 .env.local
 .env.*.local
+
+# Coverage reports and testing artifacts
+coverage/
+reports/
+test-results/
+playwright-report/
+.nyc_output/
+
+# Stryker mutation testing
+.stryker-tmp/
+
+# Build artifacts
+*.tsbuildinfo
+
+# Temporary files
+tmp/
+temp/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

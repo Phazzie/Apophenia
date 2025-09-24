@@ -58,11 +58,23 @@ export class TemporalRevisionEngine {
   }
   
   private async analyzeTemporalImpact(choice: string, worldState: WorldState): Promise<boolean> {
-    // Use AI to determine if choice has temporal significance
-    const psychCorruption = 1 - (worldState.systemHealth / 100);
-    const baseChance = REVOLUTIONARY_FEATURES.TEMPORAL_REVISION.enabled ? 0.2 : 0;
-    
-    return Math.random() < (baseChance + psychCorruption * 0.3);
+    const { generateWithSelectedModel } = await import('./unifiedAIService');
+    const systemInstruction = `You are a temporal analyst AI. Your task is to determine if a player's choice should cause a temporal revision in the story. Respond with "yes" or "no".`;
+    const prompt = `The player chose: "${choice}". The current psychological status is ${worldState.psychologicalStatus} and system health is ${worldState.systemHealth}. Should this choice cause a temporal revision?`;
+
+    try {
+      const commands = await generateWithSelectedModel(
+        systemInstruction,
+        prompt,
+        'story'
+      );
+      if (commands[0]?.type === 'displayText') {
+        return commands[0].payload.content.toLowerCase().includes('yes');
+      }
+    } catch (error) {
+      console.error('Temporal impact analysis failed:', error);
+    }
+    return false;
   }
   
   private async generateRevisedSegment(
@@ -70,31 +82,29 @@ export class TemporalRevisionEngine {
     currentChoice: string,
     worldState: WorldState
   ): Promise<string> {
-    // Create subtle but unsettling changes to past events
-    const revisionPrompts = [
-      `Subtly modify this text to suggest the protagonist was never alone: "${originalText}"`,
-      `Alter this passage to hint that previous events were hallucinations: "${originalText}"`,
-      `Revise this text to suggest digital interference: "${originalText}"`,
-      `Change this passage to imply the protagonist is an AI: "${originalText}"`,
-    ];
-    
-    const selectedPrompt = revisionPrompts[Math.floor(Math.random() * revisionPrompts.length)];
-    
-    // In production, this would use Gemini 2.5 Pro with thinking mode
-    // For now, create plausible revisions
-    return this.createPlausibleRevision(originalText, currentChoice);
-  }
-  
-  private createPlausibleRevision(originalText: string, currentChoice: string): string {
-    const revisionTypes = [
-      (text: string) => text.replace(/\bi\b/gi, 'the system').replace(/\bme\b/gi, 'the digital entity'),
-      (text: string) => text + ' [ERROR: MEMORY FRAGMENT CORRUPTED]',
-      (text: string) => text.replace(/\bsee\b/gi, 'perceive through sensors'),
-      (text: string) => '// HISTORICAL DATA MODIFIED // ' + text,
-    ];
-    
-    const revisionFn = revisionTypes[Math.floor(Math.random() * revisionTypes.length)];
-    return revisionFn(originalText);
+    const { generateWithSelectedModel } = await import('./unifiedAIService');
+    const systemInstruction = `You are a temporal revision AI. Your task is to subtly rewrite past events to create a sense of unease and psychological horror. The changes should be minor but significant enough to make the player question their memory.`;
+    const prompt = `The player's recent choice was: "${currentChoice}". Based on this, revise the following memory to create a sense of cosmic horror and unreliability. Do not drastically change the event, but introduce a subtle, unsettling detail.
+
+Original memory: "${originalText}"
+
+Return only the revised text.`;
+
+    try {
+      const commands = await generateWithSelectedModel(
+        systemInstruction,
+        prompt,
+        'story'
+      );
+      if (commands[0]?.type === 'displayText') {
+        return commands[0].payload.content;
+      }
+    } catch (error) {
+      console.error('Temporal revision failed:', error);
+    }
+
+    // Fallback to a simpler revision if AI fails
+    return originalText + ' [MEMORY FRAGMENT DISTORTED]';
   }
 }
 

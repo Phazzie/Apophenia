@@ -2,17 +2,20 @@
 export const API_KEYS = {
   googleGenAI: 'test-key',
   googleImagen: 'test-imagen-key',
+  xaiGrok: 'test-xai-key',
 };
 
 export const getConfig = () => ({
   geminiApiKey: API_KEYS.googleGenAI,
   imageApiKey: API_KEYS.googleImagen,
   imagenKey: API_KEYS.googleImagen,
+  xaiApiKey: API_KEYS.xaiGrok,
 });
 
 export const AI_MODELS = {
   PRIMARY_TEXT: 'gemini-2.5-flash-experimental',
   FALLBACK_TEXT: 'gemini-2.5-flash',
+  GROK_TEXT: 'grok-4-fast-reasoning',
   PRIMARY_IMAGE: 'imagen-3.0-generate-001',
   FALLBACK_IMAGE: 'imagen-2.0-generate-001',
   CONCEPT_GENERATION: {

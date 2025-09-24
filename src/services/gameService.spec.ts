@@ -138,7 +138,7 @@ describe('gameService', () => {
       // Should return fallback commands from secure genkit
       expect(result.commands).toHaveLength(2);
       expect(result.commands[0].type).toBe('displayText');
-      expect((result.commands[0].payload as any).content).toContain('cosmic forces continue to manifest');
+      expect((result.commands[0].payload as any).content).toContain('fabric of reality fractures');
       expect(result.commands[1].type).toBe('displayChoices');
       expect((result.commands[1].payload as any).choices).toHaveLength(3);
       

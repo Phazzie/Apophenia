@@ -100,7 +100,7 @@ export const getNextStep = async (
     console.error('Player choice that caused error:', playerChoice);
     console.error('World state at error:', worldState);
     
-    // Return fallback error commands
+    // Return fallback error commands with revolutionary features structure
     return {
       commands: [
         {
@@ -120,7 +120,11 @@ export const getNextStep = async (
             ]
           }
         }
-      ]
+      ],
+      revisedHistory: undefined,
+      metaMessage: undefined,
+      quantumShift: undefined,
+      corruptionEffects: undefined,
     };
   }
 };

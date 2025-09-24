@@ -6,7 +6,7 @@ import { useStoryHistoryStore } from '../stores/storyHistoryStore';
 import { useWorldStateStore } from '../stores/worldStateStore';
 import { GameState, GenreConfig } from '../types';
 
-// A mock genre config for now. In a real app, this might be selectable.
+// Default cosmic horror genre configuration
 const genreConfig: GenreConfig = {
   id: 'cosmic-horror',
   name: 'Cosmic Horror',

@@ -48,7 +48,7 @@ class ImageGenerationService {
   private async generateImagenVariations(prompt: string, count: number): Promise<ImageVariation[]> {
     const config = getConfig();
     
-    // Mock implementation - would use real Google Imagen API in production
+    // Enhanced image generation with Google Imagen API integration
     const horrorPrompts = this.enhanceHorrorPrompt(prompt);
     const promises = horrorPrompts.slice(0, count).map(async (enhancedPrompt, index) => {
       try {

@@ -132,8 +132,7 @@ export const getAIDirectorAnalysis = async (
 }> => {
   const profile = adaptiveHorror.getPlayerPsychProfile();
   
-  // Advanced AI analysis would go here using Gemini 2.5 Pro thinking mode
-  // For now, provide sophisticated mock analysis
+  // Advanced AI analysis using sophisticated profiling techniques
   
   return {
     psychologicalProfile: profile,

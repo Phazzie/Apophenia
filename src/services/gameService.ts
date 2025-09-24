@@ -5,6 +5,13 @@ import {
     nextStepFlow,
     processAdvancedImageGeneration,
 } from './ai/secureGenkit';
+// Import client-side AI flows for direct model usage
+import {
+  generateConceptFlow as clientGenerateConceptFlow,
+  nextStepFlow as clientNextStepFlow,
+  generateImageFlow as clientGenerateImageFlow
+} from './ai/clientAIFlow';
+import { getSelectedModel } from './ai/unifiedAIService';
 import { summarizeHistoryFlow } from './flows/summaryFlow';
 import {
   temporalRevision,
@@ -65,12 +72,21 @@ export const getNextStep = async (
     `Player chose: ${playerChoice}. Continue the cosmic horror narrative.`
   );
   
-  const commands = await nextStepFlow({ 
-    playerChoice: personalizedPrompt, 
-    worldState, 
-    history: quantumResult.history, 
-    genreConfig 
-  });
+  // Use client-side AI flows for non-Gemini models, secure backend for Gemini
+  const selectedModel = getSelectedModel();
+  const commands = selectedModel === 'grok-4-fast-reasoning' 
+    ? await clientNextStepFlow({ 
+        playerChoice: personalizedPrompt, 
+        worldState, 
+        history: quantumResult.history, 
+        genreConfig 
+      })
+    : await nextStepFlow({ 
+        playerChoice: personalizedPrompt, 
+        worldState, 
+        history: quantumResult.history, 
+        genreConfig 
+      });
   
   return {
     commands,
@@ -91,10 +107,19 @@ export const summarizeHistory = async (
 export const generateConcept = async (
   genreConfig: GenreConfig
 ): Promise<{ protagonist: string; setting: string; dilemma: string }> => {
-  return generateConceptFlow(genreConfig);
+  // Use client-side AI flows for non-Gemini models, secure backend for Gemini
+  const selectedModel = getSelectedModel();
+  
+  if (selectedModel === 'grok-4-fast-reasoning') {
+    return clientGenerateConceptFlow(genreConfig);
+  } else {
+    return generateConceptFlow(genreConfig);
+  }
 };
 
 export const generateImage = async (prompt: string): Promise<string> => {
+  // For now, always use the secure backend for image generation
+  // This could be enhanced later to support client-side image models
   return generateImageFlow(prompt);
 };
 

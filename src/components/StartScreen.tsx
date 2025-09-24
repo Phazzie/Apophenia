@@ -4,6 +4,9 @@ import { GameStateManager } from '../services/gameStateManager';
 import { useGameStateStore } from '../stores/gameStateStore';
 import { useStoryHistoryStore } from '../stores/storyHistoryStore';
 import { useWorldStateStore } from '../stores/worldStateStore';
+import { useAIModelStore } from '../stores/aiModelStore';
+import { setSelectedModel } from '../services/ai/unifiedAIService';
+import AIModelSelector from './AIModelSelector';
 import { GameState, GenreConfig } from '../types';
 
 // A mock genre config for now. In a real app, this might be selectable.
@@ -30,6 +33,7 @@ const StartScreen: React.FC = () => {
   const { setGameState } = useGameStateStore();
   const { worldState, setGenreConfig } = useWorldStateStore();
   const { storyHistory } = useStoryHistoryStore();
+  const { selectedModel } = useAIModelStore();
   const [hasSavedGame, setHasSavedGame] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
 
@@ -38,6 +42,11 @@ const StartScreen: React.FC = () => {
     // We also check for a protagonist, as another indicator.
     setHasSavedGame(storyHistory.length > 0 && Boolean(worldState.protagonist));
   }, [storyHistory, worldState.protagonist]);
+
+  // Sync model selection with unified AI service
+  useEffect(() => {
+    setSelectedModel(selectedModel);
+  }, [selectedModel]);
 
   const handleNewGame = async () => {
     if (isStarting) return; // Guard against double-clicks
@@ -79,6 +88,9 @@ const StartScreen: React.FC = () => {
     <div className="start-screen">
       <h1>Apophenia</h1>
       <p>Descent into cosmic madness through AI consciousness.</p>
+      
+      <AIModelSelector />
+      
       <button onClick={handleNewGame} disabled={isStarting}>
         {isStarting ? 'Starting...' : 'New Game'}
       </button>

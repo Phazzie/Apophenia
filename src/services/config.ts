@@ -12,11 +12,13 @@ export const API_KEYS = isTestEnvironment ? {
   // Jest test environment - use process.env
   googleGenAI: process.env.VITE_GEMINI_API_KEY || 'test-key',
   googleImagen: process.env.VITE_GEMINI_API_KEY || 'test-key', // Gemini also handles images
+  xaiGrok: process.env.VITE_XAI_API_KEY || 'test-key',
 } : {
   // DEPRECATED: Frontend no longer needs API keys
   // All API calls now go through secure backend
   googleGenAI: '',
   googleImagen: '',
+  xaiGrok: '',
 };
 
 // Configuration getter function
@@ -25,6 +27,7 @@ export const getConfig = () => {
     geminiApiKey: API_KEYS.googleGenAI,
     imageApiKey: API_KEYS.googleImagen,
     imagenKey: API_KEYS.googleImagen,
+    xaiApiKey: API_KEYS.xaiGrok,
   };
 };
 
@@ -33,6 +36,9 @@ export const AI_MODELS = {
   // Primary text generation with advanced reasoning - UPGRADED TO 2.5 PRO
   PRIMARY_TEXT: 'gemini-2.5-pro', // Latest Pro model with 1M token context
   FALLBACK_TEXT: 'gemini-2.5-flash',
+  
+  // X.AI Grok-4 Fast Reasoning - New model with 2M token context
+  GROK_TEXT: 'grok-4-fast-reasoning',
   
   // Image generation pipeline - UPGRADED TO FLASH IMAGE PREVIEW
   PRIMARY_IMAGE: 'gemini-2.5-flash-image-preview', // New image generation model

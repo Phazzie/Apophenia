@@ -16,16 +16,12 @@ import { API_KEYS, AI_MODELS } from '../config';
 
 const genAI = new GoogleGenerativeAI(API_KEYS.googleGenAI);
 
-// Placeholder for image client - will be properly implemented with correct package
-const imageClient = {
-  generateImage: async (request: any) => {
-    // Mock implementation for now - will be replaced with real ImageGenerationClient
-    return [{
-      generatedImages: [{
-        bytesBase64Encoded: 'mockBase64Data'
-      }]
-    }];
-  }
+// Google Imagen client for real image generation
+const createImageClient = (apiKey: string) => {
+  const genAI = new GoogleGenerativeAI(apiKey);
+  // Use FALLBACK_IMAGE which is now the primary Imagen model (after Grok attempt)
+  const primaryImagenModel = AI_MODELS.FALLBACK_IMAGE || 'imagen-3.0-generate-001';
+  return genAI.getGenerativeModel({ model: primaryImagenModel });
 };
 
 const safetySettings = [
@@ -265,18 +261,16 @@ export const processAdvancedImageGeneration = async (
   }
   
   try {
-    // Primary: Google Imagen (when available)
-    if (API_KEYS.googleImagen) {
-      console.log('Attempting Google Imagen image generation...');
-      const imagenUrl = await generateWithImagen(horrorEnhancedPrompt);
-      if (imagenUrl) {
-        console.log('Google Imagen image generation successful');
-        return imagenUrl;
-      }
+    // Primary: Grok-4 Fast Reasoning with Imagen fallback
+    console.log('Attempting Grok-4 Fast image generation (with Imagen fallback)...');
+    const grokFirstUrl = await generateWithGrokFirst(horrorEnhancedPrompt);
+    if (grokFirstUrl) {
+      console.log('Image generation successful (Grok-first approach)');
+      return grokFirstUrl;
     }
     
-    // Fallback: Use text-to-image capabilities if available
-    console.log('Primary image service unavailable, using enhanced Unsplash integration');
+    // Final fallback: Use enhanced Unsplash integration
+    console.log('All AI image generation methods unavailable, using enhanced Unsplash integration');
     return generateUnsplashFallback(prompt);
     
   } catch (error) {
@@ -333,34 +327,106 @@ async function generateSingleVariation(prompt: string): Promise<string> {
 }
 
 /**
+ * Enhanced image generation with Grok-first approach and Imagen fallback
+ */
+async function generateWithGrokFirst(prompt: string): Promise<string | null> {
+  // Import xaiClient here to avoid circular dependencies
+  const { xaiClient } = await import('./grokService');
+  
+  try {
+    console.log('Attempting image generation with Grok-4 first...');
+    
+    // Try Grok first (experimental/future compatibility)
+    if (API_KEYS.xaiAPI) {
+      const grokResult = await xaiClient.generateImage(prompt);
+      if (grokResult) {
+        console.log('Grok-4 image generation successful!');
+        return grokResult;
+      }
+    }
+    
+    console.log('Grok-4 image generation not available, falling back to Imagen...');
+    
+    // Fallback to Imagen
+    return await generateWithImagen(prompt);
+    
+  } catch (error) {
+    console.warn('Grok image generation failed, falling back to Imagen:', error);
+    return await generateWithImagen(prompt);
+  }
+}
+
+/**
  * Google Imagen implementation using the official Google AI API
  */
 async function generateWithImagen(prompt: string): Promise<string | null> {
   try {
-    // Use the Google Generative AI package for text-to-image generation
-    // Note: Google AI Studio provides access to image generation capabilities
-    
+    // Check for API key availability
     if (!API_KEYS.googleImagen && !API_KEYS.googleGenAI) {
       console.log('Google AI API key not available - using fallback');
       return null;
     }
 
-    // For production use, this would integrate with the official Google AI image generation
-    // Currently using the generative AI package which supports multimodal capabilities
-    const genAI = new GoogleGenerativeAI(API_KEYS.googleGenAI);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-
-    // Enhanced prompt for better image generation results
-    const enhancedPrompt = `Create a detailed description for an image generation AI: ${prompt}. Focus on atmospheric cosmic horror elements, dark lighting, surreal compositions, and otherworldly aesthetics.`;
-
-    const result = await model.generateContent(enhancedPrompt);
-    const description = result.response.text();
+    // Use the API key (prefer googleImagen, fallback to googleGenAI)
+    const apiKey = API_KEYS.googleImagen || API_KEYS.googleGenAI;
     
-    // Log the generated description for debugging
-    console.log('Generated image description:', description);
+    console.log('Generating image with Google Imagen API...');
     
-    // In a real implementation, this description would be sent to an image generation service
-    // For now, return null to fall back to Unsplash
+    // Try primary Imagen model (now FALLBACK_IMAGE in the new config)
+    let imageModel = createImageClient(apiKey);
+    let result;
+    
+    try {
+      result = await imageModel.generateContent(prompt);
+    } catch (primaryError) {
+      console.warn('Primary Imagen model failed, trying secondary fallback:', primaryError);
+      
+      // Try secondary Imagen fallback model
+      try {
+        const genAI = new GoogleGenerativeAI(apiKey);
+        imageModel = genAI.getGenerativeModel({ model: AI_MODELS.SECONDARY_FALLBACK_IMAGE });
+        result = await imageModel.generateContent(prompt);
+      } catch (fallbackError) {
+        console.warn('All Imagen models failed:', fallbackError);
+        return null;
+      }
+    }
+    
+    const response = result.response;
+    
+    // Check if response contains image data
+    if (response.candidates && response.candidates[0]) {
+      const candidate = response.candidates[0];
+      
+      // Look for image data in various possible formats
+      if (candidate.content && candidate.content.parts) {
+        for (const part of candidate.content.parts) {
+          // Check for base64 encoded image
+          if (part.inlineData && part.inlineData.data) {
+            const mimeType = part.inlineData.mimeType || 'image/png';
+            const base64Data = part.inlineData.data;
+            const dataUrl = `data:${mimeType};base64,${base64Data}`;
+            console.log('Successfully generated image with Google Imagen');
+            return dataUrl;
+          }
+          
+          // Check for image URL
+          if (part.fileData && part.fileData.fileUri) {
+            console.log('Successfully generated image with Google Imagen');
+            return part.fileData.fileUri;
+          }
+        }
+      }
+      
+      // If no direct image data, check for text response with URL
+      const text = response.text();
+      if (text && (text.includes('http') || text.includes('data:'))) {
+        console.log('Successfully generated image with Google Imagen');
+        return text.trim();
+      }
+    }
+    
+    console.log('Google Imagen response did not contain image data, falling back to Unsplash');
     return null;
     
   } catch (error) {

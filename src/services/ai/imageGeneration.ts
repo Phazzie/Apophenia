@@ -1,4 +1,5 @@
 import { getConfig } from '../config';
+import { processAdvancedImageGeneration } from './genkit';
 
 interface ImageVariation {
   url: string;
@@ -48,17 +49,20 @@ class ImageGenerationService {
   private async generateImagenVariations(prompt: string, count: number): Promise<ImageVariation[]> {
     const config = getConfig();
     
-    // Mock implementation - would use real Google Imagen API in production
+    // Real implementation using Google Imagen API
     const horrorPrompts = this.enhanceHorrorPrompt(prompt);
     const promises = horrorPrompts.slice(0, count).map(async (enhancedPrompt, index) => {
       try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 200 + index * 100));
-
+        // Use the real Imagen API instead of mock
+        const imageUrl = await processAdvancedImageGeneration(enhancedPrompt);
+        
+        // Check if we got a real generated image (not Unsplash fallback)
+        const isRealImageGeneration = imageUrl && !imageUrl.includes('unsplash.com');
+        
         return {
-          url: `https://via.placeholder.com/800x600/2d1b69/e94560?text=Imagen+${index + 1}`,
+          url: imageUrl || `https://via.placeholder.com/800x600/2d1b69/e94560?text=Imagen+Error+${index + 1}`,
           prompt: enhancedPrompt,
-          quality: 'imagen' as const
+          quality: isRealImageGeneration ? 'imagen' as const : 'unsplash' as const
         };
       } catch (error) {
         console.error(`Imagen generation ${index + 1} failed:`, error);

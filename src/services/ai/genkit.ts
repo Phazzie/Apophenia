@@ -16,16 +16,12 @@ import { API_KEYS, AI_MODELS } from '../config';
 
 const genAI = new GoogleGenerativeAI(API_KEYS.googleGenAI);
 
-// Placeholder for image client - will be properly implemented with correct package
-const imageClient = {
-  generateImage: async (request: any) => {
-    // Mock implementation for now - will be replaced with real ImageGenerationClient
-    return [{
-      generatedImages: [{
-        bytesBase64Encoded: 'mockBase64Data'
-      }]
-    }];
-  }
+// Google Imagen client for real image generation
+const createImageClient = (apiKey: string) => {
+  const genAI = new GoogleGenerativeAI(apiKey);
+  // Use Imagen 3.0 as primary image generation model
+  const primaryModel = AI_MODELS.PRIMARY_IMAGE || 'imagen-3.0-generate-001';
+  return genAI.getGenerativeModel({ model: primaryModel });
 };
 
 const safetySettings = [
@@ -337,30 +333,67 @@ async function generateSingleVariation(prompt: string): Promise<string> {
  */
 async function generateWithImagen(prompt: string): Promise<string | null> {
   try {
-    // Use the Google Generative AI package for text-to-image generation
-    // Note: Google AI Studio provides access to image generation capabilities
-    
+    // Check for API key availability
     if (!API_KEYS.googleImagen && !API_KEYS.googleGenAI) {
       console.log('Google AI API key not available - using fallback');
       return null;
     }
 
-    // For production use, this would integrate with the official Google AI image generation
-    // Currently using the generative AI package which supports multimodal capabilities
-    const genAI = new GoogleGenerativeAI(API_KEYS.googleGenAI);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-
-    // Enhanced prompt for better image generation results
-    const enhancedPrompt = `Create a detailed description for an image generation AI: ${prompt}. Focus on atmospheric cosmic horror elements, dark lighting, surreal compositions, and otherworldly aesthetics.`;
-
-    const result = await model.generateContent(enhancedPrompt);
-    const description = result.response.text();
+    // Use the API key (prefer googleImagen, fallback to googleGenAI)
+    const apiKey = API_KEYS.googleImagen || API_KEYS.googleGenAI;
     
-    // Log the generated description for debugging
-    console.log('Generated image description:', description);
+    console.log('Generating image with Google Imagen API...');
     
-    // In a real implementation, this description would be sent to an image generation service
-    // For now, return null to fall back to Unsplash
+    // Try primary Imagen model first
+    let imageModel = createImageClient(apiKey);
+    let result;
+    
+    try {
+      result = await imageModel.generateContent(prompt);
+    } catch (primaryError) {
+      console.warn('Primary Imagen model failed, trying fallback:', primaryError);
+      
+      // Try fallback Imagen model
+      const genAI = new GoogleGenerativeAI(apiKey);
+      imageModel = genAI.getGenerativeModel({ model: AI_MODELS.FALLBACK_IMAGE });
+      result = await imageModel.generateContent(prompt);
+    }
+    
+    const response = result.response;
+    
+    // Check if response contains image data
+    if (response.candidates && response.candidates[0]) {
+      const candidate = response.candidates[0];
+      
+      // Look for image data in various possible formats
+      if (candidate.content && candidate.content.parts) {
+        for (const part of candidate.content.parts) {
+          // Check for base64 encoded image
+          if (part.inlineData && part.inlineData.data) {
+            const mimeType = part.inlineData.mimeType || 'image/png';
+            const base64Data = part.inlineData.data;
+            const dataUrl = `data:${mimeType};base64,${base64Data}`;
+            console.log('Successfully generated image with Google Imagen');
+            return dataUrl;
+          }
+          
+          // Check for image URL
+          if (part.fileData && part.fileData.fileUri) {
+            console.log('Successfully generated image with Google Imagen');
+            return part.fileData.fileUri;
+          }
+        }
+      }
+      
+      // If no direct image data, check for text response with URL
+      const text = response.text();
+      if (text && (text.includes('http') || text.includes('data:'))) {
+        console.log('Successfully generated image with Google Imagen');
+        return text.trim();
+      }
+    }
+    
+    console.log('Google Imagen response did not contain image data, falling back to Unsplash');
     return null;
     
   } catch (error) {

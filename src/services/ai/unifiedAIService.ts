@@ -5,7 +5,7 @@
  */
 
 import { useAIModelStore } from '../../stores/aiModelStore';
-import { grokClient } from './grokService';
+import { xaiClient } from './grokService';
 import { generateConceptFlow, nextStepFlow } from './genkit';
 import { GameCommand, GenreConfig, WorldState, StorySegment } from '../../types';
 import { AI_MODELS } from '../config';
@@ -27,8 +27,10 @@ export async function generateWithSelectedModel(
 
   try {
     if (selectedModel.id === 'grok-4-fast-reasoning') {
+      console.log('Using X.AI/Grok-4 for text generation');
       return await generateWithGrok(systemInstruction, prompt, useCase);
     } else {
+      console.log('Using Gemini for text generation');
       return await generateWithGemini(systemInstruction, prompt, useCase);
     }
   } catch (error) {
@@ -38,7 +40,7 @@ export async function generateWithSelectedModel(
 }
 
 /**
- * Generate with Grok-4 Fast Reasoning
+ * Generate with X.AI Grok-4 Fast Reasoning
  */
 async function generateWithGrok(
   systemInstruction: string,
@@ -47,7 +49,8 @@ async function generateWithGrok(
 ): Promise<GameCommand[]> {
   const config = getConfigForUseCase(useCase);
   
-  const result = await grokClient.generateText(systemInstruction, prompt, {
+  console.log('Generating with X.AI Grok-4:', { useCase, config });
+  const result = await xaiClient.generateText(systemInstruction, prompt, {
     temperature: config.temperature,
     maxTokens: config.maxOutputTokens,
     topP: config.topP,
@@ -62,7 +65,8 @@ async function generateWithGrok(
   const jsonEnd = content.lastIndexOf(']') + 1;
   
   if (jsonStart === -1 || jsonEnd === 0) {
-    throw new Error('No valid JSON found in Grok response');
+    console.error('No valid JSON found in X.AI response:', content);
+    throw new Error('No valid JSON found in X.AI response');
   }
   
   const jsonText = content.substring(jsonStart, jsonEnd);
@@ -70,9 +74,11 @@ async function generateWithGrok(
   
   // Validate commands structure
   if (!Array.isArray(commands)) {
-    throw new Error('Invalid command format from Grok');
+    console.error('Invalid command format from X.AI:', commands);
+    throw new Error('Invalid command format from X.AI');
   }
   
+  console.log('X.AI generated', commands.length, 'commands');
   return commands;
 }
 
@@ -144,21 +150,23 @@ export async function generateConceptWithSelectedModel(
   const selectedModel = useAIModelStore.getState().getSelectedModel();
   
   if (selectedModel?.id === 'grok-4-fast-reasoning') {
+    console.log('Generating concept with X.AI/Grok-4');
     return await generateConceptWithGrok(genreConfig);
   } else {
+    console.log('Generating concept with Gemini');
     return await generateConceptFlow(genreConfig);
   }
 }
 
 /**
- * Concept generation with Grok-4
+ * Concept generation with X.AI Grok-4
  */
 async function generateConceptWithGrok(
   genreConfig: GenreConfig
 ): Promise<{ protagonist: string; setting: string; dilemma: string }> {
   const enhancedSystemInstruction = `${genreConfig.aiSystemInstruction}
 
-ENHANCED REASONING DIRECTIVE: You are now powered by Grok-4 Fast Reasoning with 2 million token context.
+ENHANCED REASONING DIRECTIVE: You are now powered by X.AI Grok-4 Fast Reasoning with 2 million token context.
 Use your advanced reasoning capabilities to create a deeply layered psychological horror concept.
 
 Analyze the genre requirements and craft a concept that:
@@ -191,7 +199,8 @@ Example format:
 }`;
 
   try {
-    const result = await grokClient.generateText(enhancedSystemInstruction, enhancedPrompt, {
+    console.log('Generating concept with X.AI/Grok-4...');
+    const result = await xaiClient.generateText(enhancedSystemInstruction, enhancedPrompt, {
       temperature: AI_MODELS.CONCEPT_GENERATION.temperature,
       maxTokens: 4096,
       topP: AI_MODELS.CONCEPT_GENERATION.topP,
@@ -201,13 +210,14 @@ Example format:
     const content = result.content;
     const json = JSON.parse(content.replace(/```json|```/g, '').trim());
     
+    console.log('X.AI concept generation successful:', json);
     return {
       protagonist: json.protagonist || 'A confused individual facing existential dread',
       setting: json.setting || 'A reality where nothing can be trusted',
       dilemma: json.dilemma || 'Every choice leads to deeper horror',
     };
   } catch (error) {
-    console.warn('Grok concept generation failed, falling back to Gemini:', error);
+    console.warn('X.AI concept generation failed, falling back to Gemini:', error);
     return await generateConceptFlow(genreConfig);
   }
 }
@@ -224,8 +234,10 @@ export async function generateNextStepWithSelectedModel(
   const selectedModel = useAIModelStore.getState().getSelectedModel();
   
   if (selectedModel?.id === 'grok-4-fast-reasoning') {
+    console.log('Generating next step with X.AI/Grok-4');
     return await generateNextStepWithGrok(playerChoice, worldState, storyHistory, genreConfig);
   } else {
+    console.log('Generating next step with Gemini');
     return await nextStepFlow({
       playerChoice,
       worldState,
@@ -236,7 +248,7 @@ export async function generateNextStepWithSelectedModel(
 }
 
 /**
- * Next step generation with Grok-4
+ * Next step generation with X.AI Grok-4
  */
 async function generateNextStepWithGrok(
   playerChoice: string,
@@ -246,7 +258,7 @@ async function generateNextStepWithGrok(
 ): Promise<GameCommand[]> {
   const systemInstruction = `${genreConfig.aiSystemInstruction}
 
-GROK-4 ENHANCED REASONING: You have 2 million token context to maintain perfect story consistency.
+X.AI GROK-4 ENHANCED REASONING: You have 2 million token context to maintain perfect story consistency.
 Use your advanced reasoning to:
 
 1. COMPLETE MEMORY INTEGRATION: Reference all previous story elements for consistency
@@ -291,5 +303,6 @@ Return a JSON array of game commands following this structure:
   ]}}
 ]`;
 
+  console.log('Generating next step with X.AI/Grok-4...');
   return await generateWithGrok(systemInstruction, contextualPrompt, 'story');
 }

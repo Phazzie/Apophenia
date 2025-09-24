@@ -16,7 +16,7 @@
 ### Required Environment Variables
 ```bash
 # Primary AI Model (Required)
-VITE_GROK_API_KEY=your-grok-api-key-here
+VITE_XAI_API_KEY=your-xai-api-key-here
 
 # Fallback AI Model (Recommended)
 VITE_GEMINI_API_KEY=your-gemini-api-key-here
@@ -46,7 +46,7 @@ vercel --prod
 
 **Environment Configuration in Vercel:**
 - Go to Project Settings → Environment Variables
-- Add `VITE_GROK_API_KEY` and `VITE_GEMINI_API_KEY`
+- Add `VITE_XAI_API_KEY` and `VITE_GEMINI_API_KEY`
 - Redeploy for changes to take effect
 
 ---

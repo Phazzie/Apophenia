@@ -32,7 +32,7 @@ module.exports = {
     'import.meta': {
       env: {
         VITE_GEMINI_API_KEY: 'test-key',
-        VITE_GROK_API_KEY: 'test-key',
+        VITE_XAI_API_KEY: 'test-key',
       }
     }
   }

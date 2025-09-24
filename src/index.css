@@ -39,6 +39,12 @@ body {
   color: #58a6ff;
 }
 
+.ai-model-info small {
+  color: #6e7681;
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
 .game-screen {
   display: flex;
   width: 100%;
@@ -498,6 +504,277 @@ body {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Compact Model Selector Styles */
+.compact-model-selector {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  z-index: 150;
+}
+
+.compact-model-button {
+  background: #21262d;
+  border: 1px solid #30363d;
+  color: #c9d1d9;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  min-width: 120px;
+}
+
+.compact-model-button:hover {
+  background: #30363d;
+  border-color: #58a6ff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+.model-icon {
+  font-size: 1rem;
+}
+
+.model-name {
+  flex-grow: 1;
+  text-align: left;
+}
+
+.dropdown-arrow {
+  font-size: 0.8rem;
+  transition: transform 0.3s ease;
+}
+
+.dropdown-arrow.open {
+  transform: rotate(180deg);
+}
+
+.compact-model-dropdown {
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  margin-bottom: 0.5rem;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  min-width: 250px;
+  max-height: 300px;
+  overflow-y: auto;
+  animation: slideInUp 0.3s ease;
+}
+
+.model-option {
+  width: 100%;
+  background: none;
+  border: none;
+  color: #c9d1d9;
+  padding: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: left;
+  transition: background 0.3s ease;
+  border-bottom: 1px solid #30363d;
+}
+
+.model-option:last-child {
+  border-bottom: none;
+}
+
+.model-option:hover {
+  background: #21262d;
+}
+
+.model-option.selected {
+  background: #0969da20;
+  border-color: #58a6ff;
+}
+
+.model-info {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.model-info .model-name {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.model-provider {
+  font-size: 0.8rem;
+  color: #7d8590;
+}
+
+.model-specs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: #7d8590;
+}
+
+.check-mark {
+  color: #238636;
+  font-weight: bold;
+}
+
+/* Compact Test API Styles */
+.compact-test-api {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 100;
+}
+
+.compact-test-button {
+  background: #21262d;
+  border: 1px solid #30363d;
+  color: #c9d1d9;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  min-width: 100px;
+}
+
+.compact-test-button:hover:not(:disabled) {
+  background: #30363d;
+  border-color: #58a6ff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+.compact-test-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.test-icon {
+  font-size: 1rem;
+}
+
+.test-text {
+  flex-grow: 1;
+}
+
+.test-options-dropdown {
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  margin-bottom: 0.5rem;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  min-width: 200px;
+  animation: slideInUp 0.3s ease;
+}
+
+.test-option {
+  width: 100%;
+  background: none;
+  border: none;
+  color: #c9d1d9;
+  padding: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: left;
+  transition: background 0.3s ease;
+  border-bottom: 1px solid #30363d;
+}
+
+.test-option:last-child {
+  border-bottom: none;
+}
+
+.test-option:hover:not(:disabled) {
+  background: #21262d;
+}
+
+.test-option:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.option-icon {
+  font-size: 1rem;
+}
+
+.result-indicator {
+  margin-left: auto;
+  font-weight: bold;
+}
+
+.result-indicator.success {
+  color: #238636;
+}
+
+.result-indicator.error {
+  color: #f85149;
+}
+
+.compact-test-result {
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  margin-bottom: 0.5rem;
+  min-width: 250px;
+  padding: 0.75rem;
+  border-radius: 8px;
+  animation: slideInUp 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.compact-test-result.success {
+  background: #0d1117;
+  border: 1px solid #238636;
+}
+
+.compact-test-result.error {
+  background: #0d1117;
+  border: 1px solid #f85149;
+}
+
+.compact-test-result .result-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.compact-test-result .result-title {
+  font-weight: bold;
+  color: #c9d1d9;
+  font-size: 0.9rem;
+}
+
+.compact-test-result .result-details {
+  color: #7d8590;
+  font-size: 0.8rem;
+}
+
+.error-message {
+  color: #f85149;
 }
 
 /* Model Selector Button */

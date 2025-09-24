@@ -12,12 +12,12 @@ export const API_KEYS = isTestEnvironment ? {
   // Jest test environment - use process.env
   googleGenAI: process.env.VITE_GEMINI_API_KEY || 'test-key',
   googleImagen: process.env.VITE_GEMINI_API_KEY || 'test-key', // Gemini also handles images
-  grokAI: process.env.VITE_GROK_API_KEY || 'test-key',
+  xaiAPI: process.env.VITE_XAI_API_KEY || 'test-key',
 } : {
   // Browser environment - use import.meta.env
   googleGenAI: import.meta.env.VITE_GEMINI_API_KEY || '',
   googleImagen: import.meta.env.VITE_GEMINI_API_KEY || '',
-  grokAI: import.meta.env.VITE_GROK_API_KEY || '',
+  xaiAPI: import.meta.env.VITE_XAI_API_KEY || '',
 };
 
 // Configuration getter function
@@ -26,7 +26,7 @@ export const getConfig = () => {
     geminiApiKey: API_KEYS.googleGenAI,
     imageApiKey: API_KEYS.googleImagen,
     imagenKey: API_KEYS.googleImagen,
-    grokApiKey: API_KEYS.grokAI,
+    xaiApiKey: API_KEYS.xaiAPI,
   };
 };
 
@@ -109,9 +109,9 @@ export const AI_MODELS = {
 };
 
 // Validation - warn if API keys are not set
-if (!API_KEYS.grokAI) {
+if (!API_KEYS.xaiAPI) {
   console.warn(
-    'Warning: VITE_GROK_API_KEY is not set in your .env file. Story generation will use Gemini fallback.'
+    'Warning: VITE_XAI_API_KEY is not set in your .env file. Story generation will use Gemini fallback.'
   );
 }
 

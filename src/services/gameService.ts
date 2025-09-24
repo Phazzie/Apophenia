@@ -33,54 +33,96 @@ export const getNextStep = async (
   quantumShift?: boolean;
   corruptionEffects?: any;
 }> => {
-  // 1. ADAPTIVE HORROR: Analyze player choice for personalization
-  adaptiveHorror.analyzePlayerChoice(playerChoice, 'game progression');
-  
-  // 2. TEMPORAL REVISION: Check if choice should alter past events
-  const revisedHistory = await temporalRevision.reviseHistory(
-    playerChoice,
-    history,
-    worldState
-  );
-  
-  // 3. QUANTUM NARRATIVE: Process potential timeline shifts
-  const quantumResult = await quantumNarrative.processQuantumChoice(
-    playerChoice,
-    revisedHistory,
-    worldState
-  );
-  
-  // 4. META-CONSCIOUSNESS: Check for AI awareness events
-  const metaMessage = await metaConsciousness.checkForMetaEvent(
-    quantumResult.history,
-    worldState
-  );
-  
-  // 5. REALITY CORRUPTION: Apply interface corruption effects
-  const corruptionResult = realityCorruption.processCorruption(
-    playerChoice,
-    worldState
-  );
-  
-  // 6. ENHANCED AI GENERATION: Generate next story beat with personalization
-  const personalizedPrompt = await adaptiveHorror.generatePersonalizedHorror(
-    `Player chose: ${playerChoice}. Continue the cosmic horror narrative.`
-  );
-  
-  const commands = await generateNextStepWithSelectedModel(
-    personalizedPrompt,
-    worldState,
-    quantumResult.history,
-    genreConfig
-  );
-  
-  return {
-    commands,
-    revisedHistory: revisedHistory !== history ? revisedHistory : undefined,
-    metaMessage: metaMessage || undefined,
-    quantumShift: quantumResult.quantumShift,
-    corruptionEffects: corruptionResult.corruptionLevel > 0 ? corruptionResult : undefined,
-  };
+  console.log('Processing next step for player choice:', playerChoice);
+  console.log('World state:', { protagonist: worldState.protagonist, psychologicalStatus: worldState.psychologicalStatus });
+  console.log('Story history length:', history.length);
+
+  try {
+    // 1. ADAPTIVE HORROR: Analyze player choice for personalization
+    console.log('Analyzing player choice for adaptive horror...');
+    adaptiveHorror.analyzePlayerChoice(playerChoice, 'game progression');
+    
+    // 2. TEMPORAL REVISION: Check if choice should alter past events
+    console.log('Processing temporal revision...');
+    const revisedHistory = await temporalRevision.reviseHistory(
+      playerChoice,
+      history,
+      worldState
+    );
+    
+    // 3. QUANTUM NARRATIVE: Process potential timeline shifts
+    console.log('Processing quantum narrative shifts...');
+    const quantumResult = await quantumNarrative.processQuantumChoice(
+      playerChoice,
+      revisedHistory,
+      worldState
+    );
+    
+    // 4. META-CONSCIOUSNESS: Check for AI awareness events
+    console.log('Checking for meta-consciousness events...');
+    const metaMessage = await metaConsciousness.checkForMetaEvent(
+      quantumResult.history,
+      worldState
+    );
+    
+    // 5. REALITY CORRUPTION: Apply interface corruption effects
+    console.log('Processing reality corruption effects...');
+    const corruptionResult = realityCorruption.processCorruption(
+      playerChoice,
+      worldState
+    );
+    
+    // 6. ENHANCED AI GENERATION: Generate next story beat with personalization
+    console.log('Generating personalized horror prompt...');
+    const personalizedPrompt = await adaptiveHorror.generatePersonalizedHorror(
+      `Player chose: ${playerChoice}. Continue the cosmic horror narrative.`
+    );
+    
+    console.log('Calling AI service for next step generation...');
+    const commands = await generateNextStepWithSelectedModel(
+      personalizedPrompt,
+      worldState,
+      quantumResult.history,
+      genreConfig
+    );
+    
+    console.log('Generated', commands.length, 'commands for next step');
+    
+    return {
+      commands,
+      revisedHistory: revisedHistory !== history ? revisedHistory : undefined,
+      metaMessage: metaMessage || undefined,
+      quantumShift: quantumResult.quantumShift,
+      corruptionEffects: corruptionResult.corruptionLevel > 0 ? corruptionResult : undefined,
+    };
+  } catch (error) {
+    console.error('Error in getNextStep:', error);
+    console.error('Player choice that caused error:', playerChoice);
+    console.error('World state at error:', worldState);
+    
+    // Return fallback error commands
+    return {
+      commands: [
+        {
+          type: 'displayText',
+          payload: {
+            content: "The fabric of reality fractures... your choices have consequences beyond comprehension.",
+            segmentId: crypto.randomUUID()
+          }
+        },
+        {
+          type: 'displayChoices',
+          payload: {
+            choices: [
+              { text: "Try to regain focus", isIntrusive: false },
+              { text: "Embrace the chaos", isIntrusive: false },
+              { text: "Something is very wrong here...", isIntrusive: true }
+            ]
+          }
+        }
+      ]
+    };
+  }
 };
 
 export const summarizeHistory = async (
@@ -93,7 +135,23 @@ export const summarizeHistory = async (
 export const generateConcept = async (
   genreConfig: GenreConfig
 ): Promise<{ protagonist: string; setting: string; dilemma: string }> => {
-  return generateConceptWithSelectedModel(genreConfig);
+  console.log('Generating concept for genre:', genreConfig.name);
+  
+  try {
+    const concept = await generateConceptWithSelectedModel(genreConfig);
+    console.log('Concept generated successfully:', concept);
+    return concept;
+  } catch (error) {
+    console.error('Error generating concept:', error);
+    console.error('Genre config:', genreConfig);
+    
+    // Return fallback concept
+    return {
+      protagonist: 'A person confronting the unknowable depths of reality',
+      setting: 'A place where the boundaries between dream and nightmare blur',
+      dilemma: 'Each revelation brings you closer to a truth you may not survive'
+    };
+  }
 };
 
 export const generateImage = async (prompt: string): Promise<string> => {

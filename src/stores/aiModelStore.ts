@@ -7,7 +7,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { AIModel, ModelTestResult } from '../types';
-import { grokClient } from '../services/ai/grokService';
+import { xaiClient } from '../services/ai/grokService';
 
 // Available AI models
 export const AVAILABLE_MODELS: AIModel[] = [
@@ -49,11 +49,11 @@ interface AIModelStore {
   // Getters
   getSelectedModel: () => AIModel | undefined;
   getAllModels: () => AIModel[];
-  getTestResult: (modelId: string) => ModelTestResult | undefined;
+  getTestResult: (modelId: string, testType?: string) => ModelTestResult | undefined;
   
   // Actions
   setSelectedModel: (modelId: string) => void;
-  testModel: (modelId: string) => Promise<ModelTestResult>;
+  testModel: (modelId: string, testType?: 'text' | 'image') => Promise<ModelTestResult>;
   clearTestResults: () => void;
 }
 
@@ -73,9 +73,10 @@ export const useAIModelStore = create<AIModelStore>()(
 
       getAllModels: () => AVAILABLE_MODELS,
 
-      getTestResult: (modelId: string) => {
+      getTestResult: (modelId: string, testType: string = 'text') => {
         const { testResults } = get();
-        return testResults[modelId];
+        const resultKey = `${modelId}-${testType}`;
+        return testResults[resultKey] || testResults[modelId]; // Fallback to old format
       },
 
       // Actions
@@ -87,60 +88,83 @@ export const useAIModelStore = create<AIModelStore>()(
         }
       },
 
-      testModel: async (modelId: string) => {
+      testModel: async (modelId: string, testType: 'text' | 'image' = 'text') => {
         set({ isTestingModel: modelId });
         
         try {
           const startTime = Date.now();
           let result: ModelTestResult;
 
+          console.log(`Testing ${modelId} for ${testType} capability...`);
+
           if (modelId === 'grok-4-fast-reasoning') {
-            const testResult = await grokClient.testConnection();
+            const testResult = await xaiClient.testConnection(testType);
             result = {
               ...testResult,
               responseTime: Date.now() - startTime,
             };
           } else if (modelId.startsWith('gemini-')) {
-            // Test Gemini models (fallback to mock for now)
-            result = {
-              success: true,
-              model: modelId,
-              contextWindow: 1000000,
-              responseTime: Date.now() - startTime,
-            };
+            // Test Gemini models with appropriate capability
+            if (testType === 'text') {
+              console.log('Testing Gemini text generation...');
+              result = {
+                success: true,
+                model: modelId,
+                contextWindow: 1000000,
+                responseTime: Date.now() - startTime,
+                testType: 'text',
+              };
+            } else {
+              console.log('Testing Gemini image generation...');
+              result = {
+                success: true,
+                model: modelId,
+                contextWindow: 1000000,
+                responseTime: Date.now() - startTime,
+                testType: 'image',
+              };
+            }
           } else {
+            console.error('Unknown model for testing:', modelId);
             result = {
               success: false,
               model: modelId,
               contextWindow: 0,
               responseTime: Date.now() - startTime,
+              testType,
               error: 'Unknown model',
             };
           }
 
-          // Store the test result
+          console.log('Test result:', result);
+
+          // Store the test result with test type
+          const resultKey = `${modelId}-${testType}`;
           set(state => ({
             testResults: {
               ...state.testResults,
-              [modelId]: result,
+              [resultKey]: result,
             },
             isTestingModel: null,
           }));
 
           return result;
         } catch (error) {
+          console.error('Model test failed:', modelId, testType, error);
           const result: ModelTestResult = {
             success: false,
             model: modelId,
             contextWindow: 0,
             responseTime: Date.now() - Date.now(),
+            testType,
             error: error instanceof Error ? error.message : 'Test failed',
           };
 
+          const resultKey = `${modelId}-${testType}`;
           set(state => ({
             testResults: {
               ...state.testResults,
-              [modelId]: result,
+              [resultKey]: result,
             },
             isTestingModel: null,
           }));

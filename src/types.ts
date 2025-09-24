@@ -120,6 +120,7 @@ export const modelTestResultSchema = z.object({
   success: z.boolean(),
   model: z.string(),
   contextWindow: z.number(),
+  testType: z.string().optional(),
   responseTime: z.number().optional(),
   error: z.string().optional(),
 });

@@ -7,8 +7,8 @@
 
 import { API_KEYS } from '../config';
 
-// Grok API configuration
-const GROK_API_BASE = 'https://api.x.ai/v1';
+// X.AI API configuration
+const XAI_API_BASE = 'https://api.x.ai/v1';
 const GROK_MODEL = 'grok-4-fast-reasoning';
 
 interface GrokMessage {
@@ -49,18 +49,18 @@ interface GrokResponse {
 }
 
 /**
- * Grok API client for text generation with thinking mode
+ * X.AI API client for text generation with thinking mode
  */
-export class GrokAPIClient {
+export class XAIAPIClient {
   private apiKey: string;
   private baseURL: string;
 
   constructor(apiKey?: string) {
-    this.apiKey = apiKey || API_KEYS.grokAI;
-    this.baseURL = GROK_API_BASE;
+    this.apiKey = apiKey || API_KEYS.xaiAPI;
+    this.baseURL = XAI_API_BASE;
     
     if (!this.apiKey) {
-      console.warn('Grok API key not provided. Service will not function.');
+      console.warn('X.AI API key not provided. Service will not function.');
     }
   }
 
@@ -78,7 +78,8 @@ export class GrokAPIClient {
     } = {}
   ): Promise<{ content: string; thinking?: string; usage: any }> {
     if (!this.apiKey) {
-      throw new Error('Grok API key not configured');
+      console.error('X.AI API key not configured - cannot make request');
+      throw new Error('X.AI API key not configured');
     }
 
     const messages: GrokMessage[] = [
@@ -97,6 +98,7 @@ export class GrokAPIClient {
     };
 
     try {
+      console.log('Making X.AI API request to:', `${this.baseURL}/chat/completions`);
       const response = await fetch(`${this.baseURL}/chat/completions`, {
         method: 'POST',
         headers: {
@@ -108,13 +110,16 @@ export class GrokAPIClient {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(`Grok API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+        console.error('X.AI API error response:', response.status, errorData);
+        throw new Error(`X.AI API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
       }
 
       const data: GrokResponse = await response.json();
+      console.log('X.AI API response received:', { model: data.model, usage: data.usage });
       
       if (!data.choices || data.choices.length === 0) {
-        throw new Error('No response choices from Grok API');
+        console.error('No response choices from X.AI API');
+        throw new Error('No response choices from X.AI API');
       }
 
       const choice = data.choices[0];
@@ -124,36 +129,59 @@ export class GrokAPIClient {
         usage: data.usage
       };
     } catch (error) {
-      console.error('Grok API request failed:', error);
+      console.error('X.AI API request failed:', error);
       throw error;
     }
   }
 
   /**
-   * Test API connection
+   * Test API connection with both text and image testing
    */
-  async testConnection(): Promise<{ success: boolean; model: string; contextWindow: number; error?: string }> {
+  async testConnection(testType: 'text' | 'image' = 'text'): Promise<{ 
+    success: boolean; 
+    model: string; 
+    contextWindow: number; 
+    testType: string;
+    error?: string 
+  }> {
     try {
-      const result = await this.generateText(
-        'You are a helpful assistant.',
-        'Please respond with "Test successful" and mention your model name and context window size.',
-        { 
-          maxTokens: 100, 
-          temperature: 0.1,
-          enableThinking: false // Don't need thinking for simple test
-        }
-      );
-      
-      return {
-        success: true,
-        model: GROK_MODEL,
-        contextWindow: 2000000, // 2M tokens
-      };
+      if (testType === 'text') {
+        console.log('Testing X.AI text generation API...');
+        const result = await this.generateText(
+          'You are a helpful assistant.',
+          'Please respond with "Test successful" and mention your model name and context window size.',
+          { 
+            maxTokens: 100, 
+            temperature: 0.1,
+            enableThinking: false // Don't need thinking for simple test
+          }
+        );
+        
+        console.log('X.AI text test successful');
+        return {
+          success: true,
+          model: GROK_MODEL,
+          contextWindow: 2000000, // 2M tokens
+          testType: 'text',
+        };
+      } else {
+        // X.AI doesn't support image generation yet, so return appropriate response
+        console.log('X.AI image generation not supported');
+        return {
+          success: false,
+          model: GROK_MODEL,
+          contextWindow: 2000000,
+          testType: 'image',
+          error: 'X.AI does not support image generation'
+        };
+      }
     } catch (error) {
+      console.error('X.AI API test failed:', error);
       return {
         success: false,
         model: GROK_MODEL,
         contextWindow: 2000000,
+        testType,
         error: error instanceof Error ? error.message : 'Unknown error'
       };
     }
@@ -175,4 +203,4 @@ export class GrokAPIClient {
 }
 
 // Singleton instance
-export const grokClient = new GrokAPIClient();
+export const xaiClient = new XAIAPIClient();

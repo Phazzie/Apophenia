@@ -49,7 +49,7 @@ npx vite preview
 cp .env.example .env.local
 
 # Edit .env.local with your keys:
-VITE_GROK_API_KEY=your-grok-api-key-here
+VITE_XAI_API_KEY=your-xai-api-key-here
 VITE_GEMINI_API_KEY=your-google-api-key-here
 ```
 

@@ -16,7 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 - **Default AI Model**: Grok-4 Fast Reasoning is now the primary model (fallback to Gemini)
-- **Environment Configuration**: Added `VITE_GROK_API_KEY` for X.AI integration
+- **Environment Configuration**: Added `VITE_XAI_API_KEY` for X.AI integration
 - **Context Window**: Upgraded from 1M tokens (Gemini) to 2M tokens (Grok-4) for enhanced narrative consistency
 - **Game Service**: Updated to use unified AI service with model selection
 - **Start Screen**: Added AI model information and selection controls

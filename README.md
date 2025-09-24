@@ -54,7 +54,7 @@ npm run build && npm test
 cp .env.example .env.local
 
 # Configure API keys for full functionality
-echo "VITE_GROK_API_KEY=your-grok-api-key-here" >> .env.local
+echo "VITE_XAI_API_KEY=your-xai-api-key-here" >> .env.local
 echo "VITE_GEMINI_API_KEY=your-google-gemini-api-key" >> .env.local
 
 # Start development with hot module replacement
@@ -96,7 +96,7 @@ npm run start:prod   # Start production server locally
 
 # Production-ready environment setup
 NODE_ENV=production
-VITE_GROK_API_KEY=your-production-grok-key
+VITE_XAI_API_KEY=your-production-xai-key
 VITE_GEMINI_API_KEY=your-production-gemini-key
 VITE_API_BASE_URL=https://your-api.domain.com
 VITE_ENABLE_ANALYTICS=true

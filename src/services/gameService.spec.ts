@@ -149,7 +149,7 @@ describe('gameService', () => {
       expect(result).toHaveProperty('corruptionEffects');
       
       // Reset mock after test
-      nextStepFlowMock.mockReset();
+      generateNextStepWithSelectedModelMock.mockReset();
     });
   });
 

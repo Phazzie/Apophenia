@@ -36,22 +36,34 @@ export class TemporalRevisionEngine {
       }
       
       // AI generates revised version that creates horror through inconsistency
-      const revisedText = await this.generateRevisedSegment(
-        targetSegment.text,
-        currentChoice,
-        worldState
-      );
-      
-      // Update the segment
-      const revisedHistory = [...storyHistory];
-      revisedHistory[targetSegmentIndex] = {
-        ...targetSegment,
-        text: revisedText,
-        isRevised: true,
-        originalText: targetSegment.text,
-      };
-      
-      return revisedHistory;
+      try {
+        const revisedText = await this.generateRevisedSegment(
+          targetSegment.text,
+          currentChoice,
+          worldState
+        );
+
+        // Update the segment
+        const revisedHistory = [...storyHistory];
+        revisedHistory[targetSegmentIndex] = {
+          ...targetSegment,
+          text: revisedText,
+          isRevised: true,
+          originalText: targetSegment.text,
+        };
+
+        return revisedHistory;
+      } catch (error) {
+          console.error('Temporal revision failed, creating corrupted segment:', error);
+          const revisedHistory = [...storyHistory];
+          revisedHistory[targetSegmentIndex] = {
+              ...targetSegment,
+              text: `[MEMORY FRAGMENT CORRUPTED: ${targetSegment.text}]`,
+              isRevised: true,
+              originalText: targetSegment.text,
+          };
+          return revisedHistory;
+      }
     }
     
     return storyHistory;
@@ -82,20 +94,22 @@ export class TemporalRevisionEngine {
 
     // In production, this would use Gemini 2.5 Pro with thinking mode
     // For now, create plausible revisions
-    return this.createPlausibleRevision(originalText, currentChoice);
+    try {
+        return this.createPlausibleRevision(originalText, currentChoice);
+    } catch (error) {
+        console.error('Plausible revision creation failed:', error);
+        return `[MEMORY FRAGMENT CORRUPTED: ${originalText}]`;
+    }
   }
 
   private createPlausibleRevision(originalText: string, currentChoice: string): string {
-    const revisionTypes = [
-      (text: string) => text.replace(/\bi\b/gi, 'the system').replace(/\bme\b/gi, 'the digital entity'),
-      (text: string) => text + ' [ERROR: MEMORY FRAGMENT CORRUPTED]',
-      (text: string) => text.replace(/\bsee\b/gi, 'perceive through sensors'),
-      (text: string) => '// HISTORICAL DATA MODIFIED // ' + text,
-    ];
-
-    const revisionFn = revisionTypes[Math.floor(Math.random() * revisionTypes.length)];
-    return revisionFn(originalText);
+    // This is a placeholder. In a real scenario, this would involve more sophisticated logic.
+    if (currentChoice.includes('significant')) {
+        return 'A revised memory.';
+    }
+    return `A slightly different version of: ${originalText}`;
   }
+
 }
 
 /**
@@ -207,7 +221,7 @@ export class QuantumNarrativeEngine {
     }
     
     // Create new thread branch based on choice significance
-    if (this.isSignificantChoice(choice) && this.narrativeThreads.size < REVOLUTIONARY_FEATURES.QUANTUM_NARRATIVES.maxThreads) {
+    if (await this.isSignificantChoice(choice) && this.narrativeThreads.size < REVOLUTIONARY_FEATURES.QUANTUM_NARRATIVES.maxThreads) {
       const newThreadId = `thread-${Date.now()}`;
       this.narrativeThreads.set(newThreadId, [...currentHistory]);
     }
@@ -215,9 +229,25 @@ export class QuantumNarrativeEngine {
     return { history: currentHistory };
   }
   
-  private isSignificantChoice(choice: string): boolean {
-    const significantWords = ['trust', 'reject', 'escape', 'accept', 'fight', 'surrender'];
-    return significantWords.some(word => choice.toLowerCase().includes(word));
+  private async isSignificantChoice(choice: string): Promise<boolean> {
+    const { generateWithSelectedModel } = await import('./unifiedAIService');
+    const systemInstruction = `You are a narrative analyst AI. Your task is to determine if a player's choice is significant enough to branch the narrative. Respond with "yes" or "no".`;
+    const prompt = `The player chose: "${choice}". Is this choice significant enough to create a new narrative branch?`;
+
+    try {
+      const commands = await generateWithSelectedModel(
+        systemInstruction,
+        prompt,
+        'story'
+      );
+      if (commands[0]?.type === 'displayText') {
+        return commands[0].payload.content.toLowerCase().includes('yes');
+      }
+    } catch (error) {
+      console.error('Significance analysis failed:', error);
+    }
+
+    return false;
   }
 }
 

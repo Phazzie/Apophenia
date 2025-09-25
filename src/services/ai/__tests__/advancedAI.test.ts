@@ -13,7 +13,7 @@ jest.mock('@google/generative-ai', () => ({
         response: {
           text: () => JSON.stringify({
             protagonist: 'Test protagonist',
-            setting: 'Test setting', 
+            setting: 'Test setting',
             dilemma: 'Test dilemma'
           })
         }
@@ -251,7 +251,7 @@ describe('Advanced AI System', () => {
         .mockReturnValueOnce({
           generateContent: jest.fn().mockResolvedValue({
             response: {
-              text: () => '[{"type": "displayText", "payload": {"content": "Fallback success", "segmentId": "test"}}]'
+              text: () => JSON.stringify([{"type": "displayText", "payload": {"content": "Fallback success", "segmentId": "test"}}])
             }
           })
         });

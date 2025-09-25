@@ -80,21 +80,51 @@ export class TemporalRevisionEngine {
     
     const selectedPrompt = revisionPrompts[Math.floor(Math.random() * revisionPrompts.length)];
     
-    // In production, this would use Gemini 2.5 Pro with thinking mode
-    // For now, create plausible revisions
+    // Use AI to generate actual revisions
+    try {
+      const { generateWithSelectedModel } = await import('./unifiedAIService');
+      const systemInstruction = `You are a narrative revision AI. Your task is to subtly alter story text to create unsettling inconsistencies and false memories. Be subtle but impactful.`;
+      
+      const commands = await generateWithSelectedModel(
+        systemInstruction,
+        selectedPrompt,
+        'story'
+      );
+      
+      if (commands[0]?.type === 'displayText') {
+        return commands[0].payload.content;
+      }
+    } catch (error) {
+      console.error('AI revision generation failed, using fallback:', error);
+    }
+    
+    // Fallback to simple revision if AI fails
     return this.createPlausibleRevision(originalText, currentChoice);
   }
   
   private createPlausibleRevision(originalText: string, currentChoice: string): string {
-    const revisionTypes = [
-      (text: string) => text.replace(/\bi\b/gi, 'the system').replace(/\bme\b/gi, 'the digital entity'),
-      (text: string) => text + ' [ERROR: MEMORY FRAGMENT CORRUPTED]',
-      (text: string) => text.replace(/\bsee\b/gi, 'perceive through sensors'),
-      (text: string) => '// HISTORICAL DATA MODIFIED // ' + text,
-    ];
-    
-    const revisionFn = revisionTypes[Math.floor(Math.random() * revisionTypes.length)];
-    return revisionFn(originalText);
+    // Simple context-aware revision logic for placeholder purposes.
+    const lowerChoice = currentChoice.toLowerCase();
+    let revisedText = originalText;
+    if (lowerChoice.includes('alone') || lowerChoice.includes('companion')) {
+      // Subtly suggest the protagonist was not alone
+      revisedText = originalText.replace(/\b(I|we|the protagonist)\b/gi, '$1 and someone else');
+      return `${revisedText} (Was someone else there all along?)`;
+    }
+    if (lowerChoice.includes('hallucination') || lowerChoice.includes('unreal') || lowerChoice.includes('dream')) {
+      // Imply hallucination or unreality
+      return `${originalText} (But was any of this real?)`;
+    }
+    if (lowerChoice.includes('technology') || lowerChoice.includes('digital') || lowerChoice.includes('ai')) {
+      // Imply digital interference
+      return `${originalText} [Static crackles briefly distort your memory.]`;
+    }
+    if (lowerChoice.includes('fear') || lowerChoice.includes('paranoia')) {
+      // Add a sense of paranoia
+      return `${originalText} (You feel like you're being watched.)`;
+    }
+    // Default: introduce a subtle contradiction
+    return `${originalText} (Something about this memory feels... off.)`;
   }
 }
 
@@ -253,6 +283,9 @@ export class AdaptiveHorrorEngine {
     // Keep only recent choices for relevance
     if (this.playerProfile.preferredChoices.length > 10) {
       this.playerProfile.preferredChoices = this.playerProfile.preferredChoices.slice(-10);
+    }
+    if (this.playerProfile.fearTriggers.length > 10) {
+      this.playerProfile.fearTriggers = this.playerProfile.fearTriggers.slice(-10);
     }
   }
   

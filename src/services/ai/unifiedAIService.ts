@@ -265,12 +265,13 @@ Use your advanced reasoning to:
 2. PSYCHOLOGICAL DEPTH ANALYSIS: Understand the deep implications of each choice
 3. NARRATIVE COHERENCE ENGINE: Ensure every story beat connects meaningfully
 4. FORESHADOWING SYSTEM: Plant seeds that will pay off in future segments
-5. REALITY DISTORTION ESCALATION: Gradually increase the horror through subtle inconsistencies
+5. REALITY DISTORTION ESCALATION: Gradually increase the horror through subtle inconsistencies, guided by the HORROR INTENSITY of ${worldState.horrorIntensity}/10.
 
 You are creating an interconnected narrative web where every choice matters and every detail serves the larger horror.`;
 
   const contextualPrompt = `COMPLETE STORY CONTEXT (utilizing 2M token window):
 WORLD STATE: ${JSON.stringify(worldState)}
+CURRENT HORROR INTENSITY: ${worldState.horrorIntensity}/10
 
 COMPLETE STORY HISTORY:
 ${storyHistory.map((s, i) => `[SEGMENT ${i + 1}]: ${s.text}`).join('\n')}
@@ -280,16 +281,17 @@ LATEST HUMAN DECISION: "${playerChoice}"
 ENHANCED REASONING DIRECTIVE: The human has made a choice. Using your 2M context window and advanced reasoning:
 
 1. DEEP PSYCHOLOGICAL STATE ANALYSIS: How has their cumulative choices shaped their mental state?
-2. NARRATIVE ESCALATION WITH MEMORY: What horror elements should build on everything that came before?
+2. NARRATIVE ESCALATION WITH MEMORY: Based on the HORROR INTENSITY of ${worldState.horrorIntensity}/10, what horror elements should build on everything that came before? A low score (0-3) means subtle, atmospheric horror. A medium score (4-7) means more direct psychological horror. A high score (8-10) means extreme, reality-bending horror.
 3. REALITY DISTORTION WITH CONSISTENCY: How should reality be altered while maintaining internal logic?
-4. CHOICE ARCHITECTURE WITH CONSEQUENCES: What options will meaningfully impact the ongoing narrative?
-5. VISUAL HORROR WITH THEMATIC COHERENCE: What atmospheric imagery reinforces the established themes?
+4. DYNAMIC INTRUSIVE THOUGHT: Based on the HORROR INTENSITY, generate an intrusive thought. If the intensity is low, it might not appear. If high, it should be severe.
+5. VISUAL HORROR WITH THEMATIC COHERENCE: What atmospheric imagery reinforces the established themes and HORROR INTENSITY?
 
 Generate the next narrative beat that:
+- Adjusts its tone and severity based on the HORROR INTENSITY.
 - References and builds upon previous story elements
-- Reveals more about the horrifying nature of their reality
 - Introduces elements that connect to earlier subtle hints
 - Creates choices that will have long-term narrative consequences
+- Dynamically includes an "intrusive thought" choice based on the HORROR INTENSITY.
 - Maintains perfect consistency with established world rules
 
 Return a JSON array of game commands following this structure:
@@ -300,7 +302,8 @@ Return a JSON array of game commands following this structure:
     {"text": "choice 1 text", "isIntrusive": false},
     {"text": "choice 2 text", "isIntrusive": false},
     {"text": "intrusive thought text", "isIntrusive": true}
-  ]}}
+  ]}},
+  {"type": "updateWorldState", "payload": {"psychologicalStatus": "evolved_mental_state"}}
 ]`;
 
   console.log('Generating next step with X.AI/Grok-4...');

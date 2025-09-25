@@ -35,6 +35,7 @@ export const worldStateSchema = z.object({
   summary: z.string(),
   psychologicalStatus: z.enum(['Stable', 'Uneasy', 'Paranoid', 'Fragmented']),
   systemHealth: z.number(),
+  horrorIntensity: z.number().min(0).max(10).default(0),
   uiDistortion: z.object({
     transform: z.string(),
     filter: z.string(),

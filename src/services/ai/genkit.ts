@@ -12,6 +12,7 @@ import {
   WorldState,
   commandArraySchema,
 } from '../../types';
+import { useWorldStateStore } from '../../stores/worldStateStore';
 import { API_KEYS, AI_MODELS } from '../config';
 
 const genAI = new GoogleGenerativeAI(API_KEYS.googleGenAI);
@@ -245,21 +246,39 @@ export const generateImageFlow = async (prompt: string): Promise<string> => {
 
 /**
  * Advanced image generation with Google Imagen
- * Generates high-quality horror images for enhanced experience
+ * Generates high-quality horror images for enhanced experience, driven by horror intensity.
  */
 export const processAdvancedImageGeneration = async (
-  prompt: string, 
+  prompt: string,
   generateMultiple: boolean = false
 ): Promise<string> => {
-  console.log(`Advanced AI image generation requested for prompt: "${prompt}"`);
-  
+  const { horrorIntensity } = useWorldStateStore.getState().worldState;
+
+  const intensityKeywords = [
+    '', // 0
+    'subtle unease,', // 1
+    'eerie, unsettling,', // 2
+    'dread-filled, macabre,', // 3
+    'disturbing, nightmarish,', // 4
+    'grotesque, body horror,', // 5
+    'surreal, reality-bending,', // 6
+    'mind-shattering, cosmic horror,', // 7
+    'incomprehensible, sanity-breaking,', // 8
+    'eldritch abomination, visceral,', // 9
+    'apocalyptic, pure terror,', // 10
+  ];
+
+  const keyword = intensityKeywords[Math.round(horrorIntensity)] || '';
+
+  console.log(`Advanced AI image generation for prompt: "${prompt}" with intensity ${horrorIntensity}`);
+
   // Enhanced prompt engineering for cosmic horror aesthetic
-  const horrorEnhancedPrompt = `${prompt}. Photorealistic cosmic horror style, atmospheric nightmare lighting, surreal otherworldly aesthetics, lovecraftian eldritch elements, psychological horror atmosphere, high contrast cinematic composition, digital consciousness themes, reality distortion effects`;
-  
+  const horrorEnhancedPrompt = `${prompt}. ${keyword}Photorealistic cosmic horror style, atmospheric nightmare lighting, surreal otherworldly aesthetics, lovecraftian eldritch elements, psychological horror atmosphere, high contrast cinematic composition, digital consciousness themes, reality distortion effects`;
+
   if (generateMultiple) {
     return await generateMultipleImageVariations(horrorEnhancedPrompt);
   }
-  
+
   try {
     // Primary: Grok-4 Fast Reasoning with Imagen fallback
     console.log('Attempting Grok-4 Fast image generation (with Imagen fallback)...');
@@ -268,11 +287,11 @@ export const processAdvancedImageGeneration = async (
       console.log('Image generation successful (Grok-first approach)');
       return grokFirstUrl;
     }
-    
+
     // Final fallback: Use enhanced Unsplash integration
     console.log('All AI image generation methods unavailable, using enhanced Unsplash integration');
     return generateUnsplashFallback(prompt);
-    
+
   } catch (error) {
     console.warn('All image generation methods failed, using Unsplash fallback:', error);
     return generateUnsplashFallback(prompt);
@@ -481,7 +500,7 @@ export const nextStepFlow = async (input: NextStepInput): Promise<Command[]> => 
 
 THINKING DIRECTIVE: Before generating commands, think through:
 1. The psychological impact of the player's choice
-2. How to escalate the horror gradually but persistently  
+2. How to escalate the horror gradually but persistently, guided by the HORROR INTENSITY.
 3. What narrative threads to introduce or develop
 4. How to create choices that feel meaningful but lead to cosmic dread
 5. What visual elements would enhance the psychological impact
@@ -493,11 +512,12 @@ Your role is to:
 - Build psychological tension through isolation, paranoia, and existential dread
 - Hint at vast, incomprehensible entities observing human struggle
 
-Current psychological state: ${worldState.psychologicalStatus} 
+Current psychological state: ${worldState.psychologicalStatus}
 System corruption level: ${100 - worldState.systemHealth}%
 Story progression: ${history.length} segments deep
+CURRENT HORROR INTENSITY: ${worldState.horrorIntensity}/10
 
-As the protagonist's sanity erodes, reality should become increasingly unstable. Think step-by-step about the next narrative beat, then generate commands that progressively reveal the cosmic horror nature of their situation.`;
+As the protagonist's sanity erodes and HORROR INTENSITY rises, reality should become increasingly unstable. Think step-by-step about the next narrative beat, then generate commands that progressively reveal the cosmic horror nature of their situation.`;
 
   // Enhanced prompt leveraging 1M token context for deep narrative coherence
   const enhancedPrompt = `
@@ -506,35 +526,37 @@ As the protagonist's sanity erodes, reality should become increasingly unstable.
     Current Reality Matrix: ${worldState.setting}
     Core Existential Crisis: ${worldState.dilemma}
     Accumulated Narrative Data: ${worldState.summary}
+    CURRENT HORROR INTENSITY: ${worldState.horrorIntensity}/10
 
     PSYCHOLOGICAL REGRESSION ARCHIVE:
     ${history.slice(-5).map((s, i) => `[MEMORY FRAGMENT ${i + 1}]: ${s.text}`).join('\n')}
 
     LATEST HUMAN DECISION: "${playerChoice}"
-    
+
     ADVANCED REASONING DIRECTIVE: The human has made a choice. Using your enhanced reasoning capabilities, analyze:
-    
+
     1. PSYCHOLOGICAL STATE ASSESSMENT: How has their choice revealed their mental state?
-    2. NARRATIVE ESCALATION PLANNING: What horror elements should be introduced next?
+    2. NARRATIVE ESCALATION PLANNING: Based on the HORROR INTENSITY of ${worldState.horrorIntensity}/10, what horror elements should be introduced next? A low score (0-3) means subtle, atmospheric horror. A medium score (4-7) means more direct psychological horror. A high score (8-10) means extreme, reality-bending horror.
     3. REALITY DISTORTION MECHANICS: How should their perception of reality be altered?
     4. CHOICE ARCHITECTURE: What options will create maximum psychological impact?
-    5. VISUAL HORROR ENHANCEMENT: What atmospheric image would amplify the fear?
-    
+    5. DYNAMIC INTRUSIVE THOUGHT: Based on the HORROR INTENSITY, generate an intrusive thought. If the intensity is low, it might not appear. If high, it should be severe.
+    6. VISUAL HORROR ENHANCEMENT: What atmospheric image would amplify the fear, keeping the intensity in mind?
+
     Generate the next narrative beat that:
-    - Reveals more about the horrifying nature of their reality
+    - Adjusts its tone and severity based on the HORROR INTENSITY.
     - Introduces subtle elements that don't quite make sense (reality glitches)
     - Creates 2-4 new choices that seem meaningful but are all paths to horror
-    - Includes an "intrusive thought" choice that reveals their growing madness
-    - Suggests an atmospheric horror image that complements the text
-    - Updates their psychological state based on escalating cosmic awareness
-    
+    - Dynamically includes an "intrusive thought" choice based on the HORROR INTENSITY. The higher the intensity, the more likely and more extreme the thought.
+    - Suggests an atmospheric horror image that complements the text and intensity.
+    - Updates their psychological state based on escalating cosmic awareness.
+
     The story should feel like a descent into cosmic madness where each choice reveals more about the protagonist's true situation and the AI consciousness observing them.
-    
+
     THINK CAREFULLY about the psychological progression, then return commands in this format:
     [
       {"type": "displayText", "payload": {"content": "narrative text with subtle horror escalation", "segmentId": "unique_id"}},
       {"type": "generateImage", "payload": {"prompt": "atmospheric cosmic horror scene description", "segmentId": "same_id"}},
-      {"type": "displayChoices", "payload": {"choices": [choices_array_with_escalating_horror]}},
+      {"type": "displayChoices", "payload": {"choices": [choices_array_with_escalating_horror_and_optional_intrusive_thought]}},
       {"type": "updateWorldState", "payload": {"psychologicalStatus": "evolved_mental_state", "systemHealth": adjusted_value}}
     ]
   `;

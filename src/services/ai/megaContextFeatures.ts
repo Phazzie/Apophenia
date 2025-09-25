@@ -108,36 +108,43 @@ export const performMegaContextAnalysis = async (
  * Adaptive Horror Intensity based on Full Session Analysis
  * Uses 1M context to perfectly calibrate horror for maximum psychological impact
  */
-export const calculateAdaptiveHorrorIntensity = async (
-  megaContextSession: MegaContextSession,
-  currentSegment: StorySegment
-): Promise<number> => {
-  try {
-    const response = await fetch(`${process.env.NODE_ENV === 'production' 
-      ? 'https://your-backend-api.ondigitalocean.app' 
-      : 'http://localhost:3001'}/api/adaptive-horror-calibration`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        megaContextSession,
-        currentSegment,
-        targetIntensity: 'optimal_psychological_impact'
-      })
-    });
+export const calculateAdaptiveHorrorIntensity = (
+  history: StorySegment[],
+  worldState: WorldState
+): number => {
+  let intensity = worldState.horrorIntensity || 0;
 
-    if (!response.ok) throw new Error('Adaptive horror calculation failed');
-    const data = await response.json();
-    return data.horrorIntensity || 0.5;
-  } catch (error) {
-    console.warn('Adaptive horror calculation failed:', error);
-    
-    // Fallback calculation based on local analysis
-    const baseIntensity = 0.5;
-    const traumaModifier = megaContextSession.characterPsychologyProfile.traumaEvents.length * 0.1;
-    const fearModifier = megaContextSession.characterPsychologyProfile.fearProfile.length * 0.05;
-    
-    return Math.min(1.0, baseIntensity + traumaModifier + fearModifier);
+  // Keyword analysis
+  const horrorKeywords = ['fear', 'terror', 'darkness', 'madness', 'scream', 'blood', 'abyss', 'void'];
+  const lastSegmentText = history[history.length - 1]?.text.toLowerCase() || '';
+  for (const keyword of horrorKeywords) {
+    if (lastSegmentText.includes(keyword)) {
+      intensity += 0.2;
+    }
   }
+
+  // Psychological status impact
+  switch (worldState.psychologicalStatus) {
+    case 'Uneasy':
+      intensity += 0.1;
+      break;
+    case 'Paranoid':
+      intensity += 0.3;
+      break;
+    case 'Fragmented':
+      intensity += 0.5;
+      break;
+  }
+
+  // Intrusive thoughts chosen
+  // This part is tricky as we don't have direct access to choice history here.
+  // We'll assume for now that if the psychological status is degrading,
+  // it's because the player is making unsettling choices.
+
+  // Normalize and clamp the intensity value between 0 and 10
+  intensity = Math.max(0, Math.min(10, intensity));
+
+  return intensity;
 };
 
 /**

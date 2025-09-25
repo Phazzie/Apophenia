@@ -14,6 +14,7 @@ import {
   quantumNarrative,
   adaptiveHorror,
   realityCorruption,
+  megaContext,
 } from './ai/revolutionaryFeatures';
 
 /**
@@ -38,16 +39,17 @@ export const getNextStep = async (
   console.log('Story history length:', history.length);
 
   try {
-    // 1. ADAPTIVE HORROR: Analyze player choice for personalization
-    console.log('Analyzing player choice for adaptive horror...');
-    adaptiveHorror.analyzePlayerChoice(playerChoice, 'game progression');
+    // 1. ADAPTIVE HORROR: Calculate the new horror intensity
+    console.log('Calculating adaptive horror intensity...');
+    const newHorrorIntensity = megaContext.calculateAdaptiveHorrorIntensity(history, worldState);
+    const updatedWorldState = { ...worldState, horrorIntensity: newHorrorIntensity };
     
     // 2. TEMPORAL REVISION: Check if choice should alter past events
     console.log('Processing temporal revision...');
     const revisedHistory = await temporalRevision.reviseHistory(
       playerChoice,
       history,
-      worldState
+      updatedWorldState
     );
     
     // 3. QUANTUM NARRATIVE: Process potential timeline shifts
@@ -55,21 +57,21 @@ export const getNextStep = async (
     const quantumResult = await quantumNarrative.processQuantumChoice(
       playerChoice,
       revisedHistory,
-      worldState
+      updatedWorldState
     );
     
     // 4. META-CONSCIOUSNESS: Check for AI awareness events
     console.log('Checking for meta-consciousness events...');
     const metaMessage = await metaConsciousness.checkForMetaEvent(
       quantumResult.history,
-      worldState
+      updatedWorldState
     );
     
     // 5. REALITY CORRUPTION: Apply interface corruption effects
     console.log('Processing reality corruption effects...');
     const corruptionResult = realityCorruption.processCorruption(
       playerChoice,
-      worldState
+      updatedWorldState
     );
     
     // 6. ENHANCED AI GENERATION: Generate next story beat with personalization
@@ -81,7 +83,7 @@ export const getNextStep = async (
     console.log('Calling AI service for next step generation...');
     const commands = await generateNextStepWithSelectedModel(
       personalizedPrompt,
-      worldState,
+      updatedWorldState,
       quantumResult.history,
       genreConfig
     );

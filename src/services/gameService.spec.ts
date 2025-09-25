@@ -46,6 +46,7 @@ describe('gameService', () => {
     summary: 'A test summary',
     psychologicalStatus: 'Stable',
     systemHealth: 100,
+    horrorIntensity: 0,
     uiDistortion: {
       transform: 'none',
       filter: 'none',

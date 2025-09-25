@@ -369,9 +369,12 @@ export class RealityCorruptionEngine {
   }
 }
 
+import * as megaContextFeatures from './megaContextFeatures';
+
 // Export singleton instances
 export const temporalRevision = new TemporalRevisionEngine();
 export const metaConsciousness = new MetaConsciousnessEngine();
 export const quantumNarrative = new QuantumNarrativeEngine();
 export const adaptiveHorror = new AdaptiveHorrorEngine();
 export const realityCorruption = new RealityCorruptionEngine();
+export const megaContext = megaContextFeatures;

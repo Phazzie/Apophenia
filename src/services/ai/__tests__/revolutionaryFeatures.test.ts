@@ -3,7 +3,7 @@
  * Testing the cutting-edge capabilities that leverage Gemini 2.5 Pro
  */
 
-// Mock REVOLUTIONARY_FEATURES for testing
+// Mock config and services
 jest.mock('../../config', () => ({
   REVOLUTIONARY_FEATURES: {
     TEMPORAL_REVISION: { enabled: true, maxRevisions: 3 },
@@ -15,6 +15,10 @@ jest.mock('../../config', () => ({
   },
 }));
 
+jest.mock('../unifiedAIService', () => ({
+  generateWithSelectedModel: jest.fn(),
+}));
+
 import {
   TemporalRevisionEngine,
   MetaConsciousnessEngine,
@@ -23,6 +27,9 @@ import {
   RealityCorruptionEngine,
 } from '../revolutionaryFeatures';
 import { StorySegment, WorldState } from '../../../types';
+import { generateWithSelectedModel } from '../unifiedAIService';
+
+const mockedGenerateWithSelectedModel = generateWithSelectedModel as jest.Mock;
 
 describe('Revolutionary AI Features Test Suite', () => {
   
@@ -81,15 +88,11 @@ describe('Revolutionary AI Features Test Suite', () => {
     });
     
     test('should maintain history when temporal revision is disabled', async () => {
-      // Since temporal revision is enabled in our test mock, this test now verifies
-      // that the temporal revision system processes history correctly
       const result = await engine.reviseHistory('test choice', mockStoryHistory, mockWorldState);
 
-      // Should return a valid history array (may be revised)
       expect(Array.isArray(result)).toBe(true);
       expect(result.length).toBe(mockStoryHistory.length);
 
-      // Each segment should maintain required properties
       result.forEach(segment => {
         expect(segment).toHaveProperty('id');
         expect(segment).toHaveProperty('text');
@@ -106,7 +109,6 @@ describe('Revolutionary AI Features Test Suite', () => {
         corruptedWorldState
       );
 
-      // Should either return original or revised history
       expect(result).toBeDefined();
       expect(result.length).toEqual(mockStoryHistory.length);
     });
@@ -115,12 +117,11 @@ describe('Revolutionary AI Features Test Suite', () => {
       const originalText = 'I see a door ahead of me.';
       const choice = 'Trust the system';
 
-      // Access private method for testing
       const revision = (engine as any).createPlausibleRevision(originalText, choice);
 
       expect(revision).toBeDefined();
       expect(typeof revision).toBe('string');
-      expect(revision).not.toBe(originalText); // Should be modified
+      expect(revision).not.toBe(originalText);
     });
   });
   
@@ -161,7 +162,6 @@ describe('Revolutionary AI Features Test Suite', () => {
     });
     
     test('should return null when meta consciousness is disabled', async () => {
-      // Create a spy on the checkForMetaEvent method to mock the behavior
       const mockEngine = new MetaConsciousnessEngine();
       const checkForMetaEventSpy = jest.spyOn(mockEngine, 'checkForMetaEvent')
         .mockResolvedValue(null);
@@ -173,18 +173,13 @@ describe('Revolutionary AI Features Test Suite', () => {
     });
     
     test('should generate meta messages when conditions are met', async () => {
-      // The test should work with the existing mock configuration
-      // We'll simulate the meta event trigger by calling the method multiple times
       let result = null;
       
-      // Try multiple times to trigger a meta event (15% probability)
       for (let i = 0; i < 20; i++) {
         result = await engine.checkForMetaEvent([], mockWorldState);
         if (result) break;
       }
       
-      // With 20 attempts at 15% probability, we should get at least one result
-      // If not, the functionality might still be working, just unlucky
       if (result) {
         expect(typeof result).toBe('string');
         expect(result.length).toBeGreaterThan(0);
@@ -192,16 +187,13 @@ describe('Revolutionary AI Features Test Suite', () => {
     });
     
     test('should respect minimum interval between meta events', async () => {
-      // Test that the system doesn't trigger events too frequently
       const results = [];
       
-      // Try to trigger multiple events in quick succession
       for (let i = 0; i < 10; i++) {
         const result = await engine.checkForMetaEvent([], mockWorldState);
         if (result) results.push(result);
       }
       
-      // Should not get too many results due to minimum interval restrictions
       expect(results.length).toBeLessThanOrEqual(3);
     });
   });
@@ -248,11 +240,8 @@ describe('Revolutionary AI Features Test Suite', () => {
     });
     
     test('should return original history when quantum narratives disabled', async () => {
-      // Since QUANTUM_NARRATIVES is enabled in our mock, we'll test the normal case
-      // A more comprehensive test would involve creating a separate test suite with disabled features
       const result = await engine.processQuantumChoice('test', mockHistory, mockWorldState);
       
-      // With quantum narratives enabled, should process the choice
       expect(result.history).toBeDefined();
       expect(Array.isArray(result.history)).toBe(true);
     });
@@ -277,10 +266,8 @@ describe('Revolutionary AI Features Test Suite', () => {
     });
     
     test('should maintain narrative thread storage', async () => {
-      const result1 = await engine.processQuantumChoice('trust', mockHistory, mockWorldState);
-      const result2 = await engine.processQuantumChoice('reject', result1.history, mockWorldState);
+      await engine.processQuantumChoice('trust', mockHistory, mockWorldState);
       
-      // Should store threads internally
       expect((engine as any).narrativeThreads.size).toBeGreaterThan(0);
     });
   });
@@ -290,12 +277,18 @@ describe('Revolutionary AI Features Test Suite', () => {
     
     beforeEach(() => {
       engine = new AdaptiveHorrorEngine();
+      mockedGenerateWithSelectedModel.mockClear();
     });
     
-    test('should analyze and store player choice patterns', () => {
-      engine.analyzePlayerChoice('I prefer to be alone', 'isolation context');
-      engine.analyzePlayerChoice('I trust no one', 'trust context');
-      engine.analyzePlayerChoice('I need control', 'control context');
+    test('should analyze and store player choice patterns', async () => {
+      mockedGenerateWithSelectedModel
+        .mockResolvedValueOnce([{ type: 'displayText', payload: { content: 'isolation' } }])
+        .mockResolvedValueOnce([{ type: 'displayText', payload: { content: 'betrayal' } }])
+        .mockResolvedValueOnce([{ type: 'displayText', payload: { content: 'powerlessness' } }]);
+
+      await engine.analyzePlayerChoice('I prefer to be alone', 'isolation context');
+      await engine.analyzePlayerChoice('I trust no one', 'trust context');
+      await engine.analyzePlayerChoice('I need control', 'control context');
       
       const profile = engine.getPlayerPsychProfile();
       expect(profile).toContain('isolation');
@@ -304,24 +297,25 @@ describe('Revolutionary AI Features Test Suite', () => {
     });
     
     test('should personalize horror prompts based on player profile', async () => {
-      // Build a player profile
-      engine.analyzePlayerChoice('I stay alone', 'test');
-      engine.analyzePlayerChoice('I trust the voice', 'test');
+      mockedGenerateWithSelectedModel.mockResolvedValue([{ type: 'displayText', payload: { content: 'isolation, betrayal' } }]);
+      await engine.analyzePlayerChoice('I stay alone', 'test');
+      await engine.analyzePlayerChoice('I trust the voice', 'test');
       
       const basePrompt = 'Generate horror scenario';
+      mockedGenerateWithSelectedModel.mockResolvedValueOnce([{ type: 'displayText', payload: { content: `${basePrompt} with isolation and betrayal` } }]);
       const personalizedPrompt = await engine.generatePersonalizedHorror(basePrompt);
       
-      expect(personalizedPrompt).toContain(basePrompt);
-      if (personalizedPrompt !== basePrompt) {
-        expect(personalizedPrompt).toContain('isolation');
-      }
+      expect(personalizedPrompt).toContain('isolation');
+      expect(personalizedPrompt).toContain('betrayal');
     });
     
-    test('should limit stored choices to maintain relevance', () => {
-      // Add more than 10 choices
+    test('should limit stored choices to maintain relevance', async () => {
+      mockedGenerateWithSelectedModel.mockResolvedValue([{ type: 'displayText', payload: { content: 'trigger' } }]);
+      const promises = [];
       for (let i = 0; i < 15; i++) {
-        engine.analyzePlayerChoice(`choice ${i}`, 'context');
+        promises.push(engine.analyzePlayerChoice(`choice ${i}`, 'context'));
       }
+      await Promise.all(promises);
       
       const choices = (engine as any).playerProfile.preferredChoices;
       expect(choices.length).toBeLessThanOrEqual(10);
@@ -365,8 +359,6 @@ describe('Revolutionary AI Features Test Suite', () => {
     });
     
     test('should return no effects when reality corruption disabled', () => {
-      // Since REALITY_CORRUPTION is enabled in our mock, we'll test the normal case
-      // The engine should process corruption normally
       const result = engine.processCorruption('test choice', mockWorldState);
       
       expect(typeof result.corruptionLevel).toBe('number');
@@ -386,13 +378,9 @@ describe('Revolutionary AI Features Test Suite', () => {
     });
     
     test('should generate progressive corruption effects', () => {
-      // Simulate high corruption
-      const highCorruptionChoice = 'embrace the digital void completely';
-
-      // Multiple corrupting choices
-      let result = engine.processCorruption(highCorruptionChoice, mockWorldState);
-      result = engine.processCorruption(highCorruptionChoice, mockWorldState);
-      result = engine.processCorruption(highCorruptionChoice, mockWorldState);
+      let result = engine.processCorruption('embrace the digital void completely', mockWorldState);
+      result = engine.processCorruption('embrace the digital void completely', mockWorldState);
+      result = engine.processCorruption('embrace the digital void completely', mockWorldState);
       
       expect(result.newEffects.length).toBeGreaterThan(0);
       expect(result.uiEffects).toBeDefined();
@@ -400,12 +388,9 @@ describe('Revolutionary AI Features Test Suite', () => {
     });
     
     test('should respect maximum corruption level', () => {
-      const maxCorruptionChoice = 'digital void digital void digital';
-
-      // Attempt to exceed maximum corruption
       for (let i = 0; i < 20; i++) {
-        const result = engine.processCorruption(maxCorruptionChoice, mockWorldState);
-        expect(result.corruptionLevel).toBeLessThanOrEqual(0.7); // Default max
+        const result = engine.processCorruption('digital void digital void digital', mockWorldState);
+        expect(result.corruptionLevel).toBeLessThanOrEqual(0.7);
       }
     });
     
@@ -464,26 +449,21 @@ describe('Revolutionary AI Features Test Suite', () => {
       
       const choice = 'Trust the digital void completely';
       
-      // Run all features
-      adaptive.analyzePlayerChoice(choice, 'integration test');
+      await adaptive.analyzePlayerChoice(choice, 'integration test');
       const corruptionResult = corruption.processCorruption(choice, mockWorldState);
       const quantumResult = await quantum.processQuantumChoice(choice, mockHistory, mockWorldState);
       const metaMessage = await meta.checkForMetaEvent(quantumResult.history, mockWorldState);
       const temporalResult = await temporal.reviseHistory(choice, quantumResult.history, mockWorldState);
       
-      // Verify no crashes and reasonable outputs
       expect(corruptionResult).toBeDefined();
       expect(quantumResult.history).toBeDefined();
       expect(temporalResult).toBeDefined();
-      // metaMessage may be null due to timing constraints, which is acceptable
       
-      // Verify features don't interfere with each other
       expect(temporalResult.length).toBeGreaterThanOrEqual(mockHistory.length);
       expect(quantumResult.history.length).toBeGreaterThanOrEqual(mockHistory.length);
     });
   });
   
-  // Performance tests
   describe('Performance Tests', () => {
     test('should handle rapid successive calls without degradation', async () => {
       const adaptive = new AdaptiveHorrorEngine();
@@ -520,16 +500,16 @@ describe('Revolutionary AI Features Test Suite', () => {
       
       const startTime = Date.now();
       
-      // Rapid fire 100 operations
+      const promises = [];
       for (let i = 0; i < 100; i++) {
-        adaptive.analyzePlayerChoice(`choice ${i}`, 'perf test');
+        promises.push(adaptive.analyzePlayerChoice(`choice ${i}`, 'perf test'));
         corruption.processCorruption(`corruption choice ${i}`, mockWorldState);
       }
+      await Promise.all(promises);
       
       const endTime = Date.now();
       const duration = endTime - startTime;
       
-      // Should complete within reasonable time (2 seconds)
       expect(duration).toBeLessThan(2000);
     });
   });

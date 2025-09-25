@@ -7,6 +7,31 @@ import { StorySegment, WorldState, Choice } from '../../types';
 import { REVOLUTIONARY_FEATURES } from '../../services/config';
 
 /**
+ * Get a randomized corruption message for error handling
+ * Improves narrative variety instead of using static error messages
+ */
+function getCorruptionMessage(): string {
+  const corruptionMessages = [
+    "The image flickers, as if reality itself is uncertain.",
+    "A shadow passes over the canvas, distorting its features.",
+    "The generated image is warped, echoing a distant scream.",
+    "Colors bleed and shapes twist, as if haunted by unseen forces.",
+    "A cold static fills the frame, obscuring all meaning.",
+    "Fragments of the image pulse with unnatural energy.",
+    "The AI hesitates, and the result is a surreal, corrupted vision.",
+    "You sense something is wrong—the image is not what it should be.",
+    "A glitch ripples through the scene, leaving only confusion.",
+    "The boundaries of the image dissolve, lost to the void.",
+    "[MEMORY FRAGMENT CORRUPTED: Reality fractures at the edges]",
+    "[ERROR: TEMPORAL THREAD SEVERED]",
+    "[SYSTEM NOTICE: Narrative coherence compromised]",
+    "[CORRUPTION DETECTED: Adjusting reality parameters...]"
+  ];
+
+  return corruptionMessages[Math.floor(Math.random() * corruptionMessages.length)];
+}
+
+/**
  * TEMPORAL NARRATIVE REVISION
  * Uses AI to retroactively modify past story segments based on current choices
  * Creates the horror of "false memories" and unreliable narrator effects
@@ -101,7 +126,7 @@ export class TemporalRevisionEngine {
     // Fallback to simple revision if AI fails
     return this.createPlausibleRevision(originalText, currentChoice);
   }
-  
+
   private createPlausibleRevision(originalText: string, currentChoice: string): string {
     // Simple context-aware revision logic for placeholder purposes.
     const lowerChoice = currentChoice.toLowerCase();
@@ -123,8 +148,8 @@ export class TemporalRevisionEngine {
       // Add a sense of paranoia
       return `${originalText} (You feel like you're being watched.)`;
     }
-    // Default: introduce a subtle contradiction
-    return `${originalText} (Something about this memory feels... off.)`;
+    // Default: introduce a subtle contradiction with randomized corruption
+    return `${originalText} (${getCorruptionMessage()})`;
   }
 }
 

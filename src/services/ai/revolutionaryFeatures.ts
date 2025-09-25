@@ -313,11 +313,11 @@ export class RealityCorruptionEngine {
   private corruptionLevel: number = 0;
   private corruptionEffects: string[] = [];
   
-  processCorruption(choice: string, worldState: WorldState): {
+  async processCorruption(choice: string, worldState: WorldState): Promise<{
     uiEffects: any;
     corruptionLevel: number;
     newEffects: string[];
-  } {
+  }> {
     if (!REVOLUTIONARY_FEATURES.REALITY_CORRUPTION.enabled) {
       return { uiEffects: {}, corruptionLevel: 0, newEffects: [] };
     }
@@ -330,7 +330,7 @@ export class RealityCorruptionEngine {
     const maxCorruption = REVOLUTIONARY_FEATURES.REALITY_CORRUPTION.maxCorruption;
     this.corruptionLevel = Math.min(this.corruptionLevel, maxCorruption);
     
-    const newEffects = this.generateCorruptionEffects();
+    const newEffects = await this.generateCorruptionEffects();
     
     return {
       uiEffects: this.calculateUIEffects(),
@@ -339,20 +339,25 @@ export class RealityCorruptionEngine {
     };
   }
   
-  private generateCorruptionEffects(): string[] {
-    const effects = [];
+  private async generateCorruptionEffects(): Promise<string[]> {
+    const { generateWithSelectedModel } = await import('./unifiedAIService');
+    const systemInstruction = `You are a reality corruption AI. Your task is to generate a list of UI corruption effects based on the current corruption level.`;
+    const prompt = `The current reality corruption level is ${this.corruptionLevel}. Based on this, generate a comma-separated list of UI corruption effects. Examples: text-glitch, choice-corruption, reality-tears, image-distortion, audio-glitch.`;
+
+    try {
+      const commands = await generateWithSelectedModel(
+        systemInstruction,
+        prompt,
+        'story'
+      );
+      if (commands[0]?.type === 'displayText') {
+        return commands[0].payload.content.split(',').map(t => t.trim());
+      }
+    } catch (error) {
+      console.error('Corruption effect generation failed:', error);
+    }
     
-    if (this.corruptionLevel > 0.2) {
-      effects.push('text-glitch');
-    }
-    if (this.corruptionLevel > 0.4) {
-      effects.push('choice-corruption');
-    }
-    if (this.corruptionLevel > 0.6) {
-      effects.push('reality-tears');
-    }
-    
-    return effects;
+    return [];
   }
   
   private calculateUIEffects(): any {

@@ -7,6 +7,7 @@ import { generateImageExecutor } from './generateImage';
 import { pregenerateImageExecutor } from './pregenerateImage';
 import { updateWorldStateExecutor } from './updateWorldState';
 import { waitExecutor } from './wait';
+import { browserEffectExecutor } from './browserEffectExecutor';
 
 export const commandExecutors: Record<string, CommandExecutor> = {
   [displayTextExecutor.command]: displayTextExecutor,
@@ -17,4 +18,5 @@ export const commandExecutors: Record<string, CommandExecutor> = {
   [displayChoicesExecutor.command]: displayChoicesExecutor,
   [generateAmbianceExecutor.command]: generateAmbianceExecutor,
   [createSegmentExecutor.command]: createSegmentExecutor,
+  [browserEffectExecutor.command]: browserEffectExecutor,
 };

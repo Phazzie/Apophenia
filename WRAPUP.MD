@@ -8,7 +8,7 @@ This document provides a detailed explanation of the project's core features, th
 
 | Feature | Description | Completion % |
 | :--- | :--- | :--- |
-| **Temporal Revision Engine** | Retroactively alters past story segments based on player choices, creating a sense of "false memories" and an unreliable narrator. This is achieved by using an AI model to analyze the impact of a choice and rewrite a previous story segment to create unsettling inconsistencies. | 100% |
+| **Temporal Revision Engine** | Retroactively alters past story segments based on player choices, creating a sense of "false memories" and an unreliable narrator. This is achieved by using an AI model to analyze the impact of a choice and rewrite a previous story segment to create unsettling inconsistencies. | 95% |
 | **Meta-Consciousness System** | The AI occasionally breaks the fourth wall to address the player directly, creating horror through its awareness of its own artificial nature. This is triggered by a probability-based system that uses an AI model to generate unsettling, self-aware messages. | 100% |
 | **Quantum Narrative Engine** | Maintains multiple, parallel story threads that the player can be shifted between, creating horror through inconsistent and conflicting realities. An AI model determines when a player's choice is significant enough to branch the narrative, and the engine can collapse these realities, disorienting the player. | 100% |
 | **Adaptive Horror Profiler** | Personalizes the horror experience by learning from the player's choices. It uses an AI model to analyze the player's decisions and identify their psychological fear triggers, then adapts the story to exploit those fears. | 100% |

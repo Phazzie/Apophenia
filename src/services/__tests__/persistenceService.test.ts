@@ -33,11 +33,22 @@ describe('Persistence Service', () => {
 
     it('should handle failed save requests gracefully', async () => {
       (fetch as jest.Mock).mockResolvedValueOnce({ ok: false });
-      console.error = jest.fn(); // Suppress console error
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
       await saveSession(mockSessionId, mockSessionData);
 
-      expect(console.error).toHaveBeenCalledWith('Error saving session:', expect.any(Error));
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Error saving session:', expect.any(Error));
+      consoleErrorSpy.mockRestore();
+    });
+
+    it('should handle network errors gracefully', async () => {
+      (fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      await saveSession(mockSessionId, mockSessionData);
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Error saving session:', expect.any(Error));
+      consoleErrorSpy.mockRestore();
     });
   });
 
@@ -56,22 +67,49 @@ describe('Persistence Service', () => {
 
     it('should return null if no session is found (404)', async () => {
       (fetch as jest.Mock).mockResolvedValueOnce({ ok: false, status: 404 });
-      console.log = jest.fn(); // Suppress console log
+      const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
 
       const data = await loadSession(mockSessionId);
 
       expect(data).toBeNull();
-      expect(console.log).toHaveBeenCalledWith('No saved session found for this ID.');
+      expect(consoleLogSpy).toHaveBeenCalledWith('No saved session found for this ID.');
+      consoleLogSpy.mockRestore();
     });
 
     it('should handle other failed load requests gracefully', async () => {
       (fetch as jest.Mock).mockResolvedValueOnce({ ok: false, status: 500 });
-      console.error = jest.fn(); // Suppress console error
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
       const data = await loadSession(mockSessionId);
 
       expect(data).toBeNull();
-      expect(console.error).toHaveBeenCalledWith('Error loading session:', expect.any(Error));
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Error loading session:', expect.any(Error));
+      consoleErrorSpy.mockRestore();
+    });
+
+    it('should handle network errors gracefully', async () => {
+      (fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      const data = await loadSession(mockSessionId);
+
+      expect(data).toBeNull();
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Error loading session:', expect.any(Error));
+      consoleErrorSpy.mockRestore();
+    });
+
+    it('should handle invalid JSON responses gracefully', async () => {
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => { throw new Error('Invalid JSON'); },
+      });
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      const data = await loadSession(mockSessionId);
+
+      expect(data).toBeNull();
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Error loading session:', expect.any(Error));
+      consoleErrorSpy.mockRestore();
     });
   });
 });

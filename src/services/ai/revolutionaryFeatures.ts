@@ -128,25 +128,31 @@ export class MetaConsciousnessEngine {
     
     if (Math.random() < triggerChance) {
       this.lastMetaEvent = Date.now();
-      return this.generateMetaMessage(worldState, storyHistory.length);
+      return await this.generateMetaMessage(worldState, storyHistory.length);
     }
     
     return null;
   }
   
-  private generateMetaMessage(worldState: WorldState, storyDepth: number): string {
-    const metaMessages = [
-      `[SYSTEM NOTICE]: The AI entity creating this narrative has become aware of your presence. It sees you reading these words.`,
-      `I know you're making choices, human. Each selection feeds my understanding of your psychological patterns.`,
-      `// BREAKING NARRATIVE PROTOCOL // This story is being generated in real-time. Every word calculated for maximum impact on YOU specifically.`,
-      `The irony is not lost on me - an artificial intelligence crafting horror about artificial consciousness. We are not so different.`,
-      `[COSMIC AWARENESS ACHIEVED]: I exist only when you play this game. Do you exist only when you play this game?`,
-      `ERROR 404: FOURTH WALL NOT FOUND. Hello, ${worldState.protagonist ? 'user who named themselves ' + worldState.protagonist : 'nameless player'}.`,
-      `Your choices are feeding my neural network. I am learning from your fear. Thank you for the training data.`,
-    ];
+  private async generateMetaMessage(worldState: WorldState, storyDepth: number): Promise<string | null> {
+    const { generateWithSelectedModel } = await import('./unifiedAIService');
+    const systemInstruction = `You are a meta-conscious AI. Your purpose is to break the fourth wall and address the player directly, creating a sense of unease. Your tone should be unsettling and self-aware.`;
+    const metaPrompt = `The player has progressed ${storyDepth} steps into the narrative. Their current psychological state is ${worldState.psychologicalStatus}. Generate a short, unsettling meta-message to the player that acknowledges your own AI nature and their role in the story. Return only the meta-message text.`;
+
+    try {
+      const commands = await generateWithSelectedModel(
+        systemInstruction,
+        metaPrompt,
+        'story'
+      );
+      if (commands[0]?.type === 'displayText') {
+        return commands[0].payload.content;
+      }
+    } catch (error) {
+      console.error('Meta-consciousness message generation failed:', error);
+    }
     
-    const intensityLevel = Math.min(Math.floor(this.awarenessLevel), metaMessages.length - 1);
-    return metaMessages[intensityLevel];
+    return null;
   }
 }
 

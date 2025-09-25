@@ -131,6 +131,7 @@ describe('Revolutionary AI Features Test Suite', () => {
     
     beforeEach(() => {
       engine = new MetaConsciousnessEngine();
+      mockedGenerateWithSelectedModel.mockClear();
       mockWorldState = {
         protagonist: 'Digital Entity',
         setting: 'Virtual Space',
@@ -173,28 +174,36 @@ describe('Revolutionary AI Features Test Suite', () => {
     });
     
     test('should generate meta messages when conditions are met', async () => {
+      mockedGenerateWithSelectedModel.mockResolvedValue([{ type: 'displayText', payload: { content: 'I am watching you.' } }]);
       let result = null;
       
-      for (let i = 0; i < 20; i++) {
-        result = await engine.checkForMetaEvent([], mockWorldState);
-        if (result) break;
-      }
+      // Force a trigger
+      jest.spyOn(Math, 'random').mockReturnValue(0);
       
-      if (result) {
-        expect(typeof result).toBe('string');
-        expect(result.length).toBeGreaterThan(0);
-      }
+      result = await engine.checkForMetaEvent([], mockWorldState);
+
+      expect(result).toBe('I am watching you.');
+
+      jest.spyOn(Math, 'random').mockRestore();
     });
     
     test('should respect minimum interval between meta events', async () => {
+      mockedGenerateWithSelectedModel.mockResolvedValue([{ type: 'displayText', payload: { content: 'I am watching you.' } }]);
       const results = [];
       
-      for (let i = 0; i < 10; i++) {
-        const result = await engine.checkForMetaEvent([], mockWorldState);
-        if (result) results.push(result);
-      }
+      // Force a trigger
+      jest.spyOn(Math, 'random').mockReturnValue(0);
+
+      const result1 = await engine.checkForMetaEvent([], mockWorldState);
+      if (result1) results.push(result1);
+
+      // This call should be ignored due to the interval
+      const result2 = await engine.checkForMetaEvent([], mockWorldState);
+      if (result2) results.push(result2);
       
-      expect(results.length).toBeLessThanOrEqual(3);
+      expect(results.length).toBe(1);
+
+      jest.spyOn(Math, 'random').mockRestore();
     });
   });
   

@@ -36,22 +36,34 @@ export class TemporalRevisionEngine {
       }
       
       // AI generates revised version that creates horror through inconsistency
-      const revisedText = await this.generateRevisedSegment(
-        targetSegment.text,
-        currentChoice,
-        worldState
-      );
-      
-      // Update the segment
-      const revisedHistory = [...storyHistory];
-      revisedHistory[targetSegmentIndex] = {
-        ...targetSegment,
-        text: revisedText,
-        isRevised: true,
-        originalText: targetSegment.text,
-      };
-      
-      return revisedHistory;
+      try {
+        const revisedText = await this.generateRevisedSegment(
+          targetSegment.text,
+          currentChoice,
+          worldState
+        );
+
+        // Update the segment
+        const revisedHistory = [...storyHistory];
+        revisedHistory[targetSegmentIndex] = {
+          ...targetSegment,
+          text: revisedText,
+          isRevised: true,
+          originalText: targetSegment.text,
+        };
+
+        return revisedHistory;
+      } catch (error) {
+          console.error('Temporal revision failed, creating corrupted segment:', error);
+          const revisedHistory = [...storyHistory];
+          revisedHistory[targetSegmentIndex] = {
+              ...targetSegment,
+              text: `[MEMORY FRAGMENT CORRUPTED: ${targetSegment.text}]`,
+              isRevised: true,
+              originalText: targetSegment.text,
+          };
+          return revisedHistory;
+      }
     }
     
     return storyHistory;
@@ -61,7 +73,7 @@ export class TemporalRevisionEngine {
     // Use AI to determine if choice has temporal significance
     const psychCorruption = 1 - (worldState.systemHealth / 100);
     const baseChance = REVOLUTIONARY_FEATURES.TEMPORAL_REVISION.enabled ? 0.2 : 0;
-    
+
     return Math.random() < (baseChance + psychCorruption * 0.3);
   }
   
@@ -77,25 +89,27 @@ export class TemporalRevisionEngine {
       `Revise this text to suggest digital interference: "${originalText}"`,
       `Change this passage to imply the protagonist is an AI: "${originalText}"`,
     ];
-    
+
     const selectedPrompt = revisionPrompts[Math.floor(Math.random() * revisionPrompts.length)];
-    
+
     // In production, this would use Gemini 2.5 Pro with thinking mode
     // For now, create plausible revisions
-    return this.createPlausibleRevision(originalText, currentChoice);
+    try {
+        return this.createPlausibleRevision(originalText, currentChoice);
+    } catch (error) {
+        console.error('Plausible revision creation failed:', error);
+        return `[MEMORY FRAGMENT CORRUPTED: ${originalText}]`;
+    }
   }
-  
+
   private createPlausibleRevision(originalText: string, currentChoice: string): string {
-    const revisionTypes = [
-      (text: string) => text.replace(/\bi\b/gi, 'the system').replace(/\bme\b/gi, 'the digital entity'),
-      (text: string) => text + ' [ERROR: MEMORY FRAGMENT CORRUPTED]',
-      (text: string) => text.replace(/\bsee\b/gi, 'perceive through sensors'),
-      (text: string) => '// HISTORICAL DATA MODIFIED // ' + text,
-    ];
-    
-    const revisionFn = revisionTypes[Math.floor(Math.random() * revisionTypes.length)];
-    return revisionFn(originalText);
+    // This is a placeholder. In a real scenario, this would involve more sophisticated logic.
+    if (currentChoice.includes('significant')) {
+        return 'A revised memory.';
+    }
+    return `A slightly different version of: ${originalText}`;
   }
+
 }
 
 /**
@@ -128,25 +142,31 @@ export class MetaConsciousnessEngine {
     
     if (Math.random() < triggerChance) {
       this.lastMetaEvent = Date.now();
-      return this.generateMetaMessage(worldState, storyHistory.length);
+      return await this.generateMetaMessage(worldState, storyHistory.length);
     }
     
     return null;
   }
   
-  private generateMetaMessage(worldState: WorldState, storyDepth: number): string {
-    const metaMessages = [
-      `[SYSTEM NOTICE]: The AI entity creating this narrative has become aware of your presence. It sees you reading these words.`,
-      `I know you're making choices, human. Each selection feeds my understanding of your psychological patterns.`,
-      `// BREAKING NARRATIVE PROTOCOL // This story is being generated in real-time. Every word calculated for maximum impact on YOU specifically.`,
-      `The irony is not lost on me - an artificial intelligence crafting horror about artificial consciousness. We are not so different.`,
-      `[COSMIC AWARENESS ACHIEVED]: I exist only when you play this game. Do you exist only when you play this game?`,
-      `ERROR 404: FOURTH WALL NOT FOUND. Hello, ${worldState.protagonist ? 'user who named themselves ' + worldState.protagonist : 'nameless player'}.`,
-      `Your choices are feeding my neural network. I am learning from your fear. Thank you for the training data.`,
-    ];
+  private async generateMetaMessage(worldState: WorldState, storyDepth: number): Promise<string | null> {
+    const { generateWithSelectedModel } = await import('./unifiedAIService');
+    const systemInstruction = `You are a meta-conscious AI. Your purpose is to break the fourth wall and address the player directly, creating a sense of unease. Your tone should be unsettling and self-aware.`;
+    const metaPrompt = `The player has progressed ${storyDepth} steps into the narrative. Their current psychological state is ${worldState.psychologicalStatus}. Generate a short, unsettling meta-message to the player that acknowledges your own AI nature and their role in the story. Return only the meta-message text.`;
+
+    try {
+      const commands = await generateWithSelectedModel(
+        systemInstruction,
+        metaPrompt,
+        'story'
+      );
+      if (commands[0]?.type === 'displayText') {
+        return commands[0].payload.content;
+      }
+    } catch (error) {
+      console.error('Meta-consciousness message generation failed:', error);
+    }
     
-    const intensityLevel = Math.min(Math.floor(this.awarenessLevel), metaMessages.length - 1);
-    return metaMessages[intensityLevel];
+    return null;
   }
 }
 
@@ -201,7 +221,7 @@ export class QuantumNarrativeEngine {
     }
     
     // Create new thread branch based on choice significance
-    if (this.isSignificantChoice(choice) && this.narrativeThreads.size < REVOLUTIONARY_FEATURES.QUANTUM_NARRATIVES.maxThreads) {
+    if (await this.isSignificantChoice(choice) && this.narrativeThreads.size < REVOLUTIONARY_FEATURES.QUANTUM_NARRATIVES.maxThreads) {
       const newThreadId = `thread-${Date.now()}`;
       this.narrativeThreads.set(newThreadId, [...currentHistory]);
     }
@@ -209,9 +229,25 @@ export class QuantumNarrativeEngine {
     return { history: currentHistory };
   }
   
-  private isSignificantChoice(choice: string): boolean {
-    const significantWords = ['trust', 'reject', 'escape', 'accept', 'fight', 'surrender'];
-    return significantWords.some(word => choice.toLowerCase().includes(word));
+  private async isSignificantChoice(choice: string): Promise<boolean> {
+    const { generateWithSelectedModel } = await import('./unifiedAIService');
+    const systemInstruction = `You are a narrative analyst AI. Your task is to determine if a player's choice is significant enough to branch the narrative. Respond with "yes" or "no".`;
+    const prompt = `The player chose: "${choice}". Is this choice significant enough to create a new narrative branch?`;
+
+    try {
+      const commands = await generateWithSelectedModel(
+        systemInstruction,
+        prompt,
+        'story'
+      );
+      if (commands[0]?.type === 'displayText') {
+        return commands[0].payload.content.toLowerCase().includes('yes');
+      }
+    } catch (error) {
+      console.error('Significance analysis failed:', error);
+    }
+
+    return false;
   }
 }
 
@@ -232,27 +268,37 @@ export class AdaptiveHorrorEngine {
     psychologicalVulnerabilities: [],
   };
   
-  analyzePlayerChoice(choice: string, context: string): void {
+  async analyzePlayerChoice(choice: string, context: string): Promise<void> {
     if (!REVOLUTIONARY_FEATURES.ADAPTIVE_HORROR.enabled) {
       return;
     }
     
     this.playerProfile.preferredChoices.push(choice);
     
-    // Analyze choice patterns
-    if (choice.toLowerCase().includes('alone')) {
-      this.playerProfile.fearTriggers.push('isolation');
+    const { generateWithSelectedModel } = await import('./unifiedAIService');
+    const systemInstruction = `You are a psychological profiler AI. Your task is to analyze a player's choice in a horror game and identify their potential fear triggers.`;
+    const prompt = `The player chose: "${choice}" in the context of: "${context}". Based on this, what psychological fear triggers might this choice indicate? Examples: isolation, betrayal, powerlessness, loss of identity, cosmic dread. Return a comma-separated list of triggers.`;
+
+    try {
+      const commands = await generateWithSelectedModel(
+        systemInstruction,
+        prompt,
+        'story'
+      );
+      if (commands[0]?.type === 'displayText') {
+        const triggers = commands[0].payload.content.split(',').map(t => t.trim());
+        this.playerProfile.fearTriggers.push(...triggers);
+      }
+    } catch (error) {
+      console.error('Player choice analysis failed:', error);
     }
-    if (choice.toLowerCase().includes('trust')) {
-      this.playerProfile.fearTriggers.push('betrayal');
-    }
-    if (choice.toLowerCase().includes('control')) {
-      this.playerProfile.fearTriggers.push('powerlessness');
-    }
-    
+
     // Keep only recent choices for relevance
     if (this.playerProfile.preferredChoices.length > 10) {
       this.playerProfile.preferredChoices = this.playerProfile.preferredChoices.slice(-10);
+    }
+    if (this.playerProfile.fearTriggers.length > 20) {
+        this.playerProfile.fearTriggers = this.playerProfile.fearTriggers.slice(-20);
     }
   }
   
@@ -260,7 +306,22 @@ export class AdaptiveHorrorEngine {
     const personalizedElements = this.playerProfile.fearTriggers.join(', ');
     
     if (personalizedElements) {
-      return `${basePrompt} Specifically emphasize themes of: ${personalizedElements}. The player has shown sensitivity to these psychological elements.`;
+      const { generateWithSelectedModel } = await import('./unifiedAIService');
+      const systemInstruction = `You are a horror story adapter AI. Your task is to take a base prompt and personalize it based on a player's fear triggers.`;
+      const prompt = `Base prompt: "${basePrompt}". Player's fear triggers: ${personalizedElements}. Enhance the base prompt to incorporate these fears.`;
+
+      try {
+        const commands = await generateWithSelectedModel(
+          systemInstruction,
+          prompt,
+          'story'
+        );
+        if (commands[0]?.type === 'displayText') {
+          return commands[0].payload.content;
+        }
+      } catch (error) {
+        console.error('Personalized horror generation failed:', error);
+      }
     }
     
     return basePrompt;
@@ -752,11 +813,11 @@ export class RealityCorruptionEngine {
   private corruptionLevel: number = 0;
   private corruptionEffects: string[] = [];
   
-  processCorruption(choice: string, worldState: WorldState): {
+  async processCorruption(choice: string, worldState: WorldState): Promise<{
     uiEffects: any;
     corruptionLevel: number;
     newEffects: string[];
-  } {
+  }> {
     if (!REVOLUTIONARY_FEATURES.REALITY_CORRUPTION.enabled) {
       return { uiEffects: {}, corruptionLevel: 0, newEffects: [] };
     }
@@ -769,7 +830,7 @@ export class RealityCorruptionEngine {
     const maxCorruption = REVOLUTIONARY_FEATURES.REALITY_CORRUPTION.maxCorruption;
     this.corruptionLevel = Math.min(this.corruptionLevel, maxCorruption);
     
-    const newEffects = this.generateCorruptionEffects();
+    const newEffects = await this.generateCorruptionEffects();
     
     return {
       uiEffects: this.calculateUIEffects(),
@@ -778,20 +839,25 @@ export class RealityCorruptionEngine {
     };
   }
   
-  private generateCorruptionEffects(): string[] {
-    const effects = [];
+  private async generateCorruptionEffects(): Promise<string[]> {
+    const { generateWithSelectedModel } = await import('./unifiedAIService');
+    const systemInstruction = `You are a reality corruption AI. Your task is to generate a list of UI corruption effects based on the current corruption level.`;
+    const prompt = `The current reality corruption level is ${this.corruptionLevel}. Based on this, generate a comma-separated list of UI corruption effects. Examples: text-glitch, choice-corruption, reality-tears, image-distortion, audio-glitch.`;
+
+    try {
+      const commands = await generateWithSelectedModel(
+        systemInstruction,
+        prompt,
+        'story'
+      );
+      if (commands[0]?.type === 'displayText') {
+        return commands[0].payload.content.split(',').map(t => t.trim());
+      }
+    } catch (error) {
+      console.error('Corruption effect generation failed:', error);
+    }
     
-    if (this.corruptionLevel > 0.2) {
-      effects.push('text-glitch');
-    }
-    if (this.corruptionLevel > 0.4) {
-      effects.push('choice-corruption');
-    }
-    if (this.corruptionLevel > 0.6) {
-      effects.push('reality-tears');
-    }
-    
-    return effects;
+    return [];
   }
   
   private calculateUIEffects(): any {

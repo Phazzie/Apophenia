@@ -12,7 +12,7 @@ interface SessionData {
   storyHistory: StorySegment[];
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api/sessions'; // This would be an environment variable in a real app
+const API_BASE_URL = process.env.VITE_API_BASE_URL || '/api/sessions'; // This would be an environment variable in a real app
 
 export const saveSession = async (sessionId: string, data: SessionData): Promise<void> => {
   try {

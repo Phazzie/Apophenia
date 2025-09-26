@@ -62,17 +62,31 @@ export const getNextStep = async (
     
     // 4. META-CONSCIOUSNESS: Check for AI awareness events
     console.log('Checking for meta-consciousness events...');
-    const metaMessage = await metaConsciousness.checkForMetaEvent(
-      quantumResult.history,
-      updatedWorldState
-    );
+    let metaMessage;
+    try {
+      metaMessage = await metaConsciousness.checkForMetaEvent(
+        quantumResult.history,
+        updatedWorldState
+      );
+      console.log('Meta-consciousness check completed');
+    } catch (error) {
+      console.error('Meta-consciousness check failed:', error);
+      metaMessage = null;
+    }
     
     // 5. REALITY CORRUPTION: Apply interface corruption effects
     console.log('Processing reality corruption effects...');
-    const corruptionResult = realityCorruption.processCorruption(
-      playerChoice,
-      updatedWorldState
-    );
+    let corruptionResult;
+    try {
+      corruptionResult = await realityCorruption.processCorruption(
+        playerChoice,
+        updatedWorldState
+      );
+      console.log('Reality corruption processing completed');
+    } catch (error) {
+      console.error('Reality corruption processing failed:', error);
+      corruptionResult = { corruptionLevel: 0, newEffects: [], uiEffects: {} };
+    }
     
     // 6. ENHANCED AI GENERATION: Generate next story beat with personalization
     console.log('Generating personalized horror prompt...');
@@ -81,12 +95,19 @@ export const getNextStep = async (
     );
     
     console.log('Calling AI service for next step generation...');
-    const commands = await generateNextStepWithSelectedModel(
-      personalizedPrompt,
-      updatedWorldState,
-      quantumResult.history,
-      genreConfig
-    );
+    let commands;
+    try {
+      commands = await generateNextStepWithSelectedModel(
+        personalizedPrompt,
+        updatedWorldState,
+        quantumResult.history,
+        genreConfig
+      );
+      console.log('AI service call successful, generated', commands.length, 'commands');
+    } catch (aiError) {
+      console.error('AI service call failed:', aiError);
+      throw aiError; // Re-throw to be caught by outer error handler
+    }
     
     console.log('Generated', commands.length, 'commands for next step');
     

@@ -100,6 +100,7 @@ async function generateWithGemini(
     summary: '',
     psychologicalStatus: 'Stable' as const,
     systemHealth: 100,
+    horrorIntensity: 0,
     uiDistortion: { transform: '', filter: '', transition: '' },
     genreConfig: {
       id: 'cosmic-horror',

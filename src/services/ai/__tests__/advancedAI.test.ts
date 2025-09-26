@@ -94,6 +94,7 @@ describe('Advanced AI System', () => {
     summary: 'Test summary',
     psychologicalStatus: 'Stable' as const,
     systemHealth: 100,
+    horrorIntensity: 0,
     uiDistortion: {
       transform: 'none',
       filter: 'none',

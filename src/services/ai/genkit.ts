@@ -365,9 +365,9 @@ async function generateWithGrokFirst(prompt: string): Promise<string | null> {
     // Try Grok first (experimental/future compatibility)
     if (API_KEYS.xaiAPI) {
       const grokResult = await xaiClient.generateImage(prompt);
-      if (grokResult) {
+      if (grokResult && grokResult.length > 0) {
         console.log('Grok-4 image generation successful!');
-        return grokResult;
+        return grokResult[0]; // Return the first image URL
       }
     }
     

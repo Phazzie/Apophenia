@@ -71,17 +71,9 @@ npm run dev          # Start dev server with HMR (Hot Module Replacement)
 npm run build        # Production build with optimization
 npm run preview      # Preview production build locally
 npm test             # Run Jest test suite (40+ tests)
-npm run test:watch   # Run tests in watch mode for TDD
-npm run type-check   # TypeScript strict type checking
-
-# Code quality and validation
-npm run lint         # ESLint code quality checks (when configured)  
-npm run format       # Prettier code formatting (when configured)
-npm run audit        # Security vulnerability audit
 
 # Deployment options
 npm run deploy       # Deploy to Vercel (configured)
-npm run build:docker # Build Docker container image
 npm run start:prod   # Start production server locally
 ```
 

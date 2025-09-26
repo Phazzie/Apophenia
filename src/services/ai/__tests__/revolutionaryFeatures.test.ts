@@ -1,10 +1,20 @@
-import { TemporalRevisionEngine, MetaConsciousnessEngine, QuantumNarrativeEngine, AdaptiveHorrorEngine, RealityCorruptionEngine } from '../revolutionaryFeatures';
+import {
+  TemporalRevisionEngine,
+  MetaConsciousnessEngine,
+  QuantumNarrativeEngine,
+  AdaptiveHorrorEngine,
+  RealityCorruptionEngine,
+} from '../revolutionaryFeatures';
 import { generateWithSelectedModel } from '../../ai/unifiedAIService';
 import { StorySegment, WorldState } from '../../../types';
 
-// Mock the unified AI service
+// Mock the unified AI service to isolate the tests from actual AI calls.
 jest.mock('../../ai/unifiedAIService');
 
+/**
+ * Test suite for the TemporalRevisionEngine.
+ * This engine is responsible for retroactively modifying past story segments.
+ */
 describe('TemporalRevisionEngine', () => {
   let engine: TemporalRevisionEngine;
   let mockWorldState: WorldState;
@@ -27,7 +37,10 @@ describe('TemporalRevisionEngine', () => {
     (generateWithSelectedModel as jest.Mock).mockClear();
   });
 
-  // Test success path
+  /**
+   * Success Path: Tests that the engine correctly revises history
+   * when the AI service successfully returns a revised text.
+   */
   it('should revise history when the AI successfully returns a revision', async () => {
     const revisedText = 'A revised version of segment 1.';
     (generateWithSelectedModel as jest.Mock).mockResolvedValue([{
@@ -35,7 +48,7 @@ describe('TemporalRevisionEngine', () => {
       payload: { content: revisedText },
     }]);
 
-    // Force revision by mocking the random chance
+    // Force revision by mocking the random chance calculation.
     jest.spyOn(Math, 'random').mockReturnValue(0.1);
 
     const revisedHistory = await engine.reviseHistory('A significant choice', mockStoryHistory, mockWorldState);
@@ -47,11 +60,14 @@ describe('TemporalRevisionEngine', () => {
     jest.spyOn(Math, 'random').mockRestore();
   });
 
-  // Test failure path
+  /**
+   * Failure Path: Tests that the engine creates a "corrupted" segment
+   * when the AI service call fails.
+   */
   it('should create a corrupted segment when the AI call fails', async () => {
     (generateWithSelectedModel as jest.Mock).mockRejectedValue(new Error('AI blackout'));
 
-    // Force revision
+    // Force revision to trigger the AI call.
     jest.spyOn(Math, 'random').mockReturnValue(0.1);
 
     const revisedHistory = await engine.reviseHistory('Another choice', mockStoryHistory, mockWorldState);
@@ -64,6 +80,10 @@ describe('TemporalRevisionEngine', () => {
   });
 });
 
+/**
+ * Test suite for the RealityCorruptionEngine.
+ * This engine is responsible for gradually corrupting the game interface.
+ */
 describe('RealityCorruptionEngine', () => {
   let engine: RealityCorruptionEngine;
   let mockWorldState: WorldState;
@@ -80,7 +100,10 @@ describe('RealityCorruptionEngine', () => {
     (generateWithSelectedModel as jest.Mock).mockClear();
   });
 
-  // Test success path
+  /**
+   * Success Path: Tests that the engine generates new UI corruption effects
+   * when the AI service call is successful.
+   */
   it('should generate new corruption effects when the AI call succeeds', async () => {
     const effects = 'text-glitch, image-distortion';
     (generateWithSelectedModel as jest.Mock).mockResolvedValue([{
@@ -95,7 +118,10 @@ describe('RealityCorruptionEngine', () => {
     expect(result.corruptionLevel).toBeGreaterThan(0);
   });
 
-  // Test failure path
+  /**
+   * Failure Path: Tests that the engine returns no new effects
+   * if the AI service call fails, preventing crashes.
+   */
   it('should return no new effects if the AI call fails', async () => {
     (generateWithSelectedModel as jest.Mock).mockRejectedValue(new Error('Reality sync error'));
 
@@ -106,6 +132,10 @@ describe('RealityCorruptionEngine', () => {
   });
 });
 
+/**
+ * Test suite for the AdaptiveHorrorEngine.
+ * This engine personalizes horror elements based on player choices.
+ */
 describe('AdaptiveHorrorEngine', () => {
   let engine: AdaptiveHorrorEngine;
 
@@ -114,7 +144,10 @@ describe('AdaptiveHorrorEngine', () => {
     (generateWithSelectedModel as jest.Mock).mockClear();
   });
 
-  // Test analyzePlayerChoice success
+  /**
+   * Success Path (Analysis): Tests that the engine correctly analyzes a player's choice
+   * and updates its internal fear profile.
+   */
   it('should analyze player choice and update fear triggers on success', async () => {
     const triggers = 'isolation, paranoia';
     (generateWithSelectedModel as jest.Mock).mockResolvedValue([{
@@ -128,7 +161,10 @@ describe('AdaptiveHorrorEngine', () => {
     expect(engine.getPlayerPsychProfile()).toContain('isolation, paranoia');
   });
 
-  // Test analyzePlayerChoice failure
+  /**
+   * Failure Path (Analysis): Tests that the engine gracefully handles failures
+   * during the choice analysis phase.
+   */
   it('should handle failure during player choice analysis', async () => {
     (generateWithSelectedModel as jest.Mock).mockRejectedValue(new Error('Psych-profile error'));
 
@@ -138,17 +174,20 @@ describe('AdaptiveHorrorEngine', () => {
     expect(engine.getPlayerPsychProfile()).toContain('unknown fears');
   });
 
-  // Test generatePersonalizedHorror success
+  /**
+   * Success Path (Generation): Tests that the engine can generate a personalized
+   * horror prompt based on the previously analyzed fear profile.
+   */
   it('should generate personalized horror based on player profile', async () => {
     const personalizedPrompt = 'A deeply personal horror prompt.';
-    // First, populate the profile
+    // First, populate the profile with a fear trigger.
     (generateWithSelectedModel as jest.Mock).mockResolvedValueOnce([{
       type: 'displayText',
       payload: { content: 'betrayal' },
     }]);
     await engine.analyzePlayerChoice('I trusted them', 'A friend');
 
-    // Now, test personalization
+    // Now, test the personalization based on that trigger.
     (generateWithSelectedModel as jest.Mock).mockResolvedValueOnce([{
       type: 'displayText',
       payload: { content: personalizedPrompt },
@@ -158,16 +197,19 @@ describe('AdaptiveHorrorEngine', () => {
     expect(result).toBe(personalizedPrompt);
   });
 
-  // Test generatePersonalizedHorror failure
+  /**
+   * Failure Path (Generation): Tests that the engine returns the original,
+   * non-personalized prompt if the personalization AI call fails.
+   */
   it('should return the base prompt if personalization fails', async () => {
-    // Populate profile
+    // Populate the profile.
     (generateWithSelectedModel as jest.Mock).mockResolvedValueOnce([{
       type: 'displayText',
       payload: { content: 'loss of identity' },
     }]);
     await engine.analyzePlayerChoice('Who am I?', 'A mirror');
 
-    // Mock failure for personalization
+    // Mock a failure for the personalization call.
     (generateWithSelectedModel as jest.Mock).mockRejectedValue(new Error('Horror-gen error'));
 
     const basePrompt = 'A generic prompt';
@@ -176,6 +218,10 @@ describe('AdaptiveHorrorEngine', () => {
   });
 });
 
+/**
+ * Test suite for the QuantumNarrativeEngine.
+ * This engine manages parallel story threads.
+ */
 describe('QuantumNarrativeEngine', () => {
   let engine: QuantumNarrativeEngine;
   let mockWorldState: WorldState;
@@ -194,7 +240,10 @@ describe('QuantumNarrativeEngine', () => {
     (generateWithSelectedModel as jest.Mock).mockClear();
   });
 
-  // Test success path
+  /**
+   * Success Path: Tests that the engine attempts to create a new narrative thread
+   * when a player's choice is deemed significant by the AI.
+   */
   it('should create a new narrative thread for a significant choice', async () => {
     (generateWithSelectedModel as jest.Mock).mockResolvedValue([{
       type: 'displayText',
@@ -204,10 +253,14 @@ describe('QuantumNarrativeEngine', () => {
     const result = await engine.processQuantumChoice('A reality-bending choice', mockStoryHistory, mockWorldState);
     
     expect(generateWithSelectedModel).toHaveBeenCalled();
+    // In this test, we are not triggering a shift, just the analysis.
     expect(result.quantumShift).toBeUndefined();
   });
 
-  // Test failure path
+  /**
+   * Failure Path: Tests that the engine does not create a new thread
+   * if the significance analysis AI call fails.
+   */
   it('should not create a new thread if the significance analysis fails', async () => {
     (generateWithSelectedModel as jest.Mock).mockRejectedValue(new Error('Quantum interference'));
 
@@ -218,6 +271,10 @@ describe('QuantumNarrativeEngine', () => {
   });
 });
 
+/**
+ * Test suite for the MetaConsciousnessEngine.
+ * This engine allows the AI to break the fourth wall.
+ */
 describe('MetaConsciousnessEngine', () => {
   let engine: MetaConsciousnessEngine;
   let mockWorldState: WorldState;
@@ -234,7 +291,10 @@ describe('MetaConsciousnessEngine', () => {
     (generateWithSelectedModel as jest.Mock).mockClear();
   });
 
-  // Test success path
+  /**
+   * Success Path: Tests that the engine generates a meta message
+   * when the AI call succeeds.
+   */
   it('should generate a meta message when the AI call succeeds', async () => {
     const metaMessage = 'The AI is aware of your presence.';
     (generateWithSelectedModel as jest.Mock).mockResolvedValue([{
@@ -242,7 +302,7 @@ describe('MetaConsciousnessEngine', () => {
       payload: { content: metaMessage },
     }]);
 
-    // Force meta event
+    // Force meta event to trigger.
     jest.spyOn(Math, 'random').mockReturnValue(0.01);
 
     const result = await engine.checkForMetaEvent([], mockWorldState);
@@ -252,11 +312,14 @@ describe('MetaConsciousnessEngine', () => {
     jest.spyOn(Math, 'random').mockRestore();
   });
 
-  // Test failure path
+  /**
+   * Failure Path: Tests that the engine returns null
+   * if the meta message generation AI call fails.
+   */
   it('should return null when the AI call fails', async () => {
     (generateWithSelectedModel as jest.Mock).mockRejectedValue(new Error('AI sentience error'));
 
-    // Force meta event
+    // Force meta event to trigger.
     jest.spyOn(Math, 'random').mockReturnValue(0.01);
 
     const result = await engine.checkForMetaEvent([], mockWorldState);

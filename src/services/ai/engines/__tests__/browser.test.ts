@@ -1,0 +1,166 @@
+import { NeuralEchoChambers } from '../NeuralEchoChambers';
+import { BreakingFifthWall } from '../BreakingFifthWall';
+import { WorldState } from '../../../../types';
+
+/**
+ * Mock for browser storage APIs (localStorage and sessionStorage).
+ * This allows testing of persistence features in a Node.js environment.
+ */
+const createStorageMock = () => {
+  let store: { [key: string]: string } = {};
+  return {
+    getItem: (key: string) => store[key] || null,
+    setItem: (key: string, value: string) => {
+      store[key] = value.toString();
+    },
+    clear: () => {
+      store = {};
+    },
+    removeItem: (key: string) => {
+      delete store[key];
+    },
+  };
+};
+
+Object.defineProperty(window, 'localStorage', { value: createStorageMock() });
+Object.defineProperty(window, 'sessionStorage', { value: createStorageMock() });
+
+/**
+ * Test suite for NeuralEchoChambers.
+ * This engine relies on browser storage, which is mocked for these tests.
+ */
+describe('NeuralEchoChambers', () => {
+  let engine: NeuralEchoChambers;
+  let mockWorldState: WorldState;
+
+  beforeEach(() => {
+    // Clear mocks before each test to ensure isolation.
+    (window.localStorage as any).clear();
+    (window.sessionStorage as any).clear();
+    engine = new NeuralEchoChambers();
+    mockWorldState = {
+      protagonist: 'The Echo',
+      setting: 'A recurring dream',
+      storyPrompt: 'You have been here before.',
+      psychologicalStatus: 'Déjà vu',
+      systemHealth: 80,
+    };
+  });
+
+  it('should initialize with an empty state if no persisted data exists', () => {
+    engine.initializeFromPersistence();
+    expect((engine as any).crossSessionPatterns).toEqual([]);
+  });
+
+  it('should load patterns from localStorage on initialization', () => {
+    const persistedData = { patterns: ['trust-seeker'], triggers: [] };
+    localStorage.setItem('apophenia-neural-echoes', JSON.stringify(persistedData));
+
+    engine.initializeFromPersistence();
+    expect((engine as any).crossSessionPatterns).toEqual(['trust-seeker']);
+  });
+
+  it('should record a choice and persist it to localStorage', () => {
+    engine.recordChoice('I choose to trust the shadow', 'A flickering hallway', mockWorldState);
+
+    const persistedData = JSON.parse(localStorage.getItem('apophenia-neural-echoes') || '{}');
+    expect(persistedData.patterns).toContain('trust-seeker');
+  });
+
+  it('should generate an echo prompt if a choice resonates with past patterns', () => {
+    (engine as any).crossSessionPatterns = ['isolation-tendency'];
+    const prompt = engine.generateEchoPrompt('I feel so alone', mockWorldState);
+    // The prompt is randomly selected, so we just check that it's not null.
+    expect(prompt).not.toBeNull();
+    expect(typeof prompt).toBe('string');
+  });
+});
+
+/**
+ * Test suite for BreakingFifthWall.
+ * This engine manipulates the browser environment, which is mocked here.
+ */
+describe('BreakingFifthWall', () => {
+  let engine: BreakingFifthWall;
+  let mockWorldState: WorldState;
+
+  beforeEach(() => {
+    engine = new BreakingFifthWall();
+    mockWorldState = {
+      protagonist: 'The User',
+      setting: 'The Browser',
+      storyPrompt: 'The game is watching you.',
+      psychologicalStatus: 'Unsettled',
+      systemHealth: 40,
+    };
+    // Mock document properties and methods.
+    document.title = 'Apophenia';
+    const favicon = { href: '' };
+    jest.spyOn(document, 'querySelector').mockReturnValue(favicon as any);
+    jest.spyOn(window, 'scrollBy').mockImplementation(() => {});
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    engine.deactivateBreakage();
+    jest.useRealTimers();
+    jest.restoreAllMocks();
+  });
+
+  it('should not activate if intensity is too low', () => {
+    engine.activateBreakage(0.2, mockWorldState);
+    expect(document.title).toBe('Apophenia'); // Title should not change.
+  });
+
+  it('should manipulate the document title when intensity is high enough', () => {
+    // Force the random check to pass for deterministic testing.
+    jest.spyOn(Math, 'random').mockReturnValue(0.1);
+
+    engine.activateBreakage(0.4, mockWorldState);
+
+    // Fast-forward time to trigger the title change interval.
+    jest.advanceTimersByTime(5000);
+
+    // Title should have been changed to one of the corrupted titles.
+    expect(document.title).not.toBe('Apophenia');
+  });
+
+  it('should manipulate the favicon when intensity is high enough', () => {
+    const favicon = { href: 'original.ico' };
+    (document.querySelector as jest.Mock).mockReturnValue(favicon);
+
+    // Force the random check to pass for deterministic testing.
+    jest.spyOn(Math, 'random').mockReturnValue(0.1);
+
+    engine.activateBreakage(0.6, mockWorldState);
+
+    jest.advanceTimersByTime(10000);
+
+    expect(favicon.href).not.toBe('original.ico');
+  });
+
+  it('should manipulate the window scroll when intensity is high enough', () => {
+    const scrollSpy = jest.spyOn(window, 'scrollBy');
+    engine.activateBreakage(0.8, mockWorldState);
+
+    jest.advanceTimersByTime(15000);
+
+    expect(scrollSpy).toHaveBeenCalled();
+  });
+
+  it('should deactivate all effects and restore the original state', () => {
+    // Force the title to corrupt for a deterministic test.
+    jest.spyOn(Math, 'random').mockReturnValue(0.1);
+
+    engine.activateBreakage(0.8, mockWorldState);
+    jest.advanceTimersByTime(5000);
+    const corruptedTitle = document.title;
+
+    // Verify that the title was indeed corrupted.
+    expect(corruptedTitle).not.toBe('Apophenia');
+
+    engine.deactivateBreakage();
+
+    expect(document.title).toBe('Apophenia');
+  });
+});

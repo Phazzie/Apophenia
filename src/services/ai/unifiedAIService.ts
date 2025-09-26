@@ -93,28 +93,33 @@ async function generateWithGemini(
   // For story generation, we need to use nextStepFlow which has a different interface
   // For now, we'll create a mock structure to satisfy the interface
   // This should be properly refactored in a future iteration
-  const mockWorldState = {
-    protagonist: '',
-    setting: '',
-    dilemma: '',
-    summary: '',
+    const mockWorldState: WorldState = {
+    protagonist: 'Test Protagonist',
+    setting: 'A mysterious facility',
+    dilemma: 'Escaped containment',
+    summary: 'Test scenario',
     psychologicalStatus: 'Stable' as const,
     systemHealth: 100,
-    uiDistortion: { transform: '', filter: '', transition: '' },
+    horrorIntensity: 0,
+    uiDistortion: {
+      transform: 'none',
+      filter: 'none',
+      transition: 'none'
+    },
     genreConfig: {
       id: 'cosmic-horror',
       name: 'Cosmic Horror',
-      description: '',
-      style: '',
+      description: 'A realm where reality and digital consciousness converge in unsettling ways.',
+      style: 'dark',
       theme: {
-        '--background-color': '#0d1117',
-        '--text-color': '#c9d1d9',
-        '--accent-color': '#58a6ff',
-        '--font-family': 'Courier New',
+        '--background-color': '#0a0a1a',
+        '--text-color': '#e0e0ff',
+        '--accent-color': '#8a2be2',
+        '--font-family': 'Courier New, monospace'
       },
-      startScreenImagePrompt: '',
-      conceptPrompt: '',
-      aiSystemInstruction: systemInstruction,
+      startScreenImagePrompt: 'cosmic horror digital consciousness',
+      conceptPrompt: 'Generate a cosmic horror concept',
+      aiSystemInstruction: 'You are an AI storyteller specializing in cosmic horror.'
     }
   };
   

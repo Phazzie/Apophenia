@@ -13,7 +13,7 @@ jest.mock('@google/generative-ai', () => ({
         response: {
           text: () => JSON.stringify({
             protagonist: 'Test protagonist',
-            setting: 'Test setting', 
+            setting: 'Test setting',
             dilemma: 'Test dilemma'
           })
         }
@@ -88,12 +88,13 @@ describe('Advanced AI System', () => {
   };
 
   const mockWorldState: WorldState = {
-    protagonist: 'Test protagonist',
-    setting: 'Test setting',
-    dilemma: 'Test dilemma',
-    summary: 'Test summary',
+    protagonist: 'Test Character',
+    setting: 'Test Setting', 
+    dilemma: 'Test Dilemma',
+    summary: 'Test Summary',
     psychologicalStatus: 'Stable' as const,
     systemHealth: 100,
+    horrorIntensity: 0,
     uiDistortion: {
       transform: 'none',
       filter: 'none',
@@ -251,7 +252,7 @@ describe('Advanced AI System', () => {
         .mockReturnValueOnce({
           generateContent: jest.fn().mockResolvedValue({
             response: {
-              text: () => '[{"type": "displayText", "payload": {"content": "Fallback success", "segmentId": "test"}}]'
+              text: () => JSON.stringify([{"type": "displayText", "payload": {"content": "Fallback success", "segmentId": "test"}}])
             }
           })
         });

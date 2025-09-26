@@ -86,5 +86,38 @@ export const REVOLUTIONARY_FEATURES = {
     enabled: true,
     description: 'AI narrator develops distinct personality traits during gameplay',
     personalityEvolution: true,
-  }
+  },
+
+  // Neural Echo Chambers - Persistent memory across sessions
+  NEURAL_ECHO_CHAMBERS: {
+    enabled: true,
+    description: 'Persistent memory across sessions that creates echoes of past decisions',
+    maxEchoes: 10,
+    echoTriggerProbability: 0.25,
+  },
+
+  // Breaking the Fifth Wall - Browser manipulation effects
+  BREAKING_FIFTH_WALL: {
+    enabled: true,
+    description: 'Browser manipulation effects that break beyond the fourth wall',
+    maxIntensity: 0.8,
+    safeMode: true,
+  },
+
+  // Semantic Choice Archaeology - Deep psychological profiling
+  SEMANTIC_CHOICE_ARCHAEOLOGY: {
+    enabled: true,
+    description: 'Deep psychological profiling that analyzes semantic meaning and subtext of choices',
+    analysisDepth: 'comprehensive',
+    profileUpdateFrequency: 'every_choice',
+  },
+
+  // Adaptive Narrative DNA - Evolving story genetics
+  ADAPTIVE_NARRATIVE_DNA: {
+    enabled: true,
+    description: 'Evolving story genetics that adapt the narrative structure itself based on player behavior',
+    mutationRate: 0.1,
+    evolutionPressure: 'moderate',
+    maxGenerations: 100,
+  },
 };

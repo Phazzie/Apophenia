@@ -15,6 +15,10 @@ import {
   adaptiveHorror,
   realityCorruption,
   megaContext,
+  neuralEchoChambers,
+  semanticArchaeology,
+  narrativeDNA,
+  fifthWallBreaker,
 } from './ai/revolutionaryFeatures';
 
 /**
@@ -33,6 +37,9 @@ export const getNextStep = async (
   metaMessage?: string;
   quantumShift?: boolean;
   corruptionEffects?: any;
+  echoMessage?: string;
+  semanticInsight?: string;
+  narrativeEvolution?: any;
 }> => {
   console.log('Processing next step for player choice:', playerChoice);
   console.log('World state:', { protagonist: worldState.protagonist, psychologicalStatus: worldState.psychologicalStatus });
@@ -44,8 +51,25 @@ export const getNextStep = async (
     console.log('Calculating adaptive horror intensity...');
     const newHorrorIntensity = megaContext.calculateAdaptiveHorrorIntensity(history, worldState);
     const updatedWorldState = { ...worldState, horrorIntensity: newHorrorIntensity };
+
+    // Initialize Neural Echo Chambers on first use
+    neuralEchoChambers.initializeFromPersistence();
+
+    // 2. NEURAL ECHO CHAMBERS: Record choice and check for echoes
+    console.log('Processing neural echo chambers...');
+    neuralEchoChambers.recordChoice(playerChoice, 'game progression', updatedWorldState);
+    const echoMessage = neuralEchoChambers.generateEchoPrompt(playerChoice, updatedWorldState);
+
+    // 3. SEMANTIC CHOICE ARCHAEOLOGY: Deep psychological analysis
+    console.log('Performing semantic choice archaeology...');
+    const allChoices: string[] = []; // For now, just use empty array as choices aren't stored in history
+    const semanticAnalysis = semanticArchaeology.analyzeChoiceSemantics(playerChoice, allChoices);
+
+    // 4. ADAPTIVE HORROR: Enhanced with semantic insights
+    console.log('Analyzing player choice for adaptive horror...');
+    adaptiveHorror.analyzePlayerChoice(playerChoice, 'game progression');
     
-    // 2. TEMPORAL REVISION: Check if choice should alter past events
+    // 4. TEMPORAL REVISION: Check if choice should alter past events
     console.log('Processing temporal revision...');
     const revisedHistory = await temporalRevision.reviseHistory(
       playerChoice,
@@ -53,7 +77,7 @@ export const getNextStep = async (
       updatedWorldState
     );
     
-    // 3. QUANTUM NARRATIVE: Process potential timeline shifts
+    // 5. QUANTUM NARRATIVE: Process potential timeline shifts
     console.log('Processing quantum narrative shifts...');
     const quantumResult = await quantumNarrative.processQuantumChoice(
       playerChoice,
@@ -61,25 +85,48 @@ export const getNextStep = async (
       updatedWorldState
     );
     
-    // 4. META-CONSCIOUSNESS: Check for AI awareness events
+    // 6. META-CONSCIOUSNESS: Check for AI awareness events
     console.log('Checking for meta-consciousness events...');
     const metaMessage = await metaConsciousness.checkForMetaEvent(
       quantumResult.history,
       updatedWorldState
     );
     
-    // 5. REALITY CORRUPTION: Apply interface corruption effects
+    // 7. REALITY CORRUPTION: Apply interface corruption effects
     console.log('Processing reality corruption effects...');
-    const corruptionResult = realityCorruption.processCorruption(
+    const corruptionResult = await realityCorruption.processCorruption(
       playerChoice,
       updatedWorldState
     );
+
+    // 8. BREAKING THE FIFTH WALL: Activate browser manipulation
+    console.log('Processing fifth wall breaking effects...');
+    const totalCorruption = corruptionResult.corruptionLevel + (worldState.systemHealth ? (100 - worldState.systemHealth) / 100 * 0.5 : 0);
+    if (totalCorruption > 0.3) {
+      fifthWallBreaker.activateBreakage(totalCorruption, worldState);
+    }
+
+    // 9. ADAPTIVE NARRATIVE DNA: Evolve story structure
+    console.log('Evolving narrative DNA...');
+    const responseStartTime = Date.now();
+    narrativeDNA.evolveNarrative(playerChoice, responseStartTime, worldState);
     
-    // 6. ENHANCED AI GENERATION: Generate next story beat with personalization
-    console.log('Generating personalized horror prompt...');
-    const personalizedPrompt = await adaptiveHorror.generatePersonalizedHorror(
+    // 10. ENHANCED AI GENERATION: Generate next story beat with all personalizations
+    console.log('Generating comprehensive personalized horror prompt...');
+    let personalizedPrompt = await adaptiveHorror.generatePersonalizedHorror(
       `Player chose: ${playerChoice}. Continue the cosmic horror narrative.`
     );
+
+    // Enhance with semantic insights
+    personalizedPrompt += ` ${semanticAnalysis.semanticInsight}`;
+    
+    // Enhance with narrative DNA
+    personalizedPrompt = narrativeDNA.generateAdaptivePrompt(personalizedPrompt, worldState);
+
+    // Add echo context if present
+    if (echoMessage) {
+      personalizedPrompt += ` [ECHO CONTEXT]: ${echoMessage}`;
+    }
     
     console.log('Calling AI service for next step generation...');
     const commands = await generateNextStepWithSelectedModel(
@@ -97,6 +144,13 @@ export const getNextStep = async (
       metaMessage: metaMessage || undefined,
       quantumShift: quantumResult.quantumShift,
       corruptionEffects: corruptionResult.corruptionLevel > 0 ? corruptionResult : undefined,
+      echoMessage: echoMessage || undefined,
+      semanticInsight: semanticAnalysis.semanticInsight,
+      narrativeEvolution: {
+        generation: (narrativeDNA as any).narrativeDNA?.generation || 1,
+        psychProfile: semanticAnalysis.psychProfile,
+        hiddenMotivations: semanticAnalysis.hiddenMotivations,
+      },
     };
   } catch (error) {
     console.error('Error in getNextStep:', error);

@@ -548,14 +548,14 @@ As the protagonist's sanity erodes and HORROR INTENSITY rises, reality should be
     2. NARRATIVE ESCALATION PLANNING: Based on the HORROR INTENSITY of ${worldState.horrorIntensity}/10, what horror elements should be introduced next? A low score (0-3) means subtle, atmospheric horror. A medium score (4-7) means more direct psychological horror. A high score (8-10) means extreme, reality-bending horror.
     3. REALITY DISTORTION MECHANICS: How should their perception of reality be altered?
     4. CHOICE ARCHITECTURE: What options will create maximum psychological impact?
-    5. DYNAMIC INTRUSIVE THOUGHT: Based on the HORROR INTENSITY, generate an intrusive thought. If the intensity is low, it might not appear. If high, it should be severe.
+    5. DYNAMIC INTRUSIVE THOUGHT: If the HORROR INTENSITY is high (e.g., > 4), generate a single, compelling intrusive thought. This thought should be a tempting, unsettling, or dangerous action that reflects the player's psychological state.
     6. VISUAL HORROR ENHANCEMENT: What atmospheric image would amplify the fear, keeping the intensity in mind?
 
     Generate the next narrative beat that:
     - Adjusts its tone and severity based on the HORROR INTENSITY.
     - Introduces subtle elements that don't quite make sense (reality glitches)
-    - Creates 2-4 new choices that seem meaningful but are all paths to horror
-    - Dynamically includes an "intrusive thought" choice based on the HORROR INTENSITY. The higher the intensity, the more likely and more extreme the thought.
+    - Creates 2-3 standard choices that seem meaningful but are all paths to horror.
+    - If the HORROR INTENSITY is high enough, generates a single intrusive thought and places it in the 'intrusiveThought' field of the 'displayChoices' payload.
     - Suggests an atmospheric horror image that complements the text and intensity.
     - Updates their psychological state based on escalating cosmic awareness.
 
@@ -565,7 +565,7 @@ As the protagonist's sanity erodes and HORROR INTENSITY rises, reality should be
     [
       {"type": "displayText", "payload": {"content": "narrative text with subtle horror escalation", "segmentId": "unique_id"}},
       {"type": "generateImage", "payload": {"prompt": "atmospheric cosmic horror scene description", "segmentId": "same_id"}},
-      {"type": "displayChoices", "payload": {"choices": [choices_array_with_escalating_horror_and_optional_intrusive_thought]}},
+      {"type": "displayChoices", "payload": {"choices": [{"text": "Standard Choice 1", "isIntrusive": false}, {"text": "Standard Choice 2", "isIntrusive": false}], "intrusiveThought": {"text": "A dynamically generated intrusive thought.", "isIntrusive": true}}},
       {"type": "updateWorldState", "payload": {"psychologicalStatus": "evolved_mental_state", "systemHealth": adjusted_value}}
     ]
   `;

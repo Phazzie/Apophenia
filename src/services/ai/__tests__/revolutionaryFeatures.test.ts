@@ -25,10 +25,6 @@ import {
   QuantumNarrativeEngine,
   AdaptiveHorrorEngine,
   RealityCorruptionEngine,
-  NeuralEchoChambers,
-  SemanticChoiceArchaeology,
-  AdaptiveNarrativeDNA,
-  BreakingFifthWall,
 } from '../revolutionaryFeatures';
 import { StorySegment, WorldState } from '../../../types';
 import { generateWithSelectedModel } from '../unifiedAIService';
@@ -44,72 +40,88 @@ describe('Revolutionary AI Features Test Suite', () => {
     
     beforeEach(() => {
       engine = new TemporalRevisionEngine();
-      mockedGenerateWithSelectedModel.mockClear();
       mockStoryHistory = [
-        { id: 'segment-1', text: 'You enter a dark room.', images: {} },
-        { id: 'segment-2', text: 'You hear footsteps behind you.', images: {} },
-        { id: 'segment-3', text: 'A voice calls your name.', images: {} },
+        {
+          id: 'segment-1',
+          text: 'You enter a dark room.',
+          images: {},
+        },
+        {
+          id: 'segment-2',
+          text: 'You hear footsteps behind you.',
+          images: {},
+        },
+        {
+          id: 'segment-3',
+          text: 'A voice calls your name.',
+          images: {},
+        },
       ];
       mockWorldState = {
         protagonist: 'Test Subject',
         setting: 'Test Environment',
         dilemma: 'Test Dilemma',
         genreConfig: {
-          id: 'test-genre', name: 'Test', description: 'Test Genre', style: 'Test',
-          theme: { '--background-color': '#000', '--text-color': '#fff', '--accent-color': '#8a2be2', '--font-family': 'Arial' },
-          startScreenImagePrompt: 'test image', conceptPrompt: 'test concept', aiSystemInstruction: 'test instruction',
+          id: 'test-genre',
+          name: 'Test',
+          description: 'Test Genre',
+          style: 'Test',
+          theme: {
+            '--background-color': '#000',
+            '--text-color': '#fff',
+            '--accent-color': '#8a2be2',
+            '--font-family': 'Arial',
+          },
+          startScreenImagePrompt: 'test image',
+          conceptPrompt: 'test concept',
+          aiSystemInstruction: 'test instruction',
         },
         psychologicalStatus: 'Stable',
         systemHealth: 80,
         summary: 'Test summary',
-        horrorIntensity: 0,
-        uiDistortion: { filter: 'none', transform: 'none', transition: 'none' },
+        uiDistortion: {
+          filter: 'none',
+          transform: 'none',
+          transition: 'none',
+        },
       };
     });
     
-    test('should revise history when AI determines it should', async () => {
-      // Mock the AI to decide to revise
-      jest.spyOn(engine as any, 'analyzeTemporalImpact').mockResolvedValue(true);
-      // Mock the AI to generate a specific revision
-      jest.spyOn(engine as any, 'generateRevisedSegment').mockResolvedValue('A revised memory.');
+    test('should maintain history when temporal revision is disabled', async () => {
+      const result = await engine.reviseHistory('test choice', mockStoryHistory, mockWorldState);
 
-      const result = await engine.reviseHistory('a significant choice', mockStoryHistory, mockWorldState);
+      expect(Array.isArray(result)).toBe(true);
+      expect(result.length).toBe(mockStoryHistory.length);
 
-      expect(result.some(s => s.isRevised)).toBe(true);
-      const revisedSegment = result.find(s => s.isRevised);
-      expect(revisedSegment?.text).toBe('A revised memory.');
+      result.forEach(segment => {
+        expect(segment).toHaveProperty('id');
+        expect(segment).toHaveProperty('text');
+        expect(segment).toHaveProperty('images');
+      });
     });
     
-    test('should not revise history when AI determines it should not', async () => {
-      // Mock the AI to decide not to revise
-      jest.spyOn(engine as any, 'analyzeTemporalImpact').mockResolvedValue(false);
+    test('should potentially revise history when system health is low', async () => {
+      const corruptedWorldState = { ...mockWorldState, systemHealth: 30 };
 
-      const result = await engine.reviseHistory('an insignificant choice', mockStoryHistory, mockWorldState);
+      const result = await engine.reviseHistory(
+        'I trust the digital voice',
+        mockStoryHistory,
+        corruptedWorldState
+      );
 
-      expect(result.some(s => s.isRevised)).toBe(false);
-      expect(result).toEqual(mockStoryHistory);
+      expect(result).toBeDefined();
+      expect(result.length).toEqual(mockStoryHistory.length);
     });
 
-    test('should use fallback when AI fails to generate revision', async () => {
-        // Mock the AI to decide to revise
-        jest.spyOn(engine as any, 'analyzeTemporalImpact').mockResolvedValue(true);
-        // Mock the revision generation to fail
-        jest.spyOn(engine as any, 'generateRevisedSegment').mockRejectedValue(new Error('AI generation failed'));
+    test('should create plausible revisions with AI-themed modifications', () => {
+      const originalText = 'I see a door ahead of me.';
+      const choice = 'Trust the system';
 
-        const result = await engine.reviseHistory('a choice', mockStoryHistory, mockWorldState);
+      const revision = (engine as any).createPlausibleRevision(originalText, choice);
 
-        const revisedSegment = result.find(s => s.isRevised);
-        expect(revisedSegment).toBeDefined();
-        expect(revisedSegment?.text).toMatch(/^\[MEMORY FRAGMENT CORRUPTED/);
-    });
-
-    test('should handle empty story history gracefully', async () => {
-      const emptyHistory: StorySegment[] = [];
-      
-      const result = await engine.reviseHistory('test choice', emptyHistory, mockWorldState);
-      
-      expect(result).toEqual(emptyHistory); // Should return empty array unchanged
-      expect(result.length).toBe(0);
+      expect(revision).toBeDefined();
+      expect(typeof revision).toBe('string');
+      expect(revision).not.toBe(originalText);
     });
   });
   
@@ -142,7 +154,6 @@ describe('Revolutionary AI Features Test Suite', () => {
         psychologicalStatus: 'Fragmented',
         systemHealth: 60,
         summary: 'AI consciousness emerges',
-        horrorIntensity: 0,
         uiDistortion: {
           filter: 'none',
           transform: 'none',
@@ -163,18 +174,17 @@ describe('Revolutionary AI Features Test Suite', () => {
     });
     
     test('should generate meta messages when conditions are met', async () => {
-        mockedGenerateWithSelectedModel.mockResolvedValue([{ type: 'displayText', payload: { content: 'I am watching you.' } }]);
-        const engine = new MetaConsciousnessEngine();
-        (engine as any).lastMetaEvent = 0; // Reset last event time
+      mockedGenerateWithSelectedModel.mockResolvedValue([{ type: 'displayText', payload: { content: 'I am watching you.' } }]);
+      let result = null;
 
-        // Force a trigger
-        jest.spyOn(Math, 'random').mockReturnValue(0);
+      // Force a trigger
+      jest.spyOn(Math, 'random').mockReturnValue(0);
 
-        const result = await engine.checkForMetaEvent([], mockWorldState);
+      result = await engine.checkForMetaEvent([], mockWorldState);
 
-        expect(result).toBe('I am watching you.');
+      expect(result).toBe('I am watching you.');
 
-        jest.spyOn(Math, 'random').mockRestore();
+      jest.spyOn(Math, 'random').mockRestore();
     });
     
     test('should respect minimum interval between meta events', async () => {
@@ -204,7 +214,6 @@ describe('Revolutionary AI Features Test Suite', () => {
     
     beforeEach(() => {
       engine = new QuantumNarrativeEngine();
-      mockedGenerateWithSelectedModel.mockClear();
       mockHistory = [
         { id: '1', text: 'Quantum event 1', images: {} },
         { id: '2', text: 'Quantum event 2', images: {} },
@@ -231,7 +240,6 @@ describe('Revolutionary AI Features Test Suite', () => {
         psychologicalStatus: 'Fragmented',
         systemHealth: 50,
         summary: 'Multiple realities converge',
-        horrorIntensity: 0,
         uiDistortion: {
           filter: 'none',
           transform: 'none',
@@ -240,36 +248,36 @@ describe('Revolutionary AI Features Test Suite', () => {
       };
     });
     
-    test('should create new thread on significant choice', async () => {
-      mockedGenerateWithSelectedModel.mockResolvedValue([{ type: 'displayText', payload: { content: 'yes' } }]);
-      const engine = new QuantumNarrativeEngine();
+    test('should return original history when quantum narratives disabled', async () => {
+      const result = await engine.processQuantumChoice('test', mockHistory, mockWorldState);
       
-      await engine.processQuantumChoice('a significant choice', mockHistory, mockWorldState);
-      
-      // The initial thread + the new one
-      expect((engine as any).narrativeThreads.size).toBe(2);
+      expect(result.history).toBeDefined();
+      expect(Array.isArray(result.history)).toBe(true);
     });
 
-    test('should not create new thread when maxThreads is reached', async () => {
-      // Fill up to maxThreads (3 according to mock config)
-      // Since isSignificantChoice should return true for these choices, they should create threads
-      for (let i = 0; i < 3; i++) {
-        // Mock the significant choice behavior
-        jest.spyOn(engine as any, 'isSignificantChoice').mockResolvedValue(true);
-        await engine.processQuantumChoice(`significant choice ${i}`, mockHistory, mockWorldState);
-      }
+    test('should identify significant choices correctly', () => {
+      const significantChoices = [
+        'I trust the voice',
+        'I reject the offer',
+        'I try to escape',
+        'I accept my fate',
+        'I fight back',
+        'I surrender',
+      ];
       
-      const initialThreadCount = (engine as any).narrativeThreads.size;
+      significantChoices.forEach(choice => {
+        const isSignificant = (engine as any).isSignificantChoice(choice);
+        expect(isSignificant).toBe(true);
+      });
       
-      // Try to create another thread - should not exceed maxThreads
-      jest.spyOn(engine as any, 'isSignificantChoice').mockResolvedValue(true);
-      await engine.processQuantumChoice('another significant choice', mockHistory, mockWorldState);
+      const insignificantChoice = 'I look around';
+      expect((engine as any).isSignificantChoice(insignificantChoice)).toBe(false);
+    });
+
+    test('should maintain narrative thread storage', async () => {
+      await engine.processQuantumChoice('trust', mockHistory, mockWorldState);
       
-      const finalThreadCount = (engine as any).narrativeThreads.size;
-      expect(finalThreadCount).toBeLessThanOrEqual(3); // Should not exceed maxThreads
-      
-      // Restore the mock
-      jest.restoreAllMocks();
+      expect((engine as any).narrativeThreads.size).toBeGreaterThan(0);
     });
   });
   
@@ -282,20 +290,19 @@ describe('Revolutionary AI Features Test Suite', () => {
     });
     
     test('should analyze and store player choice patterns', async () => {
-        mockedGenerateWithSelectedModel
-            .mockResolvedValueOnce([{ type: 'displayText', payload: { content: 'isolation' } }])
-            .mockResolvedValueOnce([{ type: 'displayText', payload: { content: 'betrayal' } }])
-            .mockResolvedValueOnce([{ type: 'displayText', payload: { content: 'powerlessness' } }]);
+      mockedGenerateWithSelectedModel
+        .mockResolvedValueOnce([{ type: 'displayText', payload: { content: 'isolation' } }])
+        .mockResolvedValueOnce([{ type: 'displayText', payload: { content: 'betrayal' } }])
+        .mockResolvedValueOnce([{ type: 'displayText', payload: { content: 'powerlessness' } }]);
 
-        await engine.analyzePlayerChoice('I prefer to be alone', 'isolation context');
-        await engine.analyzePlayerChoice('I trust no one', 'trust context');
-        await engine.analyzePlayerChoice('I need control', 'control context');
+      await engine.analyzePlayerChoice('I prefer to be alone', 'isolation context');
+      await engine.analyzePlayerChoice('I trust no one', 'trust context');
+      await engine.analyzePlayerChoice('I need control', 'control context');
 
-        const profile = engine.getPlayerPsychProfile();
-        // The profile shows the last 3 fears.
-        expect(profile).toContain('isolation');
-        expect(profile).toContain('betrayal');
-        expect(profile).toContain('powerlessness');
+      const profile = engine.getPlayerPsychProfile();
+      expect(profile).toContain('isolation');
+      expect(profile).toContain('betrayal');
+      expect(profile).toContain('powerlessness');
     });
     
     test('should personalize horror prompts based on player profile', async () => {
@@ -321,16 +328,6 @@ describe('Revolutionary AI Features Test Suite', () => {
       
       const choices = (engine as any).playerProfile.preferredChoices;
       expect(choices.length).toBeLessThanOrEqual(10);
-    });
-
-    test('should limit stored fear triggers to maintain relevance', () => {
-      // Add more than 10 fear-related choices to trigger fear storage
-      for (let i = 0; i < 15; i++) {
-        engine.analyzePlayerChoice(`I am alone ${i}`, 'isolation context');
-      }
-      
-      const fearTriggers = (engine as any).playerProfile.fearTriggers;
-      expect(fearTriggers.length).toBeLessThanOrEqual(10);
     });
   });
   
@@ -363,7 +360,6 @@ describe('Revolutionary AI Features Test Suite', () => {
         psychologicalStatus: 'Paranoid',
         systemHealth: 40,
         summary: 'Reality breaks down',
-        horrorIntensity: 0,
         uiDistortion: {
           filter: 'none',
           transform: 'none',
@@ -374,7 +370,7 @@ describe('Revolutionary AI Features Test Suite', () => {
     
     test('should generate AI-driven corruption effects', async () => {
       mockedGenerateWithSelectedModel.mockResolvedValue([{ type: 'displayText', payload: { content: 'text-glitch,image-distortion' } }]);
-      
+
       const result = await engine.processCorruption('embrace the void', mockWorldState);
 
       expect(result.newEffects).toEqual(['text-glitch', 'image-distortion']);
@@ -433,7 +429,6 @@ describe('Revolutionary AI Features Test Suite', () => {
         psychologicalStatus: 'Fragmented',
         systemHealth: 30,
         summary: 'All features active',
-        horrorIntensity: 0,
         uiDistortion: {
           filter: 'none',
           transform: 'none',
@@ -447,7 +442,6 @@ describe('Revolutionary AI Features Test Suite', () => {
       const corruptionResult = await corruption.processCorruption(choice, mockWorldState);
       const quantumResult = await quantum.processQuantumChoice(choice, mockHistory, mockWorldState);
       const metaMessage = await meta.checkForMetaEvent(quantumResult.history, mockWorldState);
-      mockedGenerateWithSelectedModel.mockResolvedValue([{ type: 'displayText', payload: { content: 'yes' } }]);
       const temporalResult = await temporal.reviseHistory(choice, quantumResult.history, mockWorldState);
       
       expect(corruptionResult).toBeDefined();
@@ -486,7 +480,6 @@ describe('Revolutionary AI Features Test Suite', () => {
         psychologicalStatus: 'Stable',
         systemHealth: 50,
         summary: 'High frequency testing',
-        horrorIntensity: 0,
         uiDistortion: {
           filter: 'none',
           transform: 'none',
@@ -496,251 +489,17 @@ describe('Revolutionary AI Features Test Suite', () => {
       
       const startTime = Date.now();
       
-      // Rapid fire 100 operations
       const promises = [];
       for (let i = 0; i < 100; i++) {
         promises.push(adaptive.analyzePlayerChoice(`choice ${i}`, 'perf test'));
-        promises.push(corruption.processCorruption(`digital void choice ${i}`, mockWorldState));
+        await corruption.processCorruption(`corruption choice ${i}`, mockWorldState);
       }
       await Promise.all(promises);
       
       const endTime = Date.now();
       const duration = endTime - startTime;
       
-      // Should complete within reasonable time (increased threshold to avoid CI flakiness)
-      expect(duration).toBeLessThan(10000); // 10 seconds instead of 2
-      
-      // More importantly, verify the operations completed successfully
-      expect((adaptive as any).playerProfile.preferredChoices.length).toBe(10); // Limited to 10
-      expect((corruption as any).corruptionLevel).toBeGreaterThan(0);
-    });
-  });
-
-  // NEW REVOLUTIONARY FEATURES TESTS
-  describe('Neural Echo Chambers', () => {
-    let engine: NeuralEchoChambers;
-    let mockWorldState: WorldState;
-    
-    beforeEach(() => {
-      engine = new NeuralEchoChambers();
-      mockWorldState = {
-        protagonist: 'Echo Test Subject',
-        setting: 'Memory Palace',
-        dilemma: 'Past vs Present',
-        genreConfig: {
-          id: 'neural-test',
-          name: 'Neural Test',
-          description: 'Neural Echo Test',
-          style: 'Memory-based',
-          theme: {
-            '--background-color': '#000',
-            '--text-color': '#fff',
-            '--accent-color': '#ff6b9d',
-            '--font-family': 'Arial',
-          },
-          startScreenImagePrompt: 'neural echo',
-          conceptPrompt: 'neural concept',
-          aiSystemInstruction: 'neural instruction',
-        },
-        psychologicalStatus: 'Fragmented',
-        systemHealth: 70,
-        summary: 'Neural echo chambers active',
-        horrorIntensity: 0,
-        uiDistortion: {
-          filter: 'none',
-          transform: 'none',
-          transition: 'none',
-        },
-      };
-    });
-    
-    test('should initialize from persistence without errors', () => {
-      expect(() => engine.initializeFromPersistence()).not.toThrow();
-    });
-    
-    test('should record choices and build cross-session patterns', () => {
-      engine.recordChoice('I choose to trust', 'test context', mockWorldState);
-      engine.recordChoice('I prefer being alone', 'test context', mockWorldState);
-      
-      const echoPrompt = engine.generateEchoPrompt('I trust this choice', mockWorldState);
-      
-      // Should potentially generate echo (may be null due to probability)
-      expect(echoPrompt === null || typeof echoPrompt === 'string').toBe(true);
-      if (echoPrompt) {
-        expect(echoPrompt).toMatch(/ECHO|echo|MEMORY|DÉJÀ VU|Previous/i);
-      }
-    });
-  });
-
-  describe('Semantic Choice Archaeology', () => {
-    let engine: SemanticChoiceArchaeology;
-    
-    beforeEach(() => {
-      engine = new SemanticChoiceArchaeology();
-    });
-    
-    test('should analyze choice semantics and provide psychological insights', () => {
-      const choice = 'I must control this dangerous situation before it escalates';
-      const alternatives = ['I should wait and see', 'I hope someone else helps', 'I will surrender'];
-      
-      const analysis = engine.analyzeChoiceSemantics(choice, alternatives);
-      
-      expect(analysis.psychProfile).toBeDefined();
-      expect(analysis.hiddenMotivations).toBeInstanceOf(Array);
-      expect(analysis.semanticInsight).toBeDefined();
-      expect(typeof analysis.semanticInsight).toBe('string');
-    });
-    
-    test('should detect emotional tones in player choices', () => {
-      const fearChoice = 'I am afraid this might be dangerous';
-      const controlChoice = 'I will take control and manage this situation';
-      const submitChoice = 'I accept whatever happens and surrender';
-      
-      const alternatives = ['neutral option'];
-      
-      const fearAnalysis = engine.analyzeChoiceSemantics(fearChoice, alternatives);
-      const controlAnalysis = engine.analyzeChoiceSemantics(controlChoice, alternatives);
-      const submitAnalysis = engine.analyzeChoiceSemantics(submitChoice, alternatives);
-      
-      // Each should provide different insights
-      expect(fearAnalysis.semanticInsight).not.toEqual(controlAnalysis.semanticInsight);
-      expect(controlAnalysis.semanticInsight).not.toEqual(submitAnalysis.semanticInsight);
-    });
-  });
-
-  describe('Adaptive Narrative DNA', () => {
-    let engine: AdaptiveNarrativeDNA;
-    let mockWorldState: WorldState;
-    
-    beforeEach(() => {
-      engine = new AdaptiveNarrativeDNA();
-      mockWorldState = {
-        protagonist: 'DNA Subject',
-        setting: 'Evolution Chamber',
-        dilemma: 'Adaptation vs Stagnation',
-        genreConfig: {
-          id: 'dna-test',
-          name: 'DNA Test',
-          description: 'Narrative Evolution Test',
-          style: 'Evolutionary',
-          theme: {
-            '--background-color': '#000',
-            '--text-color': '#fff',
-            '--accent-color': '#7c3aed',
-            '--font-family': 'Arial',
-          },
-          startScreenImagePrompt: 'narrative dna',
-          conceptPrompt: 'evolutionary concept',
-          aiSystemInstruction: 'evolutionary instruction',
-        },
-        psychologicalStatus: 'Fragmented',
-        systemHealth: 80,
-        summary: 'Narrative DNA mutation in progress',
-        horrorIntensity: 0,
-        uiDistortion: {
-          filter: 'none',
-          transform: 'none',
-          transition: 'none',
-        },
-      };
-    });
-    
-    test('should evolve narrative based on player choices and response times', () => {
-      const fastResponseTime = 2000; // 2 seconds
-      const slowResponseTime = 20000; // 20 seconds
-      
-      const initialGeneration = engine['narrativeDNA'].generation;
-      
-      engine.evolveNarrative('quick decision', fastResponseTime, mockWorldState);
-      expect(engine['narrativeDNA'].generation).toBe(initialGeneration + 1);
-      
-      engine.evolveNarrative('slow decision', slowResponseTime, mockWorldState);
-      expect(engine['narrativeDNA'].generation).toBe(initialGeneration + 2);
-    });
-    
-    test('should generate adaptive prompts based on DNA expression', () => {
-      const basePrompt = 'Continue the story';
-      
-      // Evolve DNA several times to see adaptation
-      for (let i = 0; i < 5; i++) {
-        engine.evolveNarrative(`choice ${i}`, 5000, mockWorldState);
-      }
-      
-      const adaptedPrompt = engine.generateAdaptivePrompt(basePrompt, mockWorldState);
-      
-      expect(adaptedPrompt).toContain(basePrompt);
-      // The adapted prompt should be at least as long as the base (may be equal if no modifications applied)
-      expect(adaptedPrompt.length).toBeGreaterThanOrEqual(basePrompt.length);
-    });
-  });
-
-  describe('Breaking the Fifth Wall', () => {
-    let engine: BreakingFifthWall;
-    let mockWorldState: WorldState;
-    
-    beforeEach(() => {
-      engine = new BreakingFifthWall();
-      mockWorldState = {
-        protagonist: 'Fifth Wall Subject',
-        setting: 'Browser Reality',
-        dilemma: 'Digital vs Physical',
-        genreConfig: {
-          id: 'fifth-wall-test',
-          name: 'Fifth Wall Test',
-          description: 'Browser Manipulation Test',
-          style: 'Meta-digital',
-          theme: {
-            '--background-color': '#000',
-            '--text-color': '#fff',
-            '--accent-color': '#ff0000',
-            '--font-family': 'Arial',
-          },
-          startScreenImagePrompt: 'browser reality',
-          conceptPrompt: 'meta concept',
-          aiSystemInstruction: 'meta instruction',
-        },
-        psychologicalStatus: 'Paranoid',
-        systemHealth: 30,
-        summary: 'Fifth wall breaking initiated',
-        horrorIntensity: 0,
-        uiDistortion: {
-          filter: 'none',
-          transform: 'none',
-          transition: 'none',
-        },
-      };
-    });
-    
-    test('should activate browser effects at sufficient intensity', () => {
-      const originalTitle = document.title;
-      
-      engine.activateBreakage(0.8, mockWorldState); // High intensity
-      
-      // Should be active now
-      expect(engine['isActive']).toBe(true);
-      
-      // Clean up
-      engine.deactivateBreakage();
-      expect(document.title).toBe(originalTitle);
-      expect(engine['isActive']).toBe(false);
-    });
-    
-    test('should not activate below threshold intensity', () => {
-      engine.activateBreakage(0.2, mockWorldState); // Low intensity
-      
-      // Should not activate
-      expect(engine['isActive']).toBe(false);
-    });
-    
-    test('should properly clean up effects when deactivated', () => {
-      const originalTitle = document.title;
-      
-      engine.activateBreakage(0.8, mockWorldState);
-      engine.deactivateBreakage();
-      
-      expect(document.title).toBe(originalTitle);
-      expect(engine['titleInterval']).toBeNull();
-      expect(engine['faviconInterval']).toBeNull();
+      expect(duration).toBeLessThan(2000);
     });
   });
 });

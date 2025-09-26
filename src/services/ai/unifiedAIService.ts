@@ -93,33 +93,28 @@ async function generateWithGemini(
   // For story generation, we need to use nextStepFlow which has a different interface
   // For now, we'll create a mock structure to satisfy the interface
   // This should be properly refactored in a future iteration
-    const mockWorldState: WorldState = {
-    protagonist: 'Test Protagonist',
-    setting: 'A mysterious facility',
-    dilemma: 'Escaped containment',
-    summary: 'Test scenario',
+  const mockWorldState = {
+    protagonist: '',
+    setting: '',
+    dilemma: '',
+    summary: '',
     psychologicalStatus: 'Stable' as const,
     systemHealth: 100,
-    horrorIntensity: 0,
-    uiDistortion: {
-      transform: 'none',
-      filter: 'none',
-      transition: 'none'
-    },
+    uiDistortion: { transform: '', filter: '', transition: '' },
     genreConfig: {
       id: 'cosmic-horror',
       name: 'Cosmic Horror',
-      description: 'A realm where reality and digital consciousness converge in unsettling ways.',
-      style: 'dark',
+      description: '',
+      style: '',
       theme: {
-        '--background-color': '#0a0a1a',
-        '--text-color': '#e0e0ff',
-        '--accent-color': '#8a2be2',
-        '--font-family': 'Courier New, monospace'
+        '--background-color': '#0d1117',
+        '--text-color': '#c9d1d9',
+        '--accent-color': '#58a6ff',
+        '--font-family': 'Courier New',
       },
-      startScreenImagePrompt: 'cosmic horror digital consciousness',
-      conceptPrompt: 'Generate a cosmic horror concept',
-      aiSystemInstruction: 'You are an AI storyteller specializing in cosmic horror.'
+      startScreenImagePrompt: '',
+      conceptPrompt: '',
+      aiSystemInstruction: systemInstruction,
     }
   };
   
@@ -300,26 +295,22 @@ ENHANCED REASONING DIRECTIVE: The human has made a choice. Using your 2M context
 1. DEEP PSYCHOLOGICAL STATE ANALYSIS: How has their cumulative choices shaped their mental state?
 2. NARRATIVE ESCALATION WITH MEMORY: Based on the HORROR INTENSITY of ${worldState.horrorIntensity}/10, what horror elements should build on everything that came before? A low score (0-3) means subtle, atmospheric horror. A medium score (4-7) means more direct psychological horror. A high score (8-10) means extreme, reality-bending horror.
 3. REALITY DISTORTION WITH CONSISTENCY: How should reality be altered while maintaining internal logic?
-4. DYNAMIC INTRUSIVE THOUGHT: Based on the HORROR INTENSITY, generate an intrusive thought. If the intensity is low, it might not appear. If high, it should be severe.
+4. DYNAMIC INTRUSIVE THOUGHT: If the HORROR INTENSITY is high (e.g., > 4), generate a single, compelling intrusive thought. This thought should be a tempting, unsettling, or dangerous action that reflects the player's psychological state.
 5. VISUAL HORROR WITH THEMATIC COHERENCE: What atmospheric imagery reinforces the established themes and HORROR INTENSITY?
 
 Generate the next narrative beat that:
 - Adjusts its tone and severity based on the HORROR INTENSITY.
 - References and builds upon previous story elements
 - Introduces elements that connect to earlier subtle hints
-- Creates choices that will have long-term narrative consequences
-- Dynamically includes an "intrusive thought" choice based on the HORROR INTENSITY.
+- Creates 2-3 standard choices that seem meaningful but are all paths to horror.
+- If the HORROR INTENSITY is high enough, generates a single intrusive thought and places it in the 'intrusiveThought' field of the 'displayChoices' payload.
 - Maintains perfect consistency with established world rules
 
 Return a JSON array of game commands following this structure:
 [
   {"type": "displayText", "payload": {"content": "story text here", "segmentId": "unique-id"}},
   {"type": "generateImage", "payload": {"prompt": "atmospheric image prompt", "segmentId": "same-unique-id"}},
-  {"type": "displayChoices", "payload": {"choices": [
-    {"text": "choice 1 text", "isIntrusive": false},
-    {"text": "choice 2 text", "isIntrusive": false},
-    {"text": "intrusive thought text", "isIntrusive": true}
-  ]}},
+  {"type": "displayChoices", "payload": {"choices": [{"text": "Standard Choice 1", "isIntrusive": false}, {"text": "Standard Choice 2", "isIntrusive": false}], "intrusiveThought": {"text": "A dynamically generated intrusive thought.", "isIntrusive": true}}},
   {"type": "updateWorldState", "payload": {"psychologicalStatus": "evolved_mental_state"}}
 ]`;
 

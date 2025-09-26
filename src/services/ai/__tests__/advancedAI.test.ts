@@ -88,13 +88,12 @@ describe('Advanced AI System', () => {
   };
 
   const mockWorldState: WorldState = {
-    protagonist: 'Test Character',
-    setting: 'Test Setting', 
-    dilemma: 'Test Dilemma',
-    summary: 'Test Summary',
+    protagonist: 'Test protagonist',
+    setting: 'Test setting',
+    dilemma: 'Test dilemma',
+    summary: 'Test summary',
     psychologicalStatus: 'Stable' as const,
     systemHealth: 100,
-    horrorIntensity: 0,
     uiDistortion: {
       transform: 'none',
       filter: 'none',
@@ -252,7 +251,7 @@ describe('Advanced AI System', () => {
         .mockReturnValueOnce({
           generateContent: jest.fn().mockResolvedValue({
             response: {
-              text: () => JSON.stringify([{"type": "displayText", "payload": {"content": "Fallback success", "segmentId": "test"}}])
+              text: () => '[{"type": "displayText", "payload": {"content": "Fallback success", "segmentId": "test"}}]'
             }
           })
         });

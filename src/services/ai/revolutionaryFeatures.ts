@@ -132,7 +132,8 @@ export class TemporalRevisionEngine {
         return commands[0].payload.content;
       }
     } catch (error) {
-      console.error('AI revision generation failed, using fallback:', error);
+      console.error('AI revision generation failed, propagating error:', error);
+      throw error;
     }
     
     // Fallback to simple revision if AI fails
@@ -163,8 +164,6 @@ export class TemporalRevisionEngine {
     // Default: introduce a subtle contradiction with randomized corruption
     return `${originalText} (${getCorruptionMessage()})`;
   }
-  }
-
 }
 
 /**
@@ -354,7 +353,6 @@ export class AdaptiveHorrorEngine {
     }
     if (this.playerProfile.fearTriggers.length > 10) {
       this.playerProfile.fearTriggers = this.playerProfile.fearTriggers.slice(-10);
-    }
     }
   }
   

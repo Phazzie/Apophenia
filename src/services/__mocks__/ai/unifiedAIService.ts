@@ -27,3 +27,12 @@ export const generateNextStepWithSelectedModel = jest.fn().mockResolvedValue([
     }
   }
 ]);
+
+export const generateWithSelectedModel = jest.fn().mockResolvedValue([
+    {
+        type: 'displayText',
+        payload: {
+            content: 'Mocked AI response'
+        }
+    }
+]);

@@ -170,5 +170,30 @@ export const REVOLUTIONARY_FEATURES = {
     enabled: true,
     description: 'AI narrator develops distinct personality traits during gameplay',
     personalityEvolution: true,
+  },
+  
+  // Neural Echo Chambers - Cross-session memory persistence
+  NEURAL_ECHOES: {
+    enabled: true,
+    description: 'Cross-session memory persistence using localStorage with psychological profiles',
+    maxEchoes: 50,
+    encryptionEnabled: true,
+  },
+  
+  // Semantic Choice Archaeology - Deep psychological analysis of choices
+  SEMANTIC_ARCHAEOLOGY: {
+    enabled: true,
+    description: 'Deep psychological analysis of player choice patterns and meaning excavation',
+    historyDepth: 20,
+    analysisComplexity: 'advanced',
+  },
+  
+  // Adaptive Narrative DNA - Evolutionary story genetics
+  NARRATIVE_DNA: {
+    enabled: true,
+    description: 'Evolutionary story genetics that adapt and mutate over time based on engagement',
+    maxMutations: 10,
+    evolutionRate: 0.2,
+    decayRate: 0.95,
   }
 };

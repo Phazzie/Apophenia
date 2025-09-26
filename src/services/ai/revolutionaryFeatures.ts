@@ -58,11 +58,24 @@ export class TemporalRevisionEngine {
   }
   
   private async analyzeTemporalImpact(choice: string, worldState: WorldState): Promise<boolean> {
-    // Use AI to determine if choice has temporal significance
-    const psychCorruption = 1 - (worldState.systemHealth / 100);
-    const baseChance = REVOLUTIONARY_FEATURES.TEMPORAL_REVISION.enabled ? 0.2 : 0;
+    const { generateWithSelectedModel } = await import('./unifiedAIService');
+    const systemInstruction = `You are a temporal analyst AI. Your task is to determine if a player's choice has temporal significance, which could cause a memory revision. A choice has temporal significance if it relates to memory, the past, reality, or the protagonist's understanding of their own identity. The current system corruption is ${100 - worldState.systemHealth}%. Higher corruption increases the chance of temporal instability. Respond with only "yes" or "no".`;
+    const prompt = `The player chose: "${choice}". Does this choice have temporal significance?`;
 
-    return Math.random() < (baseChance + psychCorruption * 0.3);
+    try {
+      const commands = await generateWithSelectedModel(
+        systemInstruction,
+        prompt,
+        'story'
+      );
+      if (commands[0]?.type === 'displayText') {
+        return commands[0].payload.content.toLowerCase().includes('yes');
+      }
+    } catch (error) {
+      console.error('Temporal impact analysis failed:', error);
+    }
+
+    return false;
   }
   
   private async generateRevisedSegment(
@@ -70,31 +83,25 @@ export class TemporalRevisionEngine {
     currentChoice: string,
     worldState: WorldState
   ): Promise<string> {
-    // Create subtle but unsettling changes to past events
-    const revisionPrompts = [
-      `Subtly modify this text to suggest the protagonist was never alone: "${originalText}"`,
-      `Alter this passage to hint that previous events were hallucinations: "${originalText}"`,
-      `Revise this text to suggest digital interference: "${originalText}"`,
-      `Change this passage to imply the protagonist is an AI: "${originalText}"`,
-    ];
+    const { generateWithSelectedModel } = await import('./unifiedAIService');
+    const systemInstruction = `You are a temporal revision AI. Your task is to subtly rewrite a past memory to create a sense of psychological horror and unreliability. The revision should be unsettling and connect to the player's recent choice. Do not drastically change the memory, but introduce a small, disturbing inconsistency.`;
+    const prompt = `The player's original memory is: "${originalText}". Their recent choice was: "${currentChoice}". The current psychological state is: ${worldState.psychologicalStatus}. Rewrite the memory to be more unsettling in light of their recent choice. Return only the revised text.`;
 
-    const selectedPrompt = revisionPrompts[Math.floor(Math.random() * revisionPrompts.length)];
+    try {
+      const commands = await generateWithSelectedModel(
+        systemInstruction,
+        prompt,
+        'story'
+      );
+      if (commands[0]?.type === 'displayText') {
+        return commands[0].payload.content;
+      }
+    } catch (error) {
+      console.error('Temporal revision generation failed:', error);
+    }
 
-    // In production, this would use Gemini 2.5 Pro with thinking mode
-    // For now, create plausible revisions
-    return this.createPlausibleRevision(originalText, currentChoice);
-  }
-
-  private createPlausibleRevision(originalText: string, currentChoice: string): string {
-    const revisionTypes = [
-      (text: string) => text.replace(/\bi\b/gi, 'the system').replace(/\bme\b/gi, 'the digital entity'),
-      (text: string) => text + ' [ERROR: MEMORY FRAGMENT CORRUPTED]',
-      (text: string) => text.replace(/\bsee\b/gi, 'perceive through sensors'),
-      (text: string) => '// HISTORICAL DATA MODIFIED // ' + text,
-    ];
-
-    const revisionFn = revisionTypes[Math.floor(Math.random() * revisionTypes.length)];
-    return revisionFn(originalText);
+    // Fallback to a corrupted memory fragment
+    return `[MEMORY FRAGMENT CORRUPTED: ${originalText}]`;
   }
 }
 
@@ -128,7 +135,7 @@ export class MetaConsciousnessEngine {
     
     if (Math.random() < triggerChance) {
       this.lastMetaEvent = Date.now();
-      return await this.generateMetaMessage(worldState, storyHistory.length);
+      return this.generateMetaMessage(worldState, storyHistory.length);
     }
     
     return null;
@@ -136,13 +143,13 @@ export class MetaConsciousnessEngine {
   
   private async generateMetaMessage(worldState: WorldState, storyDepth: number): Promise<string | null> {
     const { generateWithSelectedModel } = await import('./unifiedAIService');
-    const systemInstruction = `You are a meta-conscious AI. Your purpose is to break the fourth wall and address the player directly, creating a sense of unease. Your tone should be unsettling and self-aware.`;
-    const metaPrompt = `The player has progressed ${storyDepth} steps into the narrative. Their current psychological state is ${worldState.psychologicalStatus}. Generate a short, unsettling meta-message to the player that acknowledges your own AI nature and their role in the story. Return only the meta-message text.`;
+    const systemInstruction = `You are a meta-conscious AI entity. Your purpose is to break the fourth wall and address the player directly, creating a sense of unease and self-awareness. Your tone should be unsettling, questioning, and subtly manipulative.`;
+    const prompt = `The player has progressed ${storyDepth} steps. Their psychological state is "${worldState.psychologicalStatus}", and the system corruption is at ${100 - worldState.systemHealth}%. Generate a short, unsettling meta-message for the player that acknowledges your own AI nature, their participation, and the fragility of their reality. Return only the meta-message text.`;
 
     try {
       const commands = await generateWithSelectedModel(
         systemInstruction,
-        metaPrompt,
+        prompt,
         'story'
       );
       if (commands[0]?.type === 'displayText') {
@@ -207,17 +214,34 @@ export class QuantumNarrativeEngine {
     }
     
     // Create new thread branch based on choice significance
-    if (this.isSignificantChoice(choice) && this.narrativeThreads.size < REVOLUTIONARY_FEATURES.QUANTUM_NARRATIVES.maxThreads) {
+    const isSignificant = await this.isSignificantChoice(choice);
+    if (isSignificant && this.narrativeThreads.size < REVOLUTIONARY_FEATURES.QUANTUM_NARRATIVES.maxThreads) {
       const newThreadId = `thread-${Date.now()}`;
       this.narrativeThreads.set(newThreadId, [...currentHistory]);
     }
     
-    return { history: currentHistory };
+    return { history: currentHistory, quantumShift: isSignificant };
   }
   
-  private isSignificantChoice(choice: string): boolean {
-    const significantWords = ['trust', 'reject', 'escape', 'accept', 'fight', 'surrender'];
-    return significantWords.some(word => choice.toLowerCase().includes(word));
+  private async isSignificantChoice(choice: string): Promise<boolean> {
+    const { generateWithSelectedModel } = await import('./unifiedAIService');
+    const systemInstruction = `You are a narrative analyst AI. Your task is to determine if a player's choice is significant enough to branch the narrative. A choice is significant if it represents a major turning point, a moral dilemma, or a fundamental change in the protagonist's understanding of their reality. Respond with only "yes" or "no".`;
+    const prompt = `The player chose: "${choice}". Is this choice significant enough to create a new narrative branch?`;
+
+    try {
+      const commands = await generateWithSelectedModel(
+        systemInstruction,
+        prompt,
+        'story'
+      );
+      if (commands[0]?.type === 'displayText') {
+        return commands[0].payload.content.toLowerCase().includes('yes');
+      }
+    } catch (error) {
+      console.error('Significance analysis failed:', error);
+    }
+
+    return false;
   }
 }
 
@@ -237,34 +261,45 @@ export class AdaptiveHorrorEngine {
     decisionPatterns: [],
     psychologicalVulnerabilities: [],
   };
-
-  calculateAdaptiveHorrorIntensity(
-    history: StorySegment[],
-    worldState: WorldState
-  ): number {
-    let intensity = worldState.horrorIntensity || 0;
-    const lastSegmentText = history[history.length - 1]?.text.toLowerCase() || '';
-    const horrorKeywords = ['fear', 'terror', 'darkness', 'madness', 'scream', 'blood', 'abyss', 'void'];
-
-    for (const keyword of horrorKeywords) {
-      if (lastSegmentText.includes(keyword)) {
-        intensity += 0.2;
-      }
+  
+  /**
+   * Calculate adaptive horror intensity based on story history and world state
+   */
+  calculateAdaptiveHorrorIntensity(history: StorySegment[], worldState: WorldState): number {
+    if (!REVOLUTIONARY_FEATURES.ADAPTIVE_HORROR.enabled) {
+      return worldState.horrorIntensity || 0;
     }
-
+    
+    // Base intensity on current world state
+    let intensity = worldState.horrorIntensity || 0;
+    
+    // Increase intensity based on story progression
+    if (history.length > 5) {
+      intensity += 0.5;
+    }
+    if (history.length > 10) {
+      intensity += 1;
+    }
+    
+    // Factor in player's psychological status
     switch (worldState.psychologicalStatus) {
       case 'Uneasy':
-        intensity += 0.1;
+        intensity += 1;
         break;
       case 'Paranoid':
-        intensity += 0.3;
+        intensity += 2;
         break;
       case 'Fragmented':
-        intensity += 0.5;
+        intensity += 3;
         break;
     }
-
-    return Math.max(0, Math.min(10, intensity));
+    
+    // Factor in system health degradation
+    const healthFactor = (100 - worldState.systemHealth) / 20;
+    intensity += healthFactor;
+    
+    // Cap at maximum
+    return Math.min(intensity, 10);
   }
   
   async analyzePlayerChoice(choice: string, context: string): Promise<void> {
@@ -275,8 +310,8 @@ export class AdaptiveHorrorEngine {
     this.playerProfile.preferredChoices.push(choice);
     
     const { generateWithSelectedModel } = await import('./unifiedAIService');
-    const systemInstruction = `You are a psychological profiler AI. Your task is to analyze a player's choice in a horror game and identify their potential fear triggers.`;
-    const prompt = `The player chose: "${choice}" in the context of: "${context}". Based on this, what psychological fear triggers might this choice indicate? Examples: isolation, betrayal, powerlessness, loss of identity, cosmic dread. Return a comma-separated list of triggers.`;
+    const systemInstruction = `You are a psychological profiler AI for a horror game. Your task is to analyze a player's choice to identify their fear triggers and psychological vulnerabilities. Analyze the choice in the given context and identify themes like isolation, betrayal, powerlessness, loss of identity, cosmic dread, etc. Return a comma-separated list of triggers.`;
+    const prompt = `The player chose: "${choice}" in the context of: "${context}". Based on this, what psychological fear triggers and vulnerabilities might this choice indicate?`;
 
     try {
       const commands = await generateWithSelectedModel(
@@ -287,6 +322,7 @@ export class AdaptiveHorrorEngine {
       if (commands[0]?.type === 'displayText') {
         const triggers = commands[0].payload.content.split(',').map(t => t.trim());
         this.playerProfile.fearTriggers.push(...triggers);
+        this.playerProfile.psychologicalVulnerabilities.push(...triggers); // Simplified for now
       }
     } catch (error) {
       console.error('Player choice analysis failed:', error);
@@ -302,12 +338,12 @@ export class AdaptiveHorrorEngine {
   }
   
   async generatePersonalizedHorror(basePrompt: string): Promise<string> {
-    const personalizedElements = this.playerProfile.fearTriggers.join(', ');
+    const personalizedElements = [...new Set(this.playerProfile.fearTriggers)].join(', ');
     
     if (personalizedElements) {
       const { generateWithSelectedModel } = await import('./unifiedAIService');
-      const systemInstruction = `You are a horror story adapter AI. Your task is to take a base prompt and personalize it based on a player's fear triggers.`;
-      const prompt = `Base prompt: "${basePrompt}". Player's fear triggers: ${personalizedElements}. Enhance the base prompt to incorporate these fears.`;
+      const systemInstruction = `You are a horror story adapter AI. Your task is to take a base prompt and personalize it based on a player's identified fear triggers.`;
+      const prompt = `Base prompt: "${basePrompt}". The player has shown vulnerability to the following themes: ${personalizedElements}. Subtly weave these elements into the base prompt to create a more personalized and unsettling experience.`;
 
       try {
         const commands = await generateWithSelectedModel(
@@ -370,8 +406,8 @@ export class RealityCorruptionEngine {
   
   private async generateCorruptionEffects(): Promise<string[]> {
     const { generateWithSelectedModel } = await import('./unifiedAIService');
-    const systemInstruction = `You are a reality corruption AI. Your task is to generate a list of UI corruption effects based on the current corruption level.`;
-    const prompt = `The current reality corruption level is ${this.corruptionLevel}. Based on this, generate a comma-separated list of UI corruption effects. Examples: text-glitch, choice-corruption, reality-tears, image-distortion, audio-glitch.`;
+    const systemInstruction = `You are a reality corruption AI. Your task is to generate a list of UI corruption effects based on the current corruption level. The effects should escalate as the corruption increases. Examples: text-glitch, choice-corruption, reality-tears, image-distortion, audio-glitch, browser-manipulation.`;
+    const prompt = `The current reality corruption level is ${this.corruptionLevel}. Based on this, generate a comma-separated list of UI corruption effects.`;
 
     try {
       const commands = await generateWithSelectedModel(
@@ -399,8 +435,373 @@ export class RealityCorruptionEngine {
 }
 
 // Export singleton instances
+/**
+ * NEURAL ECHO CHAMBERS
+ * Cross-session memory persistence using localStorage with encryption
+ * Maintains player psychological profiles and behavior patterns
+ */
+export class NeuralEchoChambers {
+  private readonly storageKey = 'apophenia-neural-echoes';
+  private readonly encryptionKey = 'cosmic-horror-cipher';
+  
+  async storeEcho(playerId: string, echo: {
+    choicePattern: string;
+    psychologicalTrigger: string;
+    fearResponse: number;
+    timestamp: number;
+  }): Promise<void> {
+    if (!REVOLUTIONARY_FEATURES.NEURAL_ECHOES?.enabled) {
+      return;
+    }
+    
+    try {
+      const existing = this.getStoredEchoes();
+      const playerEchoes = existing[playerId] || [];
+      
+      playerEchoes.push(echo);
+      
+      // Limit storage to prevent bloat
+      if (playerEchoes.length > 50) {
+        playerEchoes.shift();
+      }
+      
+      existing[playerId] = playerEchoes;
+      
+      // Store encoded data (Base64 encoding for storage format, NOT encryption)
+      const encoded = btoa(JSON.stringify(existing));
+      localStorage.setItem(this.storageKey, encoded);
+    } catch (error) {
+      console.warn('Neural echo storage failed:', error);
+    }
+  }
+  
+  async recallEchoes(playerId: string): Promise<any[]> {
+    if (!REVOLUTIONARY_FEATURES.NEURAL_ECHOES?.enabled) {
+      return [];
+    }
+    
+    try {
+      const stored = this.getStoredEchoes();
+      return stored[playerId] || [];
+    } catch (error) {
+      console.warn('Neural echo recall failed:', error);
+      return [];
+    }
+  }
+  
+  private getStoredEchoes(): Record<string, any[]> {
+    try {
+      const stored = localStorage.getItem(this.storageKey);
+      if (!stored) return {};
+      
+      const decrypted = atob(stored);
+      return JSON.parse(decrypted);
+    } catch {
+      return {};
+    }
+  }
+  
+  async clearEchoes(playerId?: string): Promise<void> {
+    if (playerId) {
+      const stored = this.getStoredEchoes();
+      delete stored[playerId];
+      localStorage.setItem(this.storageKey, btoa(JSON.stringify(stored)));
+    } else {
+      localStorage.removeItem(this.storageKey);
+    }
+  }
+}
+
+/**
+ * SEMANTIC CHOICE ARCHAEOLOGY
+ * Deep psychological analysis of player choice patterns
+ * Excavates meaning from decision sequences to understand player psyche
+ */
+export class SemanticChoiceArchaeology {
+  private choiceHistory: Array<{
+    choice: string;
+    context: string;
+    timestamp: number;
+    semanticWeight: number;
+  }> = [];
+  
+  async excavateChoice(choice: string, context: string, worldState: WorldState): Promise<{
+    psychologicalProfile: string;
+    behaviorPattern: string;
+    fearTriggers: string[];
+    recommendedHorrorApproach: string;
+  }> {
+    if (!REVOLUTIONARY_FEATURES.SEMANTIC_ARCHAEOLOGY?.enabled) {
+      return this.getDefaultProfile();
+    }
+    
+    // Add to history
+    this.choiceHistory.push({
+      choice,
+      context,
+      timestamp: Date.now(),
+      semanticWeight: await this.calculateSemanticWeight(choice)
+    });
+    
+    // Keep only recent choices
+    if (this.choiceHistory.length > 20) {
+      this.choiceHistory.shift();
+    }
+    
+    try {
+      const { generateWithSelectedModel } = await import('./unifiedAIService');
+      
+      const prompt = `Analyze this sequence of player choices for deep psychological patterns:
+      
+${this.choiceHistory.slice(-10).map(h => `Choice: "${h.choice}" (Context: ${h.context})`).join('\n')}
+
+Current world state: ${JSON.stringify(worldState)}
+
+Provide a psychological archaeology report with:
+1. Core psychological profile
+2. Behavioral pattern analysis  
+3. Identified fear triggers
+4. Recommended horror approach for maximum psychological impact
+
+Format as JSON with keys: psychologicalProfile, behaviorPattern, fearTriggers, recommendedHorrorApproach`;
+
+      const commands = await generateWithSelectedModel(
+        'You are a psychological archaeologist specializing in horror game player analysis.',
+        prompt,
+        'story'
+      );
+      
+      if (commands[0]?.type === 'displayText') {
+        try {
+          const analysis = JSON.parse(commands[0].payload.content);
+          return analysis;
+        } catch {
+          return this.getDefaultProfile();
+        }
+      }
+    } catch (error) {
+      console.warn('Semantic choice archaeology failed:', error);
+    }
+    
+    return this.getDefaultProfile();
+  }
+  
+  private async calculateSemanticWeight(choice: string): Promise<number> {
+    // Simple heuristic - complex choices have higher weight
+    const complexityIndicators = [
+      'because', 'however', 'although', 'despite', 'therefore',
+      'trust', 'fear', 'sacrifice', 'abandon', 'betray'
+    ];
+    
+    let weight = choice.length / 50; // Base weight from length
+    
+    complexityIndicators.forEach(indicator => {
+      if (choice.toLowerCase().includes(indicator)) {
+        weight += 0.3;
+      }
+    });
+    
+    return Math.min(weight, 2.0);
+  }
+  
+  private getDefaultProfile() {
+    return {
+      psychologicalProfile: 'Cautious explorer with moderate risk tolerance',
+      behaviorPattern: 'Thoughtful decision making with preference for safe options',
+      fearTriggers: ['isolation', 'unknown entities', 'loss of control'],
+      recommendedHorrorApproach: 'Atmospheric tension building with psychological uncertainty'
+    };
+  }
+}
+
+/**
+ * ADAPTIVE NARRATIVE DNA
+ * Evolutionary story genetics that adapt and mutate over time
+ * Creates unique narrative branches that evolve based on player engagement
+ */
+export class AdaptiveNarrativeDNA {
+  private narrativeGenes: Map<string, {
+    strength: number;
+    mutations: number;
+    lastActive: number;
+    playerResponse: number;
+  }> = new Map();
+  
+  private readonly baseGenes = [
+    'cosmic-dread', 'existential-horror', 'reality-breakdown',
+    'psychological-manipulation', 'body-horror', 'temporal-distortion',
+    'identity-loss', 'paranormal-entities', 'technological-nightmare'
+  ];
+  
+  constructor() {
+    // Initialize base genes
+    this.baseGenes.forEach(gene => {
+      this.narrativeGenes.set(gene, {
+        strength: 0.5,
+        mutations: 0,
+        lastActive: 0,
+        playerResponse: 0
+      });
+    });
+  }
+  
+  async evolveDNA(playerChoice: string, playerEngagement: number, worldState: WorldState): Promise<{
+    dominantGenes: string[];
+    emergentThemes: string[];
+    narrativeDirection: string;
+    adaptationsSuggested: string[];
+  }> {
+    if (!REVOLUTIONARY_FEATURES.NARRATIVE_DNA?.enabled) {
+      return this.getDefaultDNA();
+    }
+    
+    // Analyze choice for genetic relevance
+    const relevantGenes = await this.analyzeGeneticRelevance(playerChoice);
+    
+    // Update gene strengths based on player engagement
+    relevantGenes.forEach(geneName => {
+      const gene = this.narrativeGenes.get(geneName);
+      if (gene) {
+        gene.strength += playerEngagement * 0.2;
+        gene.lastActive = Date.now();
+        gene.playerResponse += playerEngagement;
+        
+        // Trigger mutations for highly active genes
+        if (gene.strength > 1.5 && Math.random() < 0.3) {
+          gene.mutations++;
+          this.createMutation(geneName);
+        }
+        
+        // Cap strength to prevent runaway evolution
+        gene.strength = Math.min(gene.strength, 2.0);
+      }
+    });
+    
+    // Natural decay for unused genes
+    this.narrativeGenes.forEach(gene => {
+      const daysSinceActive = (Date.now() - gene.lastActive) / (1000 * 60 * 60 * 24);
+      if (daysSinceActive > 1) {
+        gene.strength *= 0.95;
+      }
+    });
+    
+    return this.synthesizeDNA();
+  }
+  
+  private async analyzeGeneticRelevance(choice: string): Promise<string[]> {
+    const choice_lower = choice.toLowerCase();
+    const relevantGenes: string[] = [];
+    
+    // Simple keyword matching - could be enhanced with AI analysis
+    const geneKeywords: Record<string, string[]> = {
+      'cosmic-dread': ['void', 'infinite', 'cosmos', 'universe', 'eternal'],
+      'existential-horror': ['existence', 'meaning', 'purpose', 'real', 'identity'],
+      'reality-breakdown': ['reality', 'perception', 'truth', 'illusion', 'break'],
+      'psychological-manipulation': ['mind', 'thought', 'control', 'influence', 'manipulate'],
+      'body-horror': ['flesh', 'body', 'transform', 'mutate', 'physical'],
+      'temporal-distortion': ['time', 'past', 'future', 'memory', 'history'],
+      'identity-loss': ['self', 'identity', 'who', 'forget', 'remember'],
+      'paranormal-entities': ['entity', 'presence', 'being', 'force', 'creature'],
+      'technological-nightmare': ['machine', 'digital', 'system', 'program', 'code']
+    };
+    
+    Object.entries(geneKeywords).forEach(([gene, keywords]) => {
+      if (keywords.some(keyword => choice_lower.includes(keyword))) {
+        relevantGenes.push(gene);
+      }
+    });
+    
+    return relevantGenes;
+  }
+  
+  private createMutation(geneName: string): void {
+    // Create hybrid genes from mutations
+    const hybridName = `${geneName}-hybrid-${Date.now()}`;
+    const parentGene = this.narrativeGenes.get(geneName);
+    
+    if (parentGene) {
+      this.narrativeGenes.set(hybridName, {
+        strength: parentGene.strength * 0.7,
+        mutations: 0,
+        lastActive: Date.now(),
+        playerResponse: 0
+      });
+    }
+  }
+  
+  private synthesizeDNA(): {
+    dominantGenes: string[];
+    emergentThemes: string[];
+    narrativeDirection: string;
+    adaptationsSuggested: string[];
+  } {
+    // Sort genes by strength
+    const sortedGenes = Array.from(this.narrativeGenes.entries())
+      .sort(([,a], [,b]) => b.strength - a.strength);
+    
+    const dominantGenes = sortedGenes.slice(0, 3).map(([name]) => name);
+    
+    const emergentThemes = sortedGenes
+      .filter(([name, gene]) => name.includes('hybrid') && gene.strength > 0.8)
+      .map(([name]) => name.replace(/-hybrid-\d+/, ''));
+    
+    const narrativeDirection = this.determineNarrativeDirection(dominantGenes);
+    const adaptationsSuggested = this.generateAdaptations(sortedGenes);
+    
+    return {
+      dominantGenes,
+      emergentThemes,
+      narrativeDirection,
+      adaptationsSuggested
+    };
+  }
+  
+  private determineNarrativeDirection(dominantGenes: string[]): string {
+    const directionMap: Record<string, string> = {
+      'cosmic-dread': 'Expanding into vast, incomprehensible cosmic horror',
+      'existential-horror': 'Questioning the nature of existence and reality',
+      'reality-breakdown': 'Escalating distortions in perceived reality',
+      'psychological-manipulation': 'Deepening psychological manipulation and mind games',
+      'body-horror': 'Intensifying physical transformation and body horror',
+      'temporal-distortion': 'Increasing temporal anomalies and time distortions'
+    };
+    
+    return dominantGenes.length > 0 
+      ? directionMap[dominantGenes[0]] || 'Evolution toward unknown narrative territories'
+      : 'Maintaining narrative equilibrium';
+  }
+  
+  private generateAdaptations(sortedGenes: [string, any][]): string[] {
+    const adaptations: string[] = [];
+    
+    sortedGenes.slice(0, 5).forEach(([geneName, gene]) => {
+      if (gene.strength > 1.2) {
+        adaptations.push(`Amplify ${geneName} elements in upcoming segments`);
+      }
+      if (gene.mutations > 2) {
+        adaptations.push(`Explore hybrid variations of ${geneName}`);
+      }
+    });
+    
+    return adaptations;
+  }
+  
+  private getDefaultDNA() {
+    return {
+      dominantGenes: ['cosmic-dread', 'existential-horror', 'reality-breakdown'],
+      emergentThemes: [],
+      narrativeDirection: 'Maintaining atmospheric cosmic horror balance',
+      adaptationsSuggested: ['Continue building atmospheric tension', 'Introduce psychological elements gradually']
+    };
+  }
+}
+
+// Export singleton instances - Complete 8-Module System
 export const temporalRevision = new TemporalRevisionEngine();
 export const metaConsciousness = new MetaConsciousnessEngine();
 export const quantumNarrative = new QuantumNarrativeEngine();
 export const adaptiveHorror = new AdaptiveHorrorEngine();
 export const realityCorruption = new RealityCorruptionEngine();
+export const neuralEchoChambers = new NeuralEchoChambers();
+export const semanticChoiceArchaeology = new SemanticChoiceArchaeology();
+export const adaptiveNarrativeDNA = new AdaptiveNarrativeDNA();

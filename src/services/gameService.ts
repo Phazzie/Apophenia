@@ -39,7 +39,8 @@ export const getNextStep = async (
   console.log('Story history length:', history.length);
 
   try {
-    // 1. ADAPTIVE HORROR: Calculate the new horror intensity
+    // 1. ADAPTIVE HORROR: Calculate the new horror intensity for this turn.
+    // This score will be used to dynamically adjust the narrative, visuals, and choices.
     console.log('Calculating adaptive horror intensity...');
     const newHorrorIntensity = megaContext.calculateAdaptiveHorrorIntensity(history, worldState);
     const updatedWorldState = { ...worldState, horrorIntensity: newHorrorIntensity };

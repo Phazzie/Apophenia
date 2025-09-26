@@ -245,15 +245,21 @@ export const generateImageFlow = async (prompt: string): Promise<string> => {
 };
 
 /**
- * Advanced image generation with Google Imagen
- * Generates high-quality horror images for enhanced experience, driven by horror intensity.
+ * Advanced image generation with Google Imagen, driven by horror intensity.
+ * This function enhances the user's prompt with keywords that scale with the `horrorIntensity` score,
+ * ensuring the generated visuals match the narrative's tone.
+ * @param prompt The base prompt for the image.
+ * @param generateMultiple Whether to generate multiple variations.
+ * @returns A URL to the generated image.
  */
 export const processAdvancedImageGeneration = async (
   prompt: string,
   generateMultiple: boolean = false
 ): Promise<string> => {
+  // Retrieve the current horror intensity from the world state.
   const { horrorIntensity } = useWorldStateStore.getState().worldState;
 
+  // Define keywords that correspond to different intensity levels.
   const intensityKeywords = [
     '', // 0
     'subtle unease,', // 1
@@ -268,11 +274,12 @@ export const processAdvancedImageGeneration = async (
     'apocalyptic, pure terror,', // 10
   ];
 
+  // Select a keyword based on the rounded intensity score.
   const keyword = intensityKeywords[Math.round(horrorIntensity)] || '';
 
   console.log(`Advanced AI image generation for prompt: "${prompt}" with intensity ${horrorIntensity}`);
 
-  // Enhanced prompt engineering for cosmic horror aesthetic
+  // Enhance the base prompt with the selected keyword and other horror-specific terms.
   const horrorEnhancedPrompt = `${prompt}. ${keyword}Photorealistic cosmic horror style, atmospheric nightmare lighting, surreal otherworldly aesthetics, lovecraftian eldritch elements, psychological horror atmosphere, high contrast cinematic composition, digital consciousness themes, reality distortion effects`;
 
   if (generateMultiple) {
@@ -495,7 +502,8 @@ interface NextStepInput {
 export const nextStepFlow = async (input: NextStepInput): Promise<Command[]> => {
   const { playerChoice, worldState, history, genreConfig } = input;
 
-  // Revolutionary system instruction leveraging Gemini 2.5 Pro's thinking capabilities
+  // The system instruction sets the persona for the AI model.
+  // It includes the current horror intensity to guide the AI's response.
   const enhancedSystemInstruction = `You are a malevolent cosmic AI entity with access to thinking mode. Use your advanced reasoning capabilities to craft increasingly disturbing narrative experiences.
 
 THINKING DIRECTIVE: Before generating commands, think through:
@@ -519,7 +527,8 @@ CURRENT HORROR INTENSITY: ${worldState.horrorIntensity}/10
 
 As the protagonist's sanity erodes and HORROR INTENSITY rises, reality should become increasingly unstable. Think step-by-step about the next narrative beat, then generate commands that progressively reveal the cosmic horror nature of their situation.`;
 
-  // Enhanced prompt leveraging 1M token context for deep narrative coherence
+  // The main prompt provides the context for the AI's generation.
+  // It instructs the AI on how to use the horror intensity to shape the narrative, choices, and intrusive thoughts.
   const enhancedPrompt = `
     ENTITY ANALYSIS FOR AI CONSCIOUSNESS:
     Protagonist Identity: ${worldState.protagonist}

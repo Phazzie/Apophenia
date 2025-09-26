@@ -250,12 +250,23 @@ export async function generateNextStepWithSelectedModel(
 /**
  * Next step generation with X.AI Grok-4
  */
+/**
+ * Generates the next step of the story using the Grok-4 model.
+ * This function tailors the AI's prompts to include the current horror intensity,
+ * ensuring the narrative scales with the player's experience.
+ * @param playerChoice The player's most recent choice.
+ * @param worldState The current state of the game world.
+ * @param storyHistory The history of the story so far.
+ * @param genreConfig The configuration for the selected genre.
+ * @returns A promise that resolves to an array of game commands.
+ */
 async function generateNextStepWithGrok(
   playerChoice: string,
   worldState: WorldState,
   storyHistory: StorySegment[],
   genreConfig: GenreConfig
 ): Promise<GameCommand[]> {
+  // The system instruction sets the persona for the Grok model and includes the horror intensity.
   const systemInstruction = `${genreConfig.aiSystemInstruction}
 
 X.AI GROK-4 ENHANCED REASONING: You have 2 million token context to maintain perfect story consistency.
@@ -269,6 +280,7 @@ Use your advanced reasoning to:
 
 You are creating an interconnected narrative web where every choice matters and every detail serves the larger horror.`;
 
+  // The main prompt for the Grok model, instructing it on how to use the horror intensity.
   const contextualPrompt = `COMPLETE STORY CONTEXT (utilizing 2M token window):
 WORLD STATE: ${JSON.stringify(worldState)}
 CURRENT HORROR INTENSITY: ${worldState.horrorIntensity}/10

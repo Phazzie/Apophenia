@@ -108,13 +108,21 @@ export const performMegaContextAnalysis = async (
  * Adaptive Horror Intensity based on Full Session Analysis
  * Uses 1M context to perfectly calibrate horror for maximum psychological impact
  */
+/**
+ * Calculates the new horror intensity score based on the current game state.
+ * This function is designed to be a lightweight, client-side calculation.
+ * @param history The full history of story segments.
+ * @param worldState The current state of the game world.
+ * @returns The new horror intensity score, clamped between 0 and 10.
+ */
 export const calculateAdaptiveHorrorIntensity = (
   history: StorySegment[],
   worldState: WorldState
 ): number => {
+  // Start with the current intensity and gradually increase it.
   let intensity = worldState.horrorIntensity || 0;
 
-  // Keyword analysis
+  // 1. Keyword Analysis: Increase intensity based on keywords in the last narrative segment.
   const horrorKeywords = ['fear', 'terror', 'darkness', 'madness', 'scream', 'blood', 'abyss', 'void'];
   const lastSegmentText = history[history.length - 1]?.text.toLowerCase() || '';
   for (const keyword of horrorKeywords) {
@@ -123,7 +131,7 @@ export const calculateAdaptiveHorrorIntensity = (
     }
   }
 
-  // Psychological status impact
+  // 2. Psychological Status: Increase intensity as the player's mental state degrades.
   switch (worldState.psychologicalStatus) {
     case 'Uneasy':
       intensity += 0.1;
@@ -136,12 +144,11 @@ export const calculateAdaptiveHorrorIntensity = (
       break;
   }
 
-  // Intrusive thoughts chosen
-  // This part is tricky as we don't have direct access to choice history here.
-  // We'll assume for now that if the psychological status is degrading,
-  // it's because the player is making unsettling choices.
+  // 3. Intrusive Thoughts: This is an indirect measure. We assume that a degrading
+  // psychological status implies the player is choosing more intrusive thoughts.
+  // A more direct implementation would require tracking choice history.
 
-  // Normalize and clamp the intensity value between 0 and 10
+  // 4. Normalization: Clamp the intensity value to ensure it stays within the 0-10 range.
   intensity = Math.max(0, Math.min(10, intensity));
 
   return intensity;

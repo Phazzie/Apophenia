@@ -135,43 +135,51 @@ export class XAIAPIClient {
   }
 
   /**
-   * Attempt image generation with Grok (will likely fail, but attempt for future compatibility)
+   * Generate a batch of images using the grok-2-image model
    */
-  async generateImage(prompt: string): Promise<string | null> {
+  async generateImage(prompt: string, n: number = 4): Promise<string[]> {
     if (!this.apiKey) {
-      console.log('X.AI API key not configured - cannot attempt image generation');
-      return null;
+      console.error('X.AI API key not configured - cannot generate images.');
+      throw new Error('X.AI API key not configured');
     }
 
+    const requestBody = {
+      model: 'grok-2-image',
+      prompt,
+      n,
+      image_format: 'url',
+    };
+
     try {
-      console.log('Attempting image generation with Grok-4 (experimental)...');
+      console.log('Making X.AI image generation request to:', `${this.baseURL}/image/sample_batch`);
+      const response = await fetch(`${this.baseURL}/image/sample_batch`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
 
-      // Try to use Grok for image generation (this will likely fail currently)
-      // but we're implementing it for future compatibility when X.AI adds image support
-      const result = await this.generateText(
-        'You are an advanced AI capable of generating images.',
-        `Generate an image with the following description: ${prompt}. Return only a data URL or image URL if possible.`,
-        {
-          maxTokens: 1000,
-          temperature: 0.8,
-          enableThinking: false // Don't need thinking for image generation
-        }
-      );
-
-      // Check if the response contains any image data or URLs
-      const content = result.content.trim();
-      if (content.includes('data:image/') ||
-          (content.includes('http') && (content.includes('.jpg') || content.includes('.png') || content.includes('.webp')))) {
-        console.log('Grok-4 image generation successful (experimental)');
-        return content;
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('X.AI image API error response:', response.status, errorData);
+        throw new Error(`X.AI image API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
       }
 
-      console.log('Grok-4 does not support image generation, will fallback to Imagen');
-      return null;
+      const data = await response.json();
+      console.log('X.AI image API response received:', data);
+
+      if (!data || !Array.isArray(data) || data.length === 0) {
+        console.error('No images found in X.AI response');
+        throw new Error('No images found in X.AI response');
+      }
+
+      return data.map((image: any) => image.url);
 
     } catch (error) {
-      console.log('Grok-4 image generation not available:', error instanceof Error ? error.message : 'Unknown error');
-      return null;
+      console.error('X.AI image generation request failed:', error);
+      throw error;
     }
   }
 

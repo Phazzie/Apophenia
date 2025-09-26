@@ -89,11 +89,6 @@ export const displayChoicesPayloadSchema = z.object({
 export const pregenerateImagePayloadSchema = z.object({ prompt: z.string() });
 
 // Discriminated Union for Commands
-export const browserEffectPayloadSchema = z.object({
-    effect: z.enum(['changeTitle', 'openTab', 'manipulateHistory']),
-    value: z.string().optional(),
-});
-
 export const commandSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('createSegment'), payload: createSegmentPayloadSchema }),
   z.object({ type: z.literal('displayText'), payload: displayTextPayloadSchema }),
@@ -106,7 +101,6 @@ export const commandSchema = z.discriminatedUnion('type', [
     type: z.literal('pregenerateImage'),
     payload: pregenerateImagePayloadSchema,
   }),
-  z.object({ type: z.literal('browserEffect'), payload: browserEffectPayloadSchema }),
 ]);
 
 export const commandArraySchema = z.array(commandSchema);

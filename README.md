@@ -15,14 +15,12 @@
 **Apophenia** creates adaptive psychological horror through AI-driven storytelling. Every playthrough is unique as the AI Director analyzes your choices and generates personalized cosmic horror narratives with atmospheric visuals.
 
 ### ✨ Core Features
-- **🧠 Grok-4 Fast Reasoning AI**: X.AI's latest model with 2M token context and advanced reasoning
-- **🔄 Multi-Model Support**: Switch between Grok-4, Gemini 2.5 Pro, and Gemini Flash
-- **🔍 Test API System**: Built-in connectivity testing for all AI providers
-- **🎨 Atmospheric Visuals**: Enhanced image generation for immersive scenes
-- **🧠 Psychological Profiling**: AI adapts story direction based on player decisions with 2M token memory
-- **👁️ Intrusive Thoughts**: Disturbing choice options that reveal character psychology
-- **📱 Responsive Design**: Seamless experience on mobile and desktop
-- **🌙 Horror Aesthetic**: Carefully crafted cosmic horror visual theme
+- **🚀 Revolutionary AI Engines**: Features like Temporal Revision, Quantum Narratives, and a Reality Corruption Engine are all driven by AI.
+- **🧠 Grok-2 Image Generation**: Atmospheric visuals are generated using X.AI's `grok-2-image` model.
+- **🤖 Advanced Psychological Profiling**: The AI analyzes player choices to create a deep, evolving psychological profile.
+- **👁️ Dynamic Intrusive Thoughts**: AI-generated intrusive thoughts that adapt to the player's psychological state.
+- **📱 Responsive Design**: Seamless experience on mobile and desktop.
+- **🌙 Horror Aesthetic**: Carefully crafted cosmic horror visual theme.
 
 ![Game Screen](https://github.com/user-attachments/assets/2a604160-3455-4215-bd2d-2c0e19300231)
 
@@ -107,237 +105,19 @@ VITE_LOG_LEVEL=error
 
 ## 🧠 AI Model System
 
-Apophenia features a sophisticated multi-model AI system with **Grok-4 Fast Reasoning** as the primary engine, supported by Google Gemini models as reliable fallbacks.
+Apophenia features a sophisticated AI system that uses a variety of models to create a dynamic and personalized horror experience.
 
-### 🚀 Grok-4 Fast Reasoning (Primary)
-- **Provider**: X.AI (xAI)
-- **Context Window**: 2 Million tokens (2x larger than Gemini)
-- **Advanced Reasoning**: Built-in thinking mode for complex narrative decisions
-- **Specialized For**: Interactive storytelling, psychological analysis, narrative consistency
+### 🚀 Revolutionary AI Engines
+- **Temporal Revision Engine**: Uses AI to analyze player choices and retroactively rewrite past memories, creating an unsettling and unreliable narrative.
+- **Quantum Narrative Engine**: Branches the narrative into parallel threads based on the significance of player choices, as determined by AI analysis.
+- **Reality-Bending Engine**: A unified engine that uses AI to generate meta-narrative messages, UI corruption effects, and browser manipulations.
+- **Psychological Profiling Engine**: Performs a deep, AI-driven analysis of player choices to build a psychological profile, which is then used to personalize the horror experience.
 
-### 🔄 Model Selection Interface
-- **Dynamic Switching**: Change AI models without restarting the game
-- **Real-time Testing**: Test API connectivity for each provider
-- **Feature Comparison**: View context windows, reasoning capabilities, and image support
-- **Persistent Selection**: Your choice is saved across sessions
-
-### 🎯 Premium Features (2M Token Context)
-- **Complete Session Memory**: Remember every choice and story beat across the entire game
-- **Advanced Psychological Profiling**: Deep personality analysis that evolves throughout the narrative
-- **Narrative Consistency Engine**: Cross-reference all story elements for perfect continuity
-- **Multi-layered Context Awareness**: Maintain thematic coherence and foreshadowing throughout
-- **Adaptive Horror Personalization**: Learn from complete player behavior patterns for maximum psychological impact
+### 🎨 Image Generation
+- **Grok-2-Image**: Atmospheric visuals are generated using X.AI's `grok-2-image` model, which can produce multiple image variations for each scene.
 
 ### 🛡️ Fallback System
-```
-Grok-4 Fast Reasoning (Primary)
-    ↓ (on failure)
-Gemini 2.5 Pro (Secondary)
-    ↓ (on failure)  
-Gemini 2.5 Flash (Final fallback)
-    ↓ (on failure)
-Static thematic error responses
-```
-
----
-
-## 🏗️ Expert Architecture Deep Dive
-
-Apophenia implements a sophisticated command-driven architecture optimized for AI integration and scalable narrative generation:
-
-**Data Flow**: `User Input → AI Processing → Command Queue → State Updates → UI Rendering`
-
-```
-src/
-├── components/              # React UI components with TypeScript
-│   ├── StartScreen.tsx      # Genre selection, AI model selection, game initialization
-│   ├── GameScreen.tsx       # Primary gameplay interface with real-time updates
-│   ├── EndScreen.tsx        # Game completion and narrative resolution
-│   ├── ModelSelector.tsx    # AI model selection modal with testing
-│   ├── TestAPIButton.tsx    # Fixed-position API connectivity testing
-│   └── ErrorBoundary.tsx    # Thematic error recovery with fallback UI
-├── stores/                 # Zustand state management with persistence
-│   ├── gameStateStore.ts    # Core game state, story segments, choices
-│   ├── worldStateStore.ts   # Narrative world context and genre configuration
-│   ├── uiStateStore.ts      # Interface state, loading, theme management
-│   ├── aiModelStore.ts      # AI model selection and testing state
-│   └── imageCacheStore.ts   # LRU+TTL image caching (50 items, 30min TTL)
-├── services/               # Business logic and AI orchestration
-│   ├── ai/                 # AI service integrations
-│   │   ├── grokService.ts   # Grok-4 Fast Reasoning with 2M context
-│   │   ├── unifiedAIService.ts  # Multi-model routing and fallbacks
-│   │   ├── genkit.ts       # Google Gemini 2.5 Pro with fallbacks
-│   │   ├── imageGeneration.ts  # Multi-service image generation
-│   │   └── revolutionaryFeatures.ts  # Advanced AI capabilities
-│   ├── flows/              # Game flow orchestration
-│   │   ├── conceptFlow.ts  # Initial story concept generation
-│   │   ├── nextStepFlow.ts # Story progression with context awareness
-│   │   └── summaryFlow.ts  # Context summarization for long sessions
-│   ├── gameService.ts      # Central game controller and flow coordinator
-│   ├── commandExecutor.ts  # Type-safe command execution engine
-│   └── gameStateManager.ts # Unified atomic store operations
-├── commands/               # Command executors with discriminated unions
-│   ├── displayText.ts      # Narrative text presentation with safety checks
-│   ├── displayChoices.ts   # Choice generation and validation
-│   ├── generateImage.ts    # Asynchronous image generation
-│   ├── createSegment.ts    # Story segment creation with unique IDs
-│   └── __tests__/          # Comprehensive command executor tests
-├── styles/                 # CSS modules and theme system
-│   └── horror-theme.css    # Cosmic horror aesthetic with CSS variables
-└── types.ts               # Comprehensive TypeScript type definitions
-```
-
-### 🔧 Core Technologies & Architecture Decisions
-
-**Frontend Stack**:
-- **React 18**: Concurrent features, Suspense, automatic batching
-- **TypeScript 5.4+**: Strict mode, discriminated unions, template literal types
-- **Vite 5**: Lightning-fast HMR, optimized production builds, plugin ecosystem
-- **Zustand**: Lightweight state management with middleware support
-
-**AI Integration Layer**:
-- **Google Gemini 2.5 Pro**: Primary narrative generation
-- **Gemini 2.0 Flash Experimental**: Advanced creative AI features
-- **Multi-service Fallbacks**: Robust error handling and service degradation
-- **Context Management**: Intelligent summarization for long narrative sessions
-
-**Development & Quality**:
-- **Jest + Testing Library**: 40+ tests with 85%+ coverage
-- **TypeScript Strict Mode**: Zero `any` types, comprehensive type safety
-- **Command Pattern**: Fully type-safe command execution with metadata
-- **Error Boundaries**: Thematic error recovery maintaining immersion
-
-**Performance Optimizations**:
-- **Bundle Splitting**: Automatic code splitting by route and feature
-- **Image Caching**: LRU+TTL cache with smart eviction policies  
-- **Async Commands**: Non-blocking operations for smooth user experience
-- **Memory Management**: Automatic cleanup and cache maintenance
-
----
-
-## 🎯 Gameplay
-
-1. **🎭 Choose Your Genre**: Select from cosmic horror themes
-2. **📖 Experience Dynamic Stories**: AI generates unique narratives
-3. **🤔 Make Crucial Decisions**: Choose from AI-generated options
-4. **😱 Face Intrusive Thoughts**: Encounter disturbing psychological choices
-5. **🌌 Witness Consequences**: Watch as your choices shape reality
-
-![Mobile View](https://github.com/user-attachments/assets/0aa5631d-9947-4ce2-a87a-1a239db1d0ed)
-
----
-
-## 🌐 Expert Deployment Guide
-
-### Production Deployment Options
-
-| Platform | Complexity | Cost | Best For | Deployment Time |
-|----------|------------|------|----------|----------------|
-| **Vercel** | ⭐ | Free/$20+ | Static sites, quick MVP | 2 minutes |
-| **Netlify** | ⭐ | Free/$19+ | JAMstack, easy rollbacks | 3 minutes |
-| **DigitalOcean** | ⭐⭐ | $5+ | Full control, scalability | 15 minutes |
-| **AWS/GCP** | ⭐⭐⭐ | Variable | Enterprise, complex needs | 30+ minutes |
-
-### Vercel Deployment (Recommended for MVP)
-
-```bash
-# Global Vercel CLI installation
-npm install -g vercel
-
-# Initialize and configure project
-vercel init apophenia-narrative
-
-# Configure environment variables (secure)
-vercel env add VITE_GEMINI_API_KEY production
-# Gemini API key handles both text and image generation
-
-# Deploy with custom domain
-vercel --prod --yes
-```
-
-**Advanced Vercel Configuration**:
-```json
-{
-  "version": 2,
-  "framework": "vite",
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "installCommand": "npm install",
-  "devCommand": "npm run dev",
-  "regions": ["iad1", "sfo1"],
-  "functions": {
-    "app/**/*": {
-      "maxDuration": 30
-    }
-  },
-  "headers": [
-    {
-      "source": "/assets/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        }
-      ]
-    }
-  ]
-}
-```
-
-### DigitalOcean App Platform
-
-```bash
-# Using DigitalOcean CLI
-doctl apps create --spec=digitalocean-app.yaml
-
-# Or via Web Interface:
-# 1. Connect GitHub repository
-# 2. Configure build: `npm run build`
-# 3. Set environment variables
-# 4. Deploy with auto-scaling
-```
-
-**Complete DigitalOcean deployment**: See [DIGITALOCEAN_DEPLOYMENT.md](DIGITALOCEAN_DEPLOYMENT.md)
-
-### Docker Production Deployment
-
-```dockerfile
-# Multi-stage optimized build
-FROM node:20-alpine AS builder
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production --audit=false
-COPY . .
-RUN npm run build
-
-FROM nginx:alpine AS runtime
-RUN apk add --no-cache nodejs npm
-WORKDIR /app
-COPY --from=builder /app/dist /usr/share/nginx/html
-COPY --from=builder /app/server.js .
-COPY --from=builder /app/node_modules ./node_modules
-COPY nginx.conf /etc/nginx/nginx.conf
-EXPOSE 80
-CMD ["sh", "-c", "node server.js & nginx -g 'daemon off;'"]
-```
-
-### Advanced Environment Configuration
-
-```bash
-# Production environment template
-NODE_ENV=production
-VITE_GEMINI_API_KEY=${GEMINI_API_KEY}
-VITE_ANALYTICS_ID=${ANALYTICS_ID}
-VITE_ERROR_TRACKING=${ERROR_TRACKING_DSN}
-VITE_API_BASE_URL=https://api.yournarrative.com
-VITE_CDN_URL=https://cdn.yournarrative.com
-VITE_FEATURE_FLAGS=${FEATURE_FLAGS}
-
-# Security headers
-FORCE_HTTPS=true
-SECURE_COOKIES=true
-HSTS_MAX_AGE=31536000
-```
+The application is designed to be resilient. If an AI service fails, the system will gracefully fall back to simpler, less dynamic alternatives, ensuring that the game remains playable.
 
 ---
 

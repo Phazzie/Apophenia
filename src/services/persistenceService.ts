@@ -12,16 +12,16 @@ interface SessionData {
   storyHistory: StorySegment[];
 }
 
-const API_BASE_URL = '/api/sessions'; // This would be an environment variable in a real app
+const API_BASE_URL = 'http://localhost:3001/api'; // This would be an environment variable in a real app
 
 export const saveSession = async (sessionId: string, data: SessionData): Promise<void> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/${sessionId}`, {
+    const response = await fetch(`${API_BASE_URL}/save`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify({ id: sessionId, data }),
     });
 
     if (!response.ok) {
@@ -36,7 +36,7 @@ export const saveSession = async (sessionId: string, data: SessionData): Promise
 
 export const loadSession = async (sessionId: string): Promise<SessionData | null> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/${sessionId}`);
+    const response = await fetch(`${API_BASE_URL}/load/${sessionId}`);
 
     if (!response.ok) {
       if (response.status === 404) {
@@ -46,7 +46,8 @@ export const loadSession = async (sessionId: string): Promise<SessionData | null
       throw new Error('Failed to load session');
     }
 
-    return await response.json();
+    const result = await response.json();
+    return result.data;
   } catch (error) {
     console.error('Error loading session:', error);
     return null;

@@ -251,7 +251,7 @@ describe('Advanced AI System', () => {
         .mockReturnValueOnce({
           generateContent: jest.fn().mockResolvedValue({
             response: {
-              text: () => JSON.stringify([{"type": "displayText", "payload": {"content": "Fallback success", "segmentId": "test"}}])
+              text: () => '[{"type": "displayText", "payload": {"content": "Fallback success", "segmentId": "test"}}]'
             }
           })
         });

@@ -467,9 +467,9 @@ export class NeuralEchoChambers {
       
       existing[playerId] = playerEchoes;
       
-      // Store encrypted data
-      const encrypted = btoa(JSON.stringify(existing));
-      localStorage.setItem(this.storageKey, encrypted);
+      // Store encoded data (Base64 encoding for storage format, NOT encryption)
+      const encoded = btoa(JSON.stringify(existing));
+      localStorage.setItem(this.storageKey, encoded);
     } catch (error) {
       console.warn('Neural echo storage failed:', error);
     }

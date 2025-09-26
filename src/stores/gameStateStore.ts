@@ -25,11 +25,16 @@ export const useGameStateStore = create<GameStateStore>()(
     (set, get) => ({
       ...initialState,
       setGameState: (gameState) => set({ gameState }),
-      setChoices: (choices, intrusiveThought) =>
+      setChoices: (choices, intrusiveThought) => {
+        const allChoices = [...choices];
+        if (intrusiveThought) {
+          allChoices.push(intrusiveThought);
+        }
         set({
-          choices,
-          intrusiveThought,
-        }),
+          choices: allChoices,
+          intrusiveThought, // Keep it separate for potential special UI handling
+        });
+      },
       setIsGenerating: (isGenerating) => set({ isGenerating }),
       reset: () => {
         set(initialState);

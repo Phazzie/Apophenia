@@ -35,6 +35,9 @@ export const worldStateSchema = z.object({
   summary: z.string(),
   psychologicalStatus: z.enum(['Stable', 'Uneasy', 'Paranoid', 'Fragmented']),
   systemHealth: z.number(),
+  // The horrorIntensity score (0-10) dynamically adjusts the game's difficulty and tone.
+  // It is calculated based on player choices and narrative events.
+  horrorIntensity: z.number().min(0).max(10).default(0),
   uiDistortion: z.object({
     transform: z.string(),
     filter: z.string(),

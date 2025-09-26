@@ -139,6 +139,20 @@ Gemini 2.5 Flash (Final fallback)
 Static thematic error responses
 ```
 
+### 🌡️ Adaptive Horror System
+Apophenia features a dynamic horror system that tailors the intensity of the experience to the player's actions and psychological state. This is managed by the `horrorIntensity` score, a value from 0 to 10 that evolves throughout the game.
+
+-   **How it Works**: The `horrorIntensity` is recalculated with each player choice. It analyzes the narrative content for disturbing keywords (e.g., "terror," "madness") and considers the protagonist's current psychological status. Choices that lead to more fragmented mental states will gradually increase the intensity.
+
+-   **Dynamic Narrative**: The AI prompts are engineered to use the `horrorIntensity` score to scale the horror.
+    -   **Low Intensity (0-3)**: The narrative focuses on subtle, atmospheric horror and psychological unease.
+    -   **Medium Intensity (4-7)**: The horror becomes more direct and personal, with more disturbing events and imagery.
+    -   **High Intensity (8-10)**: The game enters a state of extreme, reality-bending horror, with sanity-breaking visuals and narrative threads.
+
+-   **Intensity-Driven Visuals**: The prompts for the image generation AI are dynamically augmented with keywords that match the current intensity level. A low score might add "eerie" to the prompt, while a high score might add "grotesque" or "visceral," ensuring the visuals always match the tone.
+
+-   **Dynamic Intrusive Thoughts**: The frequency and severity of the "intrusive thought" choices are directly tied to the `horrorIntensity`. As the score rises, these thoughts will appear more often and become more extreme, reflecting the character's descent into madness.
+
 ---
 
 ## 🏗️ Expert Architecture Deep Dive

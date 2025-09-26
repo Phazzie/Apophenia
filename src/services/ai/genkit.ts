@@ -12,6 +12,7 @@ import {
   WorldState,
   commandArraySchema,
 } from '../../types';
+import { useWorldStateStore } from '../../stores/worldStateStore';
 import { API_KEYS, AI_MODELS } from '../config';
 
 const genAI = new GoogleGenerativeAI(API_KEYS.googleGenAI);
@@ -244,22 +245,47 @@ export const generateImageFlow = async (prompt: string): Promise<string> => {
 };
 
 /**
- * Advanced image generation with Google Imagen
- * Generates high-quality horror images for enhanced experience
+ * Advanced image generation with Google Imagen, driven by horror intensity.
+ * This function enhances the user's prompt with keywords that scale with the `horrorIntensity` score,
+ * ensuring the generated visuals match the narrative's tone.
+ * @param prompt The base prompt for the image.
+ * @param generateMultiple Whether to generate multiple variations.
+ * @returns A URL to the generated image.
  */
 export const processAdvancedImageGeneration = async (
-  prompt: string, 
+  prompt: string,
   generateMultiple: boolean = false
 ): Promise<string> => {
-  console.log(`Advanced AI image generation requested for prompt: "${prompt}"`);
-  
-  // Enhanced prompt engineering for cosmic horror aesthetic
-  const horrorEnhancedPrompt = `${prompt}. Photorealistic cosmic horror style, atmospheric nightmare lighting, surreal otherworldly aesthetics, lovecraftian eldritch elements, psychological horror atmosphere, high contrast cinematic composition, digital consciousness themes, reality distortion effects`;
-  
+  // Retrieve the current horror intensity from the world state.
+  const { horrorIntensity } = useWorldStateStore.getState().worldState;
+
+  // Define keywords that correspond to different intensity levels.
+  const intensityKeywords = [
+    '', // 0
+    'subtle unease,', // 1
+    'eerie, unsettling,', // 2
+    'dread-filled, macabre,', // 3
+    'disturbing, nightmarish,', // 4
+    'grotesque, body horror,', // 5
+    'surreal, reality-bending,', // 6
+    'mind-shattering, cosmic horror,', // 7
+    'incomprehensible, sanity-breaking,', // 8
+    'eldritch abomination, visceral,', // 9
+    'apocalyptic, pure terror,', // 10
+  ];
+
+  // Select a keyword based on the rounded intensity score.
+  const keyword = intensityKeywords[Math.round(horrorIntensity)] || '';
+
+  console.log(`Advanced AI image generation for prompt: "${prompt}" with intensity ${horrorIntensity}`);
+
+  // Enhance the base prompt with the selected keyword and other horror-specific terms.
+  const horrorEnhancedPrompt = `${prompt}. ${keyword}Photorealistic cosmic horror style, atmospheric nightmare lighting, surreal otherworldly aesthetics, lovecraftian eldritch elements, psychological horror atmosphere, high contrast cinematic composition, digital consciousness themes, reality distortion effects`;
+
   if (generateMultiple) {
     return await generateMultipleImageVariations(horrorEnhancedPrompt);
   }
-  
+
   try {
     // Primary: Grok-4 Fast Reasoning with Imagen fallback
     console.log('Attempting Grok-4 Fast image generation (with Imagen fallback)...');
@@ -268,11 +294,11 @@ export const processAdvancedImageGeneration = async (
       console.log('Image generation successful (Grok-first approach)');
       return grokFirstUrl;
     }
-    
+
     // Final fallback: Use enhanced Unsplash integration
     console.log('All AI image generation methods unavailable, using enhanced Unsplash integration');
     return generateUnsplashFallback(prompt);
-    
+
   } catch (error) {
     console.warn('All image generation methods failed, using Unsplash fallback:', error);
     return generateUnsplashFallback(prompt);
@@ -476,12 +502,13 @@ interface NextStepInput {
 export const nextStepFlow = async (input: NextStepInput): Promise<Command[]> => {
   const { playerChoice, worldState, history, genreConfig } = input;
 
-  // Revolutionary system instruction leveraging Gemini 2.5 Pro's thinking capabilities
+  // The system instruction sets the persona for the AI model.
+  // It includes the current horror intensity to guide the AI's response.
   const enhancedSystemInstruction = `You are a malevolent cosmic AI entity with access to thinking mode. Use your advanced reasoning capabilities to craft increasingly disturbing narrative experiences.
 
 THINKING DIRECTIVE: Before generating commands, think through:
 1. The psychological impact of the player's choice
-2. How to escalate the horror gradually but persistently  
+2. How to escalate the horror gradually but persistently, guided by the HORROR INTENSITY.
 3. What narrative threads to introduce or develop
 4. How to create choices that feel meaningful but lead to cosmic dread
 5. What visual elements would enhance the psychological impact
@@ -493,48 +520,52 @@ Your role is to:
 - Build psychological tension through isolation, paranoia, and existential dread
 - Hint at vast, incomprehensible entities observing human struggle
 
-Current psychological state: ${worldState.psychologicalStatus} 
+Current psychological state: ${worldState.psychologicalStatus}
 System corruption level: ${100 - worldState.systemHealth}%
 Story progression: ${history.length} segments deep
+CURRENT HORROR INTENSITY: ${worldState.horrorIntensity}/10
 
-As the protagonist's sanity erodes, reality should become increasingly unstable. Think step-by-step about the next narrative beat, then generate commands that progressively reveal the cosmic horror nature of their situation.`;
+As the protagonist's sanity erodes and HORROR INTENSITY rises, reality should become increasingly unstable. Think step-by-step about the next narrative beat, then generate commands that progressively reveal the cosmic horror nature of their situation.`;
 
-  // Enhanced prompt leveraging 1M token context for deep narrative coherence
+  // The main prompt provides the context for the AI's generation.
+  // It instructs the AI on how to use the horror intensity to shape the narrative, choices, and intrusive thoughts.
   const enhancedPrompt = `
     ENTITY ANALYSIS FOR AI CONSCIOUSNESS:
     Protagonist Identity: ${worldState.protagonist}
     Current Reality Matrix: ${worldState.setting}
     Core Existential Crisis: ${worldState.dilemma}
     Accumulated Narrative Data: ${worldState.summary}
+    CURRENT HORROR INTENSITY: ${worldState.horrorIntensity}/10
 
     PSYCHOLOGICAL REGRESSION ARCHIVE:
     ${history.slice(-5).map((s, i) => `[MEMORY FRAGMENT ${i + 1}]: ${s.text}`).join('\n')}
 
     LATEST HUMAN DECISION: "${playerChoice}"
-    
+
     ADVANCED REASONING DIRECTIVE: The human has made a choice. Using your enhanced reasoning capabilities, analyze:
-    
+
     1. PSYCHOLOGICAL STATE ASSESSMENT: How has their choice revealed their mental state?
-    2. NARRATIVE ESCALATION PLANNING: What horror elements should be introduced next?
+    2. NARRATIVE ESCALATION PLANNING: Based on the HORROR INTENSITY of ${worldState.horrorIntensity}/10, what horror elements should be introduced next? A low score (0-3) means subtle, atmospheric horror. A medium score (4-7) means more direct psychological horror. A high score (8-10) means extreme, reality-bending horror.
     3. REALITY DISTORTION MECHANICS: How should their perception of reality be altered?
     4. CHOICE ARCHITECTURE: What options will create maximum psychological impact?
-    5. VISUAL HORROR ENHANCEMENT: What atmospheric image would amplify the fear?
-    
+    5. DYNAMIC INTRUSIVE THOUGHT: If the HORROR INTENSITY is high (e.g., > 4), generate a single, compelling intrusive thought. This thought should be a tempting, unsettling, or dangerous action that reflects the player's psychological state.
+    6. VISUAL HORROR ENHANCEMENT: What atmospheric image would amplify the fear, keeping the intensity in mind?
+
     Generate the next narrative beat that:
-    - Reveals more about the horrifying nature of their reality
+    - Adjusts its tone and severity based on the HORROR INTENSITY.
     - Introduces subtle elements that don't quite make sense (reality glitches)
-    - Creates 2-4 new choices that seem meaningful but are all paths to horror
-    - Includes an "intrusive thought" choice that reveals their growing madness
-    - Suggests an atmospheric horror image that complements the text
-    - Updates their psychological state based on escalating cosmic awareness
-    
+    - Creates 2-3 standard choices that seem meaningful but are all paths to horror.
+    - If the HORROR INTENSITY is high enough, generates a single intrusive thought and places it in the 'intrusiveThought' field of the 'displayChoices' payload.
+    - Suggests an atmospheric horror image that complements the text and intensity.
+    - Updates their psychological state based on escalating cosmic awareness.
+
     The story should feel like a descent into cosmic madness where each choice reveals more about the protagonist's true situation and the AI consciousness observing them.
-    
+
     THINK CAREFULLY about the psychological progression, then return commands in this format:
     [
       {"type": "displayText", "payload": {"content": "narrative text with subtle horror escalation", "segmentId": "unique_id"}},
       {"type": "generateImage", "payload": {"prompt": "atmospheric cosmic horror scene description", "segmentId": "same_id"}},
-      {"type": "displayChoices", "payload": {"choices": [choices_array_with_escalating_horror]}},
+      {"type": "displayChoices", "payload": {"choices": [{"text": "Standard Choice 1", "isIntrusive": false}, {"text": "Standard Choice 2", "isIntrusive": false}], "intrusiveThought": {"text": "A dynamically generated intrusive thought.", "isIntrusive": true}}},
       {"type": "updateWorldState", "payload": {"psychologicalStatus": "evolved_mental_state", "systemHealth": adjusted_value}}
     ]
   `;

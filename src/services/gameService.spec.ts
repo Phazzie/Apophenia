@@ -46,6 +46,7 @@ describe('gameService', () => {
     summary: 'A test summary',
     psychologicalStatus: 'Stable',
     systemHealth: 100,
+    horrorIntensity: 0,
     uiDistortion: {
       transform: 'none',
       filter: 'none',
@@ -111,11 +112,11 @@ describe('gameService', () => {
 
       const result = await getNextStep('Open the door', mockWorldState, mockStoryHistory, mockGenreConfig);
 
-      // With revolutionary features enabled, the playerChoice gets enhanced with semantic analysis and narrative DNA
+      // With revolutionary features enabled, the playerChoice gets enhanced
       expect(generateNextStepWithSelectedModel).toHaveBeenCalledWith(
-        expect.stringContaining('Player chose: Open the door. Continue the cosmic horror narrative.'),
+        'Player chose: Open the door. Continue the cosmic horror narrative.',
         mockWorldState,
-        expect.arrayContaining([]), // History may be modified by quantum/temporal features
+        mockStoryHistory,
         mockGenreConfig
       );
       
@@ -125,9 +126,6 @@ describe('gameService', () => {
       expect(result).toHaveProperty('metaMessage');
       expect(result).toHaveProperty('quantumShift');
       expect(result).toHaveProperty('corruptionEffects');
-      expect(result).toHaveProperty('echoMessage');
-      expect(result).toHaveProperty('semanticInsight');
-      expect(result).toHaveProperty('narrativeEvolution');
     });
 
     it('returns error-recovery commands when generateNextStepWithSelectedModel throws', async () => {

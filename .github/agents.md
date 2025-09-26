@@ -33,8 +33,10 @@ npm run dev
 cp .env.example .env.local
 
 # Critical: Configure these for full functionality
-# VITE_GEMINI_API_KEY=your-google-api-key-here
+# VITE_XAI_API_KEY=your-xai-api-key-here          # X.AI Grok-4 Fast Reasoning (primary)
+# VITE_GEMINI_API_KEY=your-google-gemini-api-key  # Google Gemini (fallback)
 
+# AI Model Priority: Grok-4 Fast Reasoning → Gemini 2.5 Pro → Gemini 2.5 Flash
 # Without keys: App runs with mock data and graceful error handling
 ```
 
@@ -61,18 +63,28 @@ type Command =
 
 ### AI Integration Points (Critical for AI Agents)
 
-1. **Story Generation**: `src/services/ai/genkit.ts`
-   - Uses Google Gemini for narrative content
+1. **X.AI Grok-4 Fast Reasoning Integration**: `src/services/ai/grokService.ts`
+   - Primary AI provider with 2M token context window
+   - Advanced reasoning capabilities for complex narrative decisions
+   - Enhanced thinking mode for deeper story analysis
+
+2. **Google Gemini Integration**: `src/services/ai/genkit.ts`
+   - Fallback AI service with Gemini 2.5 Pro and Flash models
    - Handles concept generation, story progression, choices
    - Implements safety settings and content filtering
 
-2. **Flow Orchestration**: `src/services/flows/`
-   - `conceptFlow.ts` - Initial story concept generation
-   - `nextStepFlow.ts` - Story progression logic
-   - `summaryFlow.ts` - Context summarization for AI
-   - `generateImageFlow.ts` - Visual content generation
+3. **Unified AI Service**: `src/services/ai/unifiedAIService.ts`
+   - Multi-model routing and fallback management
+   - Intelligent provider selection based on task complexity
+   - Performance monitoring and error recovery
 
-3. **Command Execution**: `src/services/commandExecutor.ts`
+4. **Flow Orchestration**: `src/services/flows/`
+   - `conceptFlow.ts` - Initial story concept generation
+   - `nextStepFlow.ts` - Story progression logic with advanced reasoning
+   - `summaryFlow.ts` - Context summarization for AI
+   - `generateImageFlow.ts` - Visual content generation with AI
+
+5. **Command Execution**: `src/services/commandExecutor.ts`
    - Central orchestrator for all commands
    - Handles async execution and error boundaries
    - Manages blocking vs non-blocking operations
@@ -103,10 +115,12 @@ type Command =
 ### Modifying AI Flows
 ```bash
 # Key files for AI behavior modification:
-src/services/ai/genkit.ts          # Gemini integration
-src/services/flows/nextStepFlow.ts # Core game progression
-src/services/flows/conceptFlow.ts  # Story initialization
-src/types.ts                       # Type definitions for AI responses
+src/services/ai/grokService.ts          # X.AI Grok-4 Fast Reasoning integration
+src/services/ai/unifiedAIService.ts     # Multi-model AI routing and fallback
+src/services/ai/genkit.ts               # Gemini integration and fallback handling
+src/services/flows/nextStepFlow.ts      # Core game progression with advanced reasoning
+src/services/flows/conceptFlow.ts       # Story initialization with thinking mode
+src/types.ts                            # Type definitions for AI responses
 ```
 
 ### Debugging AI Integration
@@ -342,5 +356,43 @@ class GameStateManager {
   }
 }
 ```
+
+## Latest AI Enhancements (2025)
+
+### X.AI Grok-4 Fast Reasoning Integration
+The project now uses X.AI's Grok-4 Fast Reasoning as the primary AI provider:
+
+- **2M Token Context**: Maintains perfect story consistency across long narratives
+- **Advanced Reasoning**: Deep analysis of player psychology and narrative coherence  
+- **Thinking Mode**: Internal reasoning before generating responses
+- **Reality Distortion Engine**: Gradual horror escalation through subtle inconsistencies
+- **Foreshadowing System**: Plants narrative seeds that pay off in future segments
+
+### Revolutionary AI Features
+Located in `src/services/ai/revolutionaryFeatures.ts`:
+
+- **Neural Echo Chambers**: Cross-session pattern recognition for player behavior
+- **Adaptive Narrative DNA**: Dynamic story evolution based on player engagement
+- **Quantum Narrative Shifts**: Subtle reality alterations that build psychological tension
+- **Meta-Consciousness Events**: Fourth-wall breaking moments for enhanced immersion
+- **Fifth Wall Breaking**: Browser manipulation effects for ultimate horror experience
+
+### AI Service Architecture
+```typescript
+// Current AI Provider Hierarchy
+const AI_PROVIDERS = {
+  primary: 'grok-4-fast-reasoning',    // X.AI with 2M context
+  fallback: 'gemini-2.5-pro',         // Google Gemini Pro
+  emergency: 'gemini-2.5-flash'       // Fast Gemini for basic responses
+} as const;
+```
+
+### Advanced Prompt Engineering
+The system now uses sophisticated prompt engineering techniques:
+
+- **System-level context injection** for consistent world building
+- **Psychological profiling integration** for personalized horror experiences
+- **Dynamic difficulty adjustment** based on player engagement metrics
+- **Semantic choice archaeology** for understanding deep player motivations
 
 Remember: **AI agents have broader reasoning capabilities than Copilot**. Use this to understand system behavior, propose architectural improvements, and solve complex integration challenges.

@@ -4,6 +4,14 @@
 
 Apophenia is a React + TypeScript + Zustand web application that creates AI-driven interactive narrative experiences. The architecture follows a clear separation: flows → command queue → executors → stores → UI.
 
+## Project Overview
+
+**Technology Stack**: React 18, TypeScript 5.x, Zustand, Vite, Jest  
+**AI Integration**: X.AI Grok-4 Fast Reasoning (primary), Google Gemini (fallback)  
+**Architecture Pattern**: Command-driven with discriminated unions  
+**Testing**: Comprehensive unit tests with 50+ passing tests  
+**Deployment**: Vercel/Netlify static hosting with environment variable configuration
+
 ## Quick Bootstrap & Development
 
 **Initial setup (may vary from 30 seconds to 1+ minute):**
@@ -147,12 +155,16 @@ python verify.py
 ## Build Pipeline (CI)
 
 **GitHub Actions (`.github/workflows/ci.yml`):**
-- Runs on all pushes and PRs
-- Node.js 20.x
-- Steps: checkout → setup Node → npm ci → npm run build
-- **Must pass** before merging
+- **Triggers**: All pushes and PRs to any branch
+- **Node.js Version**: 20.x (specified in workflow)
+- **Pipeline Steps**: 
+  1. Security scan and dependency analysis
+  2. Checkout → Setup Node → `npm ci` → `npm run build`
+  3. Test execution and coverage reporting
+- **Requirements**: Must pass before merging
+- **Additional**: Weekly security scans on Sundays
 
-**No linting configured** - only TypeScript compilation and build validation.
+**Quality Gates**: TypeScript compilation + build + tests must all pass
 
 ## Deployment
 
@@ -429,3 +441,40 @@ describe('GeminiAIService', () => {
   });
 });
 ```
+
+## Contributing Guidelines
+
+When contributing to Apophenia, follow these practices:
+
+### Pull Request Guidelines
+- **Branch Naming**: Use descriptive names like `feature/ai-enhancement` or `fix/state-sync-issue`
+- **Small, Focused Changes**: Keep PRs small and focused on a single concern
+- **Test Coverage**: Add tests for new features and bug fixes
+- **Type Safety**: Maintain zero `any` types and full TypeScript compliance
+- **Documentation**: Update relevant documentation for API changes
+- **PR Template**: Fill out the provided `.github/PULL_REQUEST_TEMPLATE.md` completely
+- **CHANGELOG**: Update `CHANGELOG.md` in the "Unreleased" section for user-facing changes
+
+### Code Review Checklist
+- [ ] All tests pass (`npm test`)
+- [ ] TypeScript compiles without errors (`npx tsc --noEmit`)
+- [ ] Build succeeds (`npm run build`)
+- [ ] Commands use discriminated unions correctly
+- [ ] State updates use segmentId, not array indices
+- [ ] No secrets in source code
+- [ ] Error handling includes graceful degradation
+
+### Issue Reporting Guidelines
+- **Bug Reports**: Include browser, Node.js version, and reproduction steps
+- **Feature Requests**: Explain the use case and expected behavior
+- **Architecture Questions**: Reference the command flow: flows → queue → executors → stores → UI
+
+## Project Vision
+
+Apophenia creates AI-driven interactive narratives that adapt to player choices using advanced reasoning capabilities. The architecture prioritizes:
+
+- **Type Safety**: Zero runtime errors through comprehensive TypeScript
+- **Modularity**: Clear separation of concerns in the command system
+- **AI Integration**: Multi-model fallback system for reliability
+- **Performance**: Efficient state management and caching strategies
+- **Developer Experience**: Comprehensive testing and documentation

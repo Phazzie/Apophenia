@@ -237,6 +237,41 @@ export class AdaptiveHorrorEngine {
     decisionPatterns: [],
     psychologicalVulnerabilities: [],
   };
+
+  calculateAdaptiveHorrorIntensity(
+    history: StorySegment[],
+    worldState: WorldState,
+    playerChoice: Choice
+  ): number {
+    let intensity = worldState.horrorIntensity || 0;
+    const lastSegmentText = history[history.length - 1]?.text.toLowerCase() || '';
+    const horrorKeywords = ['fear', 'terror', 'darkness', 'madness', 'scream', 'blood', 'abyss', 'void'];
+
+    // Boost intensity for choosing an intrusive thought.
+    if (playerChoice.isIntrusive) {
+      intensity += 1.5;
+    }
+
+    for (const keyword of horrorKeywords) {
+      if (lastSegmentText.includes(keyword)) {
+        intensity += 0.2;
+      }
+    }
+
+    switch (worldState.psychologicalStatus) {
+      case 'Uneasy':
+        intensity += 0.1;
+        break;
+      case 'Paranoid':
+        intensity += 0.3;
+        break;
+      case 'Fragmented':
+        intensity += 0.5;
+        break;
+    }
+
+    return Math.max(0, Math.min(10, intensity));
+  }
   
   async analyzePlayerChoice(choice: string, context: string): Promise<void> {
     if (!REVOLUTIONARY_FEATURES.ADAPTIVE_HORROR.enabled) {

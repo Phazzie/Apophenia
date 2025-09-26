@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Choice, GameState } from '../types';
+import { useWorldStateStore } from './worldStateStore';
 
 interface GameStateStore {
   gameState: GameState;
@@ -25,11 +26,17 @@ export const useGameStateStore = create<GameStateStore>()(
     (set, get) => ({
       ...initialState,
       setGameState: (gameState) => set({ gameState }),
-      setChoices: (choices, intrusiveThought) =>
+      setChoices: (choices, intrusiveThought) => {
+        const { horrorIntensity } = useWorldStateStore.getState().worldState;
+        const allChoices = [...choices];
+        if (intrusiveThought && horrorIntensity >= (intrusiveThought.requiredIntensity || 0)) {
+          allChoices.push(intrusiveThought);
+        }
         set({
-          choices,
-          intrusiveThought,
-        }),
+          choices: allChoices,
+          intrusiveThought, // Keep it separate for potential special UI handling
+        });
+      },
       setIsGenerating: (isGenerating) => set({ isGenerating }),
       reset: () => {
         set(initialState);

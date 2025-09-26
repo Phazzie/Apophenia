@@ -1,4 +1,4 @@
-import { Command, GenreConfig, StorySegment, WorldState } from '../types';
+import { Choice, Command, GenreConfig, StorySegment, WorldState } from '../types';
 import {
     generateImageFlow,
     processAdvancedImageGeneration,
@@ -22,7 +22,7 @@ import {
  */
 
 export const getNextStep = async (
-  playerChoice: string,
+  playerChoice: Choice,
   worldState: WorldState,
   history: StorySegment[],
   genreConfig: GenreConfig
@@ -33,55 +33,57 @@ export const getNextStep = async (
   quantumShift?: boolean;
   corruptionEffects?: any;
 }> => {
-  console.log('Processing next step for player choice:', playerChoice);
+  console.log('Processing next step for player choice:', playerChoice.text);
   console.log('World state:', { protagonist: worldState.protagonist, psychologicalStatus: worldState.psychologicalStatus });
   console.log('Story history length:', history.length);
 
   try {
-    // 1. ADAPTIVE HORROR: Analyze player choice for personalization
-    console.log('Analyzing player choice for adaptive horror...');
-    adaptiveHorror.analyzePlayerChoice(playerChoice, 'game progression');
+    // 1. ADAPTIVE HORROR: Calculate the new horror intensity for this turn.
+    // This score will be used to dynamically adjust the narrative, visuals, and choices.
+    console.log('Calculating adaptive horror intensity...');
+    const newHorrorIntensity = adaptiveHorror.calculateAdaptiveHorrorIntensity(history, worldState, playerChoice);
+    const updatedWorldState = { ...worldState, horrorIntensity: newHorrorIntensity };
     
     // 2. TEMPORAL REVISION: Check if choice should alter past events
     console.log('Processing temporal revision...');
     const revisedHistory = await temporalRevision.reviseHistory(
-      playerChoice,
+      playerChoice.text,
       history,
-      worldState
+      updatedWorldState
     );
     
     // 3. QUANTUM NARRATIVE: Process potential timeline shifts
     console.log('Processing quantum narrative shifts...');
     const quantumResult = await quantumNarrative.processQuantumChoice(
-      playerChoice,
+      playerChoice.text,
       revisedHistory,
-      worldState
+      updatedWorldState
     );
     
     // 4. META-CONSCIOUSNESS: Check for AI awareness events
     console.log('Checking for meta-consciousness events...');
     const metaMessage = await metaConsciousness.checkForMetaEvent(
       quantumResult.history,
-      worldState
+      updatedWorldState
     );
     
     // 5. REALITY CORRUPTION: Apply interface corruption effects
     console.log('Processing reality corruption effects...');
     const corruptionResult = realityCorruption.processCorruption(
-      playerChoice,
-      worldState
+      playerChoice.text,
+      updatedWorldState
     );
     
     // 6. ENHANCED AI GENERATION: Generate next story beat with personalization
     console.log('Generating personalized horror prompt...');
     const personalizedPrompt = await adaptiveHorror.generatePersonalizedHorror(
-      `Player chose: ${playerChoice}. Continue the cosmic horror narrative.`
+      `Player chose: ${playerChoice.text}. Continue the cosmic horror narrative.`
     );
     
     console.log('Calling AI service for next step generation...');
     const commands = await generateNextStepWithSelectedModel(
       personalizedPrompt,
-      worldState,
+      updatedWorldState,
       quantumResult.history,
       genreConfig
     );

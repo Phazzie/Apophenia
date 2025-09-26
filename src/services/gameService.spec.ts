@@ -18,7 +18,7 @@ import {
   generateNextStepWithSelectedModel,
 } from './ai/unifiedAIService';
 
-import type { Command, GenreConfig, StorySegment, WorldState } from '../types';
+import type { Choice, Command, GenreConfig, StorySegment, WorldState } from '../types';
 import { summarizeHistoryFlow } from './flows/summaryFlow';
 
 // Mock the flow modules
@@ -46,6 +46,7 @@ describe('gameService', () => {
     summary: 'A test summary',
     psychologicalStatus: 'Stable',
     systemHealth: 100,
+    horrorIntensity: 0,
     uiDistortion: {
       transform: 'none',
       filter: 'none',
@@ -93,6 +94,11 @@ describe('gameService', () => {
     },
   ];
 
+  const mockChoice: Choice = {
+    text: 'Open the door',
+    isIntrusive: false,
+  };
+
   beforeEach(() => {
     jest.resetAllMocks();
     consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -109,12 +115,12 @@ describe('gameService', () => {
       ];
       (generateNextStepWithSelectedModel as jest.Mock).mockResolvedValueOnce(commands);
 
-      const result = await getNextStep('Open the door', mockWorldState, mockStoryHistory, mockGenreConfig);
+      const result = await getNextStep(mockChoice, mockWorldState, mockStoryHistory, mockGenreConfig);
 
       // With revolutionary features enabled, the playerChoice gets enhanced
       expect(generateNextStepWithSelectedModel).toHaveBeenCalledWith(
         'Player chose: Open the door. Continue the cosmic horror narrative.',
-        mockWorldState,
+        { ...mockWorldState, horrorIntensity: 0 },
         mockStoryHistory,
         mockGenreConfig
       );
@@ -133,7 +139,7 @@ describe('gameService', () => {
       generateNextStepWithSelectedModelMock.mockReset();
       generateNextStepWithSelectedModelMock.mockRejectedValue(new Error('Network error'));
 
-      const result = await getNextStep('Open the door', mockWorldState, [], mockGenreConfig);
+      const result = await getNextStep(mockChoice, mockWorldState, [], mockGenreConfig);
 
       // Should return fallback commands from secure genkit
       expect(result.commands).toHaveLength(2);

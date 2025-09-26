@@ -12,6 +12,9 @@ jest.mock('../../config', () => ({
     ADAPTIVE_HORROR: { enabled: true, analysisDepth: 'deep' },
     REALITY_CORRUPTION: { enabled: true, maxCorruption: 0.7 },
     EMERGENT_AI: { enabled: true, personalityEvolution: true },
+    NEURAL_ECHOES: { enabled: true, maxEchoes: 50 },
+    SEMANTIC_ARCHAEOLOGY: { enabled: true, historyDepth: 20 },
+    NARRATIVE_DNA: { enabled: true, maxMutations: 10 },
   },
 }));
 
@@ -21,6 +24,9 @@ import {
   QuantumNarrativeEngine,
   AdaptiveHorrorEngine,
   RealityCorruptionEngine,
+  NeuralEchoChambers,
+  SemanticChoiceArchaeology,
+  AdaptiveNarrativeDNA,
 } from '../revolutionaryFeatures';
 import { StorySegment, WorldState } from '../../../types';
 
@@ -404,6 +410,112 @@ describe('Revolutionary AI Features Test Suite', () => {
       
       // Should complete within reasonable time (2 seconds)
       expect(duration).toBeLessThan(2000);
+    });
+  });
+  
+  describe('NeuralEchoChambers', () => {
+    let chambers: NeuralEchoChambers;
+    
+    beforeEach(() => {
+      chambers = new NeuralEchoChambers();
+      // Mock localStorage for testing
+      Object.defineProperty(window, 'localStorage', {
+        value: {
+          storage: {},
+          getItem: jest.fn((key) => window.localStorage.storage[key] || null),
+          setItem: jest.fn((key, value) => { window.localStorage.storage[key] = value; }),
+          removeItem: jest.fn((key) => { delete window.localStorage.storage[key]; }),
+          clear: jest.fn(() => { window.localStorage.storage = {}; })
+        },
+        writable: true
+      });
+      window.localStorage.clear();
+    });
+    
+    test('should store and recall echoes', async () => {
+      // When localStorage is not available, should gracefully handle
+      const playerId = 'test-player';
+      const echo = {
+        choicePattern: 'test choice',
+        psychologicalTrigger: 'fear',
+        fearResponse: 0.8,
+        timestamp: Date.now()
+      };
+      
+      // Should not throw errors
+      await expect(chambers.storeEcho(playerId, echo)).resolves.not.toThrow();
+      
+      // Should return empty array when localStorage is not available
+      const recalled = await chambers.recallEchoes(playerId);
+      expect(Array.isArray(recalled)).toBe(true);
+      
+      // Should not throw when clearing
+      await expect(chambers.clearEchoes(playerId)).resolves.not.toThrow();
+    });
+  });
+  
+  describe('SemanticChoiceArchaeology', () => {
+    let archaeology: SemanticChoiceArchaeology;
+    let mockWorldState: WorldState;
+    
+    beforeEach(() => {
+      archaeology = new SemanticChoiceArchaeology();
+      mockWorldState = {
+        protagonist: 'Archaeologist',
+        setting: 'Semantic Dig Site',
+        dilemma: 'Choice Analysis',
+        genreConfig: {
+          id: 'test-genre', name: 'Test', description: 'Test Genre', style: 'Test',
+          theme: { '--background-color': '#000', '--text-color': '#fff', '--accent-color': '#8a2be2', '--font-family': 'Arial' },
+          startScreenImagePrompt: 'test image', conceptPrompt: 'test concept', aiSystemInstruction: 'test instruction',
+        },
+        psychologicalStatus: 'Stable',
+        systemHealth: 80,
+        summary: 'Test summary',
+        horrorIntensity: 0,
+        uiDistortion: { filter: 'none', transform: 'none', transition: 'none' },
+      };
+    });
+    
+    test('should provide default profile when AI fails', async () => {
+      mockedGenerateWithSelectedModel.mockRejectedValueOnce(new Error('AI failed'));
+      
+      const result = await archaeology.excavateChoice('test choice', 'test context', mockWorldState);
+      
+      expect(result.psychologicalProfile).toContain('Cautious explorer');
+      expect(result.fearTriggers).toContain('isolation');
+    });
+  });
+  
+  describe('AdaptiveNarrativeDNA', () => {
+    let dna: AdaptiveNarrativeDNA;
+    let mockWorldState: WorldState;
+    
+    beforeEach(() => {
+      dna = new AdaptiveNarrativeDNA();
+      mockWorldState = {
+        protagonist: 'DNA Subject',
+        setting: 'Genetic Laboratory',
+        dilemma: 'Evolution',
+        genreConfig: {
+          id: 'test-genre', name: 'Test', description: 'Test Genre', style: 'Test',
+          theme: { '--background-color': '#000', '--text-color': '#fff', '--accent-color': '#8a2be2', '--font-family': 'Arial' },
+          startScreenImagePrompt: 'test image', conceptPrompt: 'test concept', aiSystemInstruction: 'test instruction',
+        },
+        psychologicalStatus: 'Stable',
+        systemHealth: 80,
+        summary: 'Test summary',
+        horrorIntensity: 0,
+        uiDistortion: { filter: 'none', transform: 'none', transition: 'none' },
+      };
+    });
+    
+    test('should evolve DNA based on player engagement', async () => {
+      const result = await dna.evolveDNA('I stare into the cosmic void', 0.9, mockWorldState);
+      
+      expect(result.dominantGenes).toBeDefined();
+      expect(result.emergentThemes).toBeDefined();
+      expect(result.narrativeDirection).toContain('cosmic');
     });
   });
 });

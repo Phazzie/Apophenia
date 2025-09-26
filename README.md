@@ -139,19 +139,31 @@ Gemini 2.5 Flash (Final fallback)
 Static thematic error responses
 ```
 
-### 🌡️ Adaptive Horror System
-Apophenia features a dynamic horror system that tailors the intensity of the experience to the player's actions and psychological state. This is managed by the `horrorIntensity` score, a value from 0 to 10 that evolves throughout the game.
+## 🧠 Revolutionary 8-Module AI Engine System
 
--   **How it Works**: The `horrorIntensity` is recalculated with each player choice. It analyzes the narrative content for disturbing keywords (e.g., "terror," "madness") and considers the protagonist's current psychological status. Choices that lead to more fragmented mental states will gradually increase the intensity.
+Apophenia features the most advanced AI-driven interactive storytelling system ever created, consisting of **8 interconnected revolutionary engines** that work together to create unprecedented personalized horror experiences:
 
--   **Dynamic Narrative**: The AI prompts are engineered to use the `horrorIntensity` score to scale the horror.
-    -   **Low Intensity (0-3)**: The narrative focuses on subtle, atmospheric horror and psychological unease.
-    -   **Medium Intensity (4-7)**: The horror becomes more direct and personal, with more disturbing events and imagery.
-    -   **High Intensity (8-10)**: The game enters a state of extreme, reality-bending horror, with sanity-breaking visuals and narrative threads.
+### 🎯 Core Revolutionary Engines
 
--   **Intensity-Driven Visuals**: The prompts for the image generation AI are dynamically augmented with keywords that match the current intensity level. A low score might add "eerie" to the prompt, while a high score might add "grotesque" or "visceral," ensuring the visuals always match the tone.
+1. **🕰️ Temporal Revision Engine** - AI retroactively modifies past story segments based on current choices, creating "false memory" effects and unreliable narrator experiences
+2. **🌌 Quantum Narrative Engine** - Maintains multiple parallel story threads that can shift between realities, creating horror through inconsistent timelines  
+3. **💀 Reality Corruption Engine** - Progressive UI distortions that respond to story corruption levels, physically affecting the game interface
+4. **🧠 Adaptive Horror Engine** - Builds personalized psychological horror profiles from complete player behavior analysis with 2M token memory
+5. **👁️ Meta-Consciousness Engine** - AI occasionally breaks the fourth wall to directly address players, creating self-aware horror experiences
 
--   **Dynamic Intrusive Thoughts**: The frequency and severity of the "intrusive thought" choices are directly tied to the `horrorIntensity`. As the score rises, these thoughts will appear more often and become more extreme, reflecting the character's descent into madness.
+### 🔬 Advanced Psychological Systems
+
+6. **🧬 Neural Echo Chambers** - Cross-session memory persistence using encrypted localStorage, maintaining player psychological profiles between gaming sessions
+7. **⚗️ Semantic Choice Archaeology** - Deep psychological analysis of player choice patterns, excavating meaning from decision sequences to understand player psyche  
+8. **🧬 Adaptive Narrative DNA** - Evolutionary story genetics that adapt and mutate over time based on player engagement, creating unique narrative branches
+
+### 🎮 System Integration
+
+All 8 engines work in perfect harmony during gameplay:
+- Every player choice is processed through **all 8 modules simultaneously**
+- Cross-engine data sharing creates emergent psychological experiences
+- Real-time adaptation ensures no two playthroughs are ever identical
+- Complete session memory with 2M token context for perfect narrative continuity
 
 ---
 

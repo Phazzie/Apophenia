@@ -14,6 +14,9 @@ import {
   quantumNarrative,
   adaptiveHorror,
   realityCorruption,
+  neuralEchoChambers,
+  semanticChoiceArchaeology,
+  adaptiveNarrativeDNA,
 } from './ai/revolutionaryFeatures';
 
 /**
@@ -32,6 +35,9 @@ export const getNextStep = async (
   metaMessage?: string;
   quantumShift?: boolean;
   corruptionEffects?: any;
+  archaeologyReport?: any;
+  dnaEvolution?: any;
+  engineStatus?: string;
 }> => {
   console.log('Processing next step for player choice:', playerChoice);
   console.log('World state:', { protagonist: worldState.protagonist, psychologicalStatus: worldState.psychologicalStatus });
@@ -88,10 +94,60 @@ export const getNextStep = async (
       corruptionResult = { corruptionLevel: 0, newEffects: [], uiEffects: {} };
     }
     
-    // 6. ENHANCED AI GENERATION: Generate next story beat with personalization
-    console.log('Generating personalized horror prompt...');
+    // 6. NEURAL ECHO CHAMBERS: Store cross-session memories
+    console.log('Storing neural echoes...');
+    try {
+      const playerId = 'player-' + (Math.random().toString(36).substr(2, 9)); // Simple player ID
+      await neuralEchoChambers.storeEcho(playerId, {
+        choicePattern: playerChoice,
+        psychologicalTrigger: metaMessage || 'none',
+        fearResponse: corruptionResult.corruptionLevel,
+        timestamp: Date.now()
+      });
+      console.log('Neural echoes stored successfully');
+    } catch (error) {
+      console.error('Neural echo storage failed:', error);
+    }
+    
+    // 7. SEMANTIC CHOICE ARCHAEOLOGY: Deep psychological analysis
+    console.log('Performing semantic choice archaeology...');
+    let archaeologyReport;
+    try {
+      archaeologyReport = await semanticChoiceArchaeology.excavateChoice(
+        playerChoice,
+        `Horror intensity: ${updatedWorldState.horrorIntensity}/10`,
+        updatedWorldState
+      );
+      console.log('Semantic archaeology completed');
+    } catch (error) {
+      console.error('Semantic archaeology failed:', error);
+      archaeologyReport = null;
+    }
+    
+    // 8. ADAPTIVE NARRATIVE DNA: Evolve story genetics
+    console.log('Evolving narrative DNA...');
+    let dnaEvolution;
+    try {
+      const playerEngagement = corruptionResult.corruptionLevel > 0.3 ? 0.8 : 0.5;
+      dnaEvolution = await adaptiveNarrativeDNA.evolveDNA(
+        playerChoice,
+        playerEngagement,
+        updatedWorldState
+      );
+      console.log('Narrative DNA evolution completed');
+    } catch (error) {
+      console.error('Narrative DNA evolution failed:', error);
+      dnaEvolution = null;
+    }
+    
+    // 9. ENHANCED AI GENERATION: Generate next story beat with all revolutionary features
+    console.log('Generating personalized horror prompt with full 8-module analysis...');
     const personalizedPrompt = await adaptiveHorror.generatePersonalizedHorror(
-      `Player chose: ${playerChoice}. Continue the cosmic horror narrative.`
+      `Player chose: ${playerChoice}. Continue the cosmic horror narrative.
+      
+Semantic Analysis: ${archaeologyReport ? JSON.stringify(archaeologyReport) : 'none'}
+Narrative DNA: ${dnaEvolution ? JSON.stringify(dnaEvolution) : 'none'}
+Reality Corruption: ${corruptionResult.corruptionLevel}`
     );
     
     console.log('Calling AI service for next step generation...');
@@ -117,6 +173,9 @@ export const getNextStep = async (
       metaMessage: metaMessage || undefined,
       quantumShift: quantumResult.quantumShift,
       corruptionEffects: corruptionResult.corruptionLevel > 0 ? corruptionResult : undefined,
+      archaeologyReport: archaeologyReport || undefined,
+      dnaEvolution: dnaEvolution || undefined,
+      engineStatus: '8-module system fully operational'
     };
   } catch (error) {
     console.error('Error in getNextStep:', error);

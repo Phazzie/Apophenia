@@ -3,6 +3,16 @@
  * Deep psychological profiling that analyzes semantic meaning and subtext of choices
  * Goes beyond surface-level keywords to understand psychological motivations
  */
+
+interface SemanticAnalysis {
+  verbosity: number;
+  complexity: number;
+  emotionalTone: string;
+  powerDynamics: string;
+  timeOrientation: string;
+  agencyLevel: string;
+}
+
 export class SemanticChoiceArchaeology {
   private semanticProfile: {
     dominancePatterns: string[];
@@ -33,9 +43,9 @@ export class SemanticChoiceArchaeology {
     };
   }
 
-  private performSemanticAnalysis(choice: string, alternatives: string[]): any {
+  private performSemanticAnalysis(choice: string, alternatives: string[]): SemanticAnalysis {
     const choiceLength = choice.length;
-    const avgLength = alternatives.reduce((sum, alt) => sum + alt.length, 0) / alternatives.length;
+    const avgLength = alternatives.length > 0 ? alternatives.reduce((sum, alt) => sum + alt.length, 0) / alternatives.length : 1;
 
     return {
       verbosity: choiceLength / avgLength,
@@ -89,7 +99,7 @@ export class SemanticChoiceArchaeology {
     return 'moderate-agency';
   }
 
-  private updateSemanticProfile(analysis: any): void {
+  private updateSemanticProfile(analysis: SemanticAnalysis): void {
     this.semanticProfile.linguisticMarkers.set(analysis.emotionalTone,
       (this.semanticProfile.linguisticMarkers.get(analysis.emotionalTone) || 0) + 1);
   }
@@ -111,7 +121,7 @@ export class SemanticChoiceArchaeology {
     return motivations;
   }
 
-  private generateSemanticInsight(analysis: any): string {
+  private generateSemanticInsight(analysis: SemanticAnalysis): string {
     return `Choice reveals ${analysis.emotionalTone} tendencies with ${analysis.powerDynamics} power dynamics, ${analysis.agencyLevel} self-efficacy.`;
   }
 }

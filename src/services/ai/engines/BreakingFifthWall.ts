@@ -7,8 +7,8 @@ import { WorldState } from '../../../types';
  */
 export class BreakingFifthWall {
   private originalTitle: string = 'Apophenia';
-  private titleInterval: NodeJS.Timeout | null = null;
-  private faviconInterval: NodeJS.Timeout | null = null;
+  private titleInterval: number | null = null;
+  private faviconInterval: number | null = null;
   private isActive: boolean = false;
 
   activateBreakage(intensity: number, worldState: WorldState): void {
@@ -41,12 +41,18 @@ export class BreakingFifthWall {
     }
 
     if (this.titleInterval) {
-      clearInterval(this.titleInterval);
+      const win = this.getWindow();
+      if (win) {
+        win.clearInterval(this.titleInterval);
+      }
       this.titleInterval = null;
     }
 
     if (this.faviconInterval) {
-      clearInterval(this.faviconInterval);
+      const win = this.getWindow();
+      if (win) {
+        win.clearInterval(this.faviconInterval);
+      }
       this.faviconInterval = null;
     }
 
@@ -65,7 +71,13 @@ export class BreakingFifthWall {
     ];
 
     let titleIndex = 0;
-    this.titleInterval = setInterval(() => {
+    const win = this.getWindow();
+    if (!win) {
+      console.warn('BreakingFifthWall: window not available, skipping title manipulation');
+      return;
+    }
+    
+    this.titleInterval = win.setInterval(() => {
       if (Math.random() < 0.3) { // 30% chance to glitch
         doc.title = corruptedTitles[titleIndex % corruptedTitles.length];
         titleIndex++;
@@ -87,7 +99,13 @@ export class BreakingFifthWall {
     ];
 
     let faviconIndex = 0;
-    this.faviconInterval = setInterval(() => {
+    const win = this.getWindow();
+    if (!win) {
+      console.warn('BreakingFifthWall: window not available, skipping favicon manipulation');
+      return;
+    }
+    
+    this.faviconInterval = win.setInterval(() => {
       if (Math.random() < 0.2) { // 20% chance to glitch
         faviconElement.href = corruptedFavicons[faviconIndex % corruptedFavicons.length];
         faviconIndex++;

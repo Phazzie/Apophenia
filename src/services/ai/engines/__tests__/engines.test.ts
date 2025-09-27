@@ -18,6 +18,7 @@ const createWorldState = (overrides: Partial<WorldState> = {}): WorldState => ({
   summary: 'Test summary',
   psychologicalStatus: 'Stable',
   systemHealth: 100,
+  horrorIntensity: 0,
   uiDistortion: {
     transform: 'none',
     filter: 'none',

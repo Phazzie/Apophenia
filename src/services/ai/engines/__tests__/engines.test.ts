@@ -11,6 +11,36 @@ import { StorySegment, WorldState } from '../../../../types';
 // Mock the unified AI service to isolate the tests from actual AI calls.
 jest.mock('../../unifiedAIService');
 
+const createWorldState = (overrides: Partial<WorldState> = {}): WorldState => ({
+  protagonist: 'Test Protagonist',
+  setting: 'Test Setting',
+  dilemma: 'Test Dilemma',
+  summary: 'Test summary',
+  psychologicalStatus: 'Stable',
+  systemHealth: 100,
+  uiDistortion: {
+    transform: 'none',
+    filter: 'none',
+    transition: 'none',
+  },
+  genreConfig: {
+    id: 'test-genre',
+    name: 'Test Genre',
+    description: 'A test genre for engine specs.',
+    style: 'cosmic-horror',
+    theme: {
+      '--background-color': '#000000',
+      '--text-color': '#ffffff',
+      '--accent-color': '#ff00ff',
+      '--font-family': 'Inter, sans-serif',
+    },
+    startScreenImagePrompt: 'test start screen prompt',
+    conceptPrompt: 'test concept prompt',
+    aiSystemInstruction: 'test ai system instruction',
+  },
+  ...overrides,
+});
+
 /**
  * Test suite for the TemporalRevisionEngine.
  * This engine is responsible for retroactively modifying past story segments.
@@ -22,13 +52,11 @@ describe('TemporalRevisionEngine', () => {
 
   beforeEach(() => {
     engine = new TemporalRevisionEngine();
-    mockWorldState = {
+    mockWorldState = createWorldState({
       protagonist: 'Alex',
       setting: 'A haunted house',
-      storyPrompt: 'Alex enters the house.',
-      psychologicalStatus: 'Stable',
-      systemHealth: 100,
-    };
+      summary: 'Alex enters the house.',
+    });
     mockStoryHistory = [
       { id: '1', text: 'Segment 1', images: {} },
       { id: '2', text: 'Segment 2', images: {} },
@@ -111,13 +139,13 @@ describe('RealityCorruptionEngine', () => {
 
   beforeEach(() => {
     engine = new RealityCorruptionEngine();
-    mockWorldState = {
+    mockWorldState = createWorldState({
       protagonist: 'The Corrupted',
       setting: 'A digital hellscape',
-      storyPrompt: 'The world is breaking.',
-      psychologicalStatus: 'Unraveling',
+      summary: 'The world is breaking.',
+      psychologicalStatus: 'Paranoid',
       systemHealth: 50,
-    };
+    });
     (generateWithSelectedModel as jest.Mock).mockClear();
   });
 
@@ -266,13 +294,12 @@ describe('QuantumNarrativeEngine', () => {
 
   beforeEach(() => {
     engine = new QuantumNarrativeEngine();
-    mockWorldState = {
+    mockWorldState = createWorldState({
       protagonist: 'The Anomaly',
       setting: 'A fractured reality',
-      storyPrompt: 'Reality is unstable.',
+      summary: 'Reality is unstable.',
       psychologicalStatus: 'Fragmented',
-      systemHealth: 100,
-    };
+    });
     mockStoryHistory = [{ id: 'q1', text: 'Initial state', images: {} }];
     (generateWithSelectedModel as jest.Mock).mockClear();
   });
@@ -343,13 +370,12 @@ describe('MetaConsciousnessEngine', () => {
 
   beforeEach(() => {
     engine = new MetaConsciousnessEngine();
-    mockWorldState = {
+    mockWorldState = createWorldState({
       protagonist: 'Player',
       setting: 'The game',
-      storyPrompt: 'The player is playing.',
-      psychologicalStatus: 'Aware',
-      systemHealth: 100,
-    };
+      summary: 'The player is playing.',
+      psychologicalStatus: 'Uneasy',
+    });
     (generateWithSelectedModel as jest.Mock).mockClear();
   });
 
@@ -478,13 +504,11 @@ describe('AdaptiveNarrativeDNA', () => {
 
   beforeEach(() => {
     engine = new AdaptiveNarrativeDNA();
-    mockWorldState = {
+    mockWorldState = createWorldState({
       protagonist: 'The Subject',
       setting: 'A laboratory',
-      storyPrompt: 'An experiment is underway.',
-      psychologicalStatus: 'Stable',
-      systemHealth: 100,
-    };
+      summary: 'An experiment is underway.',
+    });
   });
 
   it('should evolve narrative DNA based on player choice and response time', () => {

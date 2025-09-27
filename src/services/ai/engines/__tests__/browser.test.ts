@@ -2,6 +2,36 @@ import { NeuralEchoChambers } from '../NeuralEchoChambers';
 import { BreakingFifthWall } from '../BreakingFifthWall';
 import { WorldState } from '../../../../types';
 
+const createWorldState = (overrides: Partial<WorldState> = {}): WorldState => ({
+  protagonist: 'Test Protagonist',
+  setting: 'Test Setting',
+  dilemma: 'Test Dilemma',
+  summary: 'Test summary',
+  psychologicalStatus: 'Stable',
+  systemHealth: 100,
+  uiDistortion: {
+    transform: 'none',
+    filter: 'none',
+    transition: 'none',
+  },
+  genreConfig: {
+    id: 'test-genre',
+    name: 'Test Genre',
+    description: 'A test genre for browser engine specs.',
+    style: 'psych-horror',
+    theme: {
+      '--background-color': '#000000',
+      '--text-color': '#ffffff',
+      '--accent-color': '#ff00ff',
+      '--font-family': 'Inter, sans-serif',
+    },
+    startScreenImagePrompt: 'test start prompt',
+    conceptPrompt: 'test concept prompt',
+    aiSystemInstruction: 'test ai system instruction',
+  },
+  ...overrides,
+});
+
 /**
  * Mock for browser storage APIs (localStorage and sessionStorage).
  * This allows testing of persistence features in a Node.js environment.
@@ -38,13 +68,13 @@ describe('NeuralEchoChambers', () => {
     (window.localStorage as any).clear();
     (window.sessionStorage as any).clear();
     engine = new NeuralEchoChambers();
-    mockWorldState = {
+    mockWorldState = createWorldState({
       protagonist: 'The Echo',
       setting: 'A recurring dream',
-      storyPrompt: 'You have been here before.',
-      psychologicalStatus: 'Déjà vu',
+      summary: 'You have been here before.',
+      psychologicalStatus: 'Uneasy',
       systemHealth: 80,
-    };
+    });
   });
 
   it('should initialize with an empty state if no persisted data exists', () => {
@@ -86,13 +116,13 @@ describe('BreakingFifthWall', () => {
 
   beforeEach(() => {
     engine = new BreakingFifthWall();
-    mockWorldState = {
+    mockWorldState = createWorldState({
       protagonist: 'The User',
       setting: 'The Browser',
-      storyPrompt: 'The game is watching you.',
-      psychologicalStatus: 'Unsettled',
+      summary: 'The game is watching you.',
+      psychologicalStatus: 'Paranoid',
       systemHealth: 40,
-    };
+    });
     // Mock document properties and methods.
     document.title = 'Apophenia';
     const favicon = { href: '' };

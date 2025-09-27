@@ -1,5 +1,21 @@
 import { WorldState } from '../../../types';
 
+interface EchoMemory {
+  choicePattern: string;
+  psychologicalTrigger: string;
+  fearResponse: number;
+  timestamp: number;
+}
+
+type SessionMemoryEntry = {
+  choice: string;
+  context: string;
+  timestamp: number;
+  psychState: WorldState['psychologicalStatus'];
+  protagonist: string;
+  systemHealth: number;
+};
+
 /**
  * NEURAL ECHO CHAMBERS
  * Persistent memory across sessions that creates "echoes" of past decisions
@@ -138,12 +154,3 @@ export class NeuralEchoChambers {
     return window.sessionStorage;
   }
 }
-
-type SessionMemoryEntry = {
-  choice: string;
-  context: string;
-  timestamp: number;
-  psychState: WorldState['psychologicalStatus'];
-  protagonist: string;
-  systemHealth: number;
-};

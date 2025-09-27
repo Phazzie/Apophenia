@@ -125,15 +125,22 @@ export class AdaptiveNarrativeDNA {
   }
 
   private selectFromProbabilities(probabilities: number[]): number {
+    if (probabilities.length === 0) return 0;
+    
+    // Ensure probabilities sum to 1 for proper selection
+    const sum = probabilities.reduce((acc, prob) => acc + prob, 0);
+    if (sum === 0) return 0;
+    
+    const normalizedProbs = probabilities.map(prob => prob / sum);
     const random = Math.random();
     let cumulative = 0;
 
-    for (let i = 0; i < probabilities.length; i++) {
-      cumulative += probabilities[i];
+    for (let i = 0; i < normalizedProbs.length; i++) {
+      cumulative += normalizedProbs[i];
       if (random <= cumulative) return i;
     }
 
-    return probabilities.length - 1;
+    return normalizedProbs.length - 1;
   }
 
   public getGeneration(): number {

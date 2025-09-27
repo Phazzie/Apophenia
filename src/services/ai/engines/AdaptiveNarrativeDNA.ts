@@ -140,7 +140,7 @@ export class AdaptiveNarrativeDNA {
       if (random <= cumulative) return i;
     }
 
-    return normalizedProbs.length - 1;
+    return probabilities.length - 1;
   }
 
   public getGeneration(): number {

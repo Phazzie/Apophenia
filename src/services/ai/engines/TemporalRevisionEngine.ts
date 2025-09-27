@@ -44,6 +44,10 @@ export class TemporalRevisionEngine {
       return storyHistory;
     }
 
+    if (this.isServerSide()) {
+      return storyHistory;
+    }
+
     // AI analyzes if current choice should alter past events
     const shouldRevise = await this.analyzeTemporalImpact(currentChoice, worldState);
 
@@ -158,5 +162,9 @@ export class TemporalRevisionEngine {
     }
     // Default: introduce a subtle contradiction with randomized corruption
     return `${originalText} (${getCorruptionMessage()})`;
+  }
+
+  private isServerSide(): boolean {
+    return typeof window === 'undefined';
   }
 }

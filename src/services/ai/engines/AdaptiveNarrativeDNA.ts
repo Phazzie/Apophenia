@@ -22,6 +22,8 @@ export class AdaptiveNarrativeDNA {
     generation: 1,
   };
 
+  private static readonly MUTABLE_GENE_KEYS = ['paceGenes', 'tensionGenes', 'choiceGenes'] as const;
+
   evolveNarrative(playerChoice: string, responseTime: number, worldState: WorldState): void {
     const selectionPressure = this.calculateSelectionPressure(playerChoice, responseTime, worldState);
     this.mutateGenes(selectionPressure);
@@ -81,19 +83,13 @@ export class AdaptiveNarrativeDNA {
   private mutateGenes(pressure: number): void {
     const mutationRate = Math.abs(pressure) * 0.1;
 
-    // Mutate pace genes
-    this.narrativeDNA.paceGenes = this.narrativeDNA.paceGenes.map(gene =>
-      this.mutateGene(gene, mutationRate, pressure)
-    );
+    AdaptiveNarrativeDNA.MUTABLE_GENE_KEYS.forEach(key => {
+      this.narrativeDNA[key] = this.mutateGeneSet(this.narrativeDNA[key], mutationRate, pressure);
+    });
+  }
 
-    // Mutate other gene sets
-    this.narrativeDNA.tensionGenes = this.narrativeDNA.tensionGenes.map(gene =>
-      this.mutateGene(gene, mutationRate, pressure)
-    );
-
-    this.narrativeDNA.choiceGenes = this.narrativeDNA.choiceGenes.map(gene =>
-      this.mutateGene(gene, mutationRate, pressure)
-    );
+  private mutateGeneSet(genes: number[], mutationRate: number, pressure: number): number[] {
+    return genes.map(gene => this.mutateGene(gene, mutationRate, pressure));
   }
 
   private mutateGene(gene: number, mutationRate: number, pressure: number): number {
@@ -106,9 +102,9 @@ export class AdaptiveNarrativeDNA {
 
   private adaptiveSelection(): void {
     // Ensure gene values sum appropriately for probability distributions
-    this.narrativeDNA.paceGenes = this.normalizeGenes(this.narrativeDNA.paceGenes);
-    this.narrativeDNA.tensionGenes = this.normalizeGenes(this.narrativeDNA.tensionGenes);
-    this.narrativeDNA.choiceGenes = this.normalizeGenes(this.narrativeDNA.choiceGenes);
+    AdaptiveNarrativeDNA.MUTABLE_GENE_KEYS.forEach(key => {
+      this.narrativeDNA[key] = this.normalizeGenes(this.narrativeDNA[key]);
+    });
   }
 
   private normalizeGenes(genes: number[]): number[] {
@@ -138,5 +134,9 @@ export class AdaptiveNarrativeDNA {
     }
 
     return probabilities.length - 1;
+  }
+
+  public getGeneration(): number {
+    return this.narrativeDNA.generation;
   }
 }

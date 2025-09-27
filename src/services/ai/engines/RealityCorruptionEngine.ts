@@ -2,21 +2,28 @@ import { REVOLUTIONARY_FEATURES } from '../../config';
 import { WorldState } from '../../../types';
 import { generateWithSelectedModel } from '../unifiedAIService';
 
+type CorruptionUiEffects = {
+  filter: string;
+  transform: string;
+  opacity: number;
+};
+
+export type RealityCorruptionResult = {
+  uiEffects: CorruptionUiEffects;
+  corruptionLevel: number;
+  newEffects: string[];
+};
+
 /**
  * REALITY CORRUPTION ENGINE
  * Gradually corrupts the game interface based on story choices
  */
 export class RealityCorruptionEngine {
   private corruptionLevel: number = 0;
-  private corruptionEffects: string[] = [];
 
-  async processCorruption(choice: string, worldState: WorldState): Promise<{
-    uiEffects: any;
-    corruptionLevel: number;
-    newEffects: string[];
-  }> {
+  async processCorruption(choice: string, worldState: WorldState): Promise<RealityCorruptionResult> {
     if (!REVOLUTIONARY_FEATURES.REALITY_CORRUPTION.enabled) {
-      return { uiEffects: {}, corruptionLevel: 0, newEffects: [] };
+      return { uiEffects: this.calculateUIEffects(), corruptionLevel: 0, newEffects: [] };
     }
 
     // Increase corruption based on choice type
@@ -24,7 +31,7 @@ export class RealityCorruptionEngine {
       this.corruptionLevel += 0.1;
     }
 
-    const maxCorruption = REVOLUTIONARY_FEATURES.REALITY_CORRUPTION.maxCorruption;
+    const { maxCorruption } = REVOLUTIONARY_FEATURES.REALITY_CORRUPTION;
     this.corruptionLevel = Math.min(this.corruptionLevel, maxCorruption);
 
     const newEffects = await this.generateCorruptionEffects();
@@ -56,7 +63,7 @@ export class RealityCorruptionEngine {
     return [];
   }
 
-  private calculateUIEffects(): any {
+  private calculateUIEffects(): CorruptionUiEffects {
     return {
       filter: `hue-rotate(${this.corruptionLevel * 180}deg) brightness(${1 - this.corruptionLevel * 0.3})`,
       transform: `scale(${1 + this.corruptionLevel * 0.02}) rotate(${this.corruptionLevel * 2}deg)`,

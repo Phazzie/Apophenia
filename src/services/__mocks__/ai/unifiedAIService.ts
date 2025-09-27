@@ -28,11 +28,19 @@ export const generateNextStepWithSelectedModel = jest.fn().mockResolvedValue([
   }
 ]);
 
-export const generateWithSelectedModel = jest.fn().mockResolvedValue([
-    {
+export const generateWithSelectedModel = jest.fn().mockImplementation(
+  async (_system: string, _prompt: string, domain: string = 'story') => {
+    if (domain !== 'story') {
+      throw new Error(`Unexpected domain for generateWithSelectedModel: ${domain}`);
+    }
+
+    return [
+      {
         type: 'displayText',
         payload: {
-            content: 'Mocked AI response'
+          content: 'Mocked AI response'
         }
-    }
-]);
+      }
+    ];
+  }
+);

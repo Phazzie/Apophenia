@@ -3,9 +3,9 @@ import {
     generateImageFlow,
     processAdvancedImageGeneration,
 } from './ai/secureGenkit';
-import { 
-    generateConceptWithSelectedModel, 
-    generateNextStepWithSelectedModel 
+import {
+    generateConceptWithSelectedModel,
+    generateNextStepWithSelectedModel,
 } from './ai/unifiedAIService';
 import { summarizeHistoryFlow } from './flows/summaryFlow';
 import {
@@ -19,6 +19,13 @@ import {
   narrativeDNA,
   fifthWallBreaker,
 } from './ai/engines';
+import type { RealityCorruptionResult } from './ai/engines/RealityCorruptionEngine';
+
+type NarrativeEvolution = {
+  generation: number;
+  psychProfile: string;
+  hiddenMotivations: string[];
+};
 
 /**
  * Revolutionary Enhanced Game Service
@@ -35,10 +42,10 @@ export const getNextStep = async (
   revisedHistory?: StorySegment[];
   metaMessage?: string;
   quantumShift?: boolean;
-  corruptionEffects?: any;
+  corruptionEffects?: RealityCorruptionResult;
   echoMessage?: string;
   semanticInsight?: string;
-  narrativeEvolution?: any;
+  narrativeEvolution?: NarrativeEvolution;
 }> => {
   console.log('Processing next step for player choice:', playerChoice);
   console.log('World state:', { protagonist: worldState.protagonist, psychologicalStatus: worldState.psychologicalStatus });
@@ -55,12 +62,12 @@ export const getNextStep = async (
 
     // 2. SEMANTIC CHOICE ARCHAEOLOGY: Deep psychological analysis
     console.log('Performing semantic choice archaeology...');
-    const allChoices: string[] = []; // For now, just use empty array as choices aren't stored in history
+    const allChoices: string[] = [playerChoice];
     const semanticAnalysis = semanticArchaeology.analyzeChoiceSemantics(playerChoice, allChoices);
 
     // 3. ADAPTIVE HORROR: Enhanced with semantic insights
     console.log('Analyzing player choice for adaptive horror...');
-    adaptiveHorror.analyzePlayerChoice(playerChoice, 'game progression');
+    await adaptiveHorror.analyzePlayerChoice(playerChoice, 'game progression');
     
     // 4. TEMPORAL REVISION: Check if choice should alter past events
     console.log('Processing temporal revision...');
@@ -101,8 +108,8 @@ export const getNextStep = async (
 
     // 9. ADAPTIVE NARRATIVE DNA: Evolve story structure
     console.log('Evolving narrative DNA...');
-    const responseStartTime = Date.now();
-    narrativeDNA.evolveNarrative(playerChoice, responseStartTime, worldState);
+    const responseTimeMs = 5000; // TODO: Replace with real measured response latency when available.
+    narrativeDNA.evolveNarrative(playerChoice, responseTimeMs, worldState);
     
     // 10. ENHANCED AI GENERATION: Generate next story beat with all personalizations
     console.log('Generating comprehensive personalized horror prompt...');
@@ -136,11 +143,11 @@ export const getNextStep = async (
       revisedHistory: revisedHistory !== history ? revisedHistory : undefined,
       metaMessage: metaMessage || undefined,
       quantumShift: quantumResult.quantumShift,
-  corruptionEffects: corruptionResult.corruptionLevel > 0 ? corruptionResult : undefined,
+      corruptionEffects: corruptionResult.corruptionLevel > 0 ? corruptionResult : undefined,
       echoMessage: echoMessage || undefined,
       semanticInsight: semanticAnalysis.semanticInsight,
       narrativeEvolution: {
-        generation: (narrativeDNA as any).narrativeDNA?.generation || 1,
+        generation: narrativeDNA.getGeneration(),
         psychProfile: semanticAnalysis.psychProfile,
         hiddenMotivations: semanticAnalysis.hiddenMotivations,
       },
@@ -157,7 +164,7 @@ export const getNextStep = async (
           type: 'displayText',
           payload: {
             content: "The fabric of reality fractures... your choices have consequences beyond comprehension.",
-            segmentId: crypto.randomUUID()
+            segmentId: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `seg-${Date.now()}`
           }
         },
         {

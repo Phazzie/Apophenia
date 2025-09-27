@@ -6,7 +6,7 @@ import { WorldState } from '../../../types';
  * Manipulates the browser environment itself for horror effects
  */
 export class BreakingFifthWall {
-  private originalTitle: string = document.title;
+  private originalTitle: string = 'Apophenia';
   private titleInterval: NodeJS.Timeout | null = null;
   private faviconInterval: NodeJS.Timeout | null = null;
   private isActive: boolean = false;
@@ -14,20 +14,31 @@ export class BreakingFifthWall {
   activateBreakage(intensity: number, worldState: WorldState): void {
     if (this.isActive || intensity < 0.3) return;
 
+    const doc = this.getDocument();
+    if (!doc) {
+      console.warn('BreakingFifthWall: document not available, skipping activation');
+      return;
+    }
+
+    this.originalTitle = doc.title || this.originalTitle;
+
     this.isActive = true;
     console.log('💥 FIFTH WALL BREACH: Browser manipulation activated');
 
     // Progressive browser effects based on intensity
-    if (intensity > 0.3) this.manipulateTitle(worldState);
-    if (intensity > 0.5) this.manipulateFavicon();
-    if (intensity > 0.7) this.manipulateWindow();
+    if (intensity > 0.3) this.manipulateTitle(doc, worldState);
+    if (intensity > 0.5) this.manipulateFavicon(doc);
+    if (intensity > 0.7) this.manipulateWindow(doc);
   }
 
   deactivateBreakage(): void {
     if (!this.isActive) return;
 
     this.isActive = false;
-    document.title = this.originalTitle;
+    const doc = this.getDocument();
+    if (doc) {
+      doc.title = this.originalTitle;
+    }
 
     if (this.titleInterval) {
       clearInterval(this.titleInterval);
@@ -42,7 +53,7 @@ export class BreakingFifthWall {
     console.log('💥 Fifth Wall effects deactivated');
   }
 
-  private manipulateTitle(worldState: WorldState): void {
+  private manipulateTitle(doc: Document, worldState: WorldState): void {
     const corruptedTitles = [
       `Apophenia - ${worldState.protagonist} IS BEING WATCHED`,
       'Apophenia - YOU ARE NOT ALONE',
@@ -56,16 +67,16 @@ export class BreakingFifthWall {
     let titleIndex = 0;
     this.titleInterval = setInterval(() => {
       if (Math.random() < 0.3) { // 30% chance to glitch
-        document.title = corruptedTitles[titleIndex % corruptedTitles.length];
+        doc.title = corruptedTitles[titleIndex % corruptedTitles.length];
         titleIndex++;
       } else {
-        document.title = this.originalTitle;
+        doc.title = this.originalTitle;
       }
     }, 2000 + Math.random() * 3000); // Random interval 2-5 seconds
   }
 
-  private manipulateFavicon(): void {
-    const faviconElement = document.querySelector('link[rel="icon"]') as HTMLLinkElement;
+  private manipulateFavicon(doc: Document): void {
+    const faviconElement = doc.querySelector('link[rel="icon"]') as HTMLLinkElement | null;
     if (!faviconElement) return;
 
     const originalFavicon = faviconElement.href;
@@ -86,18 +97,44 @@ export class BreakingFifthWall {
     }, 5000 + Math.random() * 5000); // Random interval 5-10 seconds
   }
 
-  private manipulateWindow(): void {
+  private manipulateWindow(doc: Document): void {
+    const win = this.getWindow();
+    if (!win) {
+      return;
+    }
     // Subtle window effects that don't break user experience
-    const originalScrollBehavior = document.documentElement.style.scrollBehavior;
+    const originalScrollBehavior = doc.documentElement?.style.scrollBehavior ?? '';
 
     // Occasionally make scrolling slightly jerky
     setTimeout(() => {
-      document.documentElement.style.scrollBehavior = 'auto';
-      window.scrollBy(0, Math.random() * 2 - 1); // Tiny random scroll
+      if (!doc.documentElement) {
+        return;
+      }
+
+      doc.documentElement.style.scrollBehavior = 'auto';
+      win.scrollBy(0, Math.random() * 2 - 1); // Tiny random scroll
 
       setTimeout(() => {
-        document.documentElement.style.scrollBehavior = originalScrollBehavior;
+        if (!doc.documentElement) {
+          return;
+        }
+
+        doc.documentElement.style.scrollBehavior = originalScrollBehavior;
       }, 100);
     }, Math.random() * 10000 + 5000); // Random delay 5-15 seconds
+  }
+
+  private getDocument(): Document | null {
+    if (typeof document === 'undefined') {
+      return null;
+    }
+    return document;
+  }
+
+  private getWindow(): Window | null {
+    if (typeof window === 'undefined') {
+      return null;
+    }
+    return window;
   }
 }

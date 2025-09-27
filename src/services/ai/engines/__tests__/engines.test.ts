@@ -11,6 +11,14 @@ import { StorySegment, WorldState } from '../../../../types';
 // Mock the unified AI service to isolate the tests from actual AI calls.
 jest.mock('../../unifiedAIService');
 
+const expectStoryDomainOnCalls = () => {
+  const calls = (generateWithSelectedModel as jest.Mock).mock.calls;
+  expect(calls.length).toBeGreaterThan(0);
+  calls.forEach(call => {
+    expect(call[2]).toBe('story');
+  });
+};
+
 const createWorldState = (overrides: Partial<WorldState> = {}): WorldState => ({
   protagonist: 'Test Protagonist',
   setting: 'Test Setting',
@@ -82,7 +90,8 @@ describe('TemporalRevisionEngine', () => {
 
     const revisedHistory = await engine.reviseHistory('A significant choice', mockStoryHistory, mockWorldState);
 
-    expect(generateWithSelectedModel).toHaveBeenCalled();
+  expect(generateWithSelectedModel).toHaveBeenCalled();
+  expectStoryDomainOnCalls();
     expect(revisedHistory.some(segment => segment.text === revisedText)).toBe(true);
     expect(revisedHistory.some(segment => segment.isRevised)).toBe(true);
 
@@ -101,7 +110,8 @@ describe('TemporalRevisionEngine', () => {
 
     const revisedHistory = await engine.reviseHistory('Another choice', mockStoryHistory, mockWorldState);
 
-    expect(generateWithSelectedModel).toHaveBeenCalled();
+  expect(generateWithSelectedModel).toHaveBeenCalled();
+  expectStoryDomainOnCalls();
     expect(revisedHistory.some(segment => segment.text.includes('MEMORY FRAGMENT CORRUPTED'))).toBe(true);
     expect(revisedHistory.some(segment => segment.isRevised)).toBe(true);
 
@@ -163,7 +173,8 @@ describe('RealityCorruptionEngine', () => {
 
     const result = await engine.processCorruption('Embrace the void', mockWorldState);
 
-    expect(generateWithSelectedModel).toHaveBeenCalled();
+  expect(generateWithSelectedModel).toHaveBeenCalled();
+  expectStoryDomainOnCalls();
     expect(result.newEffects).toEqual(['text-glitch', 'image-distortion']);
     expect(result.corruptionLevel).toBeGreaterThan(0);
   });
@@ -177,7 +188,8 @@ describe('RealityCorruptionEngine', () => {
 
     const result = await engine.processCorruption('Resist the void', mockWorldState);
 
-    expect(generateWithSelectedModel).toHaveBeenCalled();
+  expect(generateWithSelectedModel).toHaveBeenCalled();
+  expectStoryDomainOnCalls();
     expect(result.newEffects).toEqual([]);
   });
 
@@ -223,7 +235,8 @@ describe('AdaptiveHorrorEngine', () => {
 
     await engine.analyzePlayerChoice('I chose to hide', 'A dark room');
 
-    expect(generateWithSelectedModel).toHaveBeenCalled();
+  expect(generateWithSelectedModel).toHaveBeenCalled();
+  expectStoryDomainOnCalls();
     expect(engine.getPlayerPsychProfile()).toContain('isolation, paranoia');
   });
 
@@ -236,7 +249,8 @@ describe('AdaptiveHorrorEngine', () => {
 
     await engine.analyzePlayerChoice('I chose to fight', 'A monster');
 
-    expect(generateWithSelectedModel).toHaveBeenCalled();
+  expect(generateWithSelectedModel).toHaveBeenCalled();
+  expectStoryDomainOnCalls();
     expect(engine.getPlayerPsychProfile()).toContain('unknown fears');
   });
 
@@ -318,6 +332,7 @@ describe('QuantumNarrativeEngine', () => {
     const result = await engine.processQuantumChoice('A reality-bending choice', mockStoryHistory, mockWorldState);
 
     expect(generateWithSelectedModel).toHaveBeenCalled();
+    expectStoryDomainOnCalls();
     // In this test, we are not triggering a shift, just the analysis.
     expect(result.quantumShift).toBeUndefined();
   });
@@ -332,6 +347,7 @@ describe('QuantumNarrativeEngine', () => {
     const result = await engine.processQuantumChoice('A choice of little consequence', mockStoryHistory, mockWorldState);
 
     expect(generateWithSelectedModel).toHaveBeenCalled();
+    expectStoryDomainOnCalls();
     expect(result.quantumShift).toBeUndefined();
   });
 
@@ -397,6 +413,7 @@ describe('MetaConsciousnessEngine', () => {
     const result = await engine.checkForMetaEvent([], mockWorldState);
     expect(result).toBe(metaMessage);
     expect(generateWithSelectedModel).toHaveBeenCalled();
+    expectStoryDomainOnCalls();
 
     jest.spyOn(Math, 'random').mockRestore();
   });
@@ -414,6 +431,7 @@ describe('MetaConsciousnessEngine', () => {
     const result = await engine.checkForMetaEvent([], mockWorldState);
     expect(result).toBeNull();
     expect(generateWithSelectedModel).toHaveBeenCalled();
+    expectStoryDomainOnCalls();
 
     jest.spyOn(Math, 'random').mockRestore();
   });
@@ -449,8 +467,9 @@ describe('MetaConsciousnessEngine', () => {
 
     // Try to trigger the event again.
     await engine.checkForMetaEvent([], mockWorldState);
-    // Now the AI should have been called a second time.
-    expect(generateWithSelectedModel).toHaveBeenCalledTimes(2);
+  // Now the AI should have been called a second time.
+  expect(generateWithSelectedModel).toHaveBeenCalledTimes(2);
+  expectStoryDomainOnCalls();
 
     jest.useRealTimers();
     jest.spyOn(Math, 'random').mockRestore();

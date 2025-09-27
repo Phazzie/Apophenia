@@ -25,7 +25,7 @@ export class QuantumNarrativeEngine {
     this.narrativeThreads.set(this.activeThread, currentHistory);
 
     // Check for quantum instability
-    this.quantumStability -= 0.05;
+    this.quantumStability = Math.max(0, this.quantumStability - 0.05);
     const shouldShift = this.quantumStability < 0.7 && Math.random() < 0.3;
 
     if (shouldShift && this.narrativeThreads.size > 1) {

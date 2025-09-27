@@ -45,7 +45,17 @@ export class NeuralEchoChambers {
     };
 
     this.sessionMemory.get(sessionId)?.push(memory);
-    this.analyzeForCrossSessionPatterns(memory);
+    
+    // Convert to EchoMemory for cross-session analysis
+    const echoMemory: EchoMemory = {
+      choice,
+      context,
+      timestamp: memory.timestamp,
+      psychologicalStatus: memory.psychState,
+      protagonist: memory.protagonist,
+      systemHealth: memory.systemHealth,
+    };
+    this.analyzeForCrossSessionPatterns(echoMemory);
     this.persistMemory();
   }
 
@@ -82,12 +92,12 @@ export class NeuralEchoChambers {
     return sessionId;
   }
 
-  private analyzeForCrossSessionPatterns(memory: SessionMemoryEntry): void {
+  private analyzeForCrossSessionPatterns(memory: EchoMemory): void {
     const patterns = [
       memory.choice.toLowerCase().includes('trust') ? 'trust-seeker' : null,
       memory.choice.toLowerCase().includes('alone') ? 'isolation-tendency' : null,
       memory.choice.toLowerCase().includes('fight') ? 'aggressive-responder' : null,
-      memory.psychState === 'Paranoid' ? 'paranoia-spiral' : null,
+      memory.psychologicalStatus === 'Paranoid' ? 'paranoia-spiral' : null,
     ].filter(Boolean);
 
     patterns.forEach(pattern => {
@@ -138,6 +148,15 @@ export class NeuralEchoChambers {
     return window.sessionStorage;
   }
 }
+
+/**
+ * Echo memory type with proper type safety
+ */
+export type EchoMemory = {
+  choice: string;
+  context: string;
+  timestamp: number;
+} & Pick<WorldState, 'psychologicalStatus' | 'protagonist' | 'systemHealth'>;
 
 type SessionMemoryEntry = {
   choice: string;

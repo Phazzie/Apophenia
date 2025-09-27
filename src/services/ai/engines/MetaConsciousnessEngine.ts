@@ -26,7 +26,7 @@ export class MetaConsciousnessEngine {
       return null;
     }
 
-    this.awarenessLevel += 0.1;
+    this.awarenessLevel = Math.min(this.awarenessLevel + 0.1, 1.0);
     const triggerChance = REVOLUTIONARY_FEATURES.META_CONSCIOUSNESS.triggerProbability +
                          (this.awarenessLevel * 0.05);
 

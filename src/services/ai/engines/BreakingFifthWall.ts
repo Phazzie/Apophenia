@@ -6,9 +6,10 @@ import { WorldState } from '../../../types';
  * Manipulates the browser environment itself for horror effects
  */
 export class BreakingFifthWall {
-  private originalTitle: string = 'Apophenia';
-  private titleInterval: NodeJS.Timeout | null = null;
-  private faviconInterval: NodeJS.Timeout | null = null;
+  private originalTitle: string | null = null;
+  private titleInterval: ReturnType<typeof setInterval> | null = null;
+  private faviconInterval: ReturnType<typeof setInterval> | null = null;
+  private windowTimeouts: ReturnType<typeof setTimeout>[] = [];
   private isActive: boolean = false;
 
   activateBreakage(intensity: number, worldState: WorldState): void {
@@ -20,7 +21,9 @@ export class BreakingFifthWall {
       return;
     }
 
-    this.originalTitle = doc.title || this.originalTitle;
+    if (this.originalTitle === null) {
+      this.originalTitle = doc.title || 'Apophenia';
+    }
 
     this.isActive = true;
     console.log('💥 FIFTH WALL BREACH: Browser manipulation activated');
@@ -36,7 +39,7 @@ export class BreakingFifthWall {
 
     this.isActive = false;
     const doc = this.getDocument();
-    if (doc) {
+    if (doc && this.originalTitle !== null) {
       doc.title = this.originalTitle;
     }
 
@@ -49,6 +52,10 @@ export class BreakingFifthWall {
       clearInterval(this.faviconInterval);
       this.faviconInterval = null;
     }
+
+    // Clear all window manipulation timeouts
+    this.windowTimeouts.forEach(timeout => clearTimeout(timeout));
+    this.windowTimeouts = [];
 
     console.log('💥 Fifth Wall effects deactivated');
   }
@@ -70,7 +77,7 @@ export class BreakingFifthWall {
         doc.title = corruptedTitles[titleIndex % corruptedTitles.length];
         titleIndex++;
       } else {
-        doc.title = this.originalTitle;
+        doc.title = this.originalTitle || 'Apophenia';
       }
     }, 2000 + Math.random() * 3000); // Random interval 2-5 seconds
   }
@@ -106,7 +113,7 @@ export class BreakingFifthWall {
     const originalScrollBehavior = doc.documentElement?.style.scrollBehavior ?? '';
 
     // Occasionally make scrolling slightly jerky
-    setTimeout(() => {
+    const timeout1 = setTimeout(() => {
       if (!doc.documentElement) {
         return;
       }
@@ -114,14 +121,18 @@ export class BreakingFifthWall {
       doc.documentElement.style.scrollBehavior = 'auto';
       win.scrollBy(0, Math.random() * 2 - 1); // Tiny random scroll
 
-      setTimeout(() => {
+      const timeout2 = setTimeout(() => {
         if (!doc.documentElement) {
           return;
         }
 
         doc.documentElement.style.scrollBehavior = originalScrollBehavior;
       }, 100);
+      
+      this.windowTimeouts.push(timeout2);
     }, Math.random() * 10000 + 5000); // Random delay 5-15 seconds
+    
+    this.windowTimeouts.push(timeout1);
   }
 
   private getDocument(): Document | null {

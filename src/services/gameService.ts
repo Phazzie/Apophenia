@@ -104,6 +104,8 @@ export const getNextStep = async (
     const totalCorruption = corruptionResult.corruptionLevel + (worldState.systemHealth ? (100 - worldState.systemHealth) / 100 * 0.5 : 0);
     if (totalCorruption > 0.3) {
       fifthWallBreaker.activateBreakage(totalCorruption, worldState);
+    } else {
+      fifthWallBreaker.deactivateBreakage();
     }
 
     // 9. ADAPTIVE NARRATIVE DNA: Evolve story structure

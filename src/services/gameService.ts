@@ -1,3 +1,11 @@
+/**
+ * @file gameService.ts
+ * @description The master game service that orchestrates the entire gameplay loop.
+ * This service integrates all 8 of the revolutionary AI engines to process a player's
+ * choice and generate the next state of the game, creating a deeply dynamic and
+ * personalized cosmic horror experience.
+ */
+
 import { Command, GenreConfig, StorySegment, WorldState } from '../types';
 import {
     generateImageFlow,
@@ -20,10 +28,26 @@ import {
 } from './ai/revolutionaryFeatures';
 
 /**
- * Revolutionary Enhanced Game Service
- * Integrates cutting-edge AI features for unprecedented cosmic horror experience
+ * The core function of the game. It processes the player's choice by running it
+ * through the full pipeline of 8 revolutionary AI engines.
+ *
+ * The process is as follows:
+ * 1.  **Adaptive Horror**: Calculates the new horror intensity for the turn.
+ * 2.  **Temporal Revision**: Checks if the choice should retroactively alter past events.
+ * 3.  **Quantum Narrative**: Processes potential shifts to alternate timelines.
+ * 4.  **Meta-Consciousness**: Checks if the AI should break the fourth wall.
+ * 5.  **Reality Corruption**: Calculates and applies UI distortion effects.
+ * 6.  **Neural Echoes**: Stores cross-session memory of player patterns.
+ * 7.  **Semantic Archaeology**: Performs deep psychological analysis of the choice.
+ * 8.  **Narrative DNA**: Evolves the story's genetic makeup based on the choice.
+ * 9.  **AI Generation**: Finally, calls the selected AI model with a prompt enriched by the outputs of the other engines to generate the next set of game commands.
+ *
+ * @param {string} playerChoice - The text of the player's most recent choice.
+ * @param {WorldState} worldState - The current state of the game world.
+ * @param {StorySegment[]} history - The full narrative history.
+ * @param {GenreConfig} genreConfig - The configuration for the current genre.
+ * @returns {Promise<object>} A promise that resolves to an object containing the generated commands and the results from each revolutionary engine.
  */
-
 export const getNextStep = async (
   playerChoice: string,
   worldState: WorldState,
@@ -211,6 +235,13 @@ Reality Corruption: ${corruptionResult.corruptionLevel}`
   }
 };
 
+/**
+ * A pass-through function that calls the `summarizeHistoryFlow` to generate a summary of the narrative.
+ *
+ * @param {WorldState} worldState - The current state of the game world.
+ * @param {StorySegment} lastSegment - The most recent story segment.
+ * @returns {Promise<string>} A promise that resolves to the generated summary.
+ */
 export const summarizeHistory = async (
   worldState: WorldState,
   lastSegment: StorySegment
@@ -218,6 +249,14 @@ export const summarizeHistory = async (
   return await summarizeHistoryFlow(worldState, lastSegment);
 };
 
+/**
+ * Kicks off the process of generating a new story concept.
+ * It calls the unified AI service, which routes the request to the appropriate model.
+ * Includes a robust fallback mechanism in case of errors.
+ *
+ * @param {GenreConfig} genreConfig - The configuration for the desired genre.
+ * @returns {Promise<{ protagonist: string; setting: string; dilemma: string }>} A promise that resolves to the generated story concept.
+ */
 export const generateConcept = async (
   genreConfig: GenreConfig
 ): Promise<{ protagonist: string; setting: string; dilemma: string }> => {
@@ -231,7 +270,7 @@ export const generateConcept = async (
     console.error('Error generating concept:', error);
     console.error('Genre config:', genreConfig);
     
-    // Return fallback concept
+    // Return a thematic fallback concept on failure
     return {
       protagonist: 'A person confronting the unknowable depths of reality',
       setting: 'A place where the boundaries between dream and nightmare blur',
@@ -240,13 +279,23 @@ export const generateConcept = async (
   }
 };
 
+/**
+ * A pass-through function to generate a single image for a given prompt.
+ *
+ * @param {string} prompt - The prompt to generate an image for.
+ * @returns {Promise<string>} A promise that resolves to the URL of the generated image.
+ */
 export const generateImage = async (prompt: string): Promise<string> => {
   return generateImageFlow(prompt);
 };
 
 /**
- * Revolutionary multi-variation image generation
- * Generates multiple horror image variations for enhanced immersion
+ * Generates multiple, distinct image variations for a single prompt to enhance immersion.
+ * This function concurrently calls the advanced image generation process for each variation.
+ *
+ * @param {string} prompt - The base prompt for the images.
+ * @param {number} [variationCount=3] - The number of variations to generate.
+ * @returns {Promise<string[]>} A promise that resolves to an array of image URLs.
  */
 export const generateMultipleImages = async (
   prompt: string, 
@@ -264,8 +313,14 @@ export const generateMultipleImages = async (
 };
 
 /**
- * Advanced AI Director functionality
- * Uses Gemini 2.5 Pro thinking mode for sophisticated narrative planning
+ * Provides a high-level analysis from the "AI Director" perspective.
+ * In a full implementation, this would use the AI's thinking or analysis capabilities
+ * to provide meta-commentary on the state of the narrative and player psychology.
+ * Currently, it provides a sophisticated mock analysis based on the adaptive horror engine's profile.
+ *
+ * @param {WorldState} worldState - The current world state.
+ * @param {string[]} recentChoices - A list of recent player choices.
+ * @returns {Promise<object>} A promise that resolves to an analysis object from the AI Director.
  */
 export const getAIDirectorAnalysis = async (
   worldState: WorldState,
@@ -278,8 +333,8 @@ export const getAIDirectorAnalysis = async (
 }> => {
   const profile = adaptiveHorror.getPlayerPsychProfile();
   
-  // Advanced AI analysis would go here using Gemini 2.5 Pro thinking mode
-  // For now, provide sophisticated mock analysis
+  // In a full implementation, this would use an advanced AI model's reasoning capabilities.
+  // For now, it provides a sophisticated mock analysis based on the data we have.
   
   return {
     psychologicalProfile: profile,

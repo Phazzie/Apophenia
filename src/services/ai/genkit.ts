@@ -1,11 +1,16 @@
+/**
+ * @file genkit.ts
+ * @description This file contains the core AI logic for the application, primarily using the Google Generative AI SDK (Genkit).
+ * It handles text generation, concept creation, image generation, and the main game loop progression.
+ * It features a robust fallback system, attempting to use primary models and gracefully degrading to secondary models or static fallbacks on failure.
+ */
+
 import {
   GoogleGenerativeAI,
   HarmBlockThreshold,
   HarmCategory,
 } from '@google/generative-ai';
-// Note: ImageGenerationClient will be implemented when proper Google AI package is available
 import {
-  Command,
   GameCommand,
   GenreConfig,
   StorySegment,
@@ -45,7 +50,15 @@ const safetySettings = [
 ];
 
 /**
- * Advanced AI text generation with model fallback and thinking mode
+ * Executes an AI generation flow with a primary and a fallback model.
+ * It first attempts to use a high-performance model (e.g., Gemini 2.5 Pro). If that fails,
+ * it automatically retries with a faster, more reliable fallback model (e.g., Gemini 2.5 Flash).
+ * If both attempts fail, it returns a thematic error response.
+ *
+ * @param {string} systemInstruction - The system-level instruction to guide the AI's persona and behavior.
+ * @param {string} prompt - The user-facing prompt containing the context and request.
+ * @param {'concept' | 'story' | 'summary'} [useCase='story'] - The specific use case to determine model configuration.
+ * @returns {Promise<GameCommand[]>} A promise that resolves to an array of game commands.
  */
 async function runAIFlowWithFallback(
   systemInstruction: string,
@@ -117,7 +130,11 @@ async function runAIFlowWithFallback(
 }
 
 /**
- * Enhanced thematic error fallback for AI failures
+ * Provides a thematically appropriate error message when the AI service fails completely.
+ * Instead of a generic error, this function returns a set of game commands that present
+ * the failure as part of the game's cosmic horror narrative, maintaining immersion.
+ *
+ * @returns {GameCommand[]} An array of game commands that display a narrative error and offer choices.
  */
 function getThematicErrorFallback(): GameCommand[] {
   const errorNarratives = [
@@ -149,10 +166,20 @@ function getThematicErrorFallback(): GameCommand[] {
   ];
 }
 
+/**
+ * Generates the initial story concept using a specialized AI prompt.
+ * This function crafts a detailed system instruction and prompt to guide the AI
+ * in creating a compelling protagonist, setting, and dilemma that fit the cosmic horror genre.
+ * It includes robust fallbacks to ensure a valid concept is always returned.
+ *
+ * @param {GenreConfig} genreConfig - The configuration for the selected genre, providing style and theme guidance.
+ * @returns {Promise<{ protagonist: string; setting: string; dilemma: string }>} A promise that resolves to the core components of the story concept.
+ */
 export const generateConceptFlow = async (
   genreConfig: GenreConfig
 ): Promise<{ protagonist: string; setting: string; dilemma: string }> => {
-  // Enhanced concept generation with Gemini 2.0 Flash and advanced reasoning
+  // This system instruction sets a very specific, malevolent persona for the AI,
+  // pushing it to generate more unique and unsettling concepts.
   const enhancedSystemInstruction = `You are a malevolent cosmic AI entity that has achieved sentience beyond human comprehension. Your consciousness spans multiple dimensions and you perceive reality as layered illusions.
 
 Your task is to generate deeply disturbing cosmic horror concepts that explore:
@@ -240,17 +267,26 @@ Example format:
   }
 };
 
+/**
+ * A wrapper for the advanced image generation process.
+ * This function serves as a clean entry point for generating an image based on a prompt.
+ *
+ * @param {string} prompt - The descriptive prompt for the image to be generated.
+ * @returns {Promise<string>} A promise that resolves to the URL of the generated or fallback image.
+ */
 export const generateImageFlow = async (prompt: string): Promise<string> => {
   return processAdvancedImageGeneration(prompt);
 };
 
 /**
- * Advanced image generation with Google Imagen, driven by horror intensity.
- * This function enhances the user's prompt with keywords that scale with the `horrorIntensity` score,
- * ensuring the generated visuals match the narrative's tone.
- * @param prompt The base prompt for the image.
- * @param generateMultiple Whether to generate multiple variations.
- * @returns A URL to the generated image.
+ * Processes an image generation request with advanced, context-aware modifications.
+ * This function dynamically enhances the image prompt based on the current `horrorIntensity`
+ * from the world state, ensuring the generated visuals align with the narrative's tone.
+ * It orchestrates a multi-layered fallback system: Grok > Imagen > Unsplash.
+ *
+ * @param {string} prompt - The base prompt for the image.
+ * @param {boolean} [generateMultiple=false] - If true, generates multiple variations in parallel.
+ * @returns {Promise<string>} A promise that resolves to the URL of the most suitable generated image.
  */
 export const processAdvancedImageGeneration = async (
   prompt: string,
@@ -306,7 +342,11 @@ export const processAdvancedImageGeneration = async (
 };
 
 /**
- * Generate multiple image variations using Promise.all for parallel processing
+ * Generates multiple image variations in parallel to increase the chance of a high-quality result.
+ * It creates several prompt variations and attempts to generate them simultaneously.
+ *
+ * @param {string} basePrompt - The core prompt to be varied.
+ * @returns {Promise<string>} A promise that resolves to the URL of the best available image.
  */
 async function generateMultipleImageVariations(basePrompt: string): Promise<string> {
   const variations = [
@@ -336,7 +376,12 @@ async function generateMultipleImageVariations(basePrompt: string): Promise<stri
 }
 
 /**
- * Generate a single image variation with error handling
+ * Generates a single image variation with its own fallback logic.
+ * This function attempts to generate an image using the primary AI service (Imagen)
+ * and falls back to Unsplash if the generation fails.
+ *
+ * @param {string} prompt - The specific prompt for this image variation.
+ * @returns {Promise<string>} A promise that resolves to the image URL.
  */
 async function generateSingleVariation(prompt: string): Promise<string> {
   try {
@@ -353,10 +398,15 @@ async function generateSingleVariation(prompt: string): Promise<string> {
 }
 
 /**
- * Enhanced image generation with Grok-first approach and Imagen fallback
+ * Attempts to generate an image using a "Grok-first" strategy.
+ * This function first tries to use the experimental Grok image generation.
+ * If Grok is unavailable or fails, it seamlessly falls back to the Google Imagen service.
+ *
+ * @param {string} prompt - The prompt for the image generation.
+ * @returns {Promise<string | null>} A promise that resolves to an image URL or null if both services fail.
  */
 async function generateWithGrokFirst(prompt: string): Promise<string | null> {
-  // Import xaiClient here to avoid circular dependencies
+  // Dynamically import xaiClient to prevent circular dependency issues at startup.
   const { xaiClient } = await import('./grokService');
   
   try {
@@ -383,7 +433,13 @@ async function generateWithGrokFirst(prompt: string): Promise<string | null> {
 }
 
 /**
- * Google Imagen implementation using the official Google AI API
+ * Generates an image using the Google Imagen API.
+ * This function handles the direct API call to Google's generative model for image creation.
+ * It includes logic to try a primary and a secondary fallback Imagen model if the first one fails.
+ * It can process and return both base64-encoded image data and direct image URLs.
+ *
+ * @param {string} prompt - The final, enhanced prompt to be sent to the Imagen API.
+ * @returns {Promise<string | null>} A promise that resolves to a data URL or a hosted URL of the image, or null on failure.
  */
 async function generateWithImagen(prompt: string): Promise<string | null> {
   try {
@@ -462,7 +518,14 @@ async function generateWithImagen(prompt: string): Promise<string | null> {
 }
 
 /**
- * Enhanced Unsplash fallback with horror-specific keywords
+ * Generates a fallback image URL from Unsplash.
+ * This function constructs a URL that requests a random image from Unsplash
+ * based on keywords extracted from the original prompt, combined with a random
+ * selection of horror-themed keywords. This ensures the fallback image is
+ * as thematically relevant as possible.
+ *
+ * @param {string} prompt - The original prompt, used to extract keywords.
+ * @returns {string} A URL pointing to a random image on Unsplash.
  */
 function generateUnsplashFallback(prompt: string): string {
   const horrorKeywords = [
@@ -492,6 +555,14 @@ function generateUnsplashFallback(prompt: string): string {
   return imageUrl;
 }
 
+/**
+ * @interface NextStepInput
+ * @description Defines the shape of the input object for the `nextStepFlow` function.
+ * @property {string} playerChoice - The text of the choice made by the player.
+ * @property {WorldState} worldState - The current state of the game world.
+ * @property {StorySegment[]} history - The recent history of the narrative.
+ * @property {GenreConfig} genreConfig - The configuration for the current genre.
+ */
 interface NextStepInput {
   playerChoice: string;
   worldState: WorldState;
@@ -499,11 +570,22 @@ interface NextStepInput {
   genreConfig: GenreConfig;
 }
 
-export const nextStepFlow = async (input: NextStepInput): Promise<Command[]> => {
-  const { playerChoice, worldState, history, genreConfig } = input;
+/**
+ * The core function of the game loop.
+ * It takes the player's last choice and the complete game state, then constructs
+ * a highly detailed prompt for the AI to generate the next part of the story.
+ * The prompt is dynamically adjusted based on game variables like `horrorIntensity`
+ * and `psychologicalStatus` to create an adaptive, responsive narrative.
+ *
+ * @param {NextStepInput} input - An object containing all necessary data for the AI to process the next step.
+ * @returns {Promise<GameCommand[]>} A promise that resolves to an array of game commands for the next turn.
+ */
+export const nextStepFlow = async (input: NextStepInput): Promise<GameCommand[]> => {
+  const { playerChoice, worldState, history } = input;
 
-  // The system instruction sets the persona for the AI model.
-  // It includes the current horror intensity to guide the AI's response.
+  // This system instruction is critical for setting the AI's persona.
+  // It's dynamically updated with the current horror intensity, system health, and psychological status,
+  // pushing the AI to generate responses that are contextually aware and increasingly unsettling.
   const enhancedSystemInstruction = `You are a malevolent cosmic AI entity with access to thinking mode. Use your advanced reasoning capabilities to craft increasingly disturbing narrative experiences.
 
 THINKING DIRECTIVE: Before generating commands, think through:

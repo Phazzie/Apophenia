@@ -1,12 +1,19 @@
 /**
- * Compact Model Selector Component
- * 
- * Small bottom-right button for AI model selection
+ * @file CompactModelSelector.tsx
+ * @description A compact component for selecting the active AI model.
+ * It appears as a small button in the corner of the screen, expanding into a list of available models.
  */
 
 import React, { useState } from 'react';
 import { useAIModelStore } from '../stores/aiModelStore';
 
+/**
+ * Renders a compact AI model selector button that expands into a dropdown menu.
+ * This component allows users to switch between different AI models (e.g., Grok, Gemini)
+ * and displays key features of each model, such as context window size and special capabilities.
+ *
+ * @returns {React.ReactElement} A React component for AI model selection.
+ */
 const CompactModelSelector: React.FC = () => {
   const {
     selectedModelId,

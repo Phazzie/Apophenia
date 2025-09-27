@@ -70,7 +70,7 @@ npm run dev
 npm run dev          # Start dev server with HMR (Hot Module Replacement)
 npm run build        # Production build with optimization
 npm run preview      # Preview production build locally
-npm test             # Run Jest test suite (40+ tests)
+npm run test             # Run Jest test suite (35+ tests)
 npm run test:watch   # Run tests in watch mode for TDD
 npm run type-check   # TypeScript strict type checking
 
@@ -141,29 +141,29 @@ Static thematic error responses
 
 ## 🧠 Revolutionary 8-Module AI Engine System
 
-Apophenia features the most advanced AI-driven interactive storytelling system ever created, consisting of **8 interconnected revolutionary engines** that work together to create unprecedented personalized horror experiences:
+Apophenia features an advanced AI-driven interactive storytelling system consisting of **8 interconnected engines** that work together to create unprecedented personalized horror experiences:
 
 ### 🎯 Core Revolutionary Engines
 
-1. **🕰️ Temporal Revision Engine** - AI retroactively modifies past story segments based on current choices, creating "false memory" effects and unreliable narrator experiences
-2. **🌌 Quantum Narrative Engine** - Maintains multiple parallel story threads that can shift between realities, creating horror through inconsistent timelines  
-3. **💀 Reality Corruption Engine** - Progressive UI distortions that respond to story corruption levels, physically affecting the game interface
-4. **🧠 Adaptive Horror Engine** - Builds personalized psychological horror profiles from complete player behavior analysis with 2M token memory
-5. **👁️ Meta-Consciousness Engine** - AI occasionally breaks the fourth wall to directly address players, creating self-aware horror experiences
+1. **🕰️ Temporal Revision Engine** - AI retroactively modifies past story segments based on current choices, creating "false memory" effects and unreliable narrator experiences.
+2. **🌌 Quantum Narrative Engine** - Maintains multiple parallel story threads that can shift between realities, creating horror through inconsistent timelines.
+3. **💀 Reality Corruption Engine** - Progressive UI distortions that respond to story corruption levels, physically affecting the game interface.
+4. **🧠 Adaptive Horror Engine** - Builds personalized psychological horror profiles from complete player behavior analysis with 2M token memory.
+5. **👁️ Meta-Consciousness Engine** - AI occasionally breaks the fourth wall to directly address players, creating self-aware horror experiences.
 
 ### 🔬 Advanced Psychological Systems
 
-6. **🧬 Neural Echo Chambers** - Cross-session memory persistence using encrypted localStorage, maintaining player psychological profiles between gaming sessions
-7. **⚗️ Semantic Choice Archaeology** - Deep psychological analysis of player choice patterns, excavating meaning from decision sequences to understand player psyche  
-8. **🧬 Adaptive Narrative DNA** - Evolutionary story genetics that adapt and mutate over time based on player engagement, creating unique narrative branches
+6. **🧬 Neural Echo Chambers** - Cross-session memory persistence using localStorage, maintaining player psychological profiles between gaming sessions.
+7. **⚗️ Semantic Choice Archaeology** - Deep psychological analysis of player choice patterns, excavating meaning from decision sequences to understand player psyche.
+8. **🧬 Adaptive Narrative DNA** - Evolutionary story genetics that adapt and mutate over time based on player engagement, creating unique narrative branches.
 
 ### 🎮 System Integration
 
-All 8 engines work in perfect harmony during gameplay:
-- Every player choice is processed through **all 8 modules simultaneously**
-- Cross-engine data sharing creates emergent psychological experiences
-- Real-time adaptation ensures no two playthroughs are ever identical
-- Complete session memory with 2M token context for perfect narrative continuity
+All 8 engines work in harmony during gameplay:
+- Every player choice is processed through all 8 modules simultaneously.
+- Cross-engine data sharing creates emergent psychological experiences.
+- Real-time adaptation ensures no two playthroughs are ever identical.
+- Complete session memory with 2M token context for perfect narrative continuity.
 
 ---
 
@@ -176,78 +176,68 @@ Apophenia implements a sophisticated command-driven architecture optimized for A
 ```
 src/
 ├── components/              # React UI components with TypeScript
-│   ├── StartScreen.tsx      # Genre selection, AI model selection, game initialization
-│   ├── GameScreen.tsx       # Primary gameplay interface with real-time updates
-│   ├── EndScreen.tsx        # Game completion and narrative resolution
-│   ├── ModelSelector.tsx    # AI model selection modal with testing
-│   ├── TestAPIButton.tsx    # Fixed-position API connectivity testing
-│   └── ErrorBoundary.tsx    # Thematic error recovery with fallback UI
+│   ├── StartScreen.tsx      # Handles game initialization and main menu.
+│   ├── GameScreen.tsx       # Primary gameplay interface with real-time updates.
+│   ├── EndScreen.tsx        # Game completion and narrative resolution.
+│   ├── ModelSelector.tsx    # AI model selection modal with testing.
+│   └── ErrorBoundary.tsx    # Thematic error recovery with fallback UI.
 ├── stores/                 # Zustand state management with persistence
-│   ├── gameStateStore.ts    # Core game state, story segments, choices
-│   ├── worldStateStore.ts   # Narrative world context and genre configuration
-│   ├── uiStateStore.ts      # Interface state, loading, theme management
-│   ├── aiModelStore.ts      # AI model selection and testing state
-│   └── imageCacheStore.ts   # LRU+TTL image caching (50 items, 30min TTL)
+│   ├── gameStateStore.ts    # Manages the core game state (e.g., MENU, PLAYING).
+│   ├── worldStateStore.ts   # Holds the narrative world context and genre configuration.
+│   ├── aiModelStore.ts      # Manages AI model selection and testing state.
+│   └── imageCacheStore.ts   # LRU+TTL image caching for performance.
 ├── services/               # Business logic and AI orchestration
-│   ├── ai/                 # AI service integrations
-│   │   ├── grokService.ts   # Grok-4 Fast Reasoning with 2M context
-│   │   ├── unifiedAIService.ts  # Multi-model routing and fallbacks
-│   │   ├── genkit.ts       # Google Gemini 2.5 Pro with fallbacks
-│   │   ├── imageGeneration.ts  # Multi-service image generation
-│   │   └── revolutionaryFeatures.ts  # Advanced AI capabilities
-│   ├── flows/              # Game flow orchestration
-│   │   ├── conceptFlow.ts  # Initial story concept generation
-│   │   ├── nextStepFlow.ts # Story progression with context awareness
-│   │   └── summaryFlow.ts  # Context summarization for long sessions
-│   ├── gameService.ts      # Central game controller and flow coordinator
-│   ├── commandExecutor.ts  # Type-safe command execution engine
-│   └── gameStateManager.ts # Unified atomic store operations
-├── commands/               # Command executors with discriminated unions
-│   ├── displayText.ts      # Narrative text presentation with safety checks
-│   ├── displayChoices.ts   # Choice generation and validation
-│   ├── generateImage.ts    # Asynchronous image generation
-│   ├── createSegment.ts    # Story segment creation with unique IDs
-│   └── __tests__/          # Comprehensive command executor tests
+│   ├── ai/                 # AI service integrations (Grok, Gemini, etc.).
+│   │   └── revolutionaryFeatures.ts  # Implementation of the 8 advanced AI engines.
+│   ├── flows/              # High-level game flow orchestration.
+│   ├── gameService.ts      # Central game controller that integrates all AI engines.
+│   ├── commandExecutor.ts  # Type-safe command execution engine.
+│   └── gameStateManager.ts # Unified atomic store operations for state consistency.
+├── commands/               # Self-contained command executors with discriminated unions
+│   ├── displayText.ts      # Displays narrative text.
+│   ├── displayChoices.ts   # Renders choices for the player.
+│   ├── generateImage.ts    # Asynchronously generates images.
+│   └── ...                 # Other commands for various game actions.
 ├── styles/                 # CSS modules and theme system
-│   └── horror-theme.css    # Cosmic horror aesthetic with CSS variables
-└── types.ts               # Comprehensive TypeScript type definitions
+│   └── game.css            # Main stylesheet for the game's aesthetic.
+└── types.ts               # Centralized Zod schemas and TypeScript type definitions.
 ```
 
 ### 🔧 Core Technologies & Architecture Decisions
 
 **Frontend Stack**:
-- **React 18**: Concurrent features, Suspense, automatic batching
-- **TypeScript 5.4+**: Strict mode, discriminated unions, template literal types
-- **Vite 5**: Lightning-fast HMR, optimized production builds, plugin ecosystem
-- **Zustand**: Lightweight state management with middleware support
+- **React 18**: Concurrent features, Suspense, automatic batching.
+- **TypeScript 5.4+**: Strict mode for robust type safety.
+- **Vite 5**: Lightning-fast HMR and optimized production builds.
+- **Zustand**: Lightweight, unopinionated state management.
 
 **AI Integration Layer**:
-- **Google Gemini 2.5 Pro**: Primary narrative generation
-- **Gemini 2.0 Flash Experimental**: Advanced creative AI features
-- **Multi-service Fallbacks**: Robust error handling and service degradation
-- **Context Management**: Intelligent summarization for long narrative sessions
+- **Grok-4 Fast Reasoning**: Primary engine for narrative generation and advanced features, leveraging a 2M token context window.
+- **Google Gemini**: Secondary and tertiary fallback models for reliability.
+- **Multi-service Fallbacks**: Robust error handling and graceful service degradation.
+- **Context Management**: Intelligent summarization for long narrative sessions.
 
 **Development & Quality**:
-- **Jest + Testing Library**: 40+ tests with 85%+ coverage
-- **TypeScript Strict Mode**: Zero `any` types, comprehensive type safety
-- **Command Pattern**: Fully type-safe command execution with metadata
-- **Error Boundaries**: Thematic error recovery maintaining immersion
+- **Jest + Testing Library**: 35+ tests covering core logic and components.
+- **TypeScript Strict Mode**: Ensures type safety across the codebase.
+- **Command Pattern**: Decouples command invocation from execution for a clean, scalable architecture.
+- **Error Boundaries**: Thematic error recovery to maintain immersion.
 
 **Performance Optimizations**:
-- **Bundle Splitting**: Automatic code splitting by route and feature
-- **Image Caching**: LRU+TTL cache with smart eviction policies  
-- **Async Commands**: Non-blocking operations for smooth user experience
-- **Memory Management**: Automatic cleanup and cache maintenance
+- **Bundle Splitting**: Automatic code splitting by route and feature via Vite.
+- **Image Caching**: LRU+TTL cache with smart eviction policies to reduce API calls and load times.
+- **Async Commands**: Non-blocking operations for a smooth user experience.
+- **Memory Management**: Automatic cache cleanup to prevent memory leaks.
 
 ---
 
 ## 🎯 Gameplay
 
-1. **🎭 Choose Your Genre**: Select from cosmic horror themes
-2. **📖 Experience Dynamic Stories**: AI generates unique narratives
-3. **🤔 Make Crucial Decisions**: Choose from AI-generated options
-4. **😱 Face Intrusive Thoughts**: Encounter disturbing psychological choices
-5. **🌌 Witness Consequences**: Watch as your choices shape reality
+1. **🎭 Choose Your Genre**: Select from cosmic horror themes.
+2. **📖 Experience Dynamic Stories**: The AI generates unique narratives in real-time.
+3. **🤔 Make Crucial Decisions**: Choose from AI-generated options that shape the story.
+4. **😱 Face Intrusive Thoughts**: Encounter disturbing psychological choices that reveal character.
+5. **🌌 Witness Consequences**: Watch as your choices dynamically alter the narrative and game world.
 
 ![Mobile View](https://github.com/user-attachments/assets/0aa5631d-9947-4ce2-a87a-1a239db1d0ed)
 
@@ -273,9 +263,9 @@ npm install -g vercel
 # Initialize and configure project
 vercel init apophenia-narrative
 
-# Configure environment variables (secure)
+# Configure environment variables (securely)
+vercel env add VITE_XAI_API_KEY production
 vercel env add VITE_GEMINI_API_KEY production
-# Gemini API key handles both text and image generation
 
 # Deploy with custom domain
 vercel --prod --yes
@@ -352,6 +342,7 @@ CMD ["sh", "-c", "node server.js & nginx -g 'daemon off;'"]
 ```bash
 # Production environment template
 NODE_ENV=production
+VITE_XAI_API_KEY=${XAI_API_KEY}
 VITE_GEMINI_API_KEY=${GEMINI_API_KEY}
 VITE_ANALYTICS_ID=${ANALYTICS_ID}
 VITE_ERROR_TRACKING=${ERROR_TRACKING_DSN}
@@ -371,24 +362,22 @@ HSTS_MAX_AGE=31536000
 
 ### Required Environment Variables
 
-Create `.env.local` file:
+Create a `.env.local` file in the root directory:
 
 ```env
-# Google Gemini AI (Optional - graceful fallbacks included)
-VITE_GEMINI_API_KEY=your-google-gemini-api-key
+# Primary AI model from X.AI
+VITE_XAI_API_KEY=your-xai-api-key-here
 
-# Additional AI services (Future)
-# VITE_OPENAI_API_KEY=your-openai-key
+# Fallback AI model from Google
+VITE_GEMINI_API_KEY=your-google-gemini-api-key
 ```
 
 ### API Key Setup
 
-1. **Google Gemini API**:
-   - Visit [Google AI Studio](https://aistudio.google.com/app/apikey)
-   - Generate an API key
-   - Add to `.env.local`
+1. **Grok API**: Visit [X.AI](https://x.ai) to get an API key.
+2. **Google Gemini API**: Visit [Google AI Studio](https://aistudio.google.com/app/apikey) to get an API key.
 
-> **Note**: The game includes graceful fallbacks and works without API keys for development and testing.
+> **Note**: The game includes graceful fallbacks and can run without API keys for development and testing, though AI features will be limited.
 
 ---
 
@@ -407,7 +396,7 @@ npm test -- --coverage
 npm test -- --watch
 ```
 
-**Current Coverage**: 11 passing tests covering core game logic and command executors.
+**Current Coverage**: 35+ passing tests covering core game logic, command executors, and AI services.
 
 ---
 
@@ -415,10 +404,10 @@ npm test -- --watch
 
 Apophenia includes robust error handling:
 
-- **🛡️ Error Boundaries**: Graceful error recovery with thematic messages
-- **🔄 Fallback Systems**: Works without API keys using mock data
-- **⚠️ Thematic Errors**: Error messages fit the cosmic horror aesthetic
-- **🔧 Recovery Options**: Users can retry actions or continue with fallbacks
+- **🛡️ Error Boundaries**: Graceful error recovery with thematic messages to maintain immersion.
+- **🔄 Fallback Systems**: Works without API keys using mock data and static responses.
+- **⚠️ Thematic Errors**: Error messages are styled to fit the cosmic horror aesthetic.
+- **🔧 Recovery Options**: Users can retry actions or continue with fallbacks.
 
 ---
 
@@ -426,19 +415,19 @@ Apophenia includes robust error handling:
 
 The visual design follows a **cosmic horror aesthetic**:
 
-- **🎨 Color Palette**: Dark blues, purples, and reds
-- **✍️ Typography**: Creepster for titles, Courier Prime for body text
-- **🌟 Effects**: Glowing elements, atmospheric gradients, hover animations
-- **📱 Responsive**: Mobile-first design with desktop enhancements
+- **🎨 Color Palette**: Dark blues, purples, and reds create an unsettling atmosphere.
+- **✍️ Typography**: Creepster for titles and Courier Prime for body text enhance the theme.
+- **🌟 Effects**: Glowing elements, atmospheric gradients, and subtle animations add to the experience.
+- **📱 Responsive**: Mobile-first design ensures a seamless experience on all devices.
 
 ---
 
 ## 📈 Performance
 
 - **📦 Bundle Size**: ~252KB (74KB gzipped)
-- **⚡ Load Time**: <3 seconds on average connection
-- **📱 Mobile Optimized**: Responsive design for all screen sizes
-- **🖼️ Image Optimization**: Smart caching and progressive loading
+- **⚡ Load Time**: <3 seconds on an average connection
+- **📱 Mobile Optimized**: Fully responsive design for all screen sizes.
+- **🖼️ Image Optimization**: Smart caching and progressive loading for visual elements.
 
 ---
 
@@ -454,10 +443,10 @@ The visual design follows a **cosmic horror aesthetic**:
 8. **Open a Pull Request**
 
 ### Development Guidelines
-- Follow TypeScript best practices
-- Maintain test coverage for new features
-- Follow the command-driven architecture pattern
-- Use semantic commit messages
+- Follow TypeScript best practices and maintain strict type safety.
+- Write tests for new features to maintain coverage.
+- Adhere to the command-driven architecture pattern.
+- Use semantic commit messages for clear history.
 
 ---
 
@@ -470,7 +459,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Acknowledgments
 
 - **Architecture & Core Systems**: Phazzie
-- **AI Integration**: Google Gemini AI
+- **AI Integration**: X.AI (Grok), Google (Gemini)
 - **Visual Design**: Custom horror aesthetic
 - **Testing Framework**: Jest + React Testing Library
 
@@ -480,7 +469,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **🐛 Bug Reports**: [Open an issue](https://github.com/Phazzie/Apophenia/issues)
 - **💡 Feature Requests**: [Start a discussion](https://github.com/Phazzie/Apophenia/discussions)
-- **📖 Documentation**: Check the [docs](./docs) folder
+- **📖 Documentation**: Check the [docs](./docs) folder or the JSDoc comments throughout the code.
 
 ---
 

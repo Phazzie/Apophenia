@@ -1,3 +1,10 @@
+/**
+ * @file GameScreen.tsx
+ * @description The main screen for the interactive narrative experience.
+ * This component orchestrates the display of story segments, player choices,
+ * and handles the core gameplay loop by interfacing with the game services.
+ */
+
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { executeCommandQueue } from '../services/commandExecutor';
 import { triggerSummary } from '../services/flows/gameFlow';
@@ -8,6 +15,14 @@ import { useStoryHistoryStore } from '../stores/storyHistoryStore';
 import { useWorldStateStore } from '../stores/worldStateStore';
 import { Choice, GameState } from '../types';
 
+/**
+ * Renders the main game interface.
+ * This includes the current story text and image, available choices (including intrusive thoughts),
+ * and special UI effects for revolutionary AI features like temporal revisions and reality corruption.
+ * It manages the game's flow, sending player choices to the game service and executing the resulting commands.
+ *
+ * @returns {React.ReactElement} The main game screen component.
+ */
 const GameScreen: React.FC = () => {
   const { choices, intrusiveThought, gameState, setGameState, isGenerating, setIsGenerating } =
     useGameStateStore();

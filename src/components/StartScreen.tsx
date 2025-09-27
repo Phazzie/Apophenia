@@ -1,3 +1,9 @@
+/**
+ * @file StartScreen.tsx
+ * @description The entry point component for the game, displaying the main menu.
+ * It allows the player to start a new game or continue a saved one.
+ */
+
 import React, { useEffect, useState } from 'react';
 import { generateConcept } from '../services/gameService';
 import { GameStateManager } from '../services/gameStateManager';
@@ -7,7 +13,12 @@ import { useWorldStateStore } from '../stores/worldStateStore';
 import { useAIModelStore } from '../stores/aiModelStore';
 import { GameState, GenreConfig } from '../types';
 
-// A mock genre config for now. In a real app, this might be selectable.
+/**
+ * @constant {GenreConfig} genreConfig
+ * @description The default genre configuration for the game.
+ * In a more complex application, this could be user-selectable. It defines the theme,
+ * style, and initial prompts for the cosmic horror narrative.
+ */
 const genreConfig: GenreConfig = {
   id: 'cosmic-horror',
   name: 'Cosmic Horror',
@@ -27,6 +38,13 @@ const genreConfig: GenreConfig = {
     'You are a master of cosmic horror, weaving tales of dread and insignificance.',
 };
 
+/**
+ * Renders the start screen or main menu of the game.
+ * It provides options to start a new game, which involves generating a new story concept,
+ * or to continue a previously saved game if one exists.
+ *
+ * @returns {React.ReactElement} The start screen component.
+ */
 const StartScreen: React.FC = () => {
   const { setGameState } = useGameStateStore();
   const { worldState, setGenreConfig } = useWorldStateStore();
@@ -43,6 +61,11 @@ const StartScreen: React.FC = () => {
     setHasSavedGame(storyHistory.length > 0 && Boolean(worldState.protagonist));
   }, [storyHistory, worldState.protagonist]);
 
+  /**
+   * Initiates a new game.
+   * This function resets all game state, generates a new story concept using the AI,
+   * sets up the initial world state and story history, and transitions the game to the playing state.
+   */
   const handleNewGame = async () => {
     if (isStarting) return; // Guard against double-clicks
     setIsStarting(true);
@@ -73,6 +96,11 @@ const StartScreen: React.FC = () => {
     setIsStarting(false);
   };
 
+  /**
+   * Continues a saved game.
+   * This function simply transitions the game to the playing state.
+   * The game state is automatically restored from persistent storage by Zustand middleware.
+   */
   const handleContinue = () => {
     // The stores are already rehydrated by the persist middleware.
     // We just need to navigate to the game screen.

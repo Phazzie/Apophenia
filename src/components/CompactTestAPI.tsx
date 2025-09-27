@@ -1,12 +1,19 @@
 /**
- * Compact Test API Component
- * 
- * Small unobtrusive API testing with text and image options
+ * @file CompactTestAPI.tsx
+ * @description Provides a compact UI for testing the connectivity and functionality of the selected AI model's API.
  */
 
 import React, { useState } from 'react';
 import { useAIModelStore } from '../stores/aiModelStore';
 
+/**
+ * Renders a compact API testing component.
+ * This component displays a button that, when clicked, provides options to test
+ * the text and image generation capabilities of the currently selected AI model.
+ * It shows the status (pending, success, failure) and response time of the tests.
+ *
+ * @returns {React.ReactElement} A React component for testing AI model APIs.
+ */
 const CompactTestAPI: React.FC = () => {
   const {
     getSelectedModel,

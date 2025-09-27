@@ -1,31 +1,43 @@
 /**
- * Grok-4 Fast Reasoning API Integration
- *
- * Implements X.AI's Grok-4-fast-reasoning model with 2M token context window
- * and advanced reasoning capabilities (thinking mode).
+ * @file grokService.ts
+ * @description This service provides a client for interacting with the X.AI Grok API.
+ * It encapsulates the logic for making authenticated requests for text and image generation,
+ * leveraging the Grok-4 Fast Reasoning model with its unique "thinking mode".
  */
 
 import { API_KEYS } from '../config';
 
-// X.AI API configuration
+// X.AI API configuration constants
 const XAI_API_BASE = 'https://api.x.ai/v1';
 const GROK_MODEL = 'grok-4-fast-reasoning';
 
+/**
+ * @interface GrokMessage
+ * @description Defines the structure of a message in the chat completions request.
+ */
 interface GrokMessage {
   role: 'system' | 'user' | 'assistant';
   content: string;
 }
 
+/**
+ * @interface GrokRequest
+ * @description Defines the structure of the request body for the Grok chat completions endpoint.
+ */
 interface GrokRequest {
   model: string;
   messages: GrokMessage[];
   temperature?: number;
   max_tokens?: number;
   top_p?: number;
-  thinking?: boolean; // Enable reasoning mode
+  thinking?: boolean; // Grok-specific feature to enable reasoning mode
   stream?: boolean;
 }
 
+/**
+ * @interface GrokResponse
+ * @description Defines the structure of the response from the Grok chat completions endpoint.
+ */
 interface GrokResponse {
   id: string;
   object: string;
@@ -36,7 +48,7 @@ interface GrokResponse {
     message: {
       role: string;
       content: string;
-      thinking?: string; // Reasoning trace when thinking mode enabled
+      thinking?: string; // The reasoning trace when thinking mode is enabled
     };
     finish_reason: string;
   }[];
@@ -44,28 +56,43 @@ interface GrokResponse {
     prompt_tokens: number;
     completion_tokens: number;
     total_tokens: number;
-    thinking_tokens?: number; // Tokens used for thinking
+    thinking_tokens?: number; // Tokens specifically used for the thinking process
   };
 }
 
 /**
- * X.AI API client for text generation with thinking mode
+ * A client for interacting with the X.AI API, specifically for the Grok models.
+ * Handles authentication, request formatting, and response parsing for text and image generation.
  */
 export class XAIAPIClient {
   private apiKey: string;
   private baseURL: string;
 
+  /**
+   * Constructs an instance of the XAIAPIClient.
+   * @param {string} [apiKey] - The API key for X.AI. If not provided, it falls back to the one in the global config.
+   */
   constructor(apiKey?: string) {
     this.apiKey = apiKey || API_KEYS.xaiAPI;
     this.baseURL = XAI_API_BASE;
 
     if (!this.apiKey) {
-      console.warn('X.AI API key not provided. Service will not function.');
+      console.warn('X.AI API key not provided. Grok service will not function.');
     }
   }
 
   /**
-   * Generate text with Grok-4 Fast Reasoning
+   * Generates text content using the Grok-4 Fast Reasoning model.
+   * Supports enabling "thinking mode" to get a reasoning trace along with the response.
+   *
+   * @param {string} systemInstruction - The system prompt to guide the model's behavior.
+   * @param {string} userPrompt - The user's prompt for the model to respond to.
+   * @param {object} [config={}] - Configuration options for the generation request.
+   * @param {number} [config.temperature] - The sampling temperature.
+   * @param {number} [config.maxTokens] - The maximum number of tokens to generate.
+   * @param {number} [config.topP] - The nucleus sampling probability.
+   * @param {boolean} [config.enableThinking=true] - Whether to enable Grok's reasoning mode.
+   * @returns {Promise<{ content: string; thinking?: string; usage: any }>} A promise that resolves to the generated content, optional thinking trace, and token usage statistics.
    */
   async generateText(
     systemInstruction: string,
@@ -135,7 +162,11 @@ export class XAIAPIClient {
   }
 
   /**
-   * Generate a batch of images using the grok-2-image model
+   * Generates a batch of images using the experimental Grok image model.
+   *
+   * @param {string} prompt - The prompt to generate images from.
+   * @param {number} [n=4] - The number of image variations to generate.
+   * @returns {Promise<string[]>} A promise that resolves to an array of image URLs.
    */
   async generateImage(prompt: string, n: number = 4): Promise<string[]> {
     if (!this.apiKey) {
@@ -144,7 +175,7 @@ export class XAIAPIClient {
     }
 
     const requestBody = {
-      model: 'grok-2-image',
+      model: 'grok-2-image', // This is a hypothetical model name for future compatibility
       prompt,
       n,
       image_format: 'url',
@@ -184,7 +215,10 @@ export class XAIAPIClient {
   }
 
   /**
-   * Test API connection with both text and image testing
+   * Tests the connectivity and functionality of the X.AI API for either text or image generation.
+   *
+   * @param {'text' | 'image'} [testType='text'] - The type of API to test.
+   * @returns {Promise<{ success: boolean; model: string; contextWindow: number; testType: string; error?: string }>} A promise that resolves to an object containing the test results.
    */
   async testConnection(testType: 'text' | 'image' = 'text'): Promise<{
     success: boolean;
@@ -196,13 +230,13 @@ export class XAIAPIClient {
     try {
       if (testType === 'text') {
         console.log('Testing X.AI text generation API...');
-        const result = await this.generateText(
+        await this.generateText(
           'You are a helpful assistant.',
           'Please respond with "Test successful" and mention your model name and context window size.',
           {
             maxTokens: 100,
             temperature: 0.1,
-            enableThinking: false // Don't need thinking for simple test
+            enableThinking: false // Don't need thinking for a simple test
           }
         );
 
@@ -219,11 +253,11 @@ export class XAIAPIClient {
         try {
           const result = await this.generateImage('A simple test image of a red circle');
           return {
-            success: result !== null,
+            success: result !== null && result.length > 0,
             model: GROK_MODEL,
             contextWindow: 2000000,
             testType: 'image',
-            error: result === null ? 'X.AI image generation not yet available (will fallback to Imagen)' : undefined
+            error: result === null || result.length === 0 ? 'X.AI image generation not yet available (will fallback to Imagen)' : undefined
           };
         } catch (error) {
           return {
@@ -231,7 +265,7 @@ export class XAIAPIClient {
             model: GROK_MODEL,
             contextWindow: 2000000,
             testType: 'image',
-            error: 'X.AI image generation experimental (will fallback to Imagen)'
+            error: 'X.AI image generation is experimental and may fail (will fallback to Imagen)'
           };
         }
       }
@@ -248,16 +282,17 @@ export class XAIAPIClient {
   }
 
   /**
-   * Get model information
+   * Retrieves static information about the Grok model.
+   * @returns {{ name: string; provider: string; contextWindow: number; supportsFunctions: boolean; supportsThinking: boolean; supportsImages: boolean; }} An object containing model metadata.
    */
   getModelInfo() {
     return {
       name: GROK_MODEL,
       provider: 'X.AI',
       contextWindow: 2000000, // 2 million tokens
-      supportsFunctions: false, // Grok-4 doesn't support function calling yet
-      supportsThinking: true, // Advanced reasoning mode
-      supportsImages: true, // Attempting image generation (experimental/future compatibility)
+      supportsFunctions: false, // Grok-4 does not currently support structured function calling in the same way as Gemini/OpenAI
+      supportsThinking: true, // A key feature of the Grok API
+      supportsImages: true, // Represents the client's capability to *attempt* image generation
     };
   }
 }

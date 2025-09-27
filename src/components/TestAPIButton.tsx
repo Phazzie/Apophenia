@@ -1,12 +1,19 @@
 /**
- * Test API Button Component
- * 
- * Fixed position button in bottom-right corner for testing AI model connectivity
+ * @file TestAPIButton.tsx
+ * @description A component that renders a fixed-position button for testing the selected AI model's API connectivity.
+ * @deprecated This component is being replaced by the more integrated `CompactTestAPI` and `CompactModelSelector`.
  */
 
 import React, { useState } from 'react';
 import { useAIModelStore } from '../stores/aiModelStore';
 
+/**
+ * Renders a button in a fixed position on the screen to allow users to test
+ * the current AI model's API connection at any time.
+ * When clicked, it initiates a test and displays the result (success or failure) in a small popup.
+ *
+ * @returns {React.ReactElement} A React component for testing the AI API.
+ */
 const TestAPIButton: React.FC = () => {
   const {
     getSelectedModel,

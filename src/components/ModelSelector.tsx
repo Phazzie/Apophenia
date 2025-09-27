@@ -1,18 +1,31 @@
 /**
- * AI Model Selector Component
- * 
- * Allows users to select between available AI models and test their connectivity
+ * @file ModelSelector.tsx
+ * @description A modal component that allows users to select, compare, and test different AI models.
  */
 
 import React, { useState } from 'react';
 import { useAIModelStore } from '../stores/aiModelStore';
-import { AIModel, ModelTestResult } from '../types';
+import { AIModel } from '../types';
 
+/**
+ * @interface ModelSelectorProps
+ * @description Props for the ModelSelector component.
+ * @property {boolean} isVisible - Controls the visibility of the modal.
+ * @property {() => void} onClose - Callback function to close the modal.
+ */
 interface ModelSelectorProps {
   isVisible: boolean;
   onClose: () => void;
 }
 
+/**
+ * A comprehensive modal for AI model selection.
+ * It displays a list of available AI models, showing their features, capabilities, and current status.
+ * Users can select a model, test its API connectivity, and view detailed information about its advanced features.
+ *
+ * @param {ModelSelectorProps} props - The props for the component.
+ * @returns {React.ReactElement | null} A React element representing the model selection modal, or null if not visible.
+ */
 const ModelSelector: React.FC<ModelSelectorProps> = ({ isVisible, onClose }) => {
   const {
     selectedModelId,

@@ -1,7 +1,9 @@
 /**
- * Unified AI Service with Model Selection
- * 
- * Routes AI requests to the appropriate service (Grok or Gemini) based on user selection
+ * @file unifiedAIService.ts
+ * @description This service acts as a master router for AI requests. It directs traffic
+ * to the appropriate AI model (e.g., Grok, Gemini) based on the user's current selection
+ * stored in the `aiModelStore`. It ensures that the application can seamlessly switch
+ * between different AI providers without changing the core game logic.
  */
 
 import { useAIModelStore } from '../../stores/aiModelStore';
@@ -11,7 +13,14 @@ import { GameCommand, GenreConfig, WorldState, StorySegment } from '../../types'
 import { AI_MODELS } from '../config';
 
 /**
- * Unified text generation that routes to the selected AI model
+ * The primary text generation router. It checks the user's selected AI model
+ * and routes the request to the corresponding generation function (e.g., `generateWithGrok`
+ * or `generateWithGemini`). It includes a fallback to Gemini if the selected model fails.
+ *
+ * @param {string} systemInstruction - The system-level instruction for the AI.
+ * @param {string} prompt - The user-facing prompt.
+ * @param {'concept' | 'story' | 'summary'} [useCase='story'] - The context of the generation, used to select the correct model configuration.
+ * @returns {Promise<GameCommand[]>} A promise that resolves to an array of game commands.
  */
 export async function generateWithSelectedModel(
   systemInstruction: string,
@@ -40,7 +49,15 @@ export async function generateWithSelectedModel(
 }
 
 /**
- * Generate with X.AI Grok-4 Fast Reasoning
+ * Handles text generation specifically using the X.AI Grok-4 Fast Reasoning model.
+ * It calls the `xaiClient`, sends the request, and parses the response to extract game commands.
+ *
+ * @private
+ * @param {string} systemInstruction - The system instruction for Grok.
+ * @param {string} prompt - The user prompt for Grok.
+ * @param {'concept' | 'story' | 'summary'} useCase - The generation use case.
+ * @returns {Promise<GameCommand[]>} A promise that resolves to an array of game commands.
+ * @throws {Error} If the response from Grok is invalid or does not contain valid JSON.
  */
 async function generateWithGrok(
   systemInstruction: string,
@@ -83,7 +100,15 @@ async function generateWithGrok(
 }
 
 /**
- * Generate with Gemini (fallback)
+ * Handles text generation using the Gemini models as a primary or fallback option.
+ * This function adapts the call to the existing `nextStepFlow` from the `genkit` service,
+ * creating a temporary mock state to fit its more complex input requirements.
+ *
+ * @private
+ * @param {string} systemInstruction - The system instruction for Gemini.
+ * @param {string} prompt - The user prompt for Gemini.
+ * @param {'concept' | 'story' | 'summary'} useCase - The generation use case (currently used to shape the mock state).
+ * @returns {Promise<GameCommand[]>} A promise that resolves to an array of game commands from the Gemini service.
  */
 async function generateWithGemini(
   systemInstruction: string,
@@ -128,7 +153,11 @@ async function generateWithGemini(
 }
 
 /**
- * Get configuration for use case
+ * Retrieves the appropriate AI model configuration based on the use case.
+ *
+ * @private
+ * @param {'concept' | 'story' | 'summary'} useCase - The specific context of the AI request.
+ * @returns {object} The configuration object for the selected use case.
  */
 function getConfigForUseCase(useCase: 'concept' | 'story' | 'summary') {
   switch (useCase) {
@@ -143,7 +172,10 @@ function getConfigForUseCase(useCase: 'concept' | 'story' | 'summary') {
 }
 
 /**
- * Enhanced concept generation with selected model
+ * Routes a request for a new story concept to the currently selected AI model.
+ *
+ * @param {GenreConfig} genreConfig - The configuration for the story's genre.
+ * @returns {Promise<{ protagonist: string; setting: string; dilemma: string }>} A promise that resolves to the generated story concept.
  */
 export async function generateConceptWithSelectedModel(
   genreConfig: GenreConfig
@@ -160,7 +192,12 @@ export async function generateConceptWithSelectedModel(
 }
 
 /**
- * Concept generation with X.AI Grok-4
+ * Generates a story concept specifically using the Grok-4 model.
+ * It constructs a detailed prompt tailored to leverage Grok's large context window and reasoning capabilities.
+ *
+ * @private
+ * @param {GenreConfig} genreConfig - The configuration for the story's genre.
+ * @returns {Promise<{ protagonist: string; setting: string; dilemma: string }>} A promise that resolves to the generated concept, or a fallback concept on failure.
  */
 async function generateConceptWithGrok(
   genreConfig: GenreConfig
@@ -224,7 +261,14 @@ Example format:
 }
 
 /**
- * Next step generation with selected model
+ * Routes a request for the next story step to the currently selected AI model.
+ * This is a key part of the main game loop.
+ *
+ * @param {string} playerChoice - The choice the player just made.
+ * @param {WorldState} worldState - The current state of the game world.
+ * @param {StorySegment[]} storyHistory - The history of story segments.
+ * @param {GenreConfig} genreConfig - The configuration for the story's genre.
+ * @returns {Promise<GameCommand[]>} A promise that resolves to the array of commands for the next turn.
  */
 export async function generateNextStepWithSelectedModel(
   playerChoice: string,
@@ -252,14 +296,16 @@ export async function generateNextStepWithSelectedModel(
  * Next step generation with X.AI Grok-4
  */
 /**
- * Generates the next step of the story using the Grok-4 model.
- * This function tailors the AI's prompts to include the current horror intensity,
- * ensuring the narrative scales with the player's experience.
- * @param playerChoice The player's most recent choice.
- * @param worldState The current state of the game world.
- * @param storyHistory The history of the story so far.
- * @param genreConfig The configuration for the selected genre.
- * @returns A promise that resolves to an array of game commands.
+ * Generates the next story step specifically using the Grok-4 model.
+ * This function constructs a highly detailed prompt that leverages Grok's large context window,
+ * providing it with the complete world state and story history to ensure maximum narrative consistency.
+ *
+ * @private
+ * @param {string} playerChoice - The player's most recent choice.
+ * @param {WorldState} worldState - The current state of the game world.
+ * @param {StorySegment[]} storyHistory - The history of the story so far.
+ * @param {GenreConfig} genreConfig - The configuration for the selected genre.
+ * @returns {Promise<GameCommand[]>} A promise that resolves to an array of game commands generated by Grok.
  */
 async function generateNextStepWithGrok(
   playerChoice: string,

@@ -1,7 +1,8 @@
 /**
- * AI Model Selector Store
- * 
- * Manages the selected AI model and provides testing functionality
+ * @file aiModelStore.ts
+ * @description Zustand store for managing the state related to AI model selection.
+ * This store handles which AI model is currently active, provides a list of available models,
+ * and includes functionality for testing the connectivity and capabilities of each model.
  */
 
 import { create } from 'zustand';
@@ -9,13 +10,17 @@ import { persist } from 'zustand/middleware';
 import { AIModel, ModelTestResult } from '../types';
 import { xaiClient } from '../services/ai/grokService';
 
-// Available AI models
+/**
+ * @constant {AIModel[]} AVAILABLE_MODELS
+ * @description A static array defining all the AI models available in the application.
+ * This serves as the single source of truth for model metadata.
+ */
 export const AVAILABLE_MODELS: AIModel[] = [
   {
     id: 'grok-4-fast-reasoning',
     name: 'Grok-4 Fast Reasoning',
     provider: 'X.AI',
-    contextWindow: 2000000, // 2M tokens
+    contextWindow: 2000000,
     supportsThinking: true,
     supportsImages: false,
     isDefault: true,
@@ -24,7 +29,7 @@ export const AVAILABLE_MODELS: AIModel[] = [
     id: 'gemini-2.5-pro',
     name: 'Gemini 2.5 Pro',
     provider: 'Google',
-    contextWindow: 1000000, // 1M tokens
+    contextWindow: 1000000,
     supportsThinking: true,
     supportsImages: true,
     isDefault: false,
@@ -33,39 +38,53 @@ export const AVAILABLE_MODELS: AIModel[] = [
     id: 'gemini-2.5-flash',
     name: 'Gemini 2.5 Flash',
     provider: 'Google',
-    contextWindow: 1000000, // 1M tokens
+    contextWindow: 1000000,
     supportsThinking: false,
     supportsImages: true,
     isDefault: false,
   },
 ];
 
+/**
+ * @interface AIModelStore
+ * @description Defines the structure of the AI model store, including its state and actions.
+ */
 interface AIModelStore {
-  // State
+  /** The ID of the currently selected AI model. */
   selectedModelId: string;
+  /** A record of test results, keyed by model ID and test type. */
   testResults: Record<string, ModelTestResult>;
+  /** The ID of the model currently being tested, or null if no test is running. */
   isTestingModel: string | null;
   
-  // Getters
+  /** Returns the full object for the currently selected AI model. */
   getSelectedModel: () => AIModel | undefined;
+  /** Returns the complete list of available AI models. */
   getAllModels: () => AIModel[];
+  /** Retrieves the test result for a specific model and test type. */
   getTestResult: (modelId: string, testType?: string) => ModelTestResult | undefined;
   
-  // Actions
+  /** Sets the active AI model. */
   setSelectedModel: (modelId: string) => void;
+  /** Initiates a test for a given model and capability (text or image). */
   testModel: (modelId: string, testType?: 'text' | 'image') => Promise<ModelTestResult>;
+  /** Clears all stored test results. */
   clearTestResults: () => void;
 }
 
+/**
+ * @hook useAIModelStore
+ * @description A Zustand hook for accessing the AI model store.
+ * It uses `persist` middleware to save the `selectedModelId` to local storage,
+ * so the user's model choice is remembered across sessions.
+ */
 export const useAIModelStore = create<AIModelStore>()(
   persist(
     (set, get) => ({
-      // Initialize with default model (Grok-4)
       selectedModelId: AVAILABLE_MODELS.find(m => m.isDefault)?.id || 'grok-4-fast-reasoning',
       testResults: {},
       isTestingModel: null,
 
-      // Getters
       getSelectedModel: () => {
         const { selectedModelId } = get();
         return AVAILABLE_MODELS.find(m => m.id === selectedModelId);
@@ -76,10 +95,9 @@ export const useAIModelStore = create<AIModelStore>()(
       getTestResult: (modelId: string, testType: string = 'text') => {
         const { testResults } = get();
         const resultKey = `${modelId}-${testType}`;
-        return testResults[resultKey] || testResults[modelId]; // Fallback to old format
+        return testResults[resultKey] || testResults[modelId]; // Fallback for backward compatibility
       },
 
-      // Actions
       setSelectedModel: (modelId: string) => {
         const model = AVAILABLE_MODELS.find(m => m.id === modelId);
         if (model) {
@@ -97,34 +115,22 @@ export const useAIModelStore = create<AIModelStore>()(
 
           console.log(`Testing ${modelId} for ${testType} capability...`);
 
+          // Route test to the appropriate service based on model ID
           if (modelId === 'grok-4-fast-reasoning') {
             const testResult = await xaiClient.testConnection(testType);
-            result = {
-              ...testResult,
-              responseTime: Date.now() - startTime,
-            };
+            result = { ...testResult, responseTime: Date.now() - startTime };
           } else if (modelId.startsWith('gemini-')) {
-            // Test Gemini models with appropriate capability
-            if (testType === 'text') {
-              console.log('Testing Gemini text generation...');
-              result = {
-                success: true,
-                model: modelId,
-                contextWindow: 1000000,
-                responseTime: Date.now() - startTime,
-                testType: 'text',
-              };
-            } else {
-              console.log('Testing Gemini image generation...');
-              result = {
-                success: true,
-                model: modelId,
-                contextWindow: 1000000,
-                responseTime: Date.now() - startTime,
-                testType: 'image',
-              };
-            }
+            // Mock test for Gemini models as an example
+            console.log(`Testing Gemini ${testType} generation...`);
+            result = {
+              success: true,
+              model: modelId,
+              contextWindow: 1000000,
+              responseTime: Date.now() - startTime,
+              testType: testType,
+            };
           } else {
+            // Handle unknown models
             console.error('Unknown model for testing:', modelId);
             result = {
               success: false,
@@ -138,13 +144,10 @@ export const useAIModelStore = create<AIModelStore>()(
 
           console.log('Test result:', result);
 
-          // Store the test result with test type
+          // Store the result using a key that includes the test type
           const resultKey = `${modelId}-${testType}`;
           set(state => ({
-            testResults: {
-              ...state.testResults,
-              [resultKey]: result,
-            },
+            testResults: { ...state.testResults, [resultKey]: result },
             isTestingModel: null,
           }));
 
@@ -155,17 +158,14 @@ export const useAIModelStore = create<AIModelStore>()(
             success: false,
             model: modelId,
             contextWindow: 0,
-            responseTime: Date.now() - Date.now(),
+            responseTime: 0,
             testType,
             error: error instanceof Error ? error.message : 'Test failed',
           };
 
           const resultKey = `${modelId}-${testType}`;
           set(state => ({
-            testResults: {
-              ...state.testResults,
-              [resultKey]: result,
-            },
+            testResults: { ...state.testResults, [resultKey]: result },
             isTestingModel: null,
           }));
 
@@ -179,7 +179,7 @@ export const useAIModelStore = create<AIModelStore>()(
     }),
     {
       name: 'ai-model-store',
-      // Only persist the selected model, not test results
+      // Only persist the user's selected model ID, not transient state like test results.
       partialize: (state) => ({ selectedModelId: state.selectedModelId }),
     }
   )

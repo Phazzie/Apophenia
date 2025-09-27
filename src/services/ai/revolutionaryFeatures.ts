@@ -6,6 +6,12 @@
 import { StorySegment, WorldState, Choice } from '../../types';
 import { REVOLUTIONARY_FEATURES } from '../../services/config';
 
+type UIEffects = {
+  filter: string;
+  transform: string;
+  opacity: number;
+};
+
 /**
  * TEMPORAL NARRATIVE REVISION
  * Uses AI to retroactively modify past story segments based on current choices
@@ -233,7 +239,7 @@ export class QuantumNarrativeEngine {
         prompt,
         'story'
       );
-      if (commands[0]?.type === 'displayText') {
+      if (Array.isArray(commands) && commands[0]?.type === 'displayText') {
         return commands[0].payload.content.toLowerCase().includes('yes');
       }
     } catch (error) {
@@ -278,7 +284,7 @@ export class AdaptiveHorrorEngine {
         prompt,
         'story'
       );
-      if (commands[0]?.type === 'displayText') {
+      if (Array.isArray(commands) && commands[0]?.type === 'displayText') {
         const triggers = commands[0].payload.content.split(',').map(t => t.trim());
         this.playerProfile.fearTriggers.push(...triggers);
         this.playerProfile.psychologicalVulnerabilities.push(...triggers); // Simplified for now
@@ -310,7 +316,7 @@ export class AdaptiveHorrorEngine {
           prompt,
           'story'
         );
-        if (commands[0]?.type === 'displayText') {
+        if (Array.isArray(commands) && commands[0]?.type === 'displayText') {
           return commands[0].payload.content;
         }
       } catch (error) {
@@ -338,12 +344,16 @@ export class RealityCorruptionEngine {
   private corruptionEffects: string[] = [];
   
   async processCorruption(choice: string, worldState: WorldState): Promise<{
-    uiEffects: any;
+    uiEffects: UIEffects;
     corruptionLevel: number;
     newEffects: string[];
   }> {
     if (!REVOLUTIONARY_FEATURES.REALITY_CORRUPTION.enabled) {
-      return { uiEffects: {}, corruptionLevel: 0, newEffects: [] };
+      return { 
+        uiEffects: { filter: 'none', transform: 'none', opacity: 1.0 }, 
+        corruptionLevel: 0, 
+        newEffects: [] 
+      };
     }
     
     // Increase corruption based on choice type
@@ -384,7 +394,7 @@ export class RealityCorruptionEngine {
     return [];
   }
   
-  private calculateUIEffects(): any {
+  private calculateUIEffects(): UIEffects {
     return {
       filter: `hue-rotate(${this.corruptionLevel * 180}deg) brightness(${1 - this.corruptionLevel * 0.3})`,
       transform: `scale(${1 + this.corruptionLevel * 0.02}) rotate(${this.corruptionLevel * 2}deg)`,

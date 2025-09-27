@@ -214,7 +214,7 @@ export class QuantumNarrativeEngine {
     }
     
     // Create new thread branch based on choice significance
-    if (this.isSignificantChoice(choice) && this.narrativeThreads.size < REVOLUTIONARY_FEATURES.QUANTUM_NARRATIVES.maxThreads) {
+    if (await this.isSignificantChoice(choice) && this.narrativeThreads.size < REVOLUTIONARY_FEATURES.QUANTUM_NARRATIVES.maxThreads) {
       const newThreadId = `thread-${Date.now()}`;
       this.narrativeThreads.set(newThreadId, [...currentHistory]);
     }
@@ -337,11 +337,11 @@ export class RealityCorruptionEngine {
   private corruptionLevel: number = 0;
   private corruptionEffects: string[] = [];
   
-  processCorruption(choice: string, worldState: WorldState): {
+  async processCorruption(choice: string, worldState: WorldState): Promise<{
     uiEffects: any;
     corruptionLevel: number;
     newEffects: string[];
-  } {
+  }> {
     if (!REVOLUTIONARY_FEATURES.REALITY_CORRUPTION.enabled) {
       return { uiEffects: {}, corruptionLevel: 0, newEffects: [] };
     }
@@ -354,7 +354,7 @@ export class RealityCorruptionEngine {
     const maxCorruption = REVOLUTIONARY_FEATURES.REALITY_CORRUPTION.maxCorruption;
     this.corruptionLevel = Math.min(this.corruptionLevel, maxCorruption);
     
-    const newEffects = this.generateCorruptionEffects();
+    const newEffects = await this.generateCorruptionEffects();
     
     return {
       uiEffects: this.calculateUIEffects(),

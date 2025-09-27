@@ -67,7 +67,7 @@ export const getNextStep = async (
     
     // 5. REALITY CORRUPTION: Apply interface corruption effects
     console.log('Processing reality corruption effects...');
-    const corruptionResult = realityCorruption.processCorruption(
+    const corruptionResult = await realityCorruption.processCorruption(
       playerChoice,
       worldState
     );

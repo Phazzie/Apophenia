@@ -11,6 +11,8 @@ import { StorySegment, WorldState } from '../../../../types';
 // Mock the unified AI service to isolate the tests from actual AI calls.
 jest.mock('../../unifiedAIService');
 
+// NOTE: Jest (ts-jest) powers this suite to run TypeScript unit tests.
+
 const expectStoryDomainOnCalls = () => {
   const calls = (generateWithSelectedModel as jest.Mock).mock.calls;
   expect(calls.length).toBeGreaterThan(0);
@@ -138,6 +140,20 @@ describe('TemporalRevisionEngine', () => {
     jest.spyOn(Math, 'random').mockRestore();
   });
 
+  /**
+   * Probability Guard: Ensures high random rolls bypass revision attempts.
+   */
+  it('should skip AI revision when chance threshold is not met', async () => {
+    const randomSpy = jest.spyOn(Math, 'random').mockReturnValue(0.95);
+
+    const result = await engine.reviseHistory('An inconsequential choice', mockStoryHistory, mockWorldState);
+
+    expect(generateWithSelectedModel).not.toHaveBeenCalled();
+    expect(result).toBe(mockStoryHistory);
+
+    randomSpy.mockRestore();
+  });
+
 });
 
 /**
@@ -207,6 +223,21 @@ describe('RealityCorruptionEngine', () => {
 
     // Corruption level should remain at its initial state (0).
     expect(result.corruptionLevel).toBe(0);
+  });
+
+  /**
+   * Parsing Test: Ensures effect strings are split and trimmed correctly.
+   */
+  it('should trim and split AI-provided corruption effects', async () => {
+    (generateWithSelectedModel as jest.Mock).mockResolvedValue([{
+      type: 'displayText',
+      payload: { content: ' glitch-one , glitch-two , glitch-three ' },
+    }]);
+
+    const result = await engine.processCorruption('Whisper to the void', mockWorldState);
+
+    expect(result.newEffects).toEqual(['glitch-one', 'glitch-two', 'glitch-three']);
+    expect(result.corruptionLevel).toBeGreaterThanOrEqual(0);
   });
 });
 
@@ -473,6 +504,20 @@ describe('MetaConsciousnessEngine', () => {
 
     jest.useRealTimers();
     jest.spyOn(Math, 'random').mockRestore();
+  });
+
+  /**
+   * Probability Check: Confirms high random rolls skip meta generation without AI calls.
+   */
+  it('should skip meta event generation when probability check fails', async () => {
+    const randomSpy = jest.spyOn(Math, 'random').mockReturnValue(0.9);
+
+    const result = await engine.checkForMetaEvent([], mockWorldState);
+
+    expect(result).toBeNull();
+    expect(generateWithSelectedModel).not.toHaveBeenCalled();
+
+    randomSpy.mockRestore();
   });
 });
 

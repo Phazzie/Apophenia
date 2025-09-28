@@ -30,13 +30,13 @@ const GameScreen: React.FC = () => {
     triggerSummary(worldState, storyHistory);
 
     try {
-      const commands = await getNextStep(
+      const result = await getNextStep(
         choice.text,
         worldState,
         storyHistory,
         worldState.genreConfig
       );
-      await executeCommandQueue(commands);
+      await executeCommandQueue(result.commands);
       // The displayChoices command will set the state back to PLAYING
     } catch (err) {
       console.error('Failed to process choice:', err);

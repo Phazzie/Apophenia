@@ -51,6 +51,12 @@ export const storySegmentSchema = z.object({
     inset: z.array(z.string()).optional(),
     mainStatus: z.enum(['loading', 'loaded']).optional(),
   }),
+  // Revolutionary features
+  isRevised: z.boolean().optional(),
+  originalText: z.string().optional(),
+  isQuantumShift: z.boolean().optional(),
+  isMetaEvent: z.boolean().optional(),
+  corruptionLevel: z.number().optional(),
 });
 
 export const choiceSchema = z.object({

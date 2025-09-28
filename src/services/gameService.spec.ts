@@ -134,10 +134,16 @@ describe('gameService', () => {
 
       const result = await getNextStep('Open the door', mockWorldState, mockStoryHistory, mockGenreConfig);
 
-      console.log('Test result:', result);
-
-      // Since the mock might not be working due to import issues, let's just verify the structure
-      expect(result).toHaveProperty('commands');
+      // With revolutionary features enabled, the playerChoice gets enhanced
+      expect(generateNextStepWithSelectedModel).toHaveBeenCalledWith(
+        expect.stringContaining('Player chose: Open the door. Continue the cosmic horror narrative.'),
+        mockWorldState,
+        mockStoryHistory,
+        mockGenreConfig
+      );
+      
+      // Result now includes additional revolutionary features data
+      expect(result.commands).toEqual(commands);
       expect(result).toHaveProperty('revisedHistory');
       expect(result).toHaveProperty('metaMessage');  
       expect(result).toHaveProperty('quantumShift');

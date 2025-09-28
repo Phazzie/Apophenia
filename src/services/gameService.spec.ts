@@ -106,14 +106,14 @@ describe('gameService', () => {
     it('should call all revolutionary engines and the AI model', async () => {
       await getNextStep('A choice', mockWorldState, mockHistory, mockGenreConfig);
 
-      // Verify all engines were called
-      expect(mockEngines.neuralEchoChambers.recordChoice).toHaveBeenCalled();
-      expect(mockEngines.semanticArchaeology.analyzeChoiceSemantics).toHaveBeenCalled();
-      expect(mockEngines.adaptiveHorror.analyzePlayerChoice).toHaveBeenCalled();
+      // Verify all engines were called with expected data
+      expect(mockEngines.neuralEchoChambers.recordChoice).toHaveBeenCalledWith('A choice', 'game progression', mockWorldState);
+      expect(mockEngines.semanticArchaeology.analyzeChoiceSemantics).toHaveBeenCalledWith('A choice', ['A choice']);
+      expect(mockEngines.adaptiveHorror.analyzePlayerChoice).toHaveBeenCalledWith('A choice', 'game progression');
       expect(mockEngines.temporalRevision.reviseHistory).toHaveBeenCalledWith('A choice', mockHistory, mockWorldState);
       expect(mockEngines.quantumNarrative.processQuantumChoice).toHaveBeenCalledWith('A choice', mockHistory, mockWorldState);
-      expect(mockEngines.metaConsciousness.checkForMetaEvent).toHaveBeenCalled();
-      expect(mockEngines.realityCorruption.processCorruption).toHaveBeenCalled();
+      expect(mockEngines.metaConsciousness.checkForMetaEvent).toHaveBeenCalledWith(mockHistory, mockWorldState);
+      expect(mockEngines.realityCorruption.processCorruption).toHaveBeenCalledWith('A choice', mockWorldState);
       expect(mockEngines.narrativeDNA.evolveNarrative).toHaveBeenCalled();
 
       // Verify the final AI call was made with the processed data

@@ -1,3 +1,7 @@
+> **ARCHIVED DOCUMENT**
+>
+> This document is archived and is no longer maintained. It is kept for historical purposes only.
+
  Apophenia — Custom Instructions
 
 Mission

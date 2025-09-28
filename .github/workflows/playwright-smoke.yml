@@ -1,0 +1,88 @@
+name: Playwright Smoke Test
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "**" ]
+
+jobs:
+  playwright-smoke:
+    name: Playwright Smoke Test
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.40.0-jammy
+      
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build project
+      run: npm run build
+
+    - name: Start preview server
+      run: |
+        # Start the preview server in background on port 4173
+        npm run preview -- --port 4173 --host 0.0.0.0 &
+        SERVER_PID=$!
+        echo "SERVER_PID=$SERVER_PID" >> $GITHUB_ENV
+        
+        # Wait for server to be ready
+        timeout=30
+        while [ $timeout -gt 0 ]; do
+          if curl -s http://localhost:4173 > /dev/null; then
+            echo "✅ Preview server is ready on port 4173"
+            break
+          fi
+          echo "Waiting for server to start... ($timeout seconds remaining)"
+          sleep 1
+          timeout=$((timeout - 1))
+        done
+        
+        if [ $timeout -eq 0 ]; then
+          echo "❌ Server failed to start within 30 seconds"
+          exit 1
+        fi
+
+    - name: Install Python dependencies
+      run: |
+        pip install playwright
+        # Playwright browsers are already installed in the container
+
+    - name: Run Playwright verification
+      env:
+        BASE_URL: http://localhost:4173
+      run: |
+        python verify.py
+
+    - name: Upload verification screenshot
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: verification-screenshot
+        path: verification.png
+        retention-days: 30
+
+    - name: Upload error screenshot
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: error-screenshot
+        path: error_screenshot.png
+        retention-days: 30
+
+    - name: Cleanup
+      if: always()
+      run: |
+        if [ -n "$SERVER_PID" ]; then
+          kill $SERVER_PID || true
+        fi

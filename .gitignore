@@ -5,6 +5,9 @@
 /dist
 /build
 
+# Test coverage
+/coverage
+
 # Log files
 npm-debug.log*
 yarn-debug.log*

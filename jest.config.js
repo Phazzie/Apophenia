@@ -5,6 +5,7 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
   setupFiles: ['whatwg-fetch'],
   moduleNameMapper: {
+    '^../../config$': '<rootDir>/src/services/__mocks__/config.ts',
     '^../../services/config$': '<rootDir>/src/services/__mocks__/config.ts',
     '^../config$': '<rootDir>/src/services/__mocks__/config.ts',
     '^../../services/ai/grokService$': '<rootDir>/src/services/__mocks__/ai/grokService.ts',

@@ -3,9 +3,9 @@ import {
     generateImageFlow,
     processAdvancedImageGeneration,
 } from './ai/secureGenkit';
-import { 
-    generateConceptWithSelectedModel, 
-    generateNextStepWithSelectedModel 
+import {
+    generateConceptWithSelectedModel,
+    generateNextStepWithSelectedModel,
 } from './ai/unifiedAIService';
 import { summarizeHistoryFlow } from './flows/summaryFlow';
 import {
@@ -15,9 +15,17 @@ import {
   adaptiveHorror,
   realityCorruption,
   neuralEchoChambers,
-  semanticChoiceArchaeology,
-  adaptiveNarrativeDNA,
-} from './ai/revolutionaryFeatures';
+  semanticArchaeology,
+  narrativeDNA,
+  fifthWallBreaker,
+} from './ai/engines';
+import type { RealityCorruptionResult } from './ai/engines/RealityCorruptionEngine';
+
+type NarrativeEvolution = {
+  generation: number;
+  psychProfile: string;
+  hiddenMotivations: string[];
+};
 
 /**
  * Revolutionary Enhanced Game Service
@@ -34,136 +42,99 @@ export const getNextStep = async (
   revisedHistory?: StorySegment[];
   metaMessage?: string;
   quantumShift?: boolean;
-  corruptionEffects?: any;
-  archaeologyReport?: any;
-  dnaEvolution?: any;
-  engineStatus?: string;
+  corruptionEffects?: RealityCorruptionResult;
+  echoMessage?: string;
+  semanticInsight?: string;
+  narrativeEvolution?: NarrativeEvolution;
 }> => {
   console.log('Processing next step for player choice:', playerChoice);
   console.log('World state:', { protagonist: worldState.protagonist, psychologicalStatus: worldState.psychologicalStatus });
   console.log('Story history length:', history.length);
 
   try {
-    // 1. ADAPTIVE HORROR: Calculate the new horror intensity for this turn.
-    // This score will be used to dynamically adjust the narrative, visuals, and choices.
-    console.log('Calculating adaptive horror intensity...');
-    const newHorrorIntensity = adaptiveHorror.calculateAdaptiveHorrorIntensity(history, worldState);
-    const updatedWorldState = { ...worldState, horrorIntensity: newHorrorIntensity };
+    // Initialize Neural Echo Chambers on first use
+    neuralEchoChambers.initializeFromPersistence();
+
+    // 1. NEURAL ECHO CHAMBERS: Record choice and check for echoes
+    console.log('Processing neural echo chambers...');
+    neuralEchoChambers.recordChoice(playerChoice, 'game progression', worldState);
+    const echoMessage = neuralEchoChambers.generateEchoPrompt(playerChoice, worldState);
+
+    // 2. SEMANTIC CHOICE ARCHAEOLOGY: Deep psychological analysis
+    console.log('Performing semantic choice archaeology...');
+    const allChoices: string[] = [playerChoice];
+    const semanticAnalysis = semanticArchaeology.analyzeChoiceSemantics(playerChoice, allChoices);
+
+    // 3. ADAPTIVE HORROR: Enhanced with semantic insights
+    console.log('Analyzing player choice for adaptive horror...');
+    await adaptiveHorror.analyzePlayerChoice(playerChoice, 'game progression');
     
-    // 2. TEMPORAL REVISION: Check if choice should alter past events
+    // 4. TEMPORAL REVISION: Check if choice should alter past events
     console.log('Processing temporal revision...');
     const revisedHistory = await temporalRevision.reviseHistory(
       playerChoice,
       history,
-      updatedWorldState
+      worldState
     );
     
-    // 3. QUANTUM NARRATIVE: Process potential timeline shifts
+    // 5. QUANTUM NARRATIVE: Process potential timeline shifts
     console.log('Processing quantum narrative shifts...');
     const quantumResult = await quantumNarrative.processQuantumChoice(
       playerChoice,
       revisedHistory,
-      updatedWorldState
+      worldState
     );
     
-    // 4. META-CONSCIOUSNESS: Check for AI awareness events
+    // 6. META-CONSCIOUSNESS: Check for AI awareness events
     console.log('Checking for meta-consciousness events...');
-    let metaMessage;
-    try {
-      metaMessage = await metaConsciousness.checkForMetaEvent(
-        quantumResult.history,
-        updatedWorldState
-      );
-      console.log('Meta-consciousness check completed');
-    } catch (error) {
-      console.error('Meta-consciousness check failed:', error);
-      metaMessage = null;
-    }
-    
-    // 5. REALITY CORRUPTION: Apply interface corruption effects
-    console.log('Processing reality corruption effects...');
-    let corruptionResult;
-    try {
-      corruptionResult = await realityCorruption.processCorruption(
-        playerChoice,
-        updatedWorldState
-      );
-      console.log('Reality corruption processing completed');
-    } catch (error) {
-      console.error('Reality corruption processing failed:', error);
-      corruptionResult = { corruptionLevel: 0, newEffects: [], uiEffects: {} };
-    }
-    
-    // 6. NEURAL ECHO CHAMBERS: Store cross-session memories
-    console.log('Storing neural echoes...');
-    try {
-      const playerId = 'player-' + (Math.random().toString(36).substr(2, 9)); // Simple player ID
-      await neuralEchoChambers.storeEcho(playerId, {
-        choicePattern: playerChoice,
-        psychologicalTrigger: metaMessage || 'none',
-        fearResponse: corruptionResult.corruptionLevel,
-        timestamp: Date.now()
-      });
-      console.log('Neural echoes stored successfully');
-    } catch (error) {
-      console.error('Neural echo storage failed:', error);
-    }
-    
-    // 7. SEMANTIC CHOICE ARCHAEOLOGY: Deep psychological analysis
-    console.log('Performing semantic choice archaeology...');
-    let archaeologyReport;
-    try {
-      archaeologyReport = await semanticChoiceArchaeology.excavateChoice(
-        playerChoice,
-        `Horror intensity: ${updatedWorldState.horrorIntensity}/10`,
-        updatedWorldState
-      );
-      console.log('Semantic archaeology completed');
-    } catch (error) {
-      console.error('Semantic archaeology failed:', error);
-      archaeologyReport = null;
-    }
-    
-    // 8. ADAPTIVE NARRATIVE DNA: Evolve story genetics
-    console.log('Evolving narrative DNA...');
-    let dnaEvolution;
-    try {
-      const playerEngagement = corruptionResult.corruptionLevel > 0.3 ? 0.8 : 0.5;
-      dnaEvolution = await adaptiveNarrativeDNA.evolveDNA(
-        playerChoice,
-        playerEngagement,
-        updatedWorldState
-      );
-      console.log('Narrative DNA evolution completed');
-    } catch (error) {
-      console.error('Narrative DNA evolution failed:', error);
-      dnaEvolution = null;
-    }
-    
-    // 9. ENHANCED AI GENERATION: Generate next story beat with all revolutionary features
-    console.log('Generating personalized horror prompt with full 8-module analysis...');
-    const personalizedPrompt = await adaptiveHorror.generatePersonalizedHorror(
-      `Player chose: ${playerChoice}. Continue the cosmic horror narrative.
-      
-Semantic Analysis: ${archaeologyReport ? JSON.stringify(archaeologyReport) : 'none'}
-Narrative DNA: ${dnaEvolution ? JSON.stringify(dnaEvolution) : 'none'}
-Reality Corruption: ${corruptionResult.corruptionLevel}`
+    const metaMessage = await metaConsciousness.checkForMetaEvent(
+      quantumResult.history,
+      worldState
     );
+    
+    // 7. REALITY CORRUPTION: Apply interface corruption effects
+    console.log('Processing reality corruption effects...');
+    const corruptionResult = await realityCorruption.processCorruption(
+      playerChoice,
+      worldState
+    );
+
+    // 8. BREAKING THE FIFTH WALL: Activate browser manipulation
+    console.log('Processing fifth wall breaking effects...');
+    const totalCorruption = corruptionResult.corruptionLevel + (worldState.systemHealth ? (100 - worldState.systemHealth) / 100 * 0.5 : 0);
+    if (totalCorruption > 0.3) {
+      fifthWallBreaker.activateBreakage(totalCorruption, worldState);
+    }
+
+    // 9. ADAPTIVE NARRATIVE DNA: Evolve story structure
+    console.log('Evolving narrative DNA...');
+    const responseTimeMs = 5000; // TODO: Replace with real measured response latency when available.
+    narrativeDNA.evolveNarrative(playerChoice, responseTimeMs, worldState);
+    
+    // 10. ENHANCED AI GENERATION: Generate next story beat with all personalizations
+    console.log('Generating comprehensive personalized horror prompt...');
+    let personalizedPrompt = await adaptiveHorror.generatePersonalizedHorror(
+      `Player chose: ${playerChoice}. Continue the cosmic horror narrative.`
+    );
+
+    // Enhance with semantic insights
+    personalizedPrompt += ` ${semanticAnalysis.semanticInsight}`;
+    
+    // Enhance with narrative DNA
+    personalizedPrompt = narrativeDNA.generateAdaptivePrompt(personalizedPrompt, worldState);
+
+    // Add echo context if present
+    if (echoMessage) {
+      personalizedPrompt += ` [ECHO CONTEXT]: ${echoMessage}`;
+    }
     
     console.log('Calling AI service for next step generation...');
-    let commands;
-    try {
-      commands = await generateNextStepWithSelectedModel(
-        personalizedPrompt,
-        updatedWorldState,
-        quantumResult.history,
-        genreConfig
-      );
-      console.log('AI service call successful, generated', commands.length, 'commands');
-    } catch (aiError) {
-      console.error('AI service call failed:', aiError);
-      throw aiError; // Re-throw to be caught by outer error handler
-    }
+    const commands = await generateNextStepWithSelectedModel(
+      personalizedPrompt,
+      worldState,
+      quantumResult.history,
+      genreConfig
+    );
     
     console.log('Generated', commands.length, 'commands for next step');
     
@@ -173,9 +144,13 @@ Reality Corruption: ${corruptionResult.corruptionLevel}`
       metaMessage: metaMessage || undefined,
       quantumShift: quantumResult.quantumShift,
       corruptionEffects: corruptionResult.corruptionLevel > 0 ? corruptionResult : undefined,
-      archaeologyReport: archaeologyReport || undefined,
-      dnaEvolution: dnaEvolution || undefined,
-      engineStatus: '8-module system fully operational'
+      echoMessage: echoMessage || undefined,
+      semanticInsight: semanticAnalysis.semanticInsight,
+      narrativeEvolution: {
+        generation: narrativeDNA.getGeneration(),
+        psychProfile: semanticAnalysis.psychProfile,
+        hiddenMotivations: semanticAnalysis.hiddenMotivations,
+      },
     };
   } catch (error) {
     console.error('Error in getNextStep:', error);
@@ -189,7 +164,7 @@ Reality Corruption: ${corruptionResult.corruptionLevel}`
           type: 'displayText',
           payload: {
             content: "The fabric of reality fractures... your choices have consequences beyond comprehension.",
-            segmentId: crypto.randomUUID()
+            segmentId: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `seg-${Date.now()}`
           }
         },
         {

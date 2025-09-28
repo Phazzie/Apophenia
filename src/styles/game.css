@@ -543,6 +543,75 @@ body {
   font-style: italic;
 }
 
+/* Enhanced image states */
+.image-loading-overlay.retrying {
+  background: 
+    linear-gradient(45deg, rgba(138, 43, 226, 0.15), rgba(15, 15, 21, 0.9));
+  border: 1px solid rgba(138, 43, 226, 0.3);
+}
+
+.image-loading-overlay.retrying small {
+  color: var(--accent-purple);
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+  opacity: 0.8;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.image-error-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    linear-gradient(45deg, rgba(255, 38, 38, 0.15), rgba(15, 15, 21, 0.9));
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  text-align: center;
+  border: 1px solid rgba(255, 38, 38, 0.3);
+}
+
+.error-icon {
+  font-size: 2rem;
+  color: var(--accent-red);
+  text-shadow: var(--glow-red);
+  margin-bottom: 1rem;
+  animation: subtle-flicker 3s ease-in-out infinite;
+}
+
+.retry-button {
+  background: var(--bg-secondary);
+  border: 1px solid var(--accent-red);
+  color: var(--accent-red);
+  padding: 0.8rem 1.5rem;
+  margin-top: 1rem;
+  cursor: pointer;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  text-shadow: var(--glow-text);
+}
+
+.retry-button:hover {
+  background: rgba(255, 38, 38, 0.1);
+  box-shadow: var(--glow-red);
+  transform: translateY(-2px);
+}
+
+.retry-button:active {
+  transform: translateY(0);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
 /* ============================================
    END SCREEN STYLES
    ============================================ */

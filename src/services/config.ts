@@ -20,6 +20,24 @@ export const API_KEYS = isTestEnvironment ? {
   xaiAPI: import.meta.env.VITE_XAI_API_KEY || '',
 };
 
+// Cache configuration with environment variable support
+export const CACHE_CONFIG = {
+  // Image cache TTL in milliseconds (default: 30 minutes)
+  IMAGE_CACHE_TTL: isTestEnvironment 
+    ? parseInt(process.env.VITE_IMAGE_CACHE_TTL || '1800000', 10)
+    : parseInt(import.meta.env.VITE_IMAGE_CACHE_TTL || '1800000', 10),
+  
+  // Maximum number of cached images (default: 50)
+  IMAGE_CACHE_MAX_SIZE: isTestEnvironment 
+    ? parseInt(process.env.VITE_IMAGE_CACHE_MAX_SIZE || '50', 10)
+    : parseInt(import.meta.env.VITE_IMAGE_CACHE_MAX_SIZE || '50', 10),
+    
+  // Enable cache telemetry tracking (default: true)
+  ENABLE_CACHE_TELEMETRY: isTestEnvironment 
+    ? (process.env.VITE_ENABLE_CACHE_TELEMETRY === 'true')
+    : (import.meta.env.VITE_ENABLE_CACHE_TELEMETRY !== 'false'),
+};
+
 // Configuration getter function
 export const getConfig = () => {
   return {
@@ -27,6 +45,7 @@ export const getConfig = () => {
     imageApiKey: API_KEYS.googleImagen,
     imagenKey: API_KEYS.googleImagen,
     xaiApiKey: API_KEYS.xaiAPI,
+    cache: CACHE_CONFIG,
   };
 };
 

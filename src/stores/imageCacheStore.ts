@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { CACHE_CONFIG } from '../services/config';
 
 interface CachedImage {
   url: string;
@@ -7,21 +8,37 @@ interface CachedImage {
   lastAccessed: number;
 }
 
+interface CacheTelemetry {
+  hits: number;
+  misses: number;
+  evictions: number;
+  totalRequests: number;
+}
+
 interface ImageCacheStore {
   imageCache: Record<string, CachedImage>;
+  telemetry: CacheTelemetry;
   addToCache: (prompt: string, url: string) => void;
   getFromCache: (prompt: string) => string | null;
   evictStaleEntries: () => void;
   getCacheSize: () => number;
   clearCache: () => void;
+  getTelemetry: () => CacheTelemetry;
+  resetTelemetry: () => void;
 }
 
-// Cache configuration
-const MAX_CACHE_SIZE = 50; // Maximum number of cached images
-const CACHE_TTL = 1000 * 60 * 30; // 30 minutes TTL
+// Use configurable cache parameters
+const MAX_CACHE_SIZE = CACHE_CONFIG.IMAGE_CACHE_MAX_SIZE;
+const CACHE_TTL = CACHE_CONFIG.IMAGE_CACHE_TTL;
 
 export const useImageCacheStore = create<ImageCacheStore>((set, get) => ({
   imageCache: {},
+  telemetry: {
+    hits: 0,
+    misses: 0,
+    evictions: 0,
+    totalRequests: 0,
+  },
   
   addToCache: (prompt, url) =>
     set((state) => {
@@ -36,6 +53,7 @@ export const useImageCacheStore = create<ImageCacheStore>((set, get) => ({
       };
       
       const newCache = { ...state.imageCache, [prompt]: newEntry };
+      let newTelemetry = { ...state.telemetry };
       
       // Check if we need to evict entries
       const entries = Object.entries(newCache);
@@ -52,19 +70,36 @@ export const useImageCacheStore = create<ImageCacheStore>((set, get) => ({
         // Keep the most recent MAX_CACHE_SIZE entries (new entry is already included)
         const entriesToKeep = sorted.slice(-MAX_CACHE_SIZE);
         const evictedCache = Object.fromEntries(entriesToKeep);
+        const evictedCount = entries.length - MAX_CACHE_SIZE;
         
-        console.log(`Image cache evicted ${entries.length - MAX_CACHE_SIZE} entries`);
-        return { imageCache: evictedCache };
+        if (CACHE_CONFIG.ENABLE_CACHE_TELEMETRY) {
+          newTelemetry.evictions += evictedCount;
+          console.log(`Image cache evicted ${evictedCount} entries`);
+        }
+        
+        return { imageCache: evictedCache, telemetry: newTelemetry };
       }
       
-      return { imageCache: newCache };
+      return { imageCache: newCache, telemetry: newTelemetry };
     }),
     
   getFromCache: (prompt) => {
     const state = get();
     const entry = state.imageCache[prompt];
     
-    if (!entry) return null;
+    // Update telemetry
+    const newTelemetry = { 
+      ...state.telemetry, 
+      totalRequests: state.telemetry.totalRequests + 1 
+    };
+    
+    if (!entry) {
+      if (CACHE_CONFIG.ENABLE_CACHE_TELEMETRY) {
+        newTelemetry.misses++;
+      }
+      set({ telemetry: newTelemetry });
+      return null;
+    }
     
     const now = Date.now();
     
@@ -73,22 +108,39 @@ export const useImageCacheStore = create<ImageCacheStore>((set, get) => ({
       // Remove expired entry
       set((state) => {
         const { [prompt]: removed, ...rest } = state.imageCache;
-        return { imageCache: rest };
+        
+        const updatedTelemetry = { 
+          ...newTelemetry, 
+          misses: newTelemetry.misses + 1 
+        };
+        
+        return { 
+          imageCache: rest, 
+          telemetry: CACHE_CONFIG.ENABLE_CACHE_TELEMETRY ? updatedTelemetry : state.telemetry
+        };
       });
       return null;
     }
     
-    // Update access info
-    set((state) => ({
-      imageCache: {
-        ...state.imageCache,
-        [prompt]: {
-          ...entry,
-          accessCount: entry.accessCount + 1,
-          lastAccessed: now,
+    // Update access info and telemetry
+    set((state) => {
+      const updatedTelemetry = { 
+        ...newTelemetry, 
+        hits: newTelemetry.hits + 1 
+      };
+      
+      return {
+        imageCache: {
+          ...state.imageCache,
+          [prompt]: {
+            ...entry,
+            accessCount: entry.accessCount + 1,
+            lastAccessed: now,
+          },
         },
-      },
-    }));
+        telemetry: CACHE_CONFIG.ENABLE_CACHE_TELEMETRY ? updatedTelemetry : state.telemetry,
+      };
+    });
     
     return entry.url;
   },
@@ -107,14 +159,42 @@ export const useImageCacheStore = create<ImageCacheStore>((set, get) => ({
         }
       });
       
-      if (evictedCount > 0) {
+      if (evictedCount > 0 && CACHE_CONFIG.ENABLE_CACHE_TELEMETRY) {
         console.log(`Image cache evicted ${evictedCount} stale entries`);
       }
       
-      return { imageCache: freshCache };
+      const newTelemetry = { 
+        ...state.telemetry, 
+        evictions: state.telemetry.evictions + evictedCount 
+      };
+      
+      return { 
+        imageCache: freshCache,
+        telemetry: CACHE_CONFIG.ENABLE_CACHE_TELEMETRY ? newTelemetry : state.telemetry,
+      };
     }),
     
   getCacheSize: () => Object.keys(get().imageCache).length,
   
-  clearCache: () => set({ imageCache: {} }),
+  clearCache: () => set({ 
+    imageCache: {},
+    telemetry: {
+      hits: 0,
+      misses: 0,
+      evictions: 0,
+      totalRequests: 0,
+    }
+  }),
+  
+  getTelemetry: () => get().telemetry,
+  
+  resetTelemetry: () => set((state) => ({
+    ...state,
+    telemetry: {
+      hits: 0,
+      misses: 0,
+      evictions: 0,
+      totalRequests: 0,
+    }
+  })),
 }));

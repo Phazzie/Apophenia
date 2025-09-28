@@ -23,6 +23,9 @@ Frontend (Vite/React)  <--HTTPS-->  Backend API (Node.js)  <--API Calls-->  AI S
 ### Backend Environment Variables
 Create a `.env` file for your backend server based on `.env.example`.
 
+Change to:
+XAI_API_KEY="your-xai-api-key-here"
+GEMINI_API_KEY="your-google-gemini-api-key"
 ```env
 # AI Provider API Keys
 VITE_XAI_API_KEY="your-xai-api-key-here"

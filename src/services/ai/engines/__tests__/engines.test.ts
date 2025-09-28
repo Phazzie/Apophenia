@@ -8,7 +8,10 @@ import { AdaptiveNarrativeDNA } from '../AdaptiveNarrativeDNA';
 import { generateWithSelectedModel } from '../../unifiedAIService';
 import { StorySegment, WorldState } from '../../../../types';
 
-// Mock the unified AI service to isolate the tests from actual AI calls.
+
+expect(generateWithSelectedModel).toHaveBeenCalled();
+expectStoryDomainOnCalls();
+expect(engine.getPlayerPsychProfile()).toEqual('');
 jest.mock('../../unifiedAIService');
 
 // NOTE: Jest (ts-jest) powers this suite to run TypeScript unit tests.

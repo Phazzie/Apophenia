@@ -253,6 +253,10 @@ src/
 
 ---
 
+Update to:
+NODE_ENV=production
+XAI_API_KEY=your-production-xai-key
+GEMINI_API_KEY=your-production-gemini-key
 ## 🌐 Expert Deployment Guide
 
 For detailed and secure deployment instructions, please see the [Comprehensive Deployment Guide](DEPLOYMENT.md).

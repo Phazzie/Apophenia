@@ -71,7 +71,7 @@ describe('gameService', () => {
     systemHealth: 100,
     horrorIntensity: 0.1,
     uiDistortion: { transform: 'none', filter: 'none', transition: 'none' },
-    genreConfig: { id: 'test', name: 'Test', description: '', style: '', theme: {}, startScreenImagePrompt: '', conceptPrompt: '', aiSystemInstruction: '' },
+    genreConfig: mockGenreConfig,
   };
 
   const mockGenreConfig: GenreConfig = {

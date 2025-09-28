@@ -21,13 +21,7 @@ const { handleError, AppError } = require('./utils/errorHandler');
 const logger = createLogger();
 
 // Initialize services - allow injection for testing
-let grokImageService;
-if (process.env.NODE_ENV === 'test') {
-  // In test environment, service will be mocked
-  grokImageService = new GrokImageService(process.env.XAI_API_KEY, logger);
-} else {
-  grokImageService = new GrokImageService(process.env.XAI_API_KEY, logger);
-}
+let grokImageService = new GrokImageService(process.env.XAI_API_KEY, logger);
 
 const app = express();
 const PORT = process.env.PORT || 3001;

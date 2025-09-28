@@ -53,31 +53,37 @@ vercel --prod
 
 ## 🐋 Docker Deployment
 
-**For any cloud provider or self-hosted environment**
+**Containerized deployment using separate frontend/backend containers**
 
-```dockerfile
-# Dockerfile (already configured)
-FROM node:20-alpine AS builder
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-COPY . .
-RUN npm run build
+Apophenia now includes production-ready Docker containers for DigitalOcean and other platforms:
 
-FROM nginx:alpine
-COPY --from=builder /app/dist /usr/share/nginx/html
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
-```
-
+### Quick Start
 ```bash
-# Build and run locally
-docker build -t apophenia .
-docker run -p 8080:80 apophenia
+# Build both containers
+docker build -f docker/frontend/Dockerfile -t apophenia-frontend .
+docker build -f docker/backend/Dockerfile -t apophenia-backend .
 
-# Deploy to any cloud provider
-docker push your-registry/apophenia
+# Run with docker-compose (recommended for local development)
+docker compose up --build
+
+# Access application
+# Frontend: http://localhost:8080
+# Backend API: http://localhost:3001/api/health
 ```
+
+### DigitalOcean App Platform
+```bash
+# Deploy using the containerized spec
+doctl apps create --spec deployment/spec.yaml
+```
+
+**Architecture**: 
+- **Frontend**: React build served by nginx (53MB image)
+- **Backend**: Express API server with health checks (136MB image)
+- **Security**: Non-root users, minimal Alpine base images
+- **Health Checks**: Built-in container health monitoring
+
+📖 **Full Documentation**: See [`docker/README.md`](docker/README.md) for complete setup instructions.
 
 ---
 

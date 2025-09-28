@@ -3,6 +3,12 @@
 # stage does not correctly install dependencies in a way that the `CMD` can
 # find them, leading to module resolution errors at runtime. This file needs
 # to be fixed in conjunction with the server's package.json and directory structure.
+#
+# UPDATE: New production-ready Docker setup is available in docker/
+# - docker/frontend/Dockerfile: React build → nginx serve (53MB)
+# - docker/backend/Dockerfile: Express server with Node runtime (136MB)
+# - deployment/spec.yaml: DigitalOcean App Platform specification
+# See docker/README.md for complete documentation.
 
 # Stage 1: Build the frontend
 FROM node:18 AS builder

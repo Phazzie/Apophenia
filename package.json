@@ -22,6 +22,8 @@
     "build": "./node_modules/.bin/tsc && ./node_modules/.bin/vite build",
     "preview": "./node_modules/.bin/vite preview",
     "test": "jest",
+    "test:backend": "cd backend && npm test",
+    "test:all": "npm test && npm run test:backend",
     "deploy": "npm run build && vercel --prod",
     "deploy:gh-pages": "npm run build && npx gh-pages -d dist",
     "deploy:netlify": "npm run build && echo 'Upload dist/ folder to Netlify'",

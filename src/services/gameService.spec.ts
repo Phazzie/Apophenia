@@ -3,16 +3,16 @@
  */
 
 import {
-  generateConcept,
-  generateImage,
-  getNextStep,
-  summarizeHistory,
+    generateConcept,
+    generateImage,
+    getNextStep,
+    summarizeHistory,
 } from './gameService';
 
 import {
-  generateConceptFlow,
-  generateImageFlow,
-  nextStepFlow,
+    generateConceptFlow,
+    generateImageFlow,
+    nextStepFlow,
 } from './ai/genkit';
 
 import type { Command, GenreConfig, StorySegment, WorldState } from '../types';

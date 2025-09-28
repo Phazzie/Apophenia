@@ -2,6 +2,15 @@
 
 Apophenia is an AI-directed, choice-driven psychological horror game. The AI (“Director”) generates story segments, images, and choices (including intrusive thoughts) as you play. The UI reflects the protagonist’s degrading psychological state.
 
+## Product vision
+- Deliver a uniquely personal psychological horror experience where an AI Director adapts the story to your choices, mood, and selected genre.
+- Balance player agency with mounting tension: choices matter, including tempting “intrusive thoughts” that may derail you.
+- Keep the system reliable and safe via typed commands, schema-validated state, and defensive fallbacks.
+- Maintain fast, responsive pacing (sub‑3s typical step) so the horror never loses momentum.
+- Support replayability through configurable genres and evolving world state, not pre-authored branches.
+
+See [VISION.md](VISION.md) for principles, scope/non‑goals, and success criteria.
+
 Status: Functional MVP in active development. Updated: September 8, 2025
 
 ## Core loop
@@ -56,13 +65,20 @@ npm run build
 - Loading states and “New Game” reset
 - Image generation stub that falls back to Unsplash
 
-## Near-term roadmap
-- Add backend service (Express) for server-side image generation using Gemini’s image-capable model; call from `processImageGeneration`
-- DigitalOcean App Platform deployment: static frontend + Node backend
-- Expand genre configurations and polish UI effects
+## Roadmap (near‑term)
+- Add backend service (Express) for server-side image generation using Gemini’s image-capable model; call from `processImageGeneration`.
+- DigitalOcean App Platform deployment: static frontend + Node backend.
+- Expand genre configurations and polish UI effects.
 
 ## Contributing
 Use conventional commits. Update CHANGELOG.md for user-facing changes.
 
 ## License
 Proprietary (TBD). Contact the author for details.
+
+## Docs
+- Vision: [VISION.md](VISION.md)
+- Changelog: [CHANGELOG.md](CHANGELOG.md)
+- Deployment plan: [DEPLOYMENT_PLAN.md](DEPLOYMENT_PLAN.md)
+- Testing notes (Jest): [docs/testing-notes.md](docs/testing-notes.md)
+- Optional Playwright setup: [PLAYWRIGHT_SETUP.md](PLAYWRIGHT_SETUP.md)

@@ -1,15 +1,15 @@
 import {
-  GoogleGenerativeAI,
-  HarmBlockThreshold,
-  HarmCategory,
+    GoogleGenerativeAI,
+    HarmBlockThreshold,
+    HarmCategory,
 } from '@google/generative-ai';
 import {
-  Command,
-  GameCommand,
-  GenreConfig,
-  StorySegment,
-  WorldState,
-  commandArraySchema,
+    Command,
+    GameCommand,
+    GenreConfig,
+    StorySegment,
+    WorldState,
+    commandArraySchema,
 } from '../../types';
 import { API_KEYS } from '../config';
 

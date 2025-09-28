@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on Keep a Changelog, and this project adheres to Semantic Versioning.
 
 ## [0.3.1] - 2025-09-08
+## [0.3.2] - 2025-09-08
+### Added
+- VISION.md: Formalized product vision, principles, scope, and success criteria.
+- README: Added concise Product vision section and linked to VISION.md.
+
+### Documentation
+- Aligned README roadmap and near-term goals with deployment and backend plans.
+
 ### Changed
 - Simplified `GameScreen.tsx` internals:
 	- Replaced manual timeout/ref pattern for the "Game Saved!" message with a declarative effect and cleanup.

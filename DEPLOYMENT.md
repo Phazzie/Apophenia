@@ -25,15 +25,16 @@ Create a `.env` file for your backend server based on `.env.example`.
 
 Change to:
 XAI_API_KEY="your-xai-api-key-here"
-GEMINI_API_KEY="your-google-gemini-api-key"
-```env
 # AI Provider API Keys
-VITE_XAI_API_KEY="your-xai-api-key-here"
-VITE_GEMINI_API_KEY="your-google-gemini-api-key"
+XAI_API_KEY="your-xai-api-key-here"
+GEMINI_API_KEY="your-google-gemini-api-key"
 
 # Server Configuration
 NODE_ENV="production"
 PORT=3001 # Or any port your hosting requires
+
+# The public URL of your deployed frontend for CORS
+CORS_ORIGIN="https://your-frontend-domain.com"
 
 # The public URL of your deployed frontend for CORS
 CORS_ORIGIN="https://your-frontend-domain.com"

@@ -62,6 +62,17 @@ const mockSummarizeHistory = summarizeHistoryFlow as jest.Mock;
 const mockEngines = engines as jest.Mocked<typeof engines>;
 
 describe('gameService', () => {
+  const mockGenreConfig: GenreConfig = {
+    id: 'cosmic-horror',
+    name: 'Cosmic Horror',
+    description: '...',
+    style: 'Lovecraftian',
+    theme: {},
+    startScreenImagePrompt: 'prompt1',
+    conceptPrompt: 'prompt2',
+    aiSystemInstruction: 'system-instruction',
+  };
+
   const mockWorldState: WorldState = {
     protagonist: 'Test Protag',
     setting: 'Test Setting',
@@ -72,17 +83,6 @@ describe('gameService', () => {
     horrorIntensity: 0.1,
     uiDistortion: { transform: 'none', filter: 'none', transition: 'none' },
     genreConfig: mockGenreConfig,
-  };
-
-  const mockGenreConfig: GenreConfig = {
-    id: 'cosmic-horror',
-    name: 'Cosmic Horror',
-    description: '...',
-    style: 'Lovecraftian',
-    theme: {},
-    startScreenImagePrompt: 'prompt1',
-    conceptPrompt: 'prompt2',
-    aiSystemInstruction: 'system-instruction',
   };
 
   const mockHistory: StorySegment[] = [{ id: 'seg1', text: 'segment 1', images: {} }];

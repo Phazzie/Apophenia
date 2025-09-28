@@ -1,43 +1,56 @@
-name: apophenia-deploy-test
+# Apophenia Application Specification for DigitalOcean App Platform
+name: apophenia
 region: nyc
-static_sites:
-  - name: apophenia-frontend
-    github:
-      repo: Phazzie/Apophenia
-      branch: feature/ai-director-refactor
-      deploy_on_push: true
+
+services:
+  # Frontend Service (Nginx)
+  # Serves the static React app. It is built using the Dockerfile located
+  # at 'docker/frontend/Dockerfile'. The build context is the repo root.
+  - name: frontend
+    dockerfile_path: docker/frontend/Dockerfile
     source_dir: .
-    build_command: npm install && npm run build
-    output_dir: dist
+    http_port: 80
+    instance_count: 1
+    instance_size_slug: apps-xxs # Minimal size for serving static files
     routes:
       - path: /
     envs:
-      - key: VITE_API_BASE_URL
-        scope: BUILD_TIME
-        value: /api
+      # These secrets are required at BUILD time for Vite to bundle the app correctly.
+      # They must be configured in the DigitalOcean App Platform UI.
       - key: VITE_GEMINI_API_KEY
         scope: BUILD_TIME
         type: SECRET
-services:
-  - name: apophenia
-    github:
-      repo: Phazzie/Apophenia
-      branch: feature/ai-director-refactor
-      deploy_on_push: true
-    source_dir: /
-    run_command: npm run start:prod
+      - key: VITE_XAI_API_KEY
+        scope: BUILD_TIME
+        type: SECRET
+
+  # Backend Service (Node.js)
+  # Runs the Express API server. It is built using the Dockerfile located
+  # at 'docker/backend/Dockerfile'. The build context is the repo root.
+  - name: backend
+    dockerfile_path: docker/backend/Dockerfile
+    source_dir: .
     http_port: 3001
-    environment_slug: node-js
-    instance_size_slug: apps-s-1vcpu-1gb
-    instance_count: 2
+    instance_count: 1
+    instance_size_slug: apps-xs # A small instance for the Node.js API
     routes:
       - path: /api
     envs:
       - key: NODE_ENV
-        value: production
-      - key: GEMINI_API_KEY
-        scope: RUN_TIME
+        value: "production"
+      - key: PORT
+        value: "3001"
+      # These secrets are required at RUN time for the API to function.
+      # They must be configured in the DigitalOcean App Platform UI.
+      - key: XAI_API_KEY
         type: SECRET
+      - key: GEMINI_API_KEY
+        type: SECRET
+      # Use a bindable variable to automatically set the CORS origin to the app's public URL.
+      - key: CORS_ORIGIN
+        value: "${APP_URL}"
+
+# Configure alerts for deployment and domain failures.
 alerts:
   - rule: DEPLOYMENT_FAILED
   - rule: DOMAIN_FAILED

@@ -1,0 +1,125 @@
+# DigitalOcean App Platform Deployment Specification
+# References GHCR (GitHub Container Registry) images for containerized deployment
+
+name: apophenia-containerized
+region: nyc1
+
+# Frontend service - static site using containerized nginx
+static_sites:
+  - name: apophenia-frontend
+    # Option 1: Build from source (recommended for development)
+    github:
+      repo: Phazzie/Apophenia
+      branch: main
+      deploy_on_push: true
+    dockerfile_path: docker/frontend/Dockerfile
+    source_dir: /
+    
+    # Option 2: Use pre-built GHCR image (uncomment to use)
+    # image:
+    #   registry_type: GHCR
+    #   registry: ghcr.io
+    #   repository: phazzie/apophenia-frontend
+    #   tag: latest
+    
+    routes:
+      - path: /
+    
+    # Environment variables for build time
+    envs:
+      - key: VITE_API_BASE_URL
+        scope: BUILD_TIME
+        value: /api
+      - key: VITE_GEMINI_API_KEY
+        scope: BUILD_TIME
+        type: SECRET
+        # Value should be set in DigitalOcean dashboard
+      - key: VITE_XAI_API_KEY
+        scope: BUILD_TIME
+        type: SECRET
+        # Value should be set in DigitalOcean dashboard
+
+# Backend service - containerized Express server
+services:
+  - name: apophenia-backend
+    # Option 1: Build from source (recommended for development)
+    github:
+      repo: Phazzie/Apophenia
+      branch: main
+      deploy_on_push: true
+    dockerfile_path: docker/backend/Dockerfile
+    source_dir: /
+    
+    # Option 2: Use pre-built GHCR image (uncomment to use)
+    # image:
+    #   registry_type: GHCR
+    #   registry: ghcr.io
+    #   repository: phazzie/apophenia-backend
+    #   tag: latest
+    
+    http_port: 3001
+    instance_count: 2
+    instance_size_slug: apps-s-1vcpu-1gb
+    
+    routes:
+      - path: /api
+    
+    # Runtime environment variables
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3001"
+      - key: GEMINI_API_KEY
+        scope: RUN_TIME
+        type: SECRET
+        # Value should be set in DigitalOcean dashboard
+      - key: XAI_API_KEY
+        scope: RUN_TIME
+        type: SECRET
+        # Value should be set in DigitalOcean dashboard
+      - key: CORS_ORIGIN
+        value: "{{ apophenia-frontend.PUBLIC_URL }}"
+      - key: SERVE_STATIC
+        value: "false"
+    
+    # Health check configuration
+    health_check:
+      http_path: /api/health
+      initial_delay_seconds: 10
+      period_seconds: 10
+      timeout_seconds: 5
+      success_threshold: 1
+      failure_threshold: 3
+
+# Database (optional for future use)
+# databases:
+#   - name: apophenia-db
+#     engine: PG
+#     version: "13"
+#     size: apps-db-s-dev-database
+
+# Alerts and monitoring
+alerts:
+  - rule: DEPLOYMENT_FAILED
+  - rule: DOMAIN_FAILED
+  - rule: CPU_UTILIZATION
+    value: 80
+  - rule: MEM_UTILIZATION
+    value: 80
+
+# Jobs (for maintenance tasks)
+# jobs:
+#   - name: db-migrate
+#     github:
+#       repo: Phazzie/Apophenia
+#       branch: main
+#     dockerfile_path: docker/backend/Dockerfile
+#     source_dir: /
+#     run_command: npm run migrate
+#     instance_count: 1
+#     instance_size_slug: apps-s-1vcpu-1gb
+
+# Features
+features:
+  - buildpack-stack=ubuntu-22

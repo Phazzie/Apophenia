@@ -1,3 +1,7 @@
+> **ARCHIVED DOCUMENT**
+>
+> This document is archived and is no longer maintained. It is kept for historical purposes only.
+
 # AI Agent Prompts for Apophenia Project
 
 This document contains a set of master prompts for AI software engineer agents to work on the Apophenia project. These prompts are designed to provide a clear, comprehensive hand-off, ensuring that the next AI can pick up the work efficiently and effectively.

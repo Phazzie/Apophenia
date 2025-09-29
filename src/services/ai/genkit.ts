@@ -287,12 +287,12 @@ export const processAdvancedImageGeneration = async (
   }
 
   try {
-    // Primary: Grok-4 Fast Reasoning with Imagen fallback
-    console.log('Attempting Grok-4 Fast image generation (with Imagen fallback)...');
-    const grokFirstUrl = await generateWithGrokFirst(horrorEnhancedPrompt);
-    if (grokFirstUrl) {
-      console.log('Image generation successful (Grok-first approach)');
-      return grokFirstUrl;
+    // Primary: Backend API (Grok-first with Imagen fallback)
+    console.log('Attempting backend API image generation (Grok-first with Imagen fallback)...');
+    const backendUrl = await generateWithBackendFirst(horrorEnhancedPrompt);
+    if (backendUrl) {
+      console.log('Image generation successful (Backend API approach)');
+      return backendUrl;
     }
 
     // Final fallback: Use enhanced Unsplash integration
@@ -353,31 +353,49 @@ async function generateSingleVariation(prompt: string): Promise<string> {
 }
 
 /**
- * Enhanced image generation with Grok-first approach and Imagen fallback
+ * Enhanced image generation with Backend API (Grok-first approach)
+ * Now calls the backend `/api/generate-image` endpoint instead of direct AI calls
  */
-async function generateWithGrokFirst(prompt: string): Promise<string | null> {
-  // Import xaiClient here to avoid circular dependencies
-  const { xaiClient } = await import('./grokService');
+async function generateWithBackendFirst(prompt: string): Promise<string | null> {
+  const { backendAPIService, BackendAPIError } = await import('./backendAPIService');
   
   try {
-    console.log('Attempting image generation with Grok-4 first...');
+    console.log('Attempting image generation via backend API...');
     
-    // Try Grok first (experimental/future compatibility)
-    if (API_KEYS.xaiAPI) {
-      const grokResult = await xaiClient.generateImage(prompt);
-      if (grokResult && grokResult.length > 0) {
-        console.log('Grok-4 image generation successful!');
-        return grokResult[0]; // Return the first image URL
-      }
+    // Call backend endpoint which handles Grok-first with Imagen fallback
+    const result = await backendAPIService.generateImage(prompt);
+    
+    if (result.imageGenerated && result.fallbackUrl) {
+      console.log(`Backend image generation successful with ${result.model}!`);
+      return result.fallbackUrl;
     }
     
-    console.log('Grok-4 image generation not available, falling back to Imagen...');
+    if (result.fallbackUrl) {
+      console.log(`Backend returned fallback image with ${result.model}`);
+      return result.fallbackUrl;
+    }
     
-    // Fallback to Imagen
+    console.warn('Backend API returned no image URL, falling back to local generation...');
     return await generateWithImagen(prompt);
     
   } catch (error) {
-    console.warn('Grok image generation failed, falling back to Imagen:', error);
+    if (error instanceof BackendAPIError) {
+      console.warn(`Backend API error (${error.status}): ${error.message}`);
+      
+      // For network errors, try local fallback
+      if (error.status === 0 || error.status === 408) {
+        console.log('Network error detected, falling back to local generation...');
+        return await generateWithImagen(prompt);
+      }
+      
+      // For server errors, still try local fallback
+      if (error.status && error.status >= 500) {
+        console.log('Server error detected, falling back to local generation...');
+        return await generateWithImagen(prompt);
+      }
+    }
+    
+    console.warn('Backend image generation failed, falling back to local generation:', error);
     return await generateWithImagen(prompt);
   }
 }

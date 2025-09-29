@@ -52,7 +52,7 @@ export const storySegmentSchema = z.object({
   images: z.object({
     main: z.string().optional(),
     inset: z.array(z.string()).optional(),
-    mainStatus: z.enum(['loading', 'loaded']).optional(),
+    mainStatus: z.enum(['loading', 'loaded', 'failed', 'retrying']).optional(),
   }),
   // Revolutionary features
   isRevised: z.boolean().optional(),

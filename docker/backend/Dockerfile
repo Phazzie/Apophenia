@@ -17,7 +17,7 @@ COPY server/ ./server/
 
 # Create a non-root user for security
 RUN addgroup -g 1001 -S nodejs && \
-    adduser -S apophenia -u 1001
+    adduser -S apophenia -u 1001 -G nodejs
 
 # Change ownership of the app directory
 RUN chown -R apophenia:nodejs /app

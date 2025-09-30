@@ -22,7 +22,7 @@ const initialState = {
 
 export const useGameStateStore = create<GameStateStore>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       ...initialState,
       setGameState: (gameState) => set({ gameState }),
       setChoices: (choices, intrusiveThought) => {

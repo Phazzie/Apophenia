@@ -33,7 +33,7 @@ export class AdaptiveNarrativeDNA {
     console.log(`🧬 Narrative DNA Evolution: Generation ${this.narrativeDNA.generation}, Pressure: ${selectionPressure.toFixed(2)}`);
   }
 
-  generateAdaptivePrompt(basePrompt: string, worldState: WorldState): string {
+  generateAdaptivePrompt(basePrompt: string): string {
     const dnaModifiers = this.expressGenes();
 
     let adaptedPrompt = basePrompt;

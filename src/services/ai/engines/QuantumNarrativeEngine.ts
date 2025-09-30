@@ -1,4 +1,4 @@
-import { StorySegment, WorldState } from '../../../types';
+import { StorySegment } from '../../../types';
 import { REVOLUTIONARY_FEATURES } from '../../config';
 import { generateWithSelectedModel } from '../unifiedAIService';
 
@@ -14,8 +14,7 @@ export class QuantumNarrativeEngine {
 
   async processQuantumChoice(
     choice: string,
-    currentHistory: StorySegment[],
-    worldState: WorldState
+    currentHistory: StorySegment[]
   ): Promise<{ history: StorySegment[], quantumShift?: boolean }> {
     if (!REVOLUTIONARY_FEATURES.QUANTUM_NARRATIVES.enabled) {
       return { history: currentHistory };

@@ -15,7 +15,7 @@ const GameScreen: React.FC = () => {
   const { worldState, updateWorldState } = useWorldStateStore();
   const [saveMessageVisible, setSaveMessageVisible] = useState(false);
   const [metaMessage, setMetaMessage] = useState<string | null>(null);
-  const [corruptionEffects, setCorruptionEffects] = useState<any>({});
+  const [corruptionEffects, setCorruptionEffects] = useState<React.CSSProperties>({});
   const [quantumShiftNotification, setQuantumShiftNotification] = useState(false);
   const autoStartedRef = useRef(false);
 

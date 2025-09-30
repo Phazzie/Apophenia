@@ -1,5 +1,5 @@
 import { useStoryHistoryStore } from '../stores/storyHistoryStore';
-import { Command } from '../types';
+import { Command, StorySegment } from '../types';
 import { CommandExecutor } from './command.types';
 
 export const displayTextExecutor: CommandExecutor = {
@@ -10,7 +10,7 @@ export const displayTextExecutor: CommandExecutor = {
     }
 
     const { storyHistory, updateSegmentById } = useStoryHistoryStore.getState();
-    const segment = storyHistory.find((s: any) => s.id === command.payload.segmentId);
+    const segment = storyHistory.find((s: StorySegment) => s.id === command.payload.segmentId);
 
     if (segment) {
       updateSegmentById(command.payload.segmentId, {

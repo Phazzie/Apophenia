@@ -6,7 +6,7 @@
 
 import React, { useState } from 'react';
 import { useAIModelStore } from '../stores/aiModelStore';
-import { AIModel, ModelTestResult } from '../types';
+import { AIModel } from '../types';
 
 interface ModelSelectorProps {
   isVisible: boolean;

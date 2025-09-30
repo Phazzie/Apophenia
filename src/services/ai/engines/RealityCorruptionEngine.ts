@@ -1,5 +1,4 @@
 import { REVOLUTIONARY_FEATURES } from '../../config';
-import { WorldState } from '../../../types';
 import { generateWithSelectedModel } from '../unifiedAIService';
 
 type CorruptionUiEffects = {
@@ -21,7 +20,7 @@ export type RealityCorruptionResult = {
 export class RealityCorruptionEngine {
   private corruptionLevel: number = 0;
 
-  async processCorruption(choice: string, worldState: WorldState): Promise<RealityCorruptionResult> {
+  async processCorruption(choice: string): Promise<RealityCorruptionResult> {
     if (!REVOLUTIONARY_FEATURES.REALITY_CORRUPTION.enabled) {
       return { uiEffects: this.calculateUIEffects(), corruptionLevel: 0, newEffects: [] };
     }

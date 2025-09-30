@@ -31,7 +31,7 @@ describe('GrokImageService', () => {
     });
 
     it('should warn when no API key provided', () => {
-      const serviceWithoutKey = new GrokImageService(null, mockLogger);
+      new GrokImageService(null, mockLogger);
       expect(mockLogger.warn).toHaveBeenCalledWith(
         'XAI_API_KEY not provided. Grok image service will not function.'
       );

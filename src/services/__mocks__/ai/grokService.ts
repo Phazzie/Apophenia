@@ -2,14 +2,28 @@
  * Mock X.AI Grok Service for Testing
  */
 
+interface GrokTextConfig {
+  temperature?: number;
+  maxTokens?: number;
+  topP?: number;
+  enableThinking?: boolean;
+}
+
+interface GrokUsage {
+  prompt_tokens: number;
+  completion_tokens: number;
+  total_tokens: number;
+  thinking_tokens?: number;
+}
+
 export class XAIAPIClient {
   constructor() {}
 
   async generateText(
     systemInstruction: string,
     userPrompt: string,
-    config: any = {}
-  ): Promise<{ content: string; thinking?: string; usage: any }> {
+    config: GrokTextConfig = {}
+  ): Promise<{ content: string; thinking?: string; usage: GrokUsage }> {
     // Mock successful X.AI response
     return {
       content: JSON.stringify([

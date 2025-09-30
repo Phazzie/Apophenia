@@ -1,39 +1,34 @@
-import js from '@eslint/js';
-import globals from 'globals';
-import reactHooks from 'eslint-plugin-react-hooks';
-import reactRefresh from 'eslint-plugin-react-refresh';
-import tseslint from 'typescript-eslint';
+import globals from "globals";
+import tseslint from "typescript-eslint";
+import pluginReactConfig from "eslint-plugin-react/configs/recommended.js";
+import { fixupConfigRules } from "@eslint/compat";
+import pluginReactHooks from "eslint-plugin-react-hooks";
+import pluginReactRefresh from "eslint-plugin-react-refresh";
 
-export default tseslint.config(
-  { ignores: ['dist', 'node_modules', '*.config.js', 'coverage'] },
+export default [
+  { files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"] },
+  { languageOptions: { globals: globals.browser } },
+  ...tseslint.configs.recommended,
+  ...fixupConfigRules(pluginReactConfig),
   {
-    extends: [js.configs.recommended, ...tseslint.configs.recommended],
-    files: ['**/*.{ts,tsx}'],
-    languageOptions: {
-      ecmaVersion: 2020,
-      globals: globals.browser,
+    settings: {
+      react: {
+        version: "detect",
+      },
     },
     plugins: {
-      'react-hooks': reactHooks,
-      'react-refresh': reactRefresh,
+        "react-hooks": pluginReactHooks,
+        "react-refresh": pluginReactRefresh,
     },
     rules: {
-      ...reactHooks.configs.recommended.rules,
-      'react-refresh/only-export-components': [
-        'warn',
-        { allowConstantExport: true },
-      ],
-      '@typescript-eslint/no-unused-vars': ['warn', { 
-        argsIgnorePattern: '^_',
-        varsIgnorePattern: '^_',
-        caughtErrorsIgnorePattern: '^_'
-      }],
-      '@typescript-eslint/no-explicit-any': 'off', // Allow any for game development flexibility
-      '@typescript-eslint/no-empty-object-type': 'off', // Allow empty interfaces for extensibility
-      '@typescript-eslint/no-require-imports': 'off', // Allow require in tests
-      'no-console': 'off', // Allow console for debugging in game development
-      'prefer-const': 'error',
-      'no-var': 'error',
+        "react-hooks/rules-of-hooks": "error",
+        "react-hooks/exhaustive-deps": "warn",
+        "react-refresh/only-export-components": "warn",
+        "@typescript-eslint/no-unused-vars": [
+            "error",
+            { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_", "caughtErrorsIgnorePattern": "^_" }
+        ]
     },
   },
-)
+  { ignores: ["dist", "eslint.config.js"] },
+];

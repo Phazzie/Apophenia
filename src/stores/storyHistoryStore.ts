@@ -16,7 +16,7 @@ const initialState = {
 
 export const useStoryHistoryStore = create<StoryHistoryStore>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       ...initialState,
       addStorySegment: (segment) =>
         set((state) => ({ storyHistory: [...state.storyHistory, segment] })),

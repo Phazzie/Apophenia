@@ -1,5 +1,12 @@
+import { REVOLUTIONARY_FEATURES } from '../../config';
+
+// Utility type for deep partial mocking
+type DeepPartial<T> = {
+  [P in keyof T]?: DeepPartial<T[P]>;
+};
+
 // Test utilities for mocking revolutionary features
-export const createMockRevolutionaryFeatures = (overrides: any = {}) => ({
+export const createMockRevolutionaryFeatures = (overrides: DeepPartial<typeof REVOLUTIONARY_FEATURES> = {}) => ({
   TEMPORAL_REVISION: {
     enabled: true,
     maxRevisions: 3,
@@ -34,7 +41,7 @@ export const createMockRevolutionaryFeatures = (overrides: any = {}) => ({
   }
 });
 
-export const mockRevolutionaryFeatures = (overrides: any = {}) => {
+export const mockRevolutionaryFeatures = (overrides: DeepPartial<typeof REVOLUTIONARY_FEATURES> = {}) => {
   const mockConfig = createMockRevolutionaryFeatures(overrides);
   jest.doMock('../../config', () => ({
     REVOLUTIONARY_FEATURES: mockConfig,

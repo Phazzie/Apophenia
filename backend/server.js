@@ -9,13 +9,12 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
-const winston = require('winston');
 const Joi = require('joi');
 
 // Import services
 const GrokImageService = require('./services/grokImageService');
 const { createLogger } = require('./utils/logger');
-const { handleError, AppError } = require('./utils/errorHandler');
+const { handleError } = require('./utils/errorHandler');
 
 // Initialize logger
 const logger = createLogger();
@@ -223,7 +222,7 @@ app.use((req, res) => {
 });
 
 // Global error handler
-app.use((error, req, res, next) => {
+app.use((error, req, res, _next) => {
   handleError(error, res, logger);
 });
 

@@ -245,8 +245,7 @@ export const generateMultipleImages = async (
  * Uses Gemini 2.5 Pro thinking mode for sophisticated narrative planning
  */
 export const getAIDirectorAnalysis = async (
-  worldState: WorldState,
-  recentChoices: string[]
+  worldState: WorldState
 ): Promise<{
   psychologicalProfile: string;
   narrativeRecommendations: string[];

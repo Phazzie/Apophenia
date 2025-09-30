@@ -1,4 +1,4 @@
-import { useImageCacheStore } from '../stores/imageCacheStore';
+import { useImageCacheStore, CachedImage } from '../stores/imageCacheStore';
 
 /**
  * Cache maintenance service
@@ -63,7 +63,7 @@ export class CacheMaintenanceService {
     let staleEntries = 0;
     let totalAccessCount = 0;
     
-    Object.values(imageCache).forEach((entry: any) => {
+    Object.values(imageCache).forEach((entry: CachedImage) => {
       totalEntries++;
       totalAccessCount += entry.accessCount;
       if (now - entry.timestamp > 30 * 60 * 1000) { // 30 minutes TTL

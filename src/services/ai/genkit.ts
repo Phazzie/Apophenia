@@ -347,7 +347,7 @@ async function generateSingleVariation(prompt: string): Promise<string> {
     }
     
     return generateUnsplashFallback(prompt);
-  } catch (error) {
+  } catch {
     return generateUnsplashFallback(prompt);
   }
 }
@@ -518,7 +518,7 @@ interface NextStepInput {
 }
 
 export const nextStepFlow = async (input: NextStepInput): Promise<Command[]> => {
-  const { playerChoice, worldState, history, genreConfig } = input;
+  const { playerChoice, worldState, history } = input;
 
   // The system instruction sets the persona for the AI model.
   // It includes the current horror intensity to guide the AI's response.

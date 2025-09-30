@@ -59,7 +59,7 @@ export class NeuralEchoChambers {
     this.persistMemory();
   }
 
-  generateEchoPrompt(currentChoice: string, worldState: WorldState): string | null {
+  generateEchoPrompt(currentChoice: string): string | null {
     const relevantEchoes = this.findRelevantEchoes(currentChoice);
 
     if (relevantEchoes.length === 0) return null;

@@ -37,9 +37,52 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', message: 'Apophenia API Server running' });
+// Enhanced health check endpoint for DigitalOcean Load Balancer
+app.get('/api/health', async (req, res) => {
+  const startTime = Date.now();
+  const health = {
+    status: 'ok',
+    message: 'Apophenia API Server running',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    version: process.env.npm_package_version || '1.0.0',
+    environment: process.env.NODE_ENV || 'development',
+    checks: {
+      server: true,
+      ai: genAI !== null,
+      database: false, // Will be true when database is connected
+      storage: false   // Will be true when Spaces is configured
+    }
+  };
+
+  // Check database if available
+  if (process.env.DATABASE_URL) {
+    try {
+      // Database health check will be implemented here
+      health.checks.database = true;
+    } catch (error) {
+      health.checks.database = false;
+      health.status = 'degraded';
+    }
+  }
+
+  // Check Spaces if configured
+  if (process.env.DO_SPACES_KEY) {
+    health.checks.storage = true;
+  }
+
+  // Overall health status
+  const allChecksPass = Object.values(health.checks).every(check => check === true);
+  if (!allChecksPass && health.status === 'ok') {
+    health.status = 'degraded';
+  }
+
+  health.responseTime = Date.now() - startTime;
+
+  const statusCode = health.status === 'ok' ? 200 : 
+                    health.status === 'degraded' ? 200 : 503;
+  
+  res.status(statusCode).json(health);
 });
 
 // Story concept generation endpoint

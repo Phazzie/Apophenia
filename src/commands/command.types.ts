@@ -1,9 +1,8 @@
 import { GameCommand } from '../types';
 
-export interface ExecutionContext {
-  // This can be expanded with any context the commands might need
-  // For example, access to other stores or services
-}
+// This can be expanded with any context the commands might need
+// For example, access to other stores or services
+export type ExecutionContext = object;
 
 export interface CommandExecutor {
   command: string;

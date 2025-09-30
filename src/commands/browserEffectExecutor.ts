@@ -1,5 +1,5 @@
 import { changePageTitle, openNewTab, manipulateHistory } from '../services/browserManipulator';
-import { Command, GameCommand } from '../types';
+import { GameCommand } from '../types';
 import { CommandExecutor } from './command.types';
 
 export const executeBrowserEffect = async (command: GameCommand): Promise<void> => {

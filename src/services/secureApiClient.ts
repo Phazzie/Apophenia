@@ -1,3 +1,5 @@
+import { GenreConfig, WorldState, StorySegment } from '../types';
+
 // Secure API client for Apophenia
 // Communicates with backend server to keep API keys secure
 
@@ -14,7 +16,7 @@ export class SecureApiClient {
     this.baseUrl = API_BASE_URL;
   }
 
-  private async makeRequest(endpoint: string, data?: any) {
+  private async makeRequest(endpoint: string, data?: Record<string, unknown>) {
     try {
       const response = await fetch(`${this.baseUrl}/api${endpoint}`, {
         method: 'POST',
@@ -35,11 +37,11 @@ export class SecureApiClient {
     }
   }
 
-  async generateConcept(genreConfig: any) {
+  async generateConcept(genreConfig: GenreConfig) {
     return this.makeRequest('/generate-concept', { genreConfig });
   }
 
-  async getNextStep(playerChoice: string, worldState: any, history: any[], genreConfig: any) {
+  async getNextStep(playerChoice: string, worldState: WorldState, history: StorySegment[], genreConfig: GenreConfig) {
     return this.makeRequest('/next-step', {
       playerChoice,
       worldState,
@@ -52,7 +54,7 @@ export class SecureApiClient {
     return this.makeRequest('/generate-image', { prompt });
   }
 
-  async summarizeHistory(worldState: any, lastSegment: any) {
+  async summarizeHistory(worldState: WorldState, lastSegment: StorySegment) {
     return this.makeRequest('/summarize-history', { worldState, lastSegment });
   }
 

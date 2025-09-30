@@ -1,7 +1,5 @@
 import React from 'react';
 import { useGameStateStore } from '../stores/gameStateStore';
-import { useWorldStateStore } from '../stores/worldStateStore';
-import { useStoryHistoryStore } from '../stores/storyHistoryStore';
 import { GameStateManager } from '../services/gameStateManager';
 import { GameState } from '../types';
 

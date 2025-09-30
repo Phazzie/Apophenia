@@ -32,7 +32,7 @@ const CompactTestAPI: React.FC = () => {
     setShowOptions(false);
     
     try {
-      const result = await testModel(selectedModel.id, testType);
+      await testModel(selectedModel.id, testType);
       setShowResult(true);
       
       // Auto-hide result after 4 seconds

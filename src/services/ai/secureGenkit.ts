@@ -1,4 +1,4 @@
-import { Command, GameCommand, GenreConfig, StorySegment, WorldState } from '../../types';
+import { Command, GenreConfig, StorySegment, WorldState } from '../../types';
 import { apiClient } from '../secureApiClient';
 
 /**
@@ -8,7 +8,7 @@ import { apiClient } from '../secureApiClient';
  */
 
 // Fallback content for when backend is unavailable
-const getFallbackConcept = (genreConfig: GenreConfig) => ({
+const getFallbackConcept = () => ({
   protagonist: "A researcher investigating anomalous phenomena",
   setting: "An abandoned facility where reality seems unstable",
   dilemma: "Strange forces are affecting the fabric of existence itself",
@@ -43,7 +43,7 @@ export const generateConceptFlow = async (genreConfig: GenreConfig) => {
     return concept;
   } catch (error) {
     console.warn('Backend API unavailable, using fallback concept:', error);
-    return getFallbackConcept(genreConfig);
+    return getFallbackConcept();
   }
 };
 

@@ -357,15 +357,15 @@ describe('QuantumNarrativeEngine', () => {
    */
   it('should switch to a different narrative thread when a quantum shift occurs', async () => {
     // Manually set up a multi-threaded scenario.
-    (engine as any).narrativeThreads.set('thread-1', [{ id: 't1', text: 'Thread 1 history', images: {} }]);
-    (engine as any).narrativeThreads.set('thread-2', [{ id: 't2', text: 'Thread 2 history', images: {} }]);
-    (engine as any).activeThread = 'thread-1';
+    engine['narrativeThreads'].set('thread-1', [{ id: 't1', text: 'Thread 1 history', images: {} }]);
+    engine['narrativeThreads'].set('thread-2', [{ id: 't2', text: 'Thread 2 history', images: {} }]);
+    engine['activeThread'] = 'thread-1';
 
     // Force a quantum shift.
-    (engine as any).quantumStability = 0.6; // Below the 0.7 threshold.
+    engine['quantumStability'] = 0.6; // Below the 0.7 threshold.
     jest.spyOn(Math, 'random').mockReturnValue(0.2); // Below the 0.3 probability.
 
-    const result = await engine.processQuantumChoice('A choice', mockStoryHistory, mockWorldState);
+    const result = await engine.processQuantumChoice('A choice', mockStoryHistory);
 
     expect(result.quantumShift).toBe(true);
     expect(result.history.some(segment => segment.isQuantumShift)).toBe(true);
@@ -532,14 +532,14 @@ describe('AdaptiveNarrativeDNA', () => {
   });
 
   it('should evolve narrative DNA based on player choice and response time', () => {
-    const initialGeneration = (engine as any).narrativeDNA.generation;
-    const initialPaceGenes = [...(engine as any).narrativeDNA.paceGenes];
+    const initialGeneration = engine['narrativeDNA'].generation;
+    const initialPaceGenes = [...engine['narrativeDNA'].paceGenes];
 
     // Simulate a fast, complex choice, which should apply positive pressure.
     engine.evolveNarrative('A complex, multi-clause choice', 3000, mockWorldState);
 
-    const newGeneration = (engine as any).narrativeDNA.generation;
-    const newPaceGenes = (engine as any).narrativeDNA.paceGenes;
+    const newGeneration = engine['narrativeDNA'].generation;
+    const newPaceGenes = engine['narrativeDNA'].paceGenes;
 
     expect(newGeneration).toBe(initialGeneration + 1);
     // The genes should have mutated, so they should not be identical.
@@ -548,12 +548,12 @@ describe('AdaptiveNarrativeDNA', () => {
 
   it('should generate an adaptive prompt that reflects the current DNA', () => {
     // Manually set the DNA to favor a specific style.
-    (engine as any).narrativeDNA.paceGenes = [1, 0, 0, 0]; // Fast pace
-    (engine as any).narrativeDNA.tensionGenes = [1, 0, 0]; // Build tension
-    (engine as any).narrativeDNA.choiceGenes = [0, 1, 0]; // Complex choices
+    engine['narrativeDNA'].paceGenes = [1, 0, 0, 0]; // Fast pace
+    engine['narrativeDNA'].tensionGenes = [1, 0, 0]; // Build tension
+    engine['narrativeDNA'].choiceGenes = [0, 1, 0]; // Complex choices
 
     const basePrompt = 'The story continues.';
-    const adaptivePrompt = engine.generateAdaptivePrompt(basePrompt, mockWorldState);
+    const adaptivePrompt = engine.generateAdaptivePrompt(basePrompt);
 
     expect(adaptivePrompt).toContain('Focus on rapid story progression');
     expect(adaptivePrompt).toContain('Gradually increase psychological tension');

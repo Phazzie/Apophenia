@@ -1,4 +1,3 @@
-import { getConfig } from '../config';
 import { processAdvancedImageGeneration } from './genkit';
 
 interface ImageVariation {
@@ -47,7 +46,6 @@ class ImageGenerationService {
 
 
   private async generateImagenVariations(prompt: string, count: number): Promise<ImageVariation[]> {
-    const config = getConfig();
     
     // Real implementation using Google Imagen API
     const horrorPrompts = this.enhanceHorrorPrompt(prompt);

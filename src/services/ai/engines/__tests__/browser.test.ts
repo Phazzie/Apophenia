@@ -2,6 +2,8 @@ import { NeuralEchoChambers } from '../NeuralEchoChambers';
 import { BreakingFifthWall } from '../BreakingFifthWall';
 import { WorldState } from '../../../../types';
 
+type StorageMock = ReturnType<typeof createStorageMock>;
+
 const createWorldState = (overrides: Partial<WorldState> = {}): WorldState => ({
   protagonist: 'Test Protagonist',
   setting: 'Test Setting',
@@ -66,8 +68,8 @@ describe('NeuralEchoChambers', () => {
 
   beforeEach(() => {
     // Clear mocks before each test to ensure isolation.
-    (window.localStorage as any).clear();
-    (window.sessionStorage as any).clear();
+    (window.localStorage as StorageMock).clear();
+    (window.sessionStorage as StorageMock).clear();
     engine = new NeuralEchoChambers();
     mockWorldState = createWorldState({
       protagonist: 'The Echo',
@@ -80,7 +82,7 @@ describe('NeuralEchoChambers', () => {
 
   it('should initialize with an empty state if no persisted data exists', () => {
     engine.initializeFromPersistence();
-    expect((engine as any).crossSessionPatterns).toEqual([]);
+    expect(engine['crossSessionPatterns']).toEqual([]);
   });
 
   it('should load patterns from localStorage on initialization', () => {
@@ -88,7 +90,7 @@ describe('NeuralEchoChambers', () => {
     localStorage.setItem('apophenia-neural-echoes', JSON.stringify(persistedData));
 
     engine.initializeFromPersistence();
-    expect((engine as any).crossSessionPatterns).toEqual(['trust-seeker']);
+    expect(engine['crossSessionPatterns']).toEqual(['trust-seeker']);
   });
 
   it('should record a choice and persist it to localStorage', () => {
@@ -99,8 +101,8 @@ describe('NeuralEchoChambers', () => {
   });
 
   it('should generate an echo prompt if a choice resonates with past patterns', () => {
-    (engine as any).crossSessionPatterns = ['isolation-tendency'];
-    const prompt = engine.generateEchoPrompt('I feel so alone', mockWorldState);
+    engine['crossSessionPatterns'] = ['isolation-tendency'];
+    const prompt = engine.generateEchoPrompt('I feel so alone');
     // The prompt is randomly selected, so we just check that it's not null.
     expect(prompt).not.toBeNull();
     expect(typeof prompt).toBe('string');
@@ -127,7 +129,7 @@ describe('BreakingFifthWall', () => {
     // Mock document properties and methods.
     document.title = 'Apophenia';
     const favicon = { href: '' };
-    jest.spyOn(document, 'querySelector').mockReturnValue(favicon as any);
+    jest.spyOn(document, 'querySelector').mockReturnValue(favicon as unknown as Element);
     jest.spyOn(window, 'scrollBy').mockImplementation(() => {});
     jest.useFakeTimers();
   });

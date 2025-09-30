@@ -4,6 +4,7 @@ import {
   nextStepFlow 
 } from '../genkit';
 import { GenreConfig, WorldState, StorySegment } from '../../../types';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Mock the API dependencies
 jest.mock('@google/generative-ai', () => ({
@@ -182,8 +183,7 @@ describe('Advanced AI System', () => {
   describe('Enhanced Story Progression', () => {
     it('should use advanced reasoning for story progression', async () => {
       // Mock successful AI response with commands
-      const mockGenAI = require('@google/generative-ai').GoogleGenerativeAI;
-      mockGenAI.mockImplementation(() => ({
+      (GoogleGenerativeAI as jest.Mock).mockImplementation(() => ({
         getGenerativeModel: jest.fn().mockReturnValue({
           generateContent: jest.fn().mockResolvedValue({
             response: {
@@ -216,8 +216,7 @@ describe('Advanced AI System', () => {
 
     it('should fallback gracefully when both models fail', async () => {
       // Mock both primary and fallback failure
-      const mockGenAI = require('@google/generative-ai').GoogleGenerativeAI;
-      mockGenAI.mockImplementation(() => ({
+      (GoogleGenerativeAI as jest.Mock).mockImplementation(() => ({
         getGenerativeModel: jest.fn().mockReturnValue({
           generateContent: jest.fn().mockRejectedValue(new Error('AI failure'))
         })
@@ -242,7 +241,6 @@ describe('Advanced AI System', () => {
 
   describe('Model Fallback System', () => {
     it('should attempt primary model first, then fallback', async () => {
-      const mockGenAI = require('@google/generative-ai').GoogleGenerativeAI;
       
       // Create a spy to track calls
       const mockGetGenerativeModel = jest.fn()
@@ -257,7 +255,7 @@ describe('Advanced AI System', () => {
           })
         });
 
-      mockGenAI.mockImplementation(() => ({
+      (GoogleGenerativeAI as jest.Mock).mockImplementation(() => ({
         getGenerativeModel: mockGetGenerativeModel
       }));
 

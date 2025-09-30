@@ -64,8 +64,7 @@ export class TemporalRevisionEngine {
       try {
         const revisedText = await this.generateRevisedSegment(
           targetSegment.text,
-          currentChoice,
-          worldState
+          currentChoice
         );
 
         // Update the segment
@@ -104,8 +103,7 @@ export class TemporalRevisionEngine {
 
   private async generateRevisedSegment(
     originalText: string,
-    currentChoice: string,
-    worldState: WorldState
+    currentChoice: string
   ): Promise<string> {
     // Create subtle but unsettling changes to past events
     const revisionPrompts = [

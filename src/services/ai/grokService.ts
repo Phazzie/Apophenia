@@ -40,12 +40,18 @@ interface GrokResponse {
     };
     finish_reason: string;
   }[];
-  usage: {
-    prompt_tokens: number;
-    completion_tokens: number;
-    total_tokens: number;
-    thinking_tokens?: number; // Tokens used for thinking
-  };
+  usage: GrokUsage;
+}
+
+interface GrokUsage {
+  prompt_tokens: number;
+  completion_tokens: number;
+  total_tokens: number;
+  thinking_tokens?: number;
+}
+
+interface GrokImage {
+  url: string;
 }
 
 /**
@@ -76,7 +82,7 @@ export class XAIAPIClient {
       topP?: number;
       enableThinking?: boolean;
     } = {}
-  ): Promise<{ content: string; thinking?: string; usage: any }> {
+  ): Promise<{ content: string; thinking?: string; usage: GrokUsage }> {
     if (!this.apiKey) {
       console.error('X.AI API key not configured - cannot make request');
       throw new Error('X.AI API key not configured');
@@ -175,7 +181,7 @@ export class XAIAPIClient {
         throw new Error('No images found in X.AI response');
       }
 
-      return data.map((image: any) => image.url);
+      return data.map((image: GrokImage) => image.url);
 
     } catch (error) {
       console.error('X.AI image generation request failed:', error);
@@ -196,7 +202,7 @@ export class XAIAPIClient {
     try {
       if (testType === 'text') {
         console.log('Testing X.AI text generation API...');
-        const result = await this.generateText(
+        await this.generateText(
           'You are a helpful assistant.',
           'Please respond with "Test successful" and mention your model name and context window size.',
           {
@@ -225,7 +231,7 @@ export class XAIAPIClient {
             testType: 'image',
             error: result === null ? 'X.AI image generation not yet available (will fallback to Imagen)' : undefined
           };
-        } catch (error) {
+        } catch {
           return {
             success: false,
             model: GROK_MODEL,

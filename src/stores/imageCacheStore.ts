@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-interface CachedImage {
+export interface CachedImage {
   url: string;
   timestamp: number;
   accessCount: number;
@@ -72,7 +72,7 @@ export const useImageCacheStore = create<ImageCacheStore>((set, get) => ({
     if (now - entry.timestamp > CACHE_TTL) {
       // Remove expired entry
       set((state) => {
-        const { [prompt]: removed, ...rest } = state.imageCache;
+        const { [prompt]: _, ...rest } = state.imageCache;
         return { imageCache: rest };
       });
       return null;

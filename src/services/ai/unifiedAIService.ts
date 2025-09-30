@@ -22,7 +22,7 @@ export async function generateWithSelectedModel(
   
   if (!selectedModel) {
     console.warn('No AI model selected, falling back to Gemini');
-    return generateWithGemini(systemInstruction, prompt, useCase);
+    return generateWithGemini(systemInstruction, prompt);
   }
 
   try {
@@ -31,11 +31,11 @@ export async function generateWithSelectedModel(
       return await generateWithGrok(systemInstruction, prompt, useCase);
     } else {
       console.log('Using Gemini for text generation');
-      return await generateWithGemini(systemInstruction, prompt, useCase);
+      return await generateWithGemini(systemInstruction, prompt);
     }
   } catch (error) {
     console.error(`${selectedModel.name} failed, falling back to Gemini:`, error);
-    return await generateWithGemini(systemInstruction, prompt, useCase);
+    return await generateWithGemini(systemInstruction, prompt);
   }
 }
 
@@ -87,8 +87,7 @@ async function generateWithGrok(
  */
 async function generateWithGemini(
   systemInstruction: string,
-  prompt: string,
-  useCase: 'concept' | 'story' | 'summary'
+  prompt: string
 ): Promise<GameCommand[]> {
   // For story generation, we need to use nextStepFlow which has a different interface
   // For now, we'll create a mock structure to satisfy the interface

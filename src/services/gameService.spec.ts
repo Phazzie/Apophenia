@@ -67,7 +67,12 @@ describe('gameService', () => {
     name: 'Cosmic Horror',
     description: '...',
     style: 'Lovecraftian',
-    theme: {},
+    theme: {
+      '--background-color': '#000',
+      '--text-color': '#fff',
+      '--accent-color': '#f0f',
+      '--font-family': 'monospace',
+    },
     startScreenImagePrompt: 'prompt1',
     conceptPrompt: 'prompt2',
     aiSystemInstruction: 'system-instruction',
@@ -92,14 +97,14 @@ describe('gameService', () => {
     jest.clearAllMocks();
 
     // Setup default mock implementations for a successful run
-    mockGenerateNextStep.mockResolvedValue(mockCommands);
-    mockEngines.temporalRevision.reviseHistory.mockImplementation((c, h) => Promise.resolve(h));
-    mockEngines.quantumNarrative.processQuantumChoice.mockImplementation((c, h) => Promise.resolve({ history: h, quantumShift: false }));
-    mockEngines.metaConsciousness.checkForMetaEvent.mockResolvedValue(null);
-    mockEngines.realityCorruption.processCorruption.mockResolvedValue({ corruptionLevel: 0, newEffects: [], uiEffects: {} });
-    mockEngines.adaptiveHorror.generatePersonalizedHorror.mockImplementation(p => Promise.resolve(p));
-    mockEngines.semanticArchaeology.analyzeChoiceSemantics.mockReturnValue({ semanticInsight: '', psychProfile: 'stable', hiddenMotivations: [] });
-    mockEngines.narrativeDNA.generateAdaptivePrompt.mockImplementation(p => p);
+    (mockGenerateNextStep as jest.Mock).mockResolvedValue(mockCommands);
+    (mockEngines.temporalRevision.reviseHistory as jest.Mock).mockImplementation((c: string, h: StorySegment[]) => Promise.resolve(h));
+    (mockEngines.quantumNarrative.processQuantumChoice as jest.Mock).mockImplementation((c: string, h: StorySegment[]) => Promise.resolve({ history: h, quantumShift: false }));
+    (mockEngines.metaConsciousness.checkForMetaEvent as jest.Mock).mockResolvedValue(null);
+    (mockEngines.realityCorruption.processCorruption as jest.Mock).mockResolvedValue({ corruptionLevel: 0, newEffects: [], uiEffects: {} });
+    (mockEngines.adaptiveHorror.generatePersonalizedHorror as jest.Mock).mockImplementation((p: string) => Promise.resolve(p));
+    (mockEngines.semanticArchaeology.analyzeChoiceSemantics as jest.Mock).mockReturnValue({ semanticInsight: '', psychProfile: 'stable', hiddenMotivations: [] });
+    (mockEngines.narrativeDNA.generateAdaptivePrompt as jest.Mock).mockImplementation((p: string) => p);
   });
 
   describe('getNextStep', () => {
@@ -129,7 +134,7 @@ describe('gameService', () => {
     });
 
     it('should return fallback commands if the main AI call fails', async () => {
-      mockGenerateNextStep.mockRejectedValue(new Error('AI Error'));
+      (mockGenerateNextStep as jest.Mock).mockRejectedValue(new Error('AI Error'));
 
       const result = await getNextStep('A choice', mockWorldState, mockHistory, mockGenreConfig);
 
@@ -139,14 +144,18 @@ describe('gameService', () => {
     });
 
     it('should not throw if an engine fails, and return fallback', async () => {
-      mockEngines.temporalRevision.reviseHistory.mockRejectedValue(new Error('Engine Failure'));
+      (mockEngines.temporalRevision.reviseHistory as jest.Mock).mockRejectedValue(new Error('Engine Failure'));
 
       const result = await getNextStep('A choice', mockWorldState, mockHistory, mockGenreConfig);
 
       // Should catch the engine error and return the fallback response
       expect(result.commands).toHaveLength(2);
-      expect(result.commands[0].type).toBe('displayText');
-      expect(result.commands[0].payload.content).toContain('The fabric of reality fractures');
+      const firstCommand = result.commands[0];
+      if (firstCommand.type === 'displayText') {
+        expect(firstCommand.payload.content).toContain('The fabric of reality fractures');
+      } else {
+        fail('First command was not of type displayText');
+      }
     });
   });
 

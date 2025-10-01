@@ -46,6 +46,7 @@ if (process.env.SERVE_STATIC === 'true') {
   // Serve the static files from the React app
   app.use(express.static(distPath));
 
+app.use(cors({ origin: process.env.NODE_ENV === 'production' ? false : '*' }));
   // Handle all other routes by serving the index.html
   // This is for Single Page Application (SPA) routing
   app.get(/^\/(?!api).*/, (req, res) => {

@@ -7,26 +7,7 @@ import { useWorldStateStore } from '../stores/worldStateStore';
 import { useAIModelStore } from '../stores/aiModelStore';
 import { GameState, GenreConfig, StorySegment, WorldState } from '../types';
 import { imageGenerationService } from '../services/ai/imageGeneration';
-
-// A mock genre config for now. In a real app, this might be selectable.
-const genreConfig: GenreConfig = {
-  id: 'cosmic-horror',
-  name: 'Cosmic Horror',
-  description:
-    'A story about the terrifying and unknowable entities that exist beyond human comprehension.',
-  style: 'Lovecraftian, atmospheric, psychological',
-  theme: {
-    '--background-color': '#0d1117',
-    '--text-color': '#c9d1d9',
-    '--accent-color': '#58a6ff',
-    '--font-family': '"Courier New", Courier, monospace',
-  },
-  startScreenImagePrompt:
-    'A lone lighthouse against a stormy, cosmic sky, with swirling nebulae instead of clouds.',
-  conceptPrompt: 'Generate a cosmic horror story concept.',
-  aiSystemInstruction:
-    'You are a master of cosmic horror, weaving tales of dread and insignificance.',
-};
+import { genres, defaultGenre } from '../config/genres';
 
 const StartScreen: React.FC = () => {
   const { setGameState } = useGameStateStore();
@@ -35,6 +16,7 @@ const StartScreen: React.FC = () => {
   const { getSelectedModel } = useAIModelStore();
   const [hasSavedGame, setHasSavedGame] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
+  const [selectedGenre, setSelectedGenre] = useState<GenreConfig>(defaultGenre);
 
   const selectedModel = getSelectedModel();
 
@@ -54,15 +36,15 @@ const StartScreen: React.FC = () => {
     setGameState(GameState.GENERATING_CONCEPT);
 
     // Set the genre for the new game
-    setGenreConfig(genreConfig);
+    setGenreConfig(selectedGenre);
 
-    const concept = await generateConcept(genreConfig);
+    const concept = await generateConcept(selectedGenre);
     const settingText =
       concept.setting && concept.setting.trim().length > 0
         ? concept.setting
         : 'The world is a bleak and unforgiving place.';
 
-    useWorldStateStore.getState().updateWorldState({ ...concept, setting: settingText, genreConfig });
+    useWorldStateStore.getState().updateWorldState({ ...concept, setting: settingText, genreConfig: selectedGenre });
 
     useStoryHistoryStore.getState().addStorySegment({
       id: crypto.randomUUID(),
@@ -143,6 +125,26 @@ const StartScreen: React.FC = () => {
       <div className="ai-model-info">
         <span>Powered by: <strong>{selectedModel?.name || 'Unknown Model'}</strong></span>
         <small>Use the model selector in bottom-right to change AI provider</small>
+      </div>
+
+      <div className="genre-selector">
+        <h2>Choose Your Descent</h2>
+        <select
+          value={selectedGenre.id}
+          onChange={(e) => {
+            const genre = genres.find(g => g.id === e.target.value);
+            if (genre) {
+              setSelectedGenre(genre);
+            }
+          }}
+        >
+          {genres.map(genre => (
+            <option key={genre.id} value={genre.id}>
+              {genre.name}
+            </option>
+          ))}
+        </select>
+        <p className="genre-description">{selectedGenre.description}</p>
       </div>
       
       <button onClick={handleNewGame} disabled={isStarting}>

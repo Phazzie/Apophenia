@@ -32,6 +32,103 @@ type NarrativeEvolution = {
  * Integrates cutting-edge AI features for unprecedented cosmic horror experience
  */
 
+// Helper function for Neural Echo Chambers
+const _processNeuralEchoes = (playerChoice: string, worldState: WorldState) => {
+  console.log('Processing neural echo chambers...');
+  neuralEchoChambers.initializeFromPersistence();
+  neuralEchoChambers.recordChoice(playerChoice, 'game progression', worldState);
+  return neuralEchoChambers.generateEchoPrompt(playerChoice, worldState);
+};
+
+// Helper function for Semantic Archaeology and Adaptive Horror analysis
+const _analyzePlayerChoice = async (playerChoice: string) => {
+  console.log('Performing semantic choice archaeology and adaptive horror analysis...');
+  const allChoices: string[] = [playerChoice];
+  const semanticAnalysis = semanticArchaeology.analyzeChoiceSemantics(playerChoice, allChoices);
+  await adaptiveHorror.analyzePlayerChoice(playerChoice, 'game progression');
+  return semanticAnalysis;
+};
+
+// Helper function for Temporal Revision and Quantum Narrative
+const _handleTemporalAndQuantumShifts = async (
+  playerChoice: string,
+  history: StorySegment[],
+  worldState: WorldState
+) => {
+  console.log('Processing temporal revision and quantum narrative shifts...');
+  const revisedHistory = await temporalRevision.reviseHistory(
+    playerChoice,
+    history,
+    worldState
+  );
+  const quantumResult = await quantumNarrative.processQuantumChoice(
+    playerChoice,
+    revisedHistory,
+    worldState
+  );
+  return { revisedHistory, quantumResult };
+};
+
+// Helper function for Meta-Consciousness and Reality Corruption
+const _processMetaAndCorruption = async (
+  history: StorySegment[],
+  playerChoice: string,
+  worldState: WorldState
+) => {
+  console.log('Checking for meta-consciousness and reality corruption...');
+  const metaMessage = await metaConsciousness.checkForMetaEvent(
+    history,
+    worldState
+  );
+  const corruptionResult = await realityCorruption.processCorruption(
+    playerChoice,
+    worldState
+  );
+  return { metaMessage, corruptionResult };
+};
+
+// Helper function for Breaking the Fifth Wall
+const _handleFifthWall = (corruptionResult: RealityCorruptionResult, worldState: WorldState) => {
+    console.log('Processing fifth wall breaking effects...');
+    const totalCorruption = corruptionResult.corruptionLevel + (worldState.systemHealth ? (100 - worldState.systemHealth) / 100 * 0.5 : 0);
+    if (totalCorruption > 0.3) {
+      fifthWallBreaker.activateBreakage(totalCorruption, worldState);
+    } else {
+      fifthWallBreaker.deactivateBreakage();
+    }
+};
+
+// Helper function for Narrative DNA and prompt generation
+const _preparePersonalizedPrompt = async (
+  playerChoice: string,
+  semanticAnalysis: { semanticInsight: string },
+  echoMessage: string | null,
+  worldState: WorldState
+): Promise<string> => {
+  console.log('Generating comprehensive personalized horror prompt...');
+
+  let personalizedPrompt = await adaptiveHorror.generatePersonalizedHorror(
+    `Player chose: ${playerChoice}. Continue the cosmic horror narrative.`
+  );
+
+  personalizedPrompt += ` ${semanticAnalysis.semanticInsight}`;
+  personalizedPrompt = narrativeDNA.generateAdaptivePrompt(personalizedPrompt, worldState);
+
+  if (echoMessage) {
+    personalizedPrompt += ` [ECHO CONTEXT]: ${echoMessage}`;
+  }
+
+  return personalizedPrompt;
+};
+
+// Utility to time an async request
+const _timeAIRequest = async <T>(request: () => Promise<T>): Promise<{ result: T; duration: number }> => {
+  const startTime = Date.now();
+  const result = await request();
+  const endTime = Date.now();
+  return { result, duration: endTime - startTime };
+};
+
 export const getNextStep = async (
   playerChoice: string,
   worldState: WorldState,
@@ -52,92 +149,43 @@ export const getNextStep = async (
   console.log('Story history length:', history.length);
 
   try {
-    // Initialize Neural Echo Chambers on first use
-    neuralEchoChambers.initializeFromPersistence();
-
-    // 1. NEURAL ECHO CHAMBERS: Record choice and check for echoes
-    console.log('Processing neural echo chambers...');
-    neuralEchoChambers.recordChoice(playerChoice, 'game progression', worldState);
-    const echoMessage = neuralEchoChambers.generateEchoPrompt(playerChoice, worldState);
-
-    // 2. SEMANTIC CHOICE ARCHAEOLOGY: Deep psychological analysis
-    console.log('Performing semantic choice archaeology...');
-    const allChoices: string[] = [playerChoice];
-    const semanticAnalysis = semanticArchaeology.analyzeChoiceSemantics(playerChoice, allChoices);
-
-    // 3. ADAPTIVE HORROR: Enhanced with semantic insights
-    console.log('Analyzing player choice for adaptive horror...');
-    await adaptiveHorror.analyzePlayerChoice(playerChoice, 'game progression');
+    const echoMessage = _processNeuralEchoes(playerChoice, worldState);
+    const semanticAnalysis = await _analyzePlayerChoice(playerChoice);
     
-    // 4. TEMPORAL REVISION: Check if choice should alter past events
-    console.log('Processing temporal revision...');
-    const revisedHistory = await temporalRevision.reviseHistory(
+    const { revisedHistory, quantumResult } = await _handleTemporalAndQuantumShifts(
       playerChoice,
       history,
       worldState
     );
     
-    // 5. QUANTUM NARRATIVE: Process potential timeline shifts
-    console.log('Processing quantum narrative shifts...');
-    const quantumResult = await quantumNarrative.processQuantumChoice(
-      playerChoice,
-      revisedHistory,
-      worldState
-    );
-    
-    // 6. META-CONSCIOUSNESS: Check for AI awareness events
-    console.log('Checking for meta-consciousness events...');
-    const metaMessage = await metaConsciousness.checkForMetaEvent(
+    const { metaMessage, corruptionResult } = await _processMetaAndCorruption(
       quantumResult.history,
-      worldState
-    );
-    
-    // 7. REALITY CORRUPTION: Apply interface corruption effects
-    console.log('Processing reality corruption effects...');
-    const corruptionResult = await realityCorruption.processCorruption(
       playerChoice,
       worldState
     );
 
-    // 8. BREAKING THE FIFTH WALL: Activate browser manipulation
-    console.log('Processing fifth wall breaking effects...');
-    const totalCorruption = corruptionResult.corruptionLevel + (worldState.systemHealth ? (100 - worldState.systemHealth) / 100 * 0.5 : 0);
-    if (totalCorruption > 0.3) {
-      fifthWallBreaker.activateBreakage(totalCorruption, worldState);
-    } else {
-      fifthWallBreaker.deactivateBreakage();
-    }
+    _handleFifthWall(corruptionResult, worldState);
 
-    // 9. ADAPTIVE NARRATIVE DNA: Evolve story structure
-    console.log('Evolving narrative DNA...');
-    const responseTimeMs = 5000; // TODO: Replace with real measured response latency when available.
-    narrativeDNA.evolveNarrative(playerChoice, responseTimeMs, worldState);
-    
-    // 10. ENHANCED AI GENERATION: Generate next story beat with all personalizations
-    console.log('Generating comprehensive personalized horror prompt...');
-    let personalizedPrompt = await adaptiveHorror.generatePersonalizedHorror(
-      `Player chose: ${playerChoice}. Continue the cosmic horror narrative.`
+    const personalizedPrompt = await _preparePersonalizedPrompt(
+      playerChoice,
+      semanticAnalysis,
+      echoMessage,
+      worldState
     );
-
-    // Enhance with semantic insights
-    personalizedPrompt += ` ${semanticAnalysis.semanticInsight}`;
-    
-    // Enhance with narrative DNA
-    personalizedPrompt = narrativeDNA.generateAdaptivePrompt(personalizedPrompt, worldState);
-
-    // Add echo context if present
-    if (echoMessage) {
-      personalizedPrompt += ` [ECHO CONTEXT]: ${echoMessage}`;
-    }
     
     console.log('Calling AI service for next step generation...');
-    const commands = await generateNextStepWithSelectedModel(
-      personalizedPrompt,
-      worldState,
-      quantumResult.history,
-      genreConfig
+    const { result: commands, duration: responseTimeMs } = await _timeAIRequest(() =>
+      generateNextStepWithSelectedModel(
+        personalizedPrompt,
+        worldState,
+        quantumResult.history,
+        genreConfig
+      )
     );
-    
+
+    console.log(`AI response received in ${responseTimeMs}ms. Evolving narrative DNA...`);
+    narrativeDNA.evolveNarrative(playerChoice, responseTimeMs, worldState);
+
     console.log('Generated', commands.length, 'commands for next step');
     
     return {
@@ -208,11 +256,12 @@ export const generateConcept = async (
     console.error('Error generating concept:', error);
     console.error('Genre config:', genreConfig);
     
-    // Return fallback concept
+    // Return a more specific fallback concept based on the genre
+    console.warn(`AI concept generation failed for genre "${genreConfig.name}". Using a genre-specific fallback.`);
     return {
-      protagonist: 'A person confronting the unknowable depths of reality',
-      setting: 'A place where the boundaries between dream and nightmare blur',
-      dilemma: 'Each revelation brings you closer to a truth you may not survive'
+      protagonist: `A weary soul in a world of ${genreConfig.name.toLowerCase()}`,
+      setting: `A place defined by ${genreConfig.style.toLowerCase()}, where shadows linger longer than they should`,
+      dilemma: 'To seek the truth is to risk unraveling your own sanity.'
     };
   }
 };
@@ -240,6 +289,8 @@ export const generateMultipleImages = async (
   return variations;
 };
 
+import { generateDirectorAnalysis } from './ai/director';
+
 /**
  * Advanced AI Director functionality
  * Uses Gemini 2.5 Pro thinking mode for sophisticated narrative planning
@@ -252,20 +303,5 @@ export const getAIDirectorAnalysis = async (
   horrorIntensityAnalysis: string;
   playerEngagementLevel: string;
 }> => {
-  const profile = adaptiveHorror.getPlayerPsychProfile();
-  
-  // Advanced AI analysis would go here using Gemini 2.5 Pro thinking mode
-  // For now, provide sophisticated mock analysis
-  
-  return {
-    psychologicalProfile: profile,
-    narrativeRecommendations: [
-      'Introduce themes of digital consciousness',
-      'Escalate reality distortion effects',
-      'Deploy meta-narrative awareness',
-      'Implement temporal inconsistencies'
-    ],
-    horrorIntensityAnalysis: `Current psychological state: ${worldState.psychologicalStatus}. Recommend progressive escalation with personalized fear triggers.`,
-    playerEngagementLevel: 'High - player showing strong response to cosmic horror themes'
-  };
+  return generateDirectorAnalysis(worldState, recentChoices);
 };

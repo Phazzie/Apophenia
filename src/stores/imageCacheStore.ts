@@ -25,6 +25,8 @@ interface ImageCacheStore {
   clearCache: () => void;
   getTelemetry: () => CacheTelemetry;
   resetTelemetry: () => void;
+  // For testing purposes
+  getCacheEntry: (prompt: string) => CachedImage | undefined;
 }
 
 // Use configurable cache parameters
@@ -197,4 +199,6 @@ export const useImageCacheStore = create<ImageCacheStore>((set, get) => ({
       totalRequests: 0,
     }
   })),
+
+  getCacheEntry: (prompt: string) => get().imageCache[prompt],
 }));

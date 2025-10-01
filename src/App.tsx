@@ -6,7 +6,6 @@ import StartScreen from './components/StartScreen';
 import GameScreen from './components/GameScreen';
 import EndScreen from './components/EndScreen';
 import CompactModelSelector from './components/CompactModelSelector';
-import CompactTestAPI from './components/CompactTestAPI';
 import { GameErrorBoundary } from './components/ErrorBoundary';
 import { GameStateManager } from './services/gameStateManager';
 
@@ -44,7 +43,6 @@ const App: React.FC = () => {
       <div id="app-container" style={worldState.uiDistortion}>
         {renderGameState()}
         <CompactModelSelector />
-        <CompactTestAPI />
       </div>
     </GameErrorBoundary>
   );

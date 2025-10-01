@@ -6,6 +6,7 @@ import { useStoryHistoryStore } from '../stores/storyHistoryStore';
 import { useWorldStateStore } from '../stores/worldStateStore';
 import { useAIModelStore } from '../stores/aiModelStore';
 import { GameState, GenreConfig } from '../types';
+import TestAPIButtons from './TestAPIButtons';
 
 // A mock genre config for now. In a real app, this might be selectable.
 const genreConfig: GenreConfig = {
@@ -88,6 +89,8 @@ const StartScreen: React.FC = () => {
         <span>Powered by: <strong>{selectedModel?.name || 'Unknown Model'}</strong></span>
         <small>Use the model selector in bottom-right to change AI provider</small>
       </div>
+
+      <TestAPIButtons />
       
       <button onClick={handleNewGame} disabled={isStarting}>
         {isStarting ? 'Starting...' : 'New Game'}

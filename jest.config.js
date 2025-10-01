@@ -8,6 +8,7 @@ module.exports = {
     '^../../config$': '<rootDir>/src/services/__mocks__/config.ts',
     '^../../services/config$': '<rootDir>/src/services/__mocks__/config.ts',
     '^../config$': '<rootDir>/src/services/__mocks__/config.ts',
+    '^../services/config$': '<rootDir>/src/services/__mocks__/config.ts',
     '^../../services/ai/grokService$': '<rootDir>/src/services/__mocks__/ai/grokService.ts',
     '^../ai/grokService$': '<rootDir>/src/services/__mocks__/ai/grokService.ts',
     '^../../services/ai/unifiedAIService$': '<rootDir>/src/services/__mocks__/ai/unifiedAIService.ts',
@@ -15,12 +16,7 @@ module.exports = {
     '\\.(css|less|scss)$': 'identity-obj-proxy',
   },
   transform: {
-    '^.+\\.tsx?$': ['ts-jest', {
-      useESM: true,
-      tsconfig: {
-        jsx: 'react-jsx',
-      }
-    }],
+    '^.+\\.tsx?$': 'ts-jest',
   },
   transformIgnorePatterns: [
     'node_modules/(?!(.*\\.mjs$))'

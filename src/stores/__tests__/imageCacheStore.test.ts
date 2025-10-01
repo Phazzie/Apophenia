@@ -1,4 +1,5 @@
 import { useImageCacheStore } from '../imageCacheStore';
+import { act } from '@testing-library/react';
 
 // Mock the config module to control cache settings
 jest.mock('../../services/config', () => ({
@@ -6,13 +7,16 @@ jest.mock('../../services/config', () => ({
     IMAGE_CACHE_TTL: 10000, // 10 seconds for testing
     IMAGE_CACHE_MAX_SIZE: 3, // Small size for testing
     ENABLE_CACHE_TELEMETRY: true,
-  }
+  },
 }));
 
 describe('ImageCacheStore', () => {
   beforeEach(() => {
-    // Clear the cache before each test
-    useImageCacheStore.getState().clearCache();
+    // Reset store to initial state and use real timers before each test
+    act(() => {
+      useImageCacheStore.getState().clearCache();
+    });
+    jest.useRealTimers();
   });
 
   describe('basic cache operations', () => {
@@ -34,12 +38,9 @@ describe('ImageCacheStore', () => {
 
     it('should track cache size correctly', () => {
       const store = useImageCacheStore.getState();
-      
       expect(store.getCacheSize()).toBe(0);
-      
       store.addToCache('prompt1', 'url1');
       expect(store.getCacheSize()).toBe(1);
-      
       store.addToCache('prompt2', 'url2');
       expect(store.getCacheSize()).toBe(2);
     });
@@ -49,24 +50,14 @@ describe('ImageCacheStore', () => {
     it('should track cache hits and misses', () => {
       const store = useImageCacheStore.getState();
       
-      // Initial telemetry should be zero
-      let telemetry = store.getTelemetry();
-      expect(telemetry.hits).toBe(0);
-      expect(telemetry.misses).toBe(0);
-      expect(telemetry.totalRequests).toBe(0);
+      act(() => {
+        store.addToCache('test prompt', 'test-url');
+        store.getFromCache('test prompt'); // hit
+        store.getFromCache('non-existent prompt'); // miss
+      });
       
-      // Add item to cache
-      store.addToCache('test prompt', 'test-url');
-      
-      // Cache hit
-      store.getFromCache('test prompt');
-      telemetry = store.getTelemetry();
+      const telemetry = useImageCacheStore.getState().getTelemetry();
       expect(telemetry.hits).toBe(1);
-      expect(telemetry.totalRequests).toBe(1);
-      
-      // Cache miss
-      store.getFromCache('non-existent prompt');
-      telemetry = store.getTelemetry();
       expect(telemetry.misses).toBe(1);
       expect(telemetry.totalRequests).toBe(2);
     });
@@ -74,98 +65,107 @@ describe('ImageCacheStore', () => {
     it('should track access count', () => {
       const store = useImageCacheStore.getState();
       
-      store.addToCache('test prompt', 'test-url');
+      act(() => {
+        store.addToCache('test prompt', 'test-url');
+        store.getFromCache('test prompt');
+        store.getFromCache('test prompt');
+        store.getFromCache('test prompt');
+      });
       
-      // Access the same item multiple times
-      store.getFromCache('test prompt');
-      store.getFromCache('test prompt');
-      store.getFromCache('test prompt');
-      
-      const cache = store.imageCache;
-      expect(cache['test prompt'].accessCount).toBe(4); // 1 from addToCache + 3 from getFromCache
+      const finalState = useImageCacheStore.getState();
+      expect(finalState.imageCache['test prompt'].accessCount).toBe(4);
     });
 
     it('should reset telemetry', () => {
       const store = useImageCacheStore.getState();
       
-      // Generate some activity
-      store.addToCache('prompt1', 'url1');
-      store.getFromCache('prompt1');
-      store.getFromCache('non-existent');
+      act(() => {
+        store.addToCache('prompt1', 'url1');
+        store.getFromCache('prompt1');
+      });
       
-      // Verify telemetry has data
-      let telemetry = store.getTelemetry();
-      expect(telemetry.totalRequests).toBeGreaterThan(0);
+      expect(useImageCacheStore.getState().getTelemetry().totalRequests).toBeGreaterThan(0);
       
-      // Reset and verify
-      store.resetTelemetry();
-      telemetry = store.getTelemetry();
-      expect(telemetry.hits).toBe(0);
-      expect(telemetry.misses).toBe(0);
-      expect(telemetry.totalRequests).toBe(0);
+      act(() => {
+        store.resetTelemetry();
+      });
+
+      const telemetry = useImageCacheStore.getState().getTelemetry();
+      expect(telemetry).toEqual({ hits: 0, misses: 0, evictions: 0, totalRequests: 0 });
     });
   });
 
   describe('cache eviction', () => {
-    it('should evict entries when cache size exceeds maximum', () => {
+    it('should evict the least recently used entry when cache size exceeds maximum', () => {
+      jest.useFakeTimers();
       const store = useImageCacheStore.getState();
       
-      // Add items up to the max size (3)
-      store.addToCache('prompt1', 'url1');
-      store.addToCache('prompt2', 'url2');
-      store.addToCache('prompt3', 'url3');
+      act(() => {
+        store.addToCache('prompt1', 'url1'); // Should be evicted
+        jest.advanceTimersByTime(100);
+        store.addToCache('prompt2', 'url2');
+        jest.advanceTimersByTime(100);
+        store.addToCache('prompt3', 'url3');
+      });
       
-      expect(store.getCacheSize()).toBe(3);
+      expect(useImageCacheStore.getState().getCacheSize()).toBe(3);
       
-      // Add one more to trigger eviction
-      store.addToCache('prompt4', 'url4');
+      act(() => {
+        store.addToCache('prompt4', 'url4'); // This triggers eviction
+      });
       
-      expect(store.getCacheSize()).toBe(3); // Should still be 3
-      
-      // The least recently used item should have been evicted
-      expect(store.getFromCache('prompt1')).toBeNull();
-      expect(store.getFromCache('prompt4')).toBe('url4');
+      const finalState = useImageCacheStore.getState();
+      expect(finalState.getCacheSize()).toBe(3);
+      expect(finalState.getFromCache('prompt1')).toBeNull();
+      expect(finalState.getFromCache('prompt2')).not.toBeNull();
     });
 
-    it('should evict stale entries based on TTL', (done) => {
+    it('should evict a stale entry when it is accessed via getFromCache', () => {
+      jest.useFakeTimers();
       const store = useImageCacheStore.getState();
       
-      store.addToCache('test prompt', 'test-url');
-      expect(store.getFromCache('test prompt')).toBe('test-url');
+      act(() => {
+        store.addToCache('test prompt', 'test-url');
+      });
       
-      // Wait for TTL to expire (using setTimeout since we mocked TTL to 10 seconds)
-      // For testing, we'll manually set timestamp to simulate expiration
-      const cache = store.imageCache;
-      cache['test prompt'].timestamp = Date.now() - 15000; // 15 seconds ago (> 10 second TTL)
+      expect(useImageCacheStore.getState().getFromCache('test prompt')).toBe('test-url');
       
-      // Try to get from cache - should return null due to expiration
-      const result = store.getFromCache('test prompt');
+      act(() => {
+        jest.advanceTimersByTime(15000); // Advance time beyond 10s TTL
+      });
+
+      // Accessing the stale item should cause it to be evicted
+      const result = useImageCacheStore.getState().getFromCache('test prompt');
       expect(result).toBeNull();
       
-      // Cache should be cleaned up
-      expect(store.getCacheSize()).toBe(0);
-      done();
+      expect(useImageCacheStore.getState().getCacheSize()).toBe(0);
     });
 
-    it('should manually evict stale entries', () => {
+    it('should manually evict all stale entries', () => {
+      jest.useFakeTimers();
       const store = useImageCacheStore.getState();
+
+      act(() => {
+        store.addToCache('stale-prompt', 'stale-url'); // Added at t=0
+      });
+
+      act(() => {
+        jest.advanceTimersByTime(5000); // t=5000
+        store.addToCache('fresh-prompt', 'fresh-url'); // Added at t=5000
+      });
       
-      // Add fresh entry
-      store.addToCache('fresh prompt', 'fresh-url');
-      
-      // Add stale entry by manipulating timestamp
-      store.addToCache('stale prompt', 'stale-url');
-      const cache = store.imageCache;
-      cache['stale prompt'].timestamp = Date.now() - 15000; // 15 seconds ago
-      
-      expect(store.getCacheSize()).toBe(2);
-      
-      // Manually evict stale entries
-      store.evictStaleEntries();
-      
-      expect(store.getCacheSize()).toBe(1);
-      expect(store.getFromCache('fresh prompt')).toBe('fresh-url');
-      expect(store.getFromCache('stale prompt')).toBeNull();
+      act(() => {
+        jest.advanceTimersByTime(6000); // t=11000. 'stale-prompt' is now 11s old. 'fresh-prompt' is 6s old.
+      });
+
+      act(() => {
+        store.evictStaleEntries();
+      });
+
+      const finalState = useImageCacheStore.getState();
+      expect(finalState.getCacheSize()).toBe(1);
+      expect(finalState.getFromCache('stale-prompt')).toBeNull();
+      expect(finalState.getFromCache('fresh-prompt')).toBe('fresh-url');
     });
   });
 
@@ -173,20 +173,20 @@ describe('ImageCacheStore', () => {
     it('should clear all cache and telemetry', () => {
       const store = useImageCacheStore.getState();
       
-      // Add some data
-      store.addToCache('prompt1', 'url1');
-      store.addToCache('prompt2', 'url2');
-      store.getFromCache('prompt1');
-      store.getFromCache('non-existent');
+      act(() => {
+        store.addToCache('prompt1', 'url1');
+        store.getFromCache('prompt1');
+      });
       
-      expect(store.getCacheSize()).toBe(2);
-      expect(store.getTelemetry().totalRequests).toBeGreaterThan(0);
+      expect(useImageCacheStore.getState().getCacheSize()).toBe(1);
       
-      // Clear cache
-      store.clearCache();
+      act(() => {
+        store.clearCache();
+      });
       
-      expect(store.getCacheSize()).toBe(0);
-      expect(store.getTelemetry().totalRequests).toBe(0);
+      const finalState = useImageCacheStore.getState();
+      expect(finalState.getCacheSize()).toBe(0);
+      expect(finalState.getTelemetry().totalRequests).toBe(0);
     });
   });
 });

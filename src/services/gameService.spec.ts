@@ -1,216 +1,201 @@
-/**
- * Tests for gameService.ts
- */
-
 import {
-  generateConcept,
-  generateImage,
   getNextStep,
   summarizeHistory,
+  generateConcept,
+  generateImage,
 } from './gameService';
-
-import {
-  generateImageFlow,
-} from './ai/secureGenkit';
-
 import {
   generateConceptWithSelectedModel,
   generateNextStepWithSelectedModel,
 } from './ai/unifiedAIService';
-
-import type { Command, GenreConfig, StorySegment, WorldState } from '../types';
+import { generateImageFlow } from './ai/secureGenkit';
 import { summarizeHistoryFlow } from './flows/summaryFlow';
+import * as engines from './ai/engines';
+import { Command, GenreConfig, StorySegment, WorldState } from '../types';
 
-// Mock the flow modules
-jest.mock('./ai/secureGenkit', () => ({
-  generateImageFlow: jest.fn(),
-}));
-
-jest.mock('./ai/unifiedAIService', () => ({
-  generateConceptWithSelectedModel: jest.fn(),
-  generateNextStepWithSelectedModel: jest.fn(),
-}));
-
-// Mock the revolutionary features
-jest.mock('./ai/revolutionaryFeatures', () => ({
-  adaptiveHorror: {
-    calculateAdaptiveHorrorIntensity: jest.fn(() => 0),
-    generatePersonalizedHorror: jest.fn((prompt: string) => Promise.resolve(prompt)),
-  },
+// Mock all imported modules
+jest.mock('./ai/unifiedAIService');
+jest.mock('./ai/secureGenkit');
+jest.mock('./flows/summaryFlow');
+jest.mock('./ai/engines', () => ({
   temporalRevision: {
-    reviseHistory: jest.fn((choice: string, history: any[], worldState: any) => Promise.resolve(history)),
-  },
-  quantumNarrative: {
-    processQuantumChoice: jest.fn((choice: string, history: any[], worldState: any) => 
-      Promise.resolve({ history, quantumShift: false })
-    ),
+    reviseHistory: jest.fn(),
   },
   metaConsciousness: {
-    checkForMetaEvent: jest.fn(() => Promise.resolve(null)),
+    checkForMetaEvent: jest.fn(),
+  },
+  quantumNarrative: {
+    processQuantumChoice: jest.fn(),
+  },
+  adaptiveHorror: {
+    analyzePlayerChoice: jest.fn(),
+    generatePersonalizedHorror: jest.fn(),
+    getPlayerPsychProfile: jest.fn(),
   },
   realityCorruption: {
-    processCorruption: jest.fn(() => Promise.resolve({ corruptionLevel: 0, newEffects: [], uiEffects: {} })),
+    processCorruption: jest.fn(),
+  },
+  neuralEchoChambers: {
+    initializeFromPersistence: jest.fn(),
+    recordChoice: jest.fn(),
+    generateEchoPrompt: jest.fn(),
+  },
+  semanticArchaeology: {
+    analyzeChoiceSemantics: jest.fn(),
+  },
+  narrativeDNA: {
+    evolveNarrative: jest.fn(),
+    generateAdaptivePrompt: jest.fn(),
+    getGeneration: jest.fn(),
+  },
+  fifthWallBreaker: {
+    activateBreakage: jest.fn(),
+    deactivateBreakage: jest.fn(),
   },
 }));
 
-jest.mock('./flows/summaryFlow', () => ({
-  summarizeHistoryFlow: jest.fn(),
-}));
+// Typecast mocks for easier use
+const mockGenerateNextStep = generateNextStepWithSelectedModel as jest.Mock;
+const mockGenerateConcept = generateConceptWithSelectedModel as jest.Mock;
+const mockGenerateImage = generateImageFlow as jest.Mock;
+const mockSummarizeHistory = summarizeHistoryFlow as jest.Mock;
+const mockEngines = engines as jest.Mocked<typeof engines>;
 
 describe('gameService', () => {
-  let consoleErrorSpy: jest.SpyInstance;
+  // Moved mockGenreConfig before mockWorldState to fix initialization order
+  const mockGenreConfig: GenreConfig = {
+    id: 'cosmic-horror',
+    name: 'Cosmic Horror',
+    description: 'A style of horror emphasizing the unknown and cosmic indifference.',
+    style: 'Lovecraftian',
+    // Completed the theme object to satisfy the GenreConfig type
+    theme: {
+      '--background-color': '#0a0a1a',
+      '--text-color': '#e0e0e0',
+      '--accent-color': '#b429b4',
+      '--font-family': "'Courier Prime', monospace",
+    },
+    startScreenImagePrompt: 'cosmic horror landscape',
+    conceptPrompt: 'Generate a cosmic horror story concept.',
+    aiSystemInstruction: 'You are a master of cosmic horror.',
+  };
 
-  // --- Mocks with correct types ---
   const mockWorldState: WorldState = {
-    protagonist: 'Test Protagonist',
-    setting: 'A test setting',
-    dilemma: 'A test dilemma',
-    summary: 'A test summary',
+    protagonist: 'The Archivist',
+    setting: 'A forgotten library',
+    dilemma: 'A book that whispers truths from other realities',
+    summary: '',
     psychologicalStatus: 'Stable',
     systemHealth: 100,
-    horrorIntensity: 0,
-    uiDistortion: {
-      transform: 'none',
-      filter: 'none',
-      transition: 'all 1s ease-in-out',
-    },
-    // Include genreConfig to satisfy WorldState type requirements
-    genreConfig: {
-      id: 'test-genre',
-      name: 'Test Genre',
-      description: 'A genre for testing.',
-      style: 'Test style',
-      theme: {
-        '--background-color': '#fff',
-        '--text-color': '#000',
-        '--accent-color': '#f00',
-        '--font-family': 'sans-serif',
-      },
-      startScreenImagePrompt: 'A test image prompt.',
-      conceptPrompt: 'A test concept prompt.',
-      aiSystemInstruction: 'You are a test AI.',
-    },
+    horrorIntensity: 0.1,
+    uiDistortion: { transform: 'none', filter: 'none', transition: 'none' },
+    genreConfig: mockGenreConfig,
   };
 
-  const mockGenreConfig: GenreConfig = {
-    id: 'test-genre',
-    name: 'Test Genre',
-    description: 'A genre for testing.',
-    style: 'Test style',
-    theme: {
-      '--background-color': '#fff',
-      '--text-color': '#000',
-      '--accent-color': '#f00',
-      '--font-family': 'sans-serif',
-    },
-    startScreenImagePrompt: 'A test image prompt.',
-    conceptPrompt: 'A test concept prompt.',
-    aiSystemInstruction: 'You are a test AI.',
-  };
 
-  const mockStoryHistory: StorySegment[] = [
-    {
-      id: 'seg-1',
-      text: 'The story so far.',
-      images: {},
-    },
-  ];
+  const mockHistory: StorySegment[] = [{ id: 'seg1', text: 'segment 1', images: {} }];
+  const mockCommands: Command[] = [{ type: 'displayText', payload: { content: 'next part', segmentId: 'seg2' } }];
 
   beforeEach(() => {
-    jest.resetAllMocks();
-    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-  });
+    jest.clearAllMocks();
 
-  afterEach(() => {
-    consoleErrorSpy.mockRestore();
+    // Setup default mock implementations for a successful run
+    // Added type casting to mocks and explicit types to function parameters
+    (mockGenerateNextStep as jest.Mock).mockResolvedValue(mockCommands);
+    (mockEngines.temporalRevision.reviseHistory as jest.Mock).mockImplementation((_c: string, h: StorySegment[]) => Promise.resolve(h));
+    (mockEngines.quantumNarrative.processQuantumChoice as jest.Mock).mockImplementation((_c: string, h: StorySegment[]) => Promise.resolve({ history: h, quantumShift: false }));
+    (mockEngines.metaConsciousness.checkForMetaEvent as jest.Mock).mockResolvedValue(null);
+    (mockEngines.realityCorruption.processCorruption as jest.Mock).mockResolvedValue({ corruptionLevel: 0, newEffects: [], uiEffects: {} });
+    (mockEngines.adaptiveHorror.generatePersonalizedHorror as jest.Mock).mockImplementation((p: string) => Promise.resolve(p));
+    (mockEngines.semanticArchaeology.analyzeChoiceSemantics as jest.Mock).mockReturnValue({ semanticInsight: '', psychProfile: 'stable', hiddenMotivations: [] });
+    (mockEngines.narrativeDNA.generateAdaptivePrompt as jest.Mock).mockImplementation((p: string) => p);
   });
 
   describe('getNextStep', () => {
-    it('returns commands from generateNextStepWithSelectedModel on success', async () => {
-      const commands: Command[] = [
-        { type: 'displayText', payload: { content: 'Hello', segmentId: 'seg-2' } },
-      ];
-      (generateNextStepWithSelectedModel as jest.Mock).mockResolvedValueOnce(commands);
+    it('should call all revolutionary engines and the AI model', async () => {
+      await getNextStep('A choice', mockWorldState, mockHistory, mockGenreConfig);
 
-      const result = await getNextStep('Open the door', mockWorldState, mockStoryHistory, mockGenreConfig);
+      // Verify all engines were called with expected data
+      expect(mockEngines.neuralEchoChambers.recordChoice).toHaveBeenCalledWith('A choice', 'game progression', mockWorldState);
+      expect(mockEngines.semanticArchaeology.analyzeChoiceSemantics).toHaveBeenCalledWith('A choice', ['A choice']);
+      expect(mockEngines.adaptiveHorror.analyzePlayerChoice).toHaveBeenCalledWith('A choice', 'game progression');
+      expect(mockEngines.temporalRevision.reviseHistory).toHaveBeenCalledWith('A choice', mockHistory, mockWorldState);
+      expect(mockEngines.quantumNarrative.processQuantumChoice).toHaveBeenCalledWith('A choice', mockHistory, mockWorldState);
+      expect(mockEngines.metaConsciousness.checkForMetaEvent).toHaveBeenCalledWith(mockHistory, mockWorldState);
+      expect(mockEngines.realityCorruption.processCorruption).toHaveBeenCalledWith('A choice', mockWorldState);
+      expect(mockEngines.narrativeDNA.evolveNarrative).toHaveBeenCalled();
 
-      // With revolutionary features enabled, the playerChoice gets enhanced
-      expect(generateNextStepWithSelectedModel).toHaveBeenCalledWith(
-        expect.stringContaining('Player chose: Open the door. Continue the cosmic horror narrative.'),
-        mockWorldState,
-        mockStoryHistory,
-        mockGenreConfig
-      );
-      
-      // Result now includes additional revolutionary features data
-      expect(result.commands).toEqual(commands);
-      expect(result).toHaveProperty('revisedHistory');
-      expect(result).toHaveProperty('metaMessage');  
-      expect(result).toHaveProperty('quantumShift');
-      expect(result).toHaveProperty('corruptionEffects');
-      expect(Array.isArray(result.commands)).toBe(true);
+      // Verify the final AI call was made with the processed data
+      expect(mockGenerateNextStep).toHaveBeenCalled();
     });
 
-    it('returns error-recovery commands when generateNextStepWithSelectedModel throws', async () => {
-      // Setup fresh mock for this test only
-      const generateNextStepWithSelectedModelMock = generateNextStepWithSelectedModel as jest.Mock;
-      generateNextStepWithSelectedModelMock.mockReset();
-      generateNextStepWithSelectedModelMock.mockRejectedValue(new Error('Network error'));
+    it('should return commands and engine results on success', async () => {
+      const result = await getNextStep('A choice', mockWorldState, mockHistory, mockGenreConfig);
 
-      const result = await getNextStep('Open the door', mockWorldState, [], mockGenreConfig);
+      expect(result.commands).toEqual(mockCommands);
+      expect(result.quantumShift).toBe(false);
+      expect(result.metaMessage).toBeUndefined(); // as mocked
+    });
 
-      // Should return fallback commands from secure genkit
+    it('should return fallback commands if the main AI call fails', async () => {
+      (mockGenerateNextStep as jest.Mock).mockRejectedValue(new Error('AI Error'));
+
+      const result = await getNextStep('A choice', mockWorldState, mockHistory, mockGenreConfig);
+
       expect(result.commands).toHaveLength(2);
       expect(result.commands[0].type).toBe('displayText');
-      expect((result.commands[0].payload as any).content).toContain('fabric of reality fractures');
       expect(result.commands[1].type).toBe('displayChoices');
-      expect((result.commands[1].payload as any).choices).toHaveLength(3);
-      
-      // Result includes revolutionary features structure
-      expect(result).toHaveProperty('revisedHistory');
-      expect(result).toHaveProperty('metaMessage');
-      expect(result).toHaveProperty('quantumShift');
-      expect(result).toHaveProperty('corruptionEffects');
-      
-      // Reset mock after test
-      generateNextStepWithSelectedModelMock.mockReset();
     });
-  });
 
-  describe('summarizeHistory', () => {
-    it('forwards to summarizeHistoryFlow', async () => {
-      (summarizeHistoryFlow as jest.Mock).mockResolvedValueOnce('summary');
-      const result = await summarizeHistory(mockWorldState, mockStoryHistory[0]);
-      expect(summarizeHistoryFlow).toHaveBeenCalledWith(mockWorldState, mockStoryHistory[0]);
-      expect(result).toBe('summary');
+    it('should not throw if an engine fails, and return fallback', async () => {
+      (mockEngines.temporalRevision.reviseHistory as jest.Mock).mockRejectedValue(new Error('Engine Failure'));
+
+      const result = await getNextStep('A choice', mockWorldState, mockHistory, mockGenreConfig);
+
+      // Should catch the engine error and return the fallback response
+      expect(result.commands).toHaveLength(2);
+      const firstCommand = result.commands[0];
+      expect(firstCommand.type).toBe('displayText');
+      // Added type guard to safely access payload content
+      if (firstCommand.type === 'displayText') {
+        expect(firstCommand.payload.content).toContain('The fabric of reality fractures');
+      }
     });
   });
 
   describe('generateConcept', () => {
-    it('returns concept from generateConceptWithSelectedModel on success', async () => {
-      const concept = { protagonist: 'A hero', setting: 'A castle', dilemma: 'A dragon' };
-      (generateConceptWithSelectedModel as jest.Mock).mockResolvedValueOnce(concept);
+    it('should call generateConceptWithSelectedModel and return its result', async () => {
+      const concept = { protagonist: 'p', setting: 's', dilemma: 'd' };
+      (mockGenerateConcept as jest.Mock).mockResolvedValue(concept);
+
       const result = await generateConcept(mockGenreConfig);
-      expect(generateConceptWithSelectedModel).toHaveBeenCalledWith(mockGenreConfig);
+
+      expect(mockGenerateConcept).toHaveBeenCalledWith(mockGenreConfig);
       expect(result).toEqual(concept);
     });
   });
 
   describe('generateImage', () => {
-    it('returns image URL from generateImageFlow on success', async () => {
-      (generateImageFlow as jest.Mock).mockResolvedValueOnce('https://img.example.com/abc.png');
-      const result = await generateImage('a corridor bathed in red light');
-      expect(generateImageFlow).toHaveBeenCalledWith('a corridor bathed in red light');
-      expect(result).toBe('https://img.example.com/abc.png');
-      expect(consoleErrorSpy).not.toHaveBeenCalled();
+    it('should call generateImageFlow and return its result', async () => {
+      const imageUrl = 'http://image.url/prompt.png';
+      (mockGenerateImage as jest.Mock).mockResolvedValue(imageUrl);
+
+      const result = await generateImage('a test prompt');
+
+      expect(mockGenerateImage).toHaveBeenCalledWith('a test prompt');
+      expect(result).toBe(imageUrl);
     });
+  });
 
-    it('returns a placeholder URL when generateImageFlow throws', async () => {
-      (generateImageFlow as jest.Mock).mockResolvedValueOnce('https://source.unsplash.com/1920x1080/?dark,horror,surreal,abstract,a%20broken%20screen%20flickers');
+  describe('summarizeHistory', () => {
+    it('should call summarizeHistoryFlow and return its result', async () => {
+      const summary = 'This is a summary.';
+      (mockSummarizeHistory as jest.Mock).mockResolvedValue(summary);
 
-      const result = await generateImage('a broken screen flickers');
+      const result = await summarizeHistory(mockWorldState, mockHistory[0]);
 
-      expect(result).toContain('https://source.unsplash.com');
+      expect(mockSummarizeHistory).toHaveBeenCalledWith(mockWorldState, mockHistory[0]);
+      expect(result).toBe(summary);
     });
   });
 });

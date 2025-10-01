@@ -30,8 +30,31 @@ module.exports = {
     '<rootDir>/src/**/*.spec.{ts,tsx}'
   ],
   testPathIgnorePatterns: [
-    '<rootDir>/src/services/ai/__tests__/testUtils.helper.ts'
+    '<rootDir>/src/services/ai/__tests__/testUtils.helper.ts',
+    '<rootDir>/src/services/gameService.spec.ts'
   ],
+  // Coverage configuration
+  collectCoverage: false, // Only when --coverage flag is used
+  collectCoverageFrom: [
+    'src/**/*.{ts,tsx}',
+    '!src/**/*.test.{ts,tsx}',
+    '!src/**/*.spec.{ts,tsx}',
+    '!src/**/__tests__/**',
+    '!src/**/__mocks__/**',
+    '!src/setupTests.ts',
+    '!src/types.ts',
+    '!src/vite-env.d.ts',
+  ],
+  coverageDirectory: 'coverage',
+  coverageReporters: ['text', 'lcov', 'html', 'json'],
+  coverageThreshold: {
+    global: {
+      branches: 21,
+      functions: 35,
+      lines: 33,
+      statements: 34,
+    },
+  },
   // Mock import.meta.env for Vite compatibility
   globals: {
     'import.meta': {

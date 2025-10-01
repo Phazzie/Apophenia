@@ -1,3 +1,7 @@
+> **ARCHIVED DOCUMENT**
+>
+> This document is archived and is no longer maintained. It is kept for historical purposes only.
+
 # AI Call Audit (Apophenia)
 
 This document provides a comprehensive audit of all AI calls within the Apophenia application. It details their implementation status, effectiveness, and provides suggestions for improvement.

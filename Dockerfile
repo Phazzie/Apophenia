@@ -1,5 +1,8 @@
-# Stage 1: Build the frontend assets
-FROM node:18-alpine AS builder
+
+
+
+# Stage 1: Build the frontend
+FROM node:18 AS builder
 
 WORKDIR /app
 

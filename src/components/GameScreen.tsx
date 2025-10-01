@@ -142,6 +142,33 @@ const GameScreen: React.FC = () => {
                 <p>Generating scene...</p>
               </div>
             )}
+            {lastStorySegment.images.mainStatus === 'retrying' && (
+              <div className="image-loading-overlay retrying">
+                <div className="loading-spinner"></div>
+                <p>Retrying scene generation...</p>
+                <small>The cosmic forces resist, but we persist...</small>
+              </div>
+            )}
+            {lastStorySegment.images.mainStatus === 'failed' && (
+              <div className="image-error-overlay">
+                <div className="error-icon">⚠</div>
+                <p>Scene generation disrupted</p>
+                <button 
+                  className="retry-button"
+                  onClick={() => {
+                    if (lastStorySegment?.id) {
+                      import('../commands/generateImage').then(({ retryImageGeneration }) => {
+                        // Try to extract prompt from segment or use default
+                        const prompt = `${lastStorySegment.text} cosmic horror atmospheric dark`;
+                        retryImageGeneration(lastStorySegment.id, prompt);
+                      });
+                    }
+                  }}
+                >
+                  Retry Generation
+                </button>
+              </div>
+            )}
           </div>
         )}
         <div className="story-text-container">

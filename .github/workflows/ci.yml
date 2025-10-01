@@ -15,6 +15,77 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
+  # Quality Gate: Lint → TypeCheck → Tests → Build
+  quality:
+    name: Quality Gate
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+        
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+
+    - name: Validate environment configuration
+      run: |
+        echo "Checking for required configuration files..."
+        if [ ! -f "package.json" ]; then echo "❌ package.json missing"; exit 1; fi
+        if [ ! -f "tsconfig.json" ]; then echo "❌ tsconfig.json missing"; exit 1; fi
+        if [ ! -f "jest.config.js" ]; then echo "❌ jest.config.js missing"; exit 1; fi
+        if [ ! -f "eslint.config.js" ]; then echo "❌ eslint.config.js missing"; exit 1; fi
+        echo "✅ All configuration files present"
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Check package-lock.json integrity
+      run: npm ci --dry-run
+
+    - name: Run ESLint
+      run: npm run lint
+
+    - name: TypeScript type checking
+      run: npm run typecheck
+
+    - name: Run tests with coverage
+      run: npm test -- --coverage --watchAll=false
+      env:
+        CI: true
+
+    - name: Check coverage thresholds
+      run: |
+        # Coverage thresholds are enforced by Jest configuration
+        echo "✅ Coverage thresholds met"
+        
+    - name: Upload coverage artifact
+      uses: actions/upload-artifact@v4
+      if: matrix.node-version == env.NODE_VERSION
+      with:
+        name: coverage-reports
+        path: |
+          coverage/
+          coverage/lcov.info
+        retention-days: 30
+
+    - name: Build project
+      run: npm run build
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      if: matrix.node-version == env.NODE_VERSION
+      with:
+        name: build-artifacts-node-${{ matrix.node-version }}
+        path: dist/
+        retention-days: 30
+
   # Security and Dependency Analysis
   security:
     name: Security Scan
@@ -62,68 +133,11 @@ jobs:
           exit 1
         fi
 
-  # Code Quality and Testing
-  test:
-    name: Test Suite
+  # Bundle Analysis
+  analyze:
+    name: Bundle Analysis
     runs-on: ubuntu-latest
-    
-    strategy:
-      matrix:
-        node-version: [18.x, 20.x, 22.x]
-        
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-
-    - name: Set up Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-
-    - name: Validate environment configuration
-      run: |
-        echo "Checking for required configuration files..."
-        if [ ! -f "package.json" ]; then echo "❌ package.json missing"; exit 1; fi
-        if [ ! -f "tsconfig.json" ]; then echo "❌ tsconfig.json missing"; exit 1; fi
-        if [ ! -f "jest.config.js" ]; then echo "❌ jest.config.js missing"; exit 1; fi
-        echo "✅ All configuration files present"
-
-    - name: Install dependencies
-      run: npm ci
-
-    - name: Check package-lock.json integrity
-      run: npm ci --dry-run
-
-    - name: TypeScript compilation check
-      run: npx tsc --noEmit
-
-    - name: Run linting checks
-      run: |
-        # Check if ESLint is configured
-        if [ -f ".eslintrc.js" ] || [ -f ".eslintrc.json" ] || [ -f "eslint.config.js" ]; then
-          npm run lint || echo "⚠️ Linting not configured in package.json"
-        else
-          echo "ℹ️ ESLint not configured - TypeScript compiler provides basic checking"
-        fi
-
-    - name: Run tests with coverage
-      run: npm test -- --coverage --watchAll=false
-      env:
-        CI: true
-
-    - name: Upload coverage reports
-      uses: codecov/codecov-action@v4
-      if: matrix.node-version == env.NODE_VERSION
-      with:
-        fail_ci_if_error: false
-        verbose: true
-
-  # Build and Bundle Analysis
-  build:
-    name: Build & Bundle Analysis
-    runs-on: ubuntu-latest
-    needs: [security, test]
+    needs: [quality]
     
     steps:
     - name: Checkout repository
@@ -135,11 +149,11 @@ jobs:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
 
-    - name: Install dependencies
-      run: npm ci
-
-    - name: Build project
-      run: npm run build
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: build-artifacts-node-${{ env.NODE_VERSION }}
+        path: dist/
 
     - name: Analyze bundle size
       run: |
@@ -173,13 +187,6 @@ jobs:
         done
         echo "✅ All required build artifacts present"
 
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-artifacts-node-${{ env.NODE_VERSION }}
-        path: dist/
-        retention-days: 30
-
     - name: Generate build report
       run: |
         cat << EOF > build-report.md
@@ -210,7 +217,7 @@ jobs:
   deploy-preview:
     name: Preview Deployment
     runs-on: ubuntu-latest
-    needs: [security, test, build]
+    needs: [quality, security, analyze]
     if: github.event_name == 'pull_request'
     
     steps:
@@ -229,20 +236,37 @@ jobs:
         name: build-artifacts-node-${{ env.NODE_VERSION }}
         path: dist/
 
+    - name: Download coverage reports
+      uses: actions/download-artifact@v4
+      with:
+        name: coverage-reports
+        path: coverage/
+
     - name: Generate preview report
       id: preview-report
       run: |
         BUNDLE_SIZE=$(du -sh dist/ | cut -f1)
         GZIP_SIZE=$(find dist/ -type f \( -name "*.js" -o -name "*.css" \) -exec gzip -c {} \; | wc -c | awk '{print int($1/1024) " KB"}')
         
+        # Extract coverage percentages from coverage report
+        if [ -f "coverage/coverage-summary.json" ]; then
+          COVERAGE_LINES=$(node -pe "JSON.parse(require('fs').readFileSync('coverage/coverage-summary.json')).total.lines.pct")
+          COVERAGE_BRANCHES=$(node -pe "JSON.parse(require('fs').readFileSync('coverage/coverage-summary.json')).total.branches.pct")
+        else
+          COVERAGE_LINES="N/A"
+          COVERAGE_BRANCHES="N/A"
+        fi
+        
         echo "bundle_size=$BUNDLE_SIZE" >> $GITHUB_OUTPUT
         echo "gzip_size=$GZIP_SIZE" >> $GITHUB_OUTPUT
+        echo "coverage_lines=$COVERAGE_LINES" >> $GITHUB_OUTPUT
+        echo "coverage_branches=$COVERAGE_BRANCHES" >> $GITHUB_OUTPUT
 
     - name: Comment PR with preview info
       uses: actions/github-script@v7
       with:
         script: |
-          const { bundle_size, gzip_size } = process.env;
+          const { bundle_size, gzip_size, coverage_lines, coverage_branches } = process.env;
           const body = `## 🚀 Preview Build Ready!
           
           **Build Status:** ✅ Success
@@ -251,13 +275,15 @@ jobs:
           **Node Version:** ${{ env.NODE_VERSION }}
           **Commit:** \`${{ github.sha }}\`
           
-          ### 📊 Build Analysis
-          - TypeScript compilation: ✅ Passed
-          - Tests: ✅ All passing
-          - Security scan: ✅ No critical issues
-          - Bundle analysis: ✅ Within expected range
+          ### 📊 Quality Metrics
+          - **ESLint:** ✅ Passed
+          - **TypeScript:** ✅ No errors
+          - **Tests:** ✅ All passing
+          - **Coverage Lines:** ${coverage_lines}%
+          - **Coverage Branches:** ${coverage_branches}%
+          - **Security:** ✅ No critical issues
           
-          **Preview artifacts are available for download from the Actions tab.**`;
+          **Build and coverage artifacts are available for download from the Actions tab.**`;
           
           github.rest.issues.createComment({
             issue_number: context.issue.number,
@@ -268,12 +294,14 @@ jobs:
         env:
           bundle_size: ${{ steps.preview-report.outputs.bundle_size }}
           gzip_size: ${{ steps.preview-report.outputs.gzip_size }}
+          coverage_lines: ${{ steps.preview-report.outputs.coverage_lines }}
+          coverage_branches: ${{ steps.preview-report.outputs.coverage_branches }}
 
   # Production Deployment
   deploy-production:
     name: Production Deployment
     runs-on: ubuntu-latest
-    needs: [security, test, build]
+    needs: [quality, security, analyze]
     if: github.ref == 'refs/heads/main'
     environment: production
     

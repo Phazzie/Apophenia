@@ -1,3 +1,7 @@
+> **ARCHIVED DOCUMENT**
+>
+> This document is archived and is no longer maintained. It is kept for historical purposes only.
+
 # Merge Status & Progress Log
 *Live tracking document - Updated September 27, 2025*
 

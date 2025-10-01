@@ -91,6 +91,13 @@ export const displayChoicesPayloadSchema = z.object({
 });
 export const pregenerateImagePayloadSchema = z.object({ prompt: z.string() });
 
+export const aiDirectorAnalysisPayloadSchema = z.object({
+  psychologicalProfile: z.string(),
+  narrativeRecommendations: z.array(z.string()),
+  horrorIntensityAnalysis: z.string(),
+  playerEngagementLevel: z.string(),
+});
+
 // Discriminated Union for Commands
 export const browserEffectPayloadSchema = z.object({
     effect: z.enum(['changeTitle', 'openTab', 'manipulateHistory']),
@@ -143,3 +150,4 @@ export type Command = z.infer<typeof commandSchema>;
 export type GameCommand = Command; // Alias for backward compatibility
 export type AIModel = z.infer<typeof aiModelSchema>;
 export type ModelTestResult = z.infer<typeof modelTestResultSchema>;
+export type AIDirectorAnalysisPayload = z.infer<typeof aiDirectorAnalysisPayloadSchema>;

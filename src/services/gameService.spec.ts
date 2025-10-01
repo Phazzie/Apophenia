@@ -62,11 +62,29 @@ const mockSummarizeHistory = summarizeHistoryFlow as jest.Mock;
 const mockEngines = engines as jest.Mocked<typeof engines>;
 
 describe('gameService', () => {
+  // Moved mockGenreConfig before mockWorldState to fix initialization order
+  const mockGenreConfig: GenreConfig = {
+    id: 'cosmic-horror',
+    name: 'Cosmic Horror',
+    description: 'A style of horror emphasizing the unknown and cosmic indifference.',
+    style: 'Lovecraftian',
+    // Completed the theme object to satisfy the GenreConfig type
+    theme: {
+      '--background-color': '#0a0a1a',
+      '--text-color': '#e0e0e0',
+      '--accent-color': '#b429b4',
+      '--font-family': "'Courier Prime', monospace",
+    },
+    startScreenImagePrompt: 'cosmic horror landscape',
+    conceptPrompt: 'Generate a cosmic horror story concept.',
+    aiSystemInstruction: 'You are a master of cosmic horror.',
+  };
+
   const mockWorldState: WorldState = {
-    protagonist: 'Test Protag',
-    setting: 'Test Setting',
-    dilemma: 'Test Dilemma',
-    summary: 'A summary',
+    protagonist: 'The Archivist',
+    setting: 'A forgotten library',
+    dilemma: 'A book that whispers truths from other realities',
+    summary: '',
     psychologicalStatus: 'Stable',
     systemHealth: 100,
     horrorIntensity: 0.1,
@@ -74,16 +92,6 @@ describe('gameService', () => {
     genreConfig: mockGenreConfig,
   };
 
-  const mockGenreConfig: GenreConfig = {
-    id: 'cosmic-horror',
-    name: 'Cosmic Horror',
-    description: '...',
-    style: 'Lovecraftian',
-    theme: {},
-    startScreenImagePrompt: 'prompt1',
-    conceptPrompt: 'prompt2',
-    aiSystemInstruction: 'system-instruction',
-  };
 
   const mockHistory: StorySegment[] = [{ id: 'seg1', text: 'segment 1', images: {} }];
   const mockCommands: Command[] = [{ type: 'displayText', payload: { content: 'next part', segmentId: 'seg2' } }];
@@ -92,14 +100,15 @@ describe('gameService', () => {
     jest.clearAllMocks();
 
     // Setup default mock implementations for a successful run
-    mockGenerateNextStep.mockResolvedValue(mockCommands);
-    mockEngines.temporalRevision.reviseHistory.mockImplementation((c, h) => Promise.resolve(h));
-    mockEngines.quantumNarrative.processQuantumChoice.mockImplementation((c, h) => Promise.resolve({ history: h, quantumShift: false }));
-    mockEngines.metaConsciousness.checkForMetaEvent.mockResolvedValue(null);
-    mockEngines.realityCorruption.processCorruption.mockResolvedValue({ corruptionLevel: 0, newEffects: [], uiEffects: {} });
-    mockEngines.adaptiveHorror.generatePersonalizedHorror.mockImplementation(p => Promise.resolve(p));
-    mockEngines.semanticArchaeology.analyzeChoiceSemantics.mockReturnValue({ semanticInsight: '', psychProfile: 'stable', hiddenMotivations: [] });
-    mockEngines.narrativeDNA.generateAdaptivePrompt.mockImplementation(p => p);
+    // Added type casting to mocks and explicit types to function parameters
+    (mockGenerateNextStep as jest.Mock).mockResolvedValue(mockCommands);
+    (mockEngines.temporalRevision.reviseHistory as jest.Mock).mockImplementation((_c: string, h: StorySegment[]) => Promise.resolve(h));
+    (mockEngines.quantumNarrative.processQuantumChoice as jest.Mock).mockImplementation((_c: string, h: StorySegment[]) => Promise.resolve({ history: h, quantumShift: false }));
+    (mockEngines.metaConsciousness.checkForMetaEvent as jest.Mock).mockResolvedValue(null);
+    (mockEngines.realityCorruption.processCorruption as jest.Mock).mockResolvedValue({ corruptionLevel: 0, newEffects: [], uiEffects: {} });
+    (mockEngines.adaptiveHorror.generatePersonalizedHorror as jest.Mock).mockImplementation((p: string) => Promise.resolve(p));
+    (mockEngines.semanticArchaeology.analyzeChoiceSemantics as jest.Mock).mockReturnValue({ semanticInsight: '', psychProfile: 'stable', hiddenMotivations: [] });
+    (mockEngines.narrativeDNA.generateAdaptivePrompt as jest.Mock).mockImplementation((p: string) => p);
   });
 
   describe('getNextStep', () => {
@@ -129,7 +138,7 @@ describe('gameService', () => {
     });
 
     it('should return fallback commands if the main AI call fails', async () => {
-      mockGenerateNextStep.mockRejectedValue(new Error('AI Error'));
+      (mockGenerateNextStep as jest.Mock).mockRejectedValue(new Error('AI Error'));
 
       const result = await getNextStep('A choice', mockWorldState, mockHistory, mockGenreConfig);
 
@@ -139,21 +148,25 @@ describe('gameService', () => {
     });
 
     it('should not throw if an engine fails, and return fallback', async () => {
-      mockEngines.temporalRevision.reviseHistory.mockRejectedValue(new Error('Engine Failure'));
+      (mockEngines.temporalRevision.reviseHistory as jest.Mock).mockRejectedValue(new Error('Engine Failure'));
 
       const result = await getNextStep('A choice', mockWorldState, mockHistory, mockGenreConfig);
 
       // Should catch the engine error and return the fallback response
       expect(result.commands).toHaveLength(2);
-      expect(result.commands[0].type).toBe('displayText');
-      expect(result.commands[0].payload.content).toContain('The fabric of reality fractures');
+      const firstCommand = result.commands[0];
+      expect(firstCommand.type).toBe('displayText');
+      // Added type guard to safely access payload content
+      if (firstCommand.type === 'displayText') {
+        expect(firstCommand.payload.content).toContain('The fabric of reality fractures');
+      }
     });
   });
 
   describe('generateConcept', () => {
     it('should call generateConceptWithSelectedModel and return its result', async () => {
       const concept = { protagonist: 'p', setting: 's', dilemma: 'd' };
-      mockGenerateConcept.mockResolvedValue(concept);
+      (mockGenerateConcept as jest.Mock).mockResolvedValue(concept);
 
       const result = await generateConcept(mockGenreConfig);
 
@@ -165,7 +178,7 @@ describe('gameService', () => {
   describe('generateImage', () => {
     it('should call generateImageFlow and return its result', async () => {
       const imageUrl = 'http://image.url/prompt.png';
-      mockGenerateImage.mockResolvedValue(imageUrl);
+      (mockGenerateImage as jest.Mock).mockResolvedValue(imageUrl);
 
       const result = await generateImage('a test prompt');
 
@@ -177,7 +190,7 @@ describe('gameService', () => {
   describe('summarizeHistory', () => {
     it('should call summarizeHistoryFlow and return its result', async () => {
       const summary = 'This is a summary.';
-      mockSummarizeHistory.mockResolvedValue(summary);
+      (mockSummarizeHistory as jest.Mock).mockResolvedValue(summary);
 
       const result = await summarizeHistory(mockWorldState, mockHistory[0]);
 

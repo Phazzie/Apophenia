@@ -37,6 +37,23 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
+// --- Static file serving for production ---
+// This block must be placed before any API routes to ensure the frontend is served correctly.
+if (process.env.SERVE_STATIC === 'true') {
+  const path = require('path');
+  const distPath = path.join(__dirname, 'dist');
+
+  // Serve the static files from the React app
+  app.use(express.static(distPath));
+
+app.use(cors({ origin: process.env.NODE_ENV === 'production' ? false : '*' }));
+  // Handle all other routes by serving the index.html
+  // This is for Single Page Application (SPA) routing
+  app.get(/^\/(?!api).*/, (req, res) => {
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
+}
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Apophenia API Server running' });
@@ -461,19 +478,6 @@ app.get('/', (req, res) => {
   // Simple OK for health checks at root
   res.json({ ready: true, path: '/', timestamp: Date.now() });
 });
-
-// Optional static file serving for unified deployment scenario
-if (process.env.SERVE_STATIC === 'true') {
-  const path = require('path');
-  const distPath = path.join(__dirname, 'dist');
-  app.use(express.static(distPath));
-
-  // SPA fallback
-  app.get('*', (req, res, next) => {
-    if (req.path.startsWith('/api/')) return next();
-    res.sendFile(path.join(distPath, 'index.html'));
-  });
-}
 
 // MCP server routes
 const mcpRoutes = require('./server/mcpServer');

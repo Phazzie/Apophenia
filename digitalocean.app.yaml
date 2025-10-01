@@ -1,43 +1,41 @@
-name: apophenia-deploy-test
+# Apophenia Deployment Configuration for DigitalOcean App Platform
+# This configuration defines a single service that builds the frontend and runs the backend server.
+name: apophenia
 region: nyc
-static_sites:
-  - name: apophenia-frontend
-    github:
-      repo: Phazzie/Apophenia
-      branch: feature/ai-director-refactor
-      deploy_on_push: true
-    source_dir: .
-    build_command: npm install && npm run build
-    output_dir: dist
-    routes:
-      - path: /
-    envs:
-      - key: VITE_API_BASE_URL
-        scope: BUILD_TIME
-        value: /api
-      - key: VITE_GEMINI_API_KEY
-        scope: BUILD_TIME
-        type: SECRET
 services:
-  - name: apophenia
+  - name: apophenia-service
+    # GitHub configuration
     github:
       repo: Phazzie/Apophenia
-      branch: feature/ai-director-refactor
+      branch: main # It is recommended to deploy from 'main' or a 'production' branch
       deploy_on_push: true
-    source_dir: /
+
+    # Build and run commands
+    # First, install all dependencies and build the frontend assets.
+    # Then, the start command runs the production server.
+    build_command: npm install && npm run build
     run_command: npm run start:prod
+
+    # Service configuration
     http_port: 3001
     environment_slug: node-js
     instance_size_slug: apps-s-1vcpu-1gb
-    instance_count: 2
+
+    # Routes - this single service will handle all traffic, including API calls and serving static assets.
     routes:
-      - path: /api
+      - path: /
+
+    # Environment variables
     envs:
       - key: NODE_ENV
         value: production
+      - key: SERVE_STATIC
+        value: "true" # Tells the Express server to serve the built frontend from the 'dist' directory
       - key: GEMINI_API_KEY
         scope: RUN_TIME
         type: SECRET
+
+# Alerting rules
 alerts:
   - rule: DEPLOYMENT_FAILED
   - rule: DOMAIN_FAILED

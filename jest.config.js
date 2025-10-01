@@ -16,12 +16,7 @@ module.exports = {
     '\\.(css|less|scss)$': 'identity-obj-proxy',
   },
   transform: {
-    '^.+\\.tsx?$': ['ts-jest', {
-      useESM: true,
-      tsconfig: {
-        jsx: 'react-jsx',
-      }
-    }],
+    '^.+\\.tsx?$': 'ts-jest',
   },
   transformIgnorePatterns: [
     'node_modules/(?!(.*\\.mjs$))'

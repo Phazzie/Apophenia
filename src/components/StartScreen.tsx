@@ -8,6 +8,8 @@ import { useAIModelStore } from '../stores/aiModelStore';
 import { GameState, GenreConfig, StorySegment, WorldState } from '../types';
 import { imageGenerationService } from '../services/ai/imageGeneration';
 import { genres, defaultGenre } from '../config/genres';
+import TestAPIButtons from './TestAPIButtons'; // Added import for TestAPIButtons
+
 
 const StartScreen: React.FC = () => {
   const { setGameState } = useGameStateStore();
@@ -21,8 +23,7 @@ const StartScreen: React.FC = () => {
   const selectedModel = getSelectedModel();
 
   useEffect(() => {
-    // Check for a saved game. If story has more than the initial empty state, a game exists.
-    // We also check for a protagonist, as another indicator.
+    // Check for a saved game. If story has more than the initial empty state, a game exists.\n    // We also check for a protagonist, as another indicator.
     setHasSavedGame(storyHistory.length > 0 && Boolean(worldState.protagonist));
   }, [storyHistory, worldState.protagonist]);
 
@@ -61,7 +62,7 @@ const StartScreen: React.FC = () => {
     // We just need to navigate to the game screen.
     setGameState(GameState.PLAYING);
   };
-  
+
   const handleTestImageGeneration = async () => {
     console.log("--- Testing Image Generation ---");
     const prompt = "A desolate, cosmic landscape with swirling nebulae.";
@@ -121,12 +122,13 @@ const StartScreen: React.FC = () => {
     <div className="start-screen">
       <h1>Apophenia</h1>
       <p>Descent into cosmic madness through AI consciousness.</p>
-      
+
       <div className="ai-model-info">
         <span>Powered by: <strong>{selectedModel?.name || 'Unknown Model'}</strong></span>
         <small>Use the model selector in bottom-right to change AI provider</small>
       </div>
 
+      {/* Kept genre selector from HEAD */}
       <div className="genre-selector">
         <h2>Choose Your Descent</h2>
         <select
@@ -146,7 +148,7 @@ const StartScreen: React.FC = () => {
         </select>
         <p className="genre-description">{selectedGenre.description}</p>
       </div>
-      
+
       <button onClick={handleNewGame} disabled={isStarting}>
         {isStarting ? 'Starting...' : 'New Game'}
       </button>
@@ -154,6 +156,7 @@ const StartScreen: React.FC = () => {
       <button onClick={handleLoadDemo} disabled={isStarting}>
         {isStarting ? 'Loading...' : 'Load Demo'}
       </button>
+      {/* Kept image generation test button from HEAD */}
       <button onClick={handleTestImageGeneration}>Test Image Generation</button>
     </div>
   );

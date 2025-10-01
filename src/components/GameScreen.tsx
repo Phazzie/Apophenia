@@ -183,7 +183,7 @@ const GameScreen: React.FC = () => {
           {gameState === GameState.GENERATING_CONCEPT && (
             <div className="text-loading-indicator">
               <div className="loading-spinner small"></div>
-              <span>Gemini 2.5 Pro is analyzing cosmic consciousness patterns...</span>
+              <span>The AI is analyzing cosmic consciousness patterns...</span>
             </div>
           )}
         </div>
@@ -207,7 +207,7 @@ const GameScreen: React.FC = () => {
           <div className="loading-container">
             <div className="loading-spinner"></div>
             <p>Processing your choice through advanced AI reasoning...</p>
-            <p className="loading-subtitle">Gemini 2.5 Pro is analyzing psychological impact</p>
+            <p className="loading-subtitle">The AI is analyzing psychological impact</p>
           </div>
         ) : (
           combinedChoices.map((choice, index) => (

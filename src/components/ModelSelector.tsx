@@ -173,7 +173,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ isVisible, onClose }) => 
           <div className="model-info-section">
             <h3>Why Grok-4 Fast Reasoning is the Default:</h3>
             <p>
-              Grok-4 offers a massive 2 million token context window (2x larger than Gemini) 
+              Grok-4 offers a massive 2 million token context window, one of the largest available,
               with advanced reasoning capabilities. This enables unprecedented narrative consistency, 
               deep psychological analysis, and complex story development across your entire gaming session.
             </p>

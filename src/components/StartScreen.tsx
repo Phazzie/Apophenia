@@ -5,7 +5,8 @@ import { useGameStateStore } from '../stores/gameStateStore';
 import { useStoryHistoryStore } from '../stores/storyHistoryStore';
 import { useWorldStateStore } from '../stores/worldStateStore';
 import { useAIModelStore } from '../stores/aiModelStore';
-import { GameState, GenreConfig } from '../types';
+import { GameState, GenreConfig, StorySegment, WorldState } from '../types';
+import { imageGenerationService } from '../services/ai/imageGeneration';
 
 // A mock genre config for now. In a real app, this might be selectable.
 const genreConfig: GenreConfig = {
@@ -78,6 +79,61 @@ const StartScreen: React.FC = () => {
     // We just need to navigate to the game screen.
     setGameState(GameState.PLAYING);
   };
+  
+  const handleTestImageGeneration = async () => {
+    console.log("--- Testing Image Generation ---");
+    const prompt = "A desolate, cosmic landscape with swirling nebulae.";
+    try {
+      const result = await imageGenerationService.generateImageVariations(prompt);
+      console.log("Image generation service call successful:");
+      console.log(JSON.stringify(result, null, 2));
+    } catch (error) {
+      console.error("Image generation service call failed:", error);
+    }
+    console.log("--- Test Complete ---");
+  };
+
+  const handleLoadDemo = async () => {
+    if (isStarting) return;
+    setIsStarting(true);
+
+    try {
+      // Fetch the demo data from the public folder
+      const response = await fetch('/demo.json');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const demoData = await response.json();
+
+      // Reset the current game state
+      GameStateManager.resetAllStores();
+
+      // Load the world state and story history from the demo file
+      const { worldState: demoWorldState, storyHistory: demoStoryHistory } = demoData as {
+        worldState: WorldState;
+        storyHistory: StorySegment[];
+      };
+
+      useWorldStateStore.getState().setWorldState(demoWorldState);
+      useStoryHistoryStore.getState().setStoryHistory(demoStoryHistory);
+
+      // Apply the theme from the genre config
+      if (demoWorldState.genreConfig) {
+        Object.entries(demoWorldState.genreConfig.theme).forEach(([key, value]) => {
+          document.documentElement.style.setProperty(key, value as string);
+        });
+      }
+
+      // Navigate to the game screen
+      setGameState(GameState.PLAYING);
+    } catch (error) {
+      console.error('Failed to load demo:', error);
+      // Optionally, show an error message to the user
+    } finally {
+      setIsStarting(false);
+    }
+  };
+
 
   return (
     <div className="start-screen">
@@ -93,6 +149,10 @@ const StartScreen: React.FC = () => {
         {isStarting ? 'Starting...' : 'New Game'}
       </button>
       {hasSavedGame && <button onClick={handleContinue}>Continue</button>}
+      <button onClick={handleLoadDemo} disabled={isStarting}>
+        {isStarting ? 'Loading...' : 'Load Demo'}
+      </button>
+      <button onClick={handleTestImageGeneration}>Test Image Generation</button>
     </div>
   );
 };

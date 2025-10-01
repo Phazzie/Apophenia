@@ -1,0 +1,43 @@
+{
+  "worldState": {
+    "protagonist": "Elias, a disgraced astrophysicist haunted by a 'silent' signal he once discovered",
+    "setting": "A remote, underfunded observatory in the Atacama Desert, where Elias now works in isolation.",
+    "dilemma": "The signal has returned, but it now carries a horrifyingly personal message that only he can understand.",
+    "summary": "Elias is on the brink of a discovery that could change humanity's understanding of the cosmos, but it may also be a direct threat to his sanity and his life.",
+    "psychologicalStatus": "Anxious",
+    "systemHealth": 100,
+    "horrorIntensity": 2,
+    "uiDistortion": {
+      "transform": "none",
+      "filter": "none",
+      "transition": "none"
+    },
+    "genreConfig": {
+      "id": "cosmic-horror",
+      "name": "Cosmic Horror",
+      "description": "A story about the terrifying and unknowable entities that exist beyond human comprehension.",
+      "style": "Lovecraftian, atmospheric, psychological",
+      "theme": {
+        "--background-color": "#0d1117",
+        "--text-color": "#c9d1d9",
+        "--accent-color": "#58a6ff",
+        "--font-family": "'Courier New', Courier, monospace"
+      },
+      "startScreenImagePrompt": "A lone lighthouse against a stormy, cosmic sky, with swirling nebulae instead of clouds.",
+      "conceptPrompt": "Generate a cosmic horror story concept.",
+      "aiSystemInstruction": "You are a master of cosmic horror, weaving tales of dread and insignificance."
+    }
+  },
+  "storyHistory": [
+    {
+      "id": "segment-0",
+      "text": "The Atacama Desert is the quietest place on Earth. That’s why you chose it. Here, under the blanket of a million stars, you can almost forget the laughter, the dismissals, the ruin of a once-promising career. You, Elias, the man who heard a whisper from the void and was called a fool. The ‘silent’ signal, they mocked. A ghost in the machine. Tonight, however, the ghost has returned. The old, familiar frequency hums not with silence, but with a chillingly clear, two-word message: ‘HELLO, ELIAS.’",
+      "images": {},
+      "choices": [
+        {"text": "Access the raw data feeds from the array.", "isIntrusive": false},
+        {"text": "Check the timestamp. Is this a delayed echo?", "isIntrusive": false},
+        {"text": "Step outside. Clear your head.", "isIntrusive": false}
+      ]
+    }
+  ]
+}

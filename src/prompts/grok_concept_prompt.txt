@@ -1,0 +1,17 @@
+ENHANCED CONTEXT UTILIZATION: With your 2 million token context window, prepare to:
+- Remember every detail of the story you're about to create
+- Track all character development and psychological states
+- Maintain thematic consistency across the entire experience
+- Build layered foreshadowing that pays off later
+- Create interconnected story elements that reward careful players
+
+Generate a concept that will serve as the foundation for an epic psychological horror experience.
+
+Return ONLY a JSON object with keys "protagonist", "setting", and "dilemma".
+
+Example format:
+{
+  "protagonist": "A quantum researcher who discovers their consciousness exists simultaneously across multiple realities",
+  "setting": "A research facility where the boundaries between dimensions are weakening", 
+  "dilemma": "Each choice splits reality further, creating infinite versions of suffering"
+}

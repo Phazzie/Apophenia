@@ -9,17 +9,14 @@ export {
     generateConceptFlow, generateImageFlow, nextStepFlow
 } from '../ai/genkit';
 
-export const triggerSummary = (
+export const triggerSummary = async (
   worldState: WorldState,
   history: StorySegment[]
 ) => {
   if (history.length > 0) {
-    summarizeHistory(worldState, history[history.length - 1]).then(
-      (summary) => {
-        if (summary) {
-          useWorldStateStore.getState().updateWorldState({ summary });
-        }
-      }
-    );
+    const summary = await summarizeHistory(worldState, history[history.length - 1]);
+    if (summary) {
+      useWorldStateStore.getState().updateWorldState({ summary });
+    }
   }
 };

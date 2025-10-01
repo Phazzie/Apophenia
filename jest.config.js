@@ -5,9 +5,8 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
   setupFiles: ['whatwg-fetch'],
   moduleNameMapper: {
-    '^../../config$': '<rootDir>/src/services/__mocks__/config.ts',
-    '^../../services/config$': '<rootDir>/src/services/__mocks__/config.ts',
-    '^../config$': '<rootDir>/src/services/__mocks__/config.ts',
+    '^(..|../..)/config$': '<rootDir>/src/services/__mocks__/config.ts',
+    '^../services/config$': '<rootDir>/src/services/__mocks__/config.ts',
     '^../../services/ai/grokService$': '<rootDir>/src/services/__mocks__/ai/grokService.ts',
     '^../ai/grokService$': '<rootDir>/src/services/__mocks__/ai/grokService.ts',
     '^../../services/ai/unifiedAIService$': '<rootDir>/src/services/__mocks__/ai/unifiedAIService.ts',
@@ -15,8 +14,11 @@ module.exports = {
     '\\.(css|less|scss)$': 'identity-obj-proxy',
   },
   transform: {
+    // useESM: true was removed here to prevent jest from failing on import.meta.env
+    // The project uses Vite, which supports import.meta.env, but Jest runs in a Node environment
+    // where it is not supported out-of-the-box. The current setup transpiles to CommonJS,
+    // and the setupTests.ts file mocks import.meta.env for compatibility.
     '^.+\\.tsx?$': ['ts-jest', {
-      useESM: true,
       tsconfig: {
         jsx: 'react-jsx',
       }

@@ -22,7 +22,6 @@
     "build": "./node_modules/.bin/tsc && ./node_modules/.bin/vite build",
     "preview": "./node_modules/.bin/vite preview",
     "test": "jest",
-
     "deploy": "npm run build && vercel --prod",
     "deploy:gh-pages": "npm run build && npx gh-pages -d dist",
     "deploy:netlify": "npm run build && echo 'Upload dist/ folder to Netlify'",
@@ -49,6 +48,7 @@
   "devDependencies": {
     "@eslint/js": "^9.36.0",
     "@testing-library/jest-dom": "^6.4.0",
+    "@testing-library/react": "^16.3.0",
     "@types/jest": "^30.0.0",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",

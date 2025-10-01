@@ -88,3 +88,9 @@ export const REVOLUTIONARY_FEATURES = {
     personalityEvolution: true,
   }
 };
+
+export const CACHE_CONFIG = {
+  IMAGE_CACHE_TTL: 10000, // 10 seconds for testing
+  IMAGE_CACHE_MAX_SIZE: 3, // Small size for testing
+  ENABLE_CACHE_TELEMETRY: true,
+};

@@ -5,8 +5,6 @@
  * and advanced reasoning capabilities (thinking mode).
  */
 
-import { API_KEYS } from '../config';
-
 // X.AI API configuration
 const XAI_API_BASE = 'https://api.x.ai/v1';
 const GROK_MODEL = 'grok-4-fast-reasoning';
@@ -61,8 +59,8 @@ export class XAIAPIClient {
   private apiKey: string;
   private baseURL: string;
 
-  constructor(apiKey?: string) {
-    this.apiKey = apiKey || API_KEYS.xaiAPI;
+  constructor(apiKey: string) {
+    this.apiKey = apiKey;
     this.baseURL = XAI_API_BASE;
 
     if (!this.apiKey) {
@@ -269,4 +267,6 @@ export class XAIAPIClient {
 }
 
 // Singleton instance
-export const xaiClient = new XAIAPIClient();
+const xaiApiKey =
+  (typeof process !== 'undefined' ? process.env.VITE_XAI_API_KEY : import.meta.env.VITE_XAI_API_KEY) || '';
+export const xaiClient = new XAIAPIClient(xaiApiKey);

@@ -3,7 +3,6 @@
 // See SECURE_DEPLOYMENT.md for the new secure architecture
 
 // Environment configuration for Apophenia
-
 // Conditional environment handling for Vite vs Jest
 const isTestEnvironment = typeof process !== 'undefined' && process.env.NODE_ENV === 'test';
 

@@ -85,7 +85,7 @@ const StartScreen: React.FC = () => {
       };
 
       useWorldStateStore.getState().setWorldState(demoWorldState);
-      useStoryHistoryStore.getState().setStoryHistory(demoStoryHistory);
+      useStoryHistoryStore.getState().replaceStoryHistory(demoStoryHistory);
 
       // Apply the theme from the genre config
       if (demoWorldState.genreConfig) {

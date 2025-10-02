@@ -1,3 +1,4 @@
+import { StorySegment, WorldState } from '../../../types';
 import { REVOLUTIONARY_FEATURES } from '../../config';
 import { generateWithSelectedModel } from '../unifiedAIService';
 
@@ -20,7 +21,11 @@ export type RealityCorruptionResult = {
 export class RealityCorruptionEngine {
   private corruptionLevel: number = 0;
 
-  async processCorruption(choice: string): Promise<RealityCorruptionResult> {
+  async processCorruption(
+    choice: string,
+    worldState: WorldState,
+    storyHistory: StorySegment[]
+  ): Promise<RealityCorruptionResult> {
     if (!REVOLUTIONARY_FEATURES.REALITY_CORRUPTION.enabled) {
       return { uiEffects: this.calculateUIEffects(), corruptionLevel: 0, newEffects: [] };
     }
@@ -33,7 +38,10 @@ export class RealityCorruptionEngine {
     const { maxCorruption } = REVOLUTIONARY_FEATURES.REALITY_CORRUPTION;
     this.corruptionLevel = Math.min(this.corruptionLevel, maxCorruption);
 
-    const newEffects = await this.generateCorruptionEffects();
+    const newEffects = await this.generateCorruptionEffects(
+      worldState,
+      storyHistory
+    );
 
     return {
       uiEffects: this.calculateUIEffects(),
@@ -42,7 +50,10 @@ export class RealityCorruptionEngine {
     };
   }
 
-  private async generateCorruptionEffects(): Promise<string[]> {
+  private async generateCorruptionEffects(
+    worldState: WorldState,
+    storyHistory: StorySegment[]
+  ): Promise<string[]> {
     const systemInstruction = `You are a reality corruption AI. Your task is to generate a list of UI corruption effects based on the current corruption level.`;
     const prompt = `The current reality corruption level is ${this.corruptionLevel}. Based on this, generate a comma-separated list of UI corruption effects. Examples: text-glitch, choice-corruption, reality-tears, image-distortion, audio-glitch.`;
 
@@ -50,6 +61,8 @@ export class RealityCorruptionEngine {
       const commands = await generateWithSelectedModel(
         systemInstruction,
         prompt,
+        worldState,
+        storyHistory,
         'story'
       );
       if (commands[0]?.type === 'displayText') {

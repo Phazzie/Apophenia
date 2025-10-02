@@ -13,9 +13,11 @@ import {
   commandArraySchema,
 } from '../../types';
 import { useWorldStateStore } from '../../stores/worldStateStore';
-import { API_KEYS, AI_MODELS } from '../config';
+import { AI_MODELS } from '../config';
 
-const genAI = new GoogleGenerativeAI(API_KEYS.googleGenAI);
+const googleApiKey =
+  (typeof process !== 'undefined' ? process.env.VITE_GEMINI_API_KEY : import.meta.env.VITE_GEMINI_API_KEY) || '';
+const genAI = new GoogleGenerativeAI(googleApiKey);
 
 // Google Imagen client for real image generation
 const createImageClient = (apiKey: string) => {
@@ -341,7 +343,7 @@ async function generateMultipleImageVariations(basePrompt: string): Promise<stri
 async function generateSingleVariation(prompt: string): Promise<string> {
   try {
     // Try Google Imagen first
-    if (API_KEYS.googleImagen) {
+    if (googleApiKey) {
       const result = await generateWithImagen(prompt);
       if (result) return result;
     }
@@ -406,13 +408,13 @@ async function generateWithBackendFirst(prompt: string): Promise<string | null> 
 async function generateWithImagen(prompt: string): Promise<string | null> {
   try {
     // Check for API key availability
-    if (!API_KEYS.googleImagen && !API_KEYS.googleGenAI) {
+    if (!googleApiKey) {
       console.log('Google AI API key not available - using fallback');
       return null;
     }
 
     // Use the API key (prefer googleImagen, fallback to googleGenAI)
-    const apiKey = API_KEYS.googleImagen || API_KEYS.googleGenAI;
+    const apiKey = googleApiKey;
     
     console.log('Generating image with Google Imagen API...');
     

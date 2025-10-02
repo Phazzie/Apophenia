@@ -37,15 +37,24 @@ const _processNeuralEchoes = (playerChoice: string, worldState: WorldState) => {
   console.log('Processing neural echo chambers...');
   neuralEchoChambers.initializeFromPersistence();
   neuralEchoChambers.recordChoice(playerChoice, 'game progression', worldState);
-  return neuralEchoChambers.generateEchoPrompt(playerChoice, worldState);
+  return neuralEchoChambers.generateEchoPrompt(playerChoice);
 };
 
 // Helper function for Semantic Archaeology and Adaptive Horror analysis
-const _analyzePlayerChoice = async (playerChoice: string) => {
+const _analyzePlayerChoice = async (
+  playerChoice: string,
+  worldState: WorldState,
+  history: StorySegment[]
+) => {
   console.log('Performing semantic choice archaeology and adaptive horror analysis...');
   const allChoices: string[] = [playerChoice];
   const semanticAnalysis = semanticArchaeology.analyzeChoiceSemantics(playerChoice, allChoices);
-  await adaptiveHorror.analyzePlayerChoice(playerChoice, 'game progression');
+  await adaptiveHorror.analyzePlayerChoice(
+    playerChoice,
+    'game progression',
+    worldState,
+    history
+  );
   return semanticAnalysis;
 };
 
@@ -73,8 +82,7 @@ const _handleTemporalAndQuantumShifts = async (
 const _processMetaAndCorruption = async (
   history: StorySegment[],
   playerChoice: string,
-  worldState: WorldState,
-  storyHistory: StorySegment[],
+  worldState: WorldState
 ) => {
   console.log('Checking for meta-consciousness and reality corruption...');
   const metaMessage = await metaConsciousness.checkForMetaEvent(
@@ -84,7 +92,7 @@ const _processMetaAndCorruption = async (
   const corruptionResult = await realityCorruption.processCorruption(
     playerChoice,
     worldState,
-    storyHistory
+    history
   );
   return { metaMessage, corruptionResult };
 };
@@ -105,16 +113,19 @@ const _preparePersonalizedPrompt = async (
   playerChoice: string,
   semanticAnalysis: { semanticInsight: string },
   echoMessage: string | null,
-  worldState: WorldState
+  worldState: WorldState,
+  storyHistory: StorySegment[]
 ): Promise<string> => {
   console.log('Generating comprehensive personalized horror prompt...');
 
   let personalizedPrompt = await adaptiveHorror.generatePersonalizedHorror(
-    `Player chose: ${playerChoice}. Continue the cosmic horror narrative.`
+    `Player chose: ${playerChoice}. Continue the cosmic horror narrative.`,
+    worldState,
+    storyHistory
   );
 
   personalizedPrompt += ` ${semanticAnalysis.semanticInsight}`;
-  personalizedPrompt = narrativeDNA.generateAdaptivePrompt(personalizedPrompt, worldState);
+  personalizedPrompt = narrativeDNA.generateAdaptivePrompt(personalizedPrompt);
 
   if (echoMessage) {
     personalizedPrompt += ` [ECHO CONTEXT]: ${echoMessage}`;
@@ -152,7 +163,7 @@ export const getNextStep = async (
 
   try {
     const echoMessage = _processNeuralEchoes(playerChoice, worldState);
-    const semanticAnalysis = await _analyzePlayerChoice(playerChoice);
+    const semanticAnalysis = await _analyzePlayerChoice(playerChoice, worldState, history);
     
     const { revisedHistory, quantumResult } = await _handleTemporalAndQuantumShifts(
       playerChoice,
@@ -163,8 +174,7 @@ export const getNextStep = async (
     const { metaMessage, corruptionResult } = await _processMetaAndCorruption(
       quantumResult.history,
       playerChoice,
-      worldState,
-      history
+      worldState
     );
 
     _handleFifthWall(corruptionResult, worldState);
@@ -173,7 +183,8 @@ export const getNextStep = async (
       playerChoice,
       semanticAnalysis,
       echoMessage,
-      worldState
+      worldState,
+      quantumResult.history
     );
     
     console.log('Calling AI service for next step generation...');

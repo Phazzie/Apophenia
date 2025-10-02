@@ -39,17 +39,20 @@ export const generateDirectorAnalysis = async (
 
   try {
     const response = await generateWithSelectedModel(
+      DIRECTOR_SYSTEM_PROMPT,
       prompt,
       worldState,
       [], // No history needed for this analysis
-      worldState.genreConfig,
-      DIRECTOR_SYSTEM_PROMPT
+      'summary' // Using summary use case for this analysis
     );
 
     // Assuming the AI returns a single 'displayText' command with the JSON string
-    const analysisString = response[0].payload.content;
-    const analysis: AIDirectorAnalysisPayload = JSON.parse(analysisString);
-    return analysis;
+    if (response[0]?.type === 'displayText') {
+      const analysisString = response[0].payload.content;
+      const analysis: AIDirectorAnalysisPayload = JSON.parse(analysisString);
+      return analysis;
+    }
+    throw new Error('Invalid response format from AI director analysis');
   } catch (error) {
     console.error('Error generating AI director analysis:', error);
     // Return a fallback analysis in case of an error

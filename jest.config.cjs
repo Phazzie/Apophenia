@@ -16,7 +16,14 @@ module.exports = {
     '\\.(css|less|scss)$': 'identity-obj-proxy',
   },
   transform: {
-    '^.+\\.tsx?$': 'ts-jest',
+    '^.+\\.tsx?$': [
+      'ts-jest',
+      {
+        tsconfig: {
+          module: 'esnext',
+        },
+      },
+    ],
   },
   transformIgnorePatterns: [
     'node_modules/(?!(.*\\.mjs$))'

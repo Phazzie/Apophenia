@@ -73,7 +73,8 @@ const _handleTemporalAndQuantumShifts = async (
 const _processMetaAndCorruption = async (
   history: StorySegment[],
   playerChoice: string,
-  worldState: WorldState
+  worldState: WorldState,
+  storyHistory: StorySegment[],
 ) => {
   console.log('Checking for meta-consciousness and reality corruption...');
   const metaMessage = await metaConsciousness.checkForMetaEvent(
@@ -82,7 +83,8 @@ const _processMetaAndCorruption = async (
   );
   const corruptionResult = await realityCorruption.processCorruption(
     playerChoice,
-    worldState
+    worldState,
+    storyHistory
   );
   return { metaMessage, corruptionResult };
 };
@@ -161,7 +163,8 @@ export const getNextStep = async (
     const { metaMessage, corruptionResult } = await _processMetaAndCorruption(
       quantumResult.history,
       playerChoice,
-      worldState
+      worldState,
+      history
     );
 
     _handleFifthWall(corruptionResult, worldState);
@@ -296,7 +299,8 @@ import { generateDirectorAnalysis } from './ai/director';
  * Uses Gemini 2.5 Pro thinking mode for sophisticated narrative planning
  */
 export const getAIDirectorAnalysis = async (
-  worldState: WorldState
+  worldState: WorldState,
+  recentChoices: string[]
 ): Promise<{
   psychologicalProfile: string;
   narrativeRecommendations: string[];

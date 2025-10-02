@@ -2,8 +2,8 @@
 // This provides lightweight endpoints used by `@digitalocean/mcp` or other automation
 // It intentionally defaults to "simulate" mode; set MCP_ALLOW_EXEC=true to permit real commands.
 
-const express = require('express');
-const { exec } = require('child_process');
+import express from 'express';
+import { exec } from 'child_process';
 
 const router = express.Router();
 
@@ -38,12 +38,12 @@ function authenticateMCP(req, res, next) {
 }
 
 // Simple health endpoint for load checks
-router.get('/health', (req, res) => {
+router.get('/health', (_req, res) => {
   res.json({ status: 'ok', service: 'mcp', timestamp: Date.now() });
 });
 
 // List supported services (this server currently supports a minimal 'apps' service)
-router.get('/services', authenticateMCP, (req, res) => {
+router.get('/services', authenticateMCP, (_req, res) => {
   res.json({ services: ['apps'] });
 });
 
@@ -102,4 +102,4 @@ router.post('/execute', authenticateMCP, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

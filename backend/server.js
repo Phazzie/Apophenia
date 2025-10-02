@@ -5,16 +5,16 @@
  * Supports xAI Grok-2-image-1212 model integration.
  */
 
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const rateLimit = require('express-rate-limit');
-const Joi = require('joi');
+import 'dotenv/config';
+import express from 'express';
+import cors from 'cors';
+import rateLimit from 'express-rate-limit';
+import Joi from 'joi';
 
 // Import services
-const GrokImageService = require('./services/grokImageService');
-const { createLogger } = require('./utils/logger');
-const { handleError } = require('./utils/errorHandler');
+import GrokImageService from './services/grokImageService.js';
+import { createLogger } from './utils/logger.js';
+import { handleError } from './utils/errorHandler.js';
 
 // Initialize logger
 const logger = createLogger();
@@ -239,4 +239,4 @@ app.listen(PORT, () => {
   }
 });
 
-module.exports = app;
+export default app;

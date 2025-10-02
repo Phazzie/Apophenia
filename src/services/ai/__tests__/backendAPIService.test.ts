@@ -1,4 +1,4 @@
-import { BackendAPIService, BackendAPIError } from '../backendAPIService';
+import { BackendAPIService } from '../backendAPIService';
 
 // Mock fetch for testing
 const mockFetch = jest.fn();
@@ -79,7 +79,7 @@ describe('BackendAPIService', () => {
     });
 
     it('should handle abort signal correctly', async () => {
-      const controller = new AbortController();
+      const _controller = new AbortController();
       
       mockFetch.mockImplementationOnce(() => {
         // Simulate AbortError

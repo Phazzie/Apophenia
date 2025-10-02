@@ -2,7 +2,7 @@
  * Structured logging utility using Winston
  */
 
-const winston = require('winston');
+import winston from 'winston';
 
 /**
  * Create a configured Winston logger instance
@@ -61,4 +61,4 @@ function createLogger() {
   return logger;
 }
 
-module.exports = { createLogger };
+export { createLogger };

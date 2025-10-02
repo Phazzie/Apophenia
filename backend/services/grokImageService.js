@@ -5,7 +5,7 @@
  * Includes retry logic, error handling, and usage tracking.
  */
 
-const axios = require('axios');
+import axios from 'axios';
 
 class GrokImageService {
   constructor(apiKey, logger) {
@@ -277,4 +277,4 @@ class GrokImageService {
   }
 }
 
-module.exports = GrokImageService;
+export default GrokImageService;

@@ -2,7 +2,7 @@
  * Integration tests for Grok Image Proxy Backend
  */
 
-const request = require('supertest');
+import request from 'supertest';
 
 // Mock the GrokImageService before importing the server
 const mockGrokService = {
@@ -19,11 +19,11 @@ const mockGrokService = {
   testConnection: jest.fn()
 };
 
-jest.mock('../services/grokImageService', () => {
+jest.mock('../services/grokImageService.js', () => {
   return jest.fn(() => mockGrokService);
 });
 
-const app = require('../server');
+import app from '../server.js';
 
 describe('Apophenia Backend API', () => {
   beforeEach(() => {

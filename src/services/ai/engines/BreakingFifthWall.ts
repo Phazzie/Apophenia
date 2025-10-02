@@ -35,6 +35,10 @@ export class BreakingFifthWall {
   }
 
   deactivateBreakage(): void {
+    this.cleanup();
+  }
+
+  cleanup(): void {
     if (!this.isActive) return;
 
     this.isActive = false;
@@ -57,7 +61,7 @@ export class BreakingFifthWall {
     this.windowTimeouts.forEach(timeout => clearTimeout(timeout));
     this.windowTimeouts = [];
 
-    console.log('💥 Fifth Wall effects deactivated');
+    console.log('💥 Fifth Wall effects deactivated and cleaned up');
   }
 
   private manipulateTitle(doc: Document, worldState: WorldState): void {

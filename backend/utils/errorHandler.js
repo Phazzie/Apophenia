@@ -5,7 +5,7 @@
 /**
  * Custom application error class
  */
-class AppError extends Error {
+export class AppError extends Error {
   constructor(message, statusCode = 500, isOperational = true) {
     super(message);
     this.statusCode = statusCode;
@@ -19,7 +19,7 @@ class AppError extends Error {
 /**
  * Handle errors in Express middleware
  */
-function handleError(error, res, logger) {
+export function handleError(error, res, logger) {
   let statusCode = 500;
   let message = 'Internal Server Error';
   let details = null;
@@ -63,14 +63,8 @@ function handleError(error, res, logger) {
 /**
  * Async error handler wrapper
  */
-function asyncHandler(fn) {
+export function asyncHandler(fn) {
   return (req, res, next) => {
     Promise.resolve(fn(req, res, next)).catch(next);
   };
 }
-
-module.exports = {
-  AppError,
-  handleError,
-  asyncHandler
-};

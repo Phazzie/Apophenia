@@ -5,8 +5,8 @@
  * Validates that Apophenia is ready for production deployment
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 console.log('🚀 Apophenia Deployment Readiness Check\n');
 
@@ -37,7 +37,7 @@ try {
   } else {
     checks.push({ name: 'Package Configuration', status: '❌', details: 'Missing required scripts in package.json' });
   }
-} catch (e) {
+} catch (_e) {
   checks.push({ name: 'Package Configuration', status: '❌', details: 'Invalid package.json' });
 }
 
@@ -49,7 +49,7 @@ try {
   } else {
     checks.push({ name: 'Vercel Configuration', status: '⚠️', details: 'Vercel config may need adjustment' });
   }
-} catch (e) {
+} catch (_e) {
   checks.push({ name: 'Vercel Configuration', status: '❌', details: 'Missing or invalid vercel.json' });
 }
 

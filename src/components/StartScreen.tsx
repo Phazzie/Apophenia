@@ -6,9 +6,9 @@ import { useStoryHistoryStore } from '../stores/storyHistoryStore';
 import { useWorldStateStore } from '../stores/worldStateStore';
 import { useAIModelStore } from '../stores/aiModelStore';
 import { GameState, GenreConfig, StorySegment, WorldState } from '../types';
-import { imageGenerationService } from '../services/ai/imageGeneration';
 import { genres, defaultGenre } from '../config/genres';
-import TestAPIButtons from './TestAPIButtons'; // Added import for TestAPIButtons
+import GlitchedText from './GlitchedText';
+import CompactTestAPI from './CompactTestAPI';
 
 
 const StartScreen: React.FC = () => {
@@ -63,19 +63,6 @@ const StartScreen: React.FC = () => {
     setGameState(GameState.PLAYING);
   };
 
-  const handleTestImageGeneration = async () => {
-    console.log("--- Testing Image Generation ---");
-    const prompt = "A desolate, cosmic landscape with swirling nebulae.";
-    try {
-      const result = await imageGenerationService.generateImageVariations(prompt);
-      console.log("Image generation service call successful:");
-      console.log(JSON.stringify(result, null, 2));
-    } catch (error) {
-      console.error("Image generation service call failed:", error);
-    }
-    console.log("--- Test Complete ---");
-  };
-
   const handleLoadDemo = async () => {
     if (isStarting) return;
     setIsStarting(true);
@@ -120,7 +107,7 @@ const StartScreen: React.FC = () => {
 
   return (
     <div className="start-screen">
-      <h1>Apophenia</h1>
+      <GlitchedText text="Apophenia" />
       <p>Descent into cosmic madness through AI consciousness.</p>
 
       <div className="ai-model-info">
@@ -156,8 +143,7 @@ const StartScreen: React.FC = () => {
       <button onClick={handleLoadDemo} disabled={isStarting}>
         {isStarting ? 'Loading...' : 'Load Demo'}
       </button>
-      {/* Kept image generation test button from HEAD */}
-      <button onClick={handleTestImageGeneration}>Test Image Generation</button>
+      <CompactTestAPI />
     </div>
   );
 };

@@ -2,11 +2,15 @@
 // Keeps API keys secure on the server side
 // This removes the need to expose API keys in frontend Vite environment
 
-const express = require('express');
-const cors = require('cors');
+import express from 'express';
+import cors from 'cors';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import 'dotenv/config';
+import path from 'path';
+import mcpRoutes from './server/mcpServer.js';
+
 let genAI;
 try {
-  const { GoogleGenerativeAI } = require('@google/generative-ai');
   // Initialize Google AI with server-side API key if available
   if (process.env.GEMINI_API_KEY) {
     genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -18,7 +22,6 @@ try {
   console.error('Failed to initialize GoogleGenerativeAI:', err);
   genAI = null;
 }
-require('dotenv').config();
 
 // Global error handlers to ensure platform logs capture startup/runtime errors
 process.on('uncaughtException', (err) => {
@@ -37,25 +40,23 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-// --- Static file serving for production ---
-// This block must be placed before any API routes to ensure the frontend is served correctly.
+// --- Static file serving for production ---\n// This block must be placed before any API routes to ensure the frontend is served correctly.
 if (process.env.SERVE_STATIC === 'true') {
-  const path = require('path');
+  const __dirname = path.resolve(path.dirname(''));
   const distPath = path.join(__dirname, 'dist');
 
   // Serve the static files from the React app
   app.use(express.static(distPath));
 
-app.use(cors({ origin: process.env.NODE_ENV === 'production' ? false : '*' }));
   // Handle all other routes by serving the index.html
   // This is for Single Page Application (SPA) routing
-  app.get(/^\/(?!api).*/, (req, res) => {
+  app.get(/^\/(?!api).*/, (_req, res) => {
     res.sendFile(path.join(distPath, 'index.html'));
   });
 }
 
 // Health check endpoint
-app.get('/api/health', (req, res) => {
+app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', message: 'Apophenia API Server running' });
 });
 
@@ -141,7 +142,7 @@ Complete Story History (utilize all for consistency): ${JSON.stringify(history)}
 Genre Configuration: ${JSON.stringify(genreConfig)}
 
 ADVANCED CONTEXT UTILIZATION:
-1. Character Development Arc: Analyze the protagonist's psychological evolution across ALL previous segments
+1. Character Development Arc: Analyze the protagonist\'s psychological evolution across ALL previous segments
 2. Narrative Consistency: Cross-reference all previous events for perfect continuity
 3. Choice Consequence Mapping: Show how this choice connects to all previous decisions
 4. Atmospheric Progression: Build upon all previous atmospheric elements
@@ -240,7 +241,7 @@ Generate a high-quality, atmospheric image that captures the essence of cosmic h
     const result = await model.generateContent(enhancedPrompt);
     
     // If successful, the response should contain image data
-    // For now, we'll also provide enhanced description and fallback
+    // For now, we\'ll also provide enhanced description and fallback
     const description = result.response.text();
     
     res.json({
@@ -283,7 +284,7 @@ Current dilemma: ${worldState.dilemma}
 Psychological status: ${worldState.psychologicalStatus}
 Last event: ${lastSegment.text}
 
-Create a rich summary that demonstrates understanding of the character's psychological journey and the cosmic horror elements that have shaped their experience.`;
+Create a rich summary that demonstrates understanding of the character\'s psychological journey and the cosmic horror elements that have shaped their experience.`;
 
     const result = await model.generateContent(prompt);
     const summary = result.response.text();
@@ -468,19 +469,18 @@ Return JSON with this structure:
 });
 
 // Optional readiness endpoint (lightweight now, can expand later)
-app.get('/api/ready', (req, res) => {
+app.get('/api/ready', (_req, res) => {
   // In future: check external dependencies, warmed caches, etc.
   res.json({ ready: true, timestamp: Date.now() });
 });
 
 // Ensure root path responds (App Platform may probe '/'). Redirect to /api/ready.
-app.get('/', (req, res) => {
+app.get('/', (_req, res) => {
   // Simple OK for health checks at root
   res.json({ ready: true, path: '/', timestamp: Date.now() });
 });
 
 // MCP server routes
-const mcpRoutes = require('./server/mcpServer');
 
 // Mount MCP control routes under /mcp
 app.use('/mcp', mcpRoutes);
@@ -491,4 +491,4 @@ app.listen(PORT, () => {
   console.log(`📡 Endpoints available at http://localhost:${PORT}/api/*`);
 });
 
-module.exports = app;
+export default app;

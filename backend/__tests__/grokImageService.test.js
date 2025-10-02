@@ -2,8 +2,8 @@
  * Unit tests for GrokImageService
  */
 
-const GrokImageService = require('../services/grokImageService');
-const axios = require('axios');
+import GrokImageService from '../services/grokImageService.js';
+import axios from 'axios';
 
 jest.mock('axios');
 const mockedAxios = axios;

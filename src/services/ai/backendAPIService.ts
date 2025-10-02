@@ -22,7 +22,7 @@ export class BackendAPIError extends Error {
     message: string,
     public status?: number,
     public context?: string,
-    public response?: any
+    public response?: unknown
   ) {
     super(message);
     this.name = 'BackendAPIError';

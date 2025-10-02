@@ -7,6 +7,7 @@ import { useGameStateStore } from '../stores/gameStateStore';
 import { useStoryHistoryStore } from '../stores/storyHistoryStore';
 import { useWorldStateStore } from '../stores/worldStateStore';
 import { Choice, GameState } from '../types';
+import ThematicLoading from './ThematicLoading';
 
 const GameScreen: React.FC = () => {
   const { choices, intrusiveThought, gameState, setGameState, isGenerating, setIsGenerating } =
@@ -138,14 +139,12 @@ const GameScreen: React.FC = () => {
             <img src={lastStorySegment.images.main} alt="Current Scene" className="main-image" />
             {lastStorySegment.images.mainStatus === 'loading' && (
               <div className="image-loading-overlay">
-                <div className="loading-spinner"></div>
-                <p>Generating scene...</p>
+                <ThematicLoading />
               </div>
             )}
             {lastStorySegment.images.mainStatus === 'retrying' && (
               <div className="image-loading-overlay retrying">
-                <div className="loading-spinner"></div>
-                <p>Retrying scene generation...</p>
+                <ThematicLoading />
                 <small>The cosmic forces resist, but we persist...</small>
               </div>
             )}
@@ -181,10 +180,7 @@ const GameScreen: React.FC = () => {
             )}
           </p>
           {gameState === GameState.GENERATING_CONCEPT && (
-            <div className="text-loading-indicator">
-              <div className="loading-spinner small"></div>
-              <span>The AI is analyzing cosmic consciousness patterns...</span>
-            </div>
+            <ThematicLoading />
           )}
         </div>
         
@@ -204,11 +200,7 @@ const GameScreen: React.FC = () => {
       
       <div className="choice-panel">
         {isGenerating ? (
-          <div className="loading-container">
-            <div className="loading-spinner"></div>
-            <p>Processing your choice through advanced AI reasoning...</p>
-            <p className="loading-subtitle">The AI is analyzing psychological impact</p>
-          </div>
+          <ThematicLoading />
         ) : (
           combinedChoices.map((choice, index) => (
             <button

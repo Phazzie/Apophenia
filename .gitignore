@@ -1,26 +1,2 @@
-# Dependencies
-/node_modules
 
-# Build artifacts
-/dist
-/build
-
-# Test coverage
-/coverage
-
-# Log files
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-dev_server.log
-*.log
-
-# Vite cache
-.vite/
-# Jules scratch
-jules-scratch/
-
-# Environment files
-.env
-.env.local
-.env.*.local
+.idx

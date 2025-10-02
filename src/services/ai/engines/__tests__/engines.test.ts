@@ -15,7 +15,8 @@ const expectStoryDomainOnCalls = () => {
   const calls = (generateWithSelectedModel as jest.Mock).mock.calls;
   expect(calls.length).toBeGreaterThan(0);
   calls.forEach(call => {
-    expect(call[2]).toBe('story');
+    // systemInstruction, prompt, worldState, storyHistory, useCase
+    expect(call[4]).toBe('story');
   });
 };
 
@@ -147,6 +148,7 @@ describe('TemporalRevisionEngine', () => {
 describe('RealityCorruptionEngine', () => {
   let engine: RealityCorruptionEngine;
   let mockWorldState: WorldState;
+  let mockStoryHistory: StorySegment[];
 
   beforeEach(() => {
     engine = new RealityCorruptionEngine();
@@ -157,6 +159,7 @@ describe('RealityCorruptionEngine', () => {
       psychologicalStatus: 'Paranoid',
       systemHealth: 50,
     });
+    mockStoryHistory = [{ id: 'rc1', text: 'Corruption begins.', images: {} }];
     (generateWithSelectedModel as jest.Mock).mockClear();
   });
 
@@ -171,7 +174,7 @@ describe('RealityCorruptionEngine', () => {
       payload: { content: effects },
     }]);
 
-    const result = await engine.processCorruption('Embrace the void', mockWorldState);
+    const result = await engine.processCorruption('Embrace the void', mockWorldState, mockStoryHistory);
 
   expect(generateWithSelectedModel).toHaveBeenCalled();
   expectStoryDomainOnCalls();
@@ -186,7 +189,7 @@ describe('RealityCorruptionEngine', () => {
   it('should return no new effects if the AI call fails', async () => {
     (generateWithSelectedModel as jest.Mock).mockRejectedValue(new Error('Reality sync error'));
 
-    const result = await engine.processCorruption('Resist the void', mockWorldState);
+    const result = await engine.processCorruption('Resist the void', mockWorldState, mockStoryHistory);
 
   expect(generateWithSelectedModel).toHaveBeenCalled();
   expectStoryDomainOnCalls();
@@ -203,7 +206,7 @@ describe('RealityCorruptionEngine', () => {
       payload: { content: '' },
     }]);
 
-    const result = await engine.processCorruption('A normal choice', mockWorldState);
+    const result = await engine.processCorruption('A normal choice', mockWorldState, mockStoryHistory);
 
     // Corruption level should remain at its initial state (0).
     expect(result.corruptionLevel).toBe(0);
@@ -216,9 +219,13 @@ describe('RealityCorruptionEngine', () => {
  */
 describe('AdaptiveHorrorEngine', () => {
   let engine: AdaptiveHorrorEngine;
+  let mockWorldState: WorldState;
+  let mockStoryHistory: StorySegment[];
 
   beforeEach(() => {
     engine = new AdaptiveHorrorEngine();
+    mockWorldState = createWorldState({ psychologicalStatus: 'Uneasy' });
+    mockStoryHistory = [{ id: 'ah1', text: 'A scary thing happened.', images: {} }];
     (generateWithSelectedModel as jest.Mock).mockClear();
   });
 
@@ -233,7 +240,7 @@ describe('AdaptiveHorrorEngine', () => {
       payload: { content: triggers },
     }]);
 
-    await engine.analyzePlayerChoice('I chose to hide', 'A dark room');
+    await engine.analyzePlayerChoice('I chose to hide', 'A dark room', mockWorldState, mockStoryHistory);
 
   expect(generateWithSelectedModel).toHaveBeenCalled();
   expectStoryDomainOnCalls();
@@ -247,7 +254,7 @@ describe('AdaptiveHorrorEngine', () => {
   it('should handle failure during player choice analysis', async () => {
     (generateWithSelectedModel as jest.Mock).mockRejectedValue(new Error('Psych-profile error'));
 
-    await engine.analyzePlayerChoice('I chose to fight', 'A monster');
+    await engine.analyzePlayerChoice('I chose to fight', 'A monster', mockWorldState, mockStoryHistory);
 
   expect(generateWithSelectedModel).toHaveBeenCalled();
   expectStoryDomainOnCalls();
@@ -265,7 +272,7 @@ describe('AdaptiveHorrorEngine', () => {
       type: 'displayText',
       payload: { content: 'betrayal' },
     }]);
-    await engine.analyzePlayerChoice('I trusted them', 'A friend');
+    await engine.analyzePlayerChoice('I trusted them', 'A friend', mockWorldState, mockStoryHistory);
 
     // Now, test the personalization based on that trigger.
     (generateWithSelectedModel as jest.Mock).mockResolvedValueOnce([{
@@ -273,7 +280,7 @@ describe('AdaptiveHorrorEngine', () => {
       payload: { content: personalizedPrompt },
     }]);
 
-    const result = await engine.generatePersonalizedHorror('A generic prompt');
+    const result = await engine.generatePersonalizedHorror('A generic prompt', mockWorldState, mockStoryHistory);
     expect(result).toBe(personalizedPrompt);
   });
 
@@ -287,13 +294,13 @@ describe('AdaptiveHorrorEngine', () => {
       type: 'displayText',
       payload: { content: 'loss of identity' },
     }]);
-    await engine.analyzePlayerChoice('Who am I?', 'A mirror');
+    await engine.analyzePlayerChoice('Who am I?', 'A mirror', mockWorldState, mockStoryHistory);
 
     // Mock a failure for the personalization call.
     (generateWithSelectedModel as jest.Mock).mockRejectedValue(new Error('Horror-gen error'));
 
     const basePrompt = 'A generic prompt';
-    const result = await engine.generatePersonalizedHorror(basePrompt);
+    const result = await engine.generatePersonalizedHorror(basePrompt, mockWorldState, mockStoryHistory);
     expect(result).toBe(basePrompt);
   });
 });
@@ -365,7 +372,7 @@ describe('QuantumNarrativeEngine', () => {
     engine['quantumStability'] = 0.6; // Below the 0.7 threshold.
     jest.spyOn(Math, 'random').mockReturnValue(0.2); // Below the 0.3 probability.
 
-    const result = await engine.processQuantumChoice('A choice', mockStoryHistory);
+    const result = await engine.processQuantumChoice('A choice', mockStoryHistory, mockWorldState);
 
     expect(result.quantumShift).toBe(true);
     expect(result.history.some(segment => segment.isQuantumShift)).toBe(true);

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { CACHE_CONFIG } from '../services/config';
 
-interface CachedImage {
+export interface CachedImage {
   url: string;
   timestamp: number;
   accessCount: number;

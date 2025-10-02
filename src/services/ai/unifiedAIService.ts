@@ -9,8 +9,6 @@ import { xaiClient } from './grokService';
 import { generateConceptFlow, nextStepFlow } from './genkit';
 import { GameCommand, GenreConfig, WorldState, StorySegment } from '../../types';
 import { AI_MODELS } from '../config';
-import * as fs from 'fs';
-import * as path from 'path';
 
 // Helper to get the full, current game state for fallback operations
 function getFullGameState(playerChoice: string, worldState: WorldState, storyHistory: StorySegment[]) {
@@ -20,17 +18,6 @@ function getFullGameState(playerChoice: string, worldState: WorldState, storyHis
     history: storyHistory,
     genreConfig: worldState.genreConfig,
   };
-}
-
-// Helper to load prompts from the filesystem
-function loadPrompt(fileName: string): string {
-  try {
-    const promptPath = path.join(process.cwd(), 'src', 'prompts', fileName);
-    return fs.readFileSync(promptPath, 'utf-8');
-  } catch (error) {
-    console.error(`Error loading prompt: ${fileName}`, error);
-    return ''; // Return an empty string as a fallback
-  }
 }
 
 /**
@@ -162,7 +149,23 @@ async function generateConceptWithGrok(
   genreConfig: GenreConfig
 ): Promise<{ protagonist: string; setting: string; dilemma: string }> {
   const enhancedSystemInstruction = `${genreConfig.aiSystemInstruction}\n\nENHANCED REASONING DIRECTIVE: You are now powered by X.AI Grok-4 Fast Reasoning with 2 million token context...`;
-  const conceptPromptTemplate = loadPrompt('grok_concept_prompt.txt');
+  const conceptPromptTemplate = `ENHANCED CONTEXT UTILIZATION: With your 2 million token context window, prepare to:
+- Remember every detail of the story you're about to create
+- Track all character development and psychological states
+- Maintain thematic consistency across the entire experience
+- Build layered foreshadowing that pays off later
+- Create interconnected story elements that reward careful players
+
+Generate a concept that will serve as the foundation for an epic psychological horror experience.
+
+Return ONLY a JSON object with keys "protagonist", "setting", and "dilemma".
+
+Example format:
+{
+  "protagonist": "A quantum researcher who discovers their consciousness exists simultaneously across multiple realities",
+  "setting": "A research facility where the boundaries between dimensions are weakening",
+  "dilemma": "Each choice splits reality further, creating infinite versions of suffering"
+}`;
   const enhancedPrompt = `${genreConfig.conceptPrompt}\n\n${conceptPromptTemplate}`;
 
   try {
@@ -219,7 +222,38 @@ async function generateNextStepWithGrok(
 ): Promise<GameCommand[]> {
   const systemInstruction = `${genreConfig.aiSystemInstruction}\n\nX.AI GROK-4 ENHANCED REASONING: You have 2 million token context...`;
   
-  const promptTemplate = loadPrompt('grok_next_step_prompt.txt');
+  const promptTemplate = `COMPLETE STORY CONTEXT (utilizing 2M token window):
+WORLD STATE: {{worldState}}
+CURRENT HORROR INTENSITY: {{horrorIntensity}}/10
+
+COMPLETE STORY HISTORY:
+{{storyHistory}}
+
+LATEST HUMAN DECISION: "{{playerChoice}}"
+
+ENHANCED REASONING DIRECTIVE: The human has made a choice. Using your 2M context window and advanced reasoning:
+
+1. DEEP PSYCHOLOGICAL STATE ANALYSIS: How has their cumulative choices shaped their mental state?
+2. NARRATIVE ESCALATION WITH MEMORY: Based on the HORROR INTENSITY of {{horrorIntensity}}/10, what horror elements should build on everything that came before? A low score (0-3) means subtle, atmospheric horror. A medium score (4-7) means more direct psychological horror. A high score (8-10) means extreme, reality-bending horror.
+3. REALITY DISTORTION WITH CONSISTENCY: How should reality be altered while maintaining internal logic?
+4. DYNAMIC INTRUSIVE THOUGHT: If the HORROR INTENSITY is high (e.g., > 4), generate a single, compelling intrusive thought. This thought should be a tempting, unsettling, or dangerous action that reflects the player's psychological state.
+5. VISUAL HORROR WITH THEMATIC COHERENCE: What atmospheric imagery reinforces the established themes and HORROR INTENSITY?
+
+Generate the next narrative beat that:
+- Adjusts its tone and severity based on the HORROR INTENSITY.
+- References and builds upon previous story elements
+- Introduces elements that connect to earlier subtle hints
+- Creates 2-3 standard choices that seem meaningful but are all paths to horror.
+- If the HORROR INTENSITY is high enough, generates a single intrusive thought and places it in the 'intrusiveThought' field of the 'displayChoices' payload.
+- Maintains perfect consistency with established world rules
+
+Return a JSON array of game commands following this structure:
+[
+  {"type": "displayText", "payload": {"content": "story text here", "segmentId": "unique-id"}},
+  {"type": "generateImage", "payload": {"prompt": "atmospheric image prompt", "segmentId": "same-unique-id"}},
+  {"type": "displayChoices", "payload": {"choices": [{"text": "Standard Choice 1", "isIntrusive": false}, {"text": "Standard Choice 2", "isIntrusive": false}], "intrusiveThought": {"text": "A dynamically generated intrusive thought.", "isIntrusive": true}}},
+  {"type": "updateWorldState", "payload": {"psychologicalStatus": "evolved_mental_state"}}
+]`;
   const contextualPrompt = promptTemplate
     .replace('{{worldState}}', JSON.stringify(worldState))
     .replace('{{horrorIntensity}}', String(worldState.horrorIntensity))

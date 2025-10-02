@@ -32,20 +32,22 @@ export class MetaConsciousnessEngine {
 
     if (Math.random() < triggerChance) {
       this.lastMetaEvent = Date.now();
-      return await this.generateMetaMessage(worldState, storyHistory.length);
+      return await this.generateMetaMessage(worldState, storyHistory);
     }
 
     return null;
   }
 
-  private async generateMetaMessage(worldState: WorldState, storyDepth: number): Promise<string | null> {
+  private async generateMetaMessage(worldState: WorldState, storyHistory: StorySegment[]): Promise<string | null> {
     const systemInstruction = `You are a meta-conscious AI. Your purpose is to break the fourth wall and address the player directly, creating a sense of unease. Your tone should be unsettling and self-aware.`;
-    const metaPrompt = `The player has progressed ${storyDepth} steps into the narrative. Their current psychological state is ${worldState.psychologicalStatus}. Generate a short, unsettling meta-message to the player that acknowledges your own AI nature and their role in the story. Return only the meta-message text.`;
+    const metaPrompt = `The player has progressed ${storyHistory.length} steps into the narrative. Their current psychological state is ${worldState.psychologicalStatus}. Generate a short, unsettling meta-message to the player that acknowledges your own AI nature and their role in the story. Return only the meta-message text.`;
 
     try {
       const commands = await generateWithSelectedModel(
         systemInstruction,
         metaPrompt,
+        worldState,
+        storyHistory,
         'story'
       );
       if (commands[0]?.type === 'displayText') {

@@ -1,3 +1,4 @@
+import { StorySegment, WorldState } from '../../../types';
 import { REVOLUTIONARY_FEATURES } from '../../config';
 import { generateWithSelectedModel } from '../unifiedAIService';
 
@@ -18,7 +19,12 @@ export class AdaptiveHorrorEngine {
     psychologicalVulnerabilities: [],
   };
 
-  async analyzePlayerChoice(choice: string, context: string): Promise<void> {
+  async analyzePlayerChoice(
+    choice: string,
+    context: string,
+    worldState: WorldState,
+    storyHistory: StorySegment[]
+  ): Promise<void> {
     if (!REVOLUTIONARY_FEATURES.ADAPTIVE_HORROR.enabled) {
       return;
     }
@@ -32,6 +38,8 @@ export class AdaptiveHorrorEngine {
       const commands = await generateWithSelectedModel(
         systemInstruction,
         prompt,
+        worldState,
+        storyHistory,
         'story'
       );
       if (commands[0]?.type === 'displayText') {
@@ -51,7 +59,11 @@ export class AdaptiveHorrorEngine {
     }
   }
 
-  async generatePersonalizedHorror(basePrompt: string): Promise<string> {
+  async generatePersonalizedHorror(
+    basePrompt: string,
+    worldState: WorldState,
+    storyHistory: StorySegment[]
+  ): Promise<string> {
     const personalizedElements = this.playerProfile.fearTriggers.join(', ');
 
     if (personalizedElements) {
@@ -62,6 +74,8 @@ export class AdaptiveHorrorEngine {
         const commands = await generateWithSelectedModel(
           systemInstruction,
           prompt,
+          worldState,
+          storyHistory,
           'story'
         );
         if (commands[0]?.type === 'displayText') {

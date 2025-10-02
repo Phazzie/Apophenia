@@ -3,22 +3,8 @@
 // See SECURE_DEPLOYMENT.md for the new secure architecture
 
 // Environment configuration for Apophenia
-// API keys are loaded from environment variables for security
-
 // Conditional environment handling for Vite vs Jest
 const isTestEnvironment = typeof process !== 'undefined' && process.env.NODE_ENV === 'test';
-
-export const API_KEYS = isTestEnvironment ? {
-  // Jest test environment - use process.env
-  googleGenAI: process.env.VITE_GEMINI_API_KEY || 'test-key',
-  googleImagen: process.env.VITE_GEMINI_API_KEY || 'test-key', // Gemini also handles images
-  xaiAPI: process.env.VITE_XAI_API_KEY || 'test-key',
-} : {
-  // Browser environment - use import.meta.env
-  googleGenAI: import.meta.env.VITE_GEMINI_API_KEY || '',
-  googleImagen: import.meta.env.VITE_GEMINI_API_KEY || '',
-  xaiAPI: import.meta.env.VITE_XAI_API_KEY || '',
-};
 
 // Cache configuration with environment variable support
 export const CACHE_CONFIG = {
@@ -36,17 +22,6 @@ export const CACHE_CONFIG = {
   ENABLE_CACHE_TELEMETRY: isTestEnvironment 
     ? (process.env.VITE_ENABLE_CACHE_TELEMETRY === 'true')
     : (import.meta.env.VITE_ENABLE_CACHE_TELEMETRY !== 'false'),
-};
-
-// Configuration getter function
-export const getConfig = () => {
-  return {
-    geminiApiKey: API_KEYS.googleGenAI,
-    imageApiKey: API_KEYS.googleImagen,
-    imagenKey: API_KEYS.googleImagen,
-    xaiApiKey: API_KEYS.xaiAPI,
-    cache: CACHE_CONFIG,
-  };
 };
 
 // AI Model Configuration - UPGRADED TO GROK-4 FAST REASONING AS PRIMARY
@@ -127,25 +102,6 @@ export const AI_MODELS = {
     }
   }
 };
-
-// Validation - warn if API keys are not set
-if (!API_KEYS.xaiAPI) {
-  console.warn(
-    'Warning: VITE_XAI_API_KEY is not set in your .env file. Story generation will use Gemini fallback.'
-  );
-}
-
-if (!API_KEYS.googleGenAI) {
-  console.warn(
-    'Warning: VITE_GEMINI_API_KEY is not set in your .env file. Fallback story generation may be limited.'
-  );
-}
-
-if (!API_KEYS.googleImagen) {
-  console.warn(
-    'Warning: VITE_GEMINI_API_KEY not set. Image generation will use Unsplash fallback.'
-  );
-}
 
 // Revolutionary AI Capabilities for Cosmic Horror
 export const REVOLUTIONARY_FEATURES = {

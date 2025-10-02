@@ -6,7 +6,7 @@ import { useAIModelStore } from '../../stores/aiModelStore';
 // Mock the Zustand store
 jest.mock('../../stores/aiModelStore');
 
-const mockUseAIModelStore = useAIModelStore as jest.Mock;
+const mockUseAIModelStore = useAIModelStore as unknown as jest.Mock;
 
 describe('TestAPIButtons', () => {
   const mockTestModel = jest.fn();

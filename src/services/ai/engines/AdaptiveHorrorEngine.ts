@@ -1,3 +1,9 @@
+import {
+  ADAPTIVE_HORROR_PROMPT_ADAPTER,
+  ADAPTIVE_HORROR_PROMPT_PROFILER,
+  ADAPTIVE_HORROR_SYSTEM_PROMPT_ADAPTER,
+  ADAPTIVE_HORROR_SYSTEM_PROMPT_PROFILER,
+} from '../../../prompts/adaptiveHorror';
 import { StorySegment, WorldState } from '../../../types';
 import { REVOLUTIONARY_FEATURES } from '../../config';
 import { generateWithSelectedModel } from '../unifiedAIService';
@@ -31,8 +37,8 @@ export class AdaptiveHorrorEngine {
 
     this.playerProfile.preferredChoices.push(choice);
 
-    const systemInstruction = `You are a psychological profiler AI. Your task is to analyze a player's choice in a horror game and identify their potential fear triggers.`;
-    const prompt = `The player chose: "${choice}" in the context of: "${context}". Based on this, what psychological fear triggers might this choice indicate? Examples: isolation, betrayal, powerlessness, loss of identity, cosmic dread. Return a comma-separated list of triggers.`;
+    const systemInstruction = ADAPTIVE_HORROR_SYSTEM_PROMPT_PROFILER;
+    const prompt = ADAPTIVE_HORROR_PROMPT_PROFILER(choice, context);
 
     try {
       const commands = await generateWithSelectedModel(
@@ -67,8 +73,11 @@ export class AdaptiveHorrorEngine {
     const personalizedElements = this.playerProfile.fearTriggers.join(', ');
 
     if (personalizedElements) {
-      const systemInstruction = `You are a horror story adapter AI. Your task is to take a base prompt and personalize it based on a player's fear triggers.`;
-      const prompt = `Base prompt: "${basePrompt}". Player's fear triggers: ${personalizedElements}. Enhance the base prompt to incorporate these fears.`;
+      const systemInstruction = ADAPTIVE_HORROR_SYSTEM_PROMPT_ADAPTER;
+      const prompt = ADAPTIVE_HORROR_PROMPT_ADAPTER(
+        basePrompt,
+        personalizedElements
+      );
 
       try {
         const commands = await generateWithSelectedModel(

@@ -1,3 +1,7 @@
+import {
+  REALITY_CORRUPTION_PROMPT,
+  REALITY_CORRUPTION_SYSTEM_PROMPT,
+} from '../../../prompts/realityCorruption';
 import { StorySegment, WorldState } from '../../../types';
 import { REVOLUTIONARY_FEATURES } from '../../config';
 import { generateWithSelectedModel } from '../unifiedAIService';
@@ -39,6 +43,7 @@ export class RealityCorruptionEngine {
     this.corruptionLevel = Math.min(this.corruptionLevel, maxCorruption);
 
     const newEffects = await this.generateCorruptionEffects(
+      choice,
       worldState,
       storyHistory
     );
@@ -51,11 +56,12 @@ export class RealityCorruptionEngine {
   }
 
   private async generateCorruptionEffects(
+    choice: string,
     worldState: WorldState,
     storyHistory: StorySegment[]
   ): Promise<string[]> {
-    const systemInstruction = `You are a reality corruption AI. Your task is to generate a list of UI corruption effects based on the current corruption level.`;
-    const prompt = `The current reality corruption level is ${this.corruptionLevel}. Based on this, generate a comma-separated list of UI corruption effects. Examples: text-glitch, choice-corruption, reality-tears, image-distortion, audio-glitch.`;
+    const systemInstruction = REALITY_CORRUPTION_SYSTEM_PROMPT;
+    const prompt = REALITY_CORRUPTION_PROMPT(this.corruptionLevel, choice);
 
     try {
       const commands = await generateWithSelectedModel(

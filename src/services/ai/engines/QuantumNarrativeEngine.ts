@@ -1,3 +1,7 @@
+import {
+  QUANTUM_NARRATIVE_PROMPT,
+  QUANTUM_NARRATIVE_SYSTEM_PROMPT,
+} from '../../../prompts/quantumNarrative';
 import { StorySegment, WorldState } from '../../../types';
 import { REVOLUTIONARY_FEATURES } from '../../config';
 import { generateWithSelectedModel } from '../unifiedAIService';
@@ -62,8 +66,8 @@ export class QuantumNarrativeEngine {
   }
 
   private async isSignificantChoice(choice: string, worldState: WorldState, storyHistory: StorySegment[]): Promise<boolean> {
-    const systemInstruction = `You are a narrative analyst AI. Your task is to determine if a player's choice is significant enough to branch the narrative. Respond with "yes" or "no".`;
-    const prompt = `The player chose: "${choice}". Is this choice significant enough to create a new narrative branch?`;
+    const systemInstruction = QUANTUM_NARRATIVE_SYSTEM_PROMPT;
+    const prompt = QUANTUM_NARRATIVE_PROMPT(choice);
 
     try {
       const commands = await generateWithSelectedModel(

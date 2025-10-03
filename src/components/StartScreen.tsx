@@ -1,29 +1,24 @@
 import React, { useEffect, useState } from 'react';
-import { generateConcept } from '../services/gameService';
+import { generateConceptService } from '../services/gameService';
 import { GameStateManager } from '../services/gameStateManager';
 import { useGameStateStore } from '../stores/gameStateStore';
 import { useStoryHistoryStore } from '../stores/storyHistoryStore';
 import { useWorldStateStore } from '../stores/worldStateStore';
-import { useAIModelStore } from '../stores/aiModelStore';
 import { GameState, GenreConfig, StorySegment, WorldState } from '../types';
 import { genres, defaultGenre } from '../config/genres';
 import GlitchedText from './GlitchedText';
 import CompactTestAPI from './CompactTestAPI';
 
-
 const StartScreen: React.FC = () => {
   const { setGameState } = useGameStateStore();
   const { worldState, setGenreConfig } = useWorldStateStore();
   const { storyHistory } = useStoryHistoryStore();
-  const { getSelectedModel } = useAIModelStore();
   const [hasSavedGame, setHasSavedGame] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
   const [selectedGenre, setSelectedGenre] = useState<GenreConfig>(defaultGenre);
 
-  const selectedModel = getSelectedModel();
-
   useEffect(() => {
-    // Check for a saved game. If story has more than the initial empty state, a game exists.\n    // We also check for a protagonist, as another indicator.
+    // Check for a saved game.
     setHasSavedGame(storyHistory.length > 0 && Boolean(worldState.protagonist));
   }, [storyHistory, worldState.protagonist]);
 
@@ -31,15 +26,12 @@ const StartScreen: React.FC = () => {
     if (isStarting) return; // Guard against double-clicks
     setIsStarting(true);
 
-    // Clear all previous game data from stores using unified GameStateManager
     GameStateManager.resetAllStores();
-
     setGameState(GameState.GENERATING_CONCEPT);
-
-    // Set the genre for the new game
     setGenreConfig(selectedGenre);
 
-    const concept = await generateConcept(selectedGenre);
+    // Call the refactored service to generate the concept via the backend.
+    const concept = await generateConceptService(selectedGenre);
     const settingText =
       concept.setting && concept.setting.trim().length > 0
         ? concept.setting
@@ -58,8 +50,6 @@ const StartScreen: React.FC = () => {
   };
 
   const handleContinue = () => {
-    // The stores are already rehydrated by the persist middleware.
-    // We just need to navigate to the game screen.
     setGameState(GameState.PLAYING);
   };
 
@@ -68,17 +58,14 @@ const StartScreen: React.FC = () => {
     setIsStarting(true);
 
     try {
-      // Fetch the demo data from the public folder
       const response = await fetch('/demo.json');
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const demoData = await response.json();
 
-      // Reset the current game state
       GameStateManager.resetAllStores();
 
-      // Load the world state and story history from the demo file
       const { worldState: demoWorldState, storyHistory: demoStoryHistory } = demoData as {
         worldState: WorldState;
         storyHistory: StorySegment[];
@@ -87,18 +74,15 @@ const StartScreen: React.FC = () => {
       useWorldStateStore.getState().setWorldState(demoWorldState);
       useStoryHistoryStore.getState().replaceStoryHistory(demoStoryHistory);
 
-      // Apply the theme from the genre config
       if (demoWorldState.genreConfig) {
         Object.entries(demoWorldState.genreConfig.theme).forEach(([key, value]) => {
           document.documentElement.style.setProperty(key, value as string);
         });
       }
 
-      // Navigate to the game screen
       setGameState(GameState.PLAYING);
     } catch (error) {
       console.error('Failed to load demo:', error);
-      // Optionally, show an error message to the user
     } finally {
       setIsStarting(false);
     }
@@ -111,11 +95,10 @@ const StartScreen: React.FC = () => {
       <p>Descent into cosmic madness through AI consciousness.</p>
 
       <div className="ai-model-info">
-        <span>Powered by: <strong>{selectedModel?.name || 'Unknown Model'}</strong></span>
-        <small>Use the model selector in bottom-right to change AI provider</small>
+        <span>Powered by a decentralized AI consciousness.</span>
+        <small>The backend orchestrates multiple AI providers for this experience.</small>
       </div>
 
-      {/* Kept genre selector from HEAD */}
       <div className="genre-selector">
         <h2>Choose Your Descent</h2>
         <select

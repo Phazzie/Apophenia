@@ -1,7 +1,8 @@
 /**
- * AI Model Selector Component
- * 
- * Allows users to select between available AI models and test their connectivity
+ * AI Model Viewer & Backend Diagnostic Tool
+ *
+ * Displays information about the AI models powering the application
+ * and allows users to test the connectivity to the secure backend.
  */
 
 import React, { useState } from 'react';
@@ -15,28 +16,20 @@ interface ModelSelectorProps {
 
 const ModelSelector: React.FC<ModelSelectorProps> = ({ isVisible, onClose }) => {
   const {
-    selectedModelId,
     getAllModels,
-    getSelectedModel,
     getTestResult,
-    setSelectedModel,
-    testModel,
+    testBackendConnection,
     isTestingModel,
   } = useAIModelStore();
 
   const [expandedModel, setExpandedModel] = useState<string | null>(null);
   const models = getAllModels();
 
-  const handleModelSelect = (modelId: string) => {
-    setSelectedModel(modelId);
-  };
-
-  const handleTestModel = async (modelId: string) => {
-    await testModel(modelId);
+  const handleTestConnection = async (modelId: string) => {
+    await testBackendConnection(modelId);
   };
 
   const renderModelCard = (model: AIModel) => {
-    const isSelected = model.id === selectedModelId;
     const testResult = getTestResult(model.id);
     const isCurrentlyTesting = isTestingModel === model.id;
     const isExpanded = expandedModel === model.id;
@@ -44,17 +37,13 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ isVisible, onClose }) => 
     return (
       <div
         key={model.id}
-        className={`model-card ${isSelected ? 'selected' : ''}`}
-        onClick={() => handleModelSelect(model.id)}
+        className={`model-card ${model.isDefault ? 'selected' : ''}`}
       >
         <div className="model-header">
           <div className="model-info">
             <div className="model-name">{model.name}</div>
             <div className="model-provider">{model.provider}</div>
-            {model.isDefault && <span className="default-badge">Default</span>}
-          </div>
-          <div className="model-status">
-            {isSelected && <span className="selected-indicator">✓</span>}
+            {model.isDefault && <span className="default-badge">Primary</span>}
           </div>
         </div>
 
@@ -63,7 +52,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ isVisible, onClose }) => 
             <div className="feature">
               <span className="feature-label">Context:</span>
               <span className="feature-value">
-                {model.contextWindow >= 1000000 
+                {model.contextWindow >= 1000000
                   ? `${(model.contextWindow / 1000000).toFixed(1)}M tokens`
                   : `${Math.round(model.contextWindow / 1000)}K tokens`
                 }
@@ -89,13 +78,13 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ isVisible, onClose }) => 
             className="test-button"
             onClick={(e) => {
               e.stopPropagation();
-              handleTestModel(model.id);
+              handleTestConnection(model.id);
             }}
             disabled={isCurrentlyTesting}
           >
-            {isCurrentlyTesting ? 'Testing...' : 'Test API'}
+            {isCurrentlyTesting ? 'Testing...' : 'Test Backend'}
           </button>
-          
+
           <button
             className="details-button"
             onClick={(e) => {
@@ -130,9 +119,6 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ isVisible, onClose }) => 
                   <li>🧠 Advanced reasoning with thinking mode</li>
                   <li>📚 2M token context for complete session memory</li>
                   <li>🎭 Deep psychological profiling across entire narrative</li>
-                  <li>🔗 Cross-reference all story elements for perfect consistency</li>
-                  <li>🌌 Multi-layered thematic coherence analysis</li>
-                  <li>⚡ Fast reasoning optimized for interactive narratives</li>
                 </ul>
               )}
               {model.id.startsWith('gemini-') && (
@@ -140,8 +126,6 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ isVisible, onClose }) => 
                   <li>🎨 Image generation capabilities</li>
                   <li>📖 {model.contextWindow / 1000000}M token context window</li>
                   <li>🛡️ Advanced safety filtering</li>
-                  <li>🔄 Reliable fallback performance</li>
-                  {model.supportsThinking && <li>🧠 Thinking mode support</li>}
                 </ul>
               )}
             </div>
@@ -157,25 +141,25 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ isVisible, onClose }) => 
     <div className="model-selector-overlay" onClick={onClose}>
       <div className="model-selector-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>Select AI Model</h2>
+          <h2>AI Consciousness Matrix</h2>
           <button className="close-button" onClick={onClose}>×</button>
         </div>
-        
+
         <div className="modal-content">
           <div className="current-selection">
-            <strong>Currently selected:</strong> {getSelectedModel()?.name || 'None'}
+            <strong>Backend orchestrates multiple AI models for this experience.</strong>
           </div>
-          
+
           <div className="models-grid">
             {models.map(renderModelCard)}
           </div>
-          
+
           <div className="model-info-section">
-            <h3>Why Grok-4 Fast Reasoning is the Default:</h3>
+            <h3>Why a Multi-Model Backend?</h3>
             <p>
-              Grok-4 offers a massive 2 million token context window, one of the largest available,
-              with advanced reasoning capabilities. This enables unprecedented narrative consistency, 
-              deep psychological analysis, and complex story development across your entire gaming session.
+              By using a secure backend, Apophenia can leverage the best features of multiple AI providers,
+              ensuring the highest quality narrative generation while providing robust fallbacks. This architecture
+              also protects the API keys and centralizes the complex AI logic.
             </p>
           </div>
         </div>

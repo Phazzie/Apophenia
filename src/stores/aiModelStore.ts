@@ -1,40 +1,34 @@
 /**
- * AI Model Selector Store
- * 
- * Manages the selected AI model and provides testing functionality
+ * AI Model Information and Backend Test Store
+ *
+ * Manages information about the AI models available on the backend
+ * and provides functionality for testing backend connectivity.
  */
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { AIModel, ModelTestResult } from '../types';
-import { xaiClient } from '../services/ai/grokService';
+import { backendAPIService } from '../services/ai/backendAPIService';
+import { testGrokConnection } from '../services/ai/grokService';
 
-// Available AI models
+// This list now serves for informational purposes on the frontend.
+// The actual model selection logic resides on the backend server.
 export const AVAILABLE_MODELS: AIModel[] = [
   {
     id: 'grok-4-fast-reasoning',
     name: 'Grok-4 Fast Reasoning',
     provider: 'X.AI',
-    contextWindow: 2000000, // 2M tokens
+    contextWindow: 2000000,
     supportsThinking: true,
-    supportsImages: false,
+    supportsImages: false, // As per current backend implementation
     isDefault: true,
   },
   {
     id: 'gemini-2.5-pro',
     name: 'Gemini 2.5 Pro',
     provider: 'Google',
-    contextWindow: 1000000, // 1M tokens
+    contextWindow: 1000000,
     supportsThinking: true,
-    supportsImages: true,
-    isDefault: false,
-  },
-  {
-    id: 'gemini-2.5-flash',
-    name: 'Gemini 2.5 Flash',
-    provider: 'Google',
-    contextWindow: 1000000, // 1M tokens
-    supportsThinking: false,
     supportsImages: true,
     isDefault: false,
   },
@@ -42,135 +36,87 @@ export const AVAILABLE_MODELS: AIModel[] = [
 
 interface AIModelStore {
   // State
-  selectedModelId: string;
   testResults: Record<string, ModelTestResult>;
   isTestingModel: string | null;
-  
+
   // Getters
-  getSelectedModel: () => AIModel | undefined;
   getAllModels: () => AIModel[];
-  getTestResult: (modelId: string, testType?: string) => ModelTestResult | undefined;
-  
+  getTestResult: (modelId: string) => ModelTestResult | undefined;
+
   // Actions
-  setSelectedModel: (modelId: string) => void;
-  testModel: (modelId: string, testType?: 'text' | 'image') => Promise<ModelTestResult>;
+  testBackendConnection: (modelId: string) => Promise<ModelTestResult>;
   clearTestResults: () => void;
 }
 
 export const useAIModelStore = create<AIModelStore>()(
   persist(
     (set, get) => ({
-      // Initialize with default model (Grok-4)
-      selectedModelId: AVAILABLE_MODELS.find(m => m.isDefault)?.id || 'grok-4-fast-reasoning',
       testResults: {},
       isTestingModel: null,
 
       // Getters
-      getSelectedModel: () => {
-        const { selectedModelId } = get();
-        return AVAILABLE_MODELS.find(m => m.id === selectedModelId);
-      },
-
       getAllModels: () => AVAILABLE_MODELS,
 
-      getTestResult: (modelId: string, testType: string = 'text') => {
+      getTestResult: (modelId: string) => {
         const { testResults } = get();
-        const resultKey = `${modelId}-${testType}`;
-        return testResults[resultKey] || testResults[modelId]; // Fallback to old format
+        return testResults[modelId];
       },
 
       // Actions
-      setSelectedModel: (modelId: string) => {
-        const model = AVAILABLE_MODELS.find(m => m.id === modelId);
-        if (model) {
-          set({ selectedModelId: modelId });
-          console.log(`AI model switched to: ${model.name} (${model.provider})`);
-        }
-      },
-
-      testModel: async (modelId: string, testType: 'text' | 'image' = 'text') => {
+      testBackendConnection: async (modelId: string) => {
         set({ isTestingModel: modelId });
-        
+        let result: ModelTestResult;
+
         try {
+          // All tests now go through our secure backend.
+          // We can have model-specific test logic if the backend supports it,
+          // but for now, a general health check is sufficient.
           const startTime = Date.now();
-          let result: ModelTestResult;
+          const isHealthy = await backendAPIService.healthCheck();
+          const responseTime = Date.now() - startTime;
 
-          console.log(`Testing ${modelId} for ${testType} capability...`);
+          if (!isHealthy) {
+            throw new Error('Backend API health check failed.');
+          }
 
-          if (modelId === 'grok-4-fast-reasoning') {
-            const testResult = await xaiClient.testConnection(testType);
-            result = {
-              ...testResult,
-              responseTime: Date.now() - startTime,
-            };
-          } else if (modelId.startsWith('gemini-')) {
-            // Test Gemini models with appropriate capability
-            if (testType === 'text') {
-              console.log('Testing Gemini text generation...');
-              result = {
-                success: true,
-                model: modelId,
-                contextWindow: 1000000,
-                responseTime: Date.now() - startTime,
-                testType: 'text',
-              };
-            } else {
-              console.log('Testing Gemini image generation...');
-              result = {
-                success: true,
-                model: modelId,
-                contextWindow: 1000000,
-                responseTime: Date.now() - startTime,
-                testType: 'image',
-              };
-            }
+          // If a specific test for Grok is available, use it.
+          if (modelId.includes('grok')) {
+              const grokResult = await testGrokConnection();
+              result = { ...grokResult, responseTime };
           } else {
-            console.error('Unknown model for testing:', modelId);
+            // For other models, a general success message is appropriate
             result = {
-              success: false,
+              success: true,
               model: modelId,
-              contextWindow: 0,
-              responseTime: Date.now() - startTime,
-              testType,
-              error: 'Unknown model',
+              contextWindow: 1000000, // Example value
+              responseTime,
+              testType: 'text',
             };
           }
 
-          console.log('Test result:', result);
-
-          // Store the test result with test type
-          const resultKey = `${modelId}-${testType}`;
-          set(state => ({
-            testResults: {
-              ...state.testResults,
-              [resultKey]: result,
-            },
-            isTestingModel: null,
-          }));
-
-          return result;
+          console.log(`Backend connection test for ${modelId} successful.`);
         } catch (error) {
-          console.error('Model test failed:', modelId, testType, error);
-          const result: ModelTestResult = {
+          const errorMessage = error instanceof Error ? error.message : 'Test failed';
+          console.error(`Backend connection test for ${modelId} failed:`, errorMessage);
+          result = {
             success: false,
             model: modelId,
             contextWindow: 0,
-            responseTime: Date.now() - Date.now(),
-            testType,
-            error: error instanceof Error ? error.message : 'Test failed',
+            error: errorMessage,
+            testType: 'text',
+            responseTime: 0,
           };
-
-          const resultKey = `${modelId}-${testType}`;
-          set(state => ({
-            testResults: {
-              ...state.testResults,
-              [resultKey]: result,
-            },
-            isTestingModel: null,
-          }));
-
-          return result;
         }
+
+        set(state => ({
+          testResults: {
+            ...state.testResults,
+            [modelId]: result,
+          },
+          isTestingModel: null,
+        }));
+
+        return result;
       },
 
       clearTestResults: () => {
@@ -179,8 +125,8 @@ export const useAIModelStore = create<AIModelStore>()(
     }),
     {
       name: 'ai-model-store',
-      // Only persist the selected model, not test results
-      partialize: (state) => ({ selectedModelId: state.selectedModelId }),
+      // Only persist a subset of the state, excluding test results.
+      partialize: (state) => ({}),
     }
   )
 );

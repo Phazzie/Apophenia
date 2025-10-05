@@ -17,6 +17,7 @@ const StartScreen: React.FC = () => {
   const [hasSavedGame, setHasSavedGame] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
   const [selectedGenre, setSelectedGenre] = useState<GenreConfig>(defaultGenre);
+  const [error, setError] = useState<string | null>(null);
 
   const selectedModel = getSelectedModel();
 
@@ -110,7 +111,7 @@ const StartScreen: React.FC = () => {
       setGameState(GameState.PLAYING);
     } catch (error) {
       console.error('Failed to load demo:', error);
-      // Optionally, show an error message to the user
+      setError('Failed to load demo data. Please try again later.');
     } finally {
       setIsStarting(false);
     }
@@ -122,6 +123,8 @@ const StartScreen: React.FC = () => {
       <h1>Apophenia</h1>
       <p>Descent into cosmic madness through AI consciousness.</p>
       
+      {error && <div className="error-message">{error}</div>}
+
       <div className="ai-model-info">
         <span>Powered by: <strong>{selectedModel?.name || 'Unknown Model'}</strong></span>
         <small>Use the model selector in bottom-right to change AI provider</small>
@@ -154,7 +157,6 @@ const StartScreen: React.FC = () => {
       <button onClick={handleLoadDemo} disabled={isStarting}>
         {isStarting ? 'Loading...' : 'Load Demo'}
       </button>
-      <button onClick={handleTestImageGeneration}>Test Image Generation</button>
     </div>
   );
 };

@@ -65,7 +65,11 @@ export class QuantumNarrativeEngine {
     return { history: currentHistory };
   }
 
-  private async isSignificantChoice(choice: string, worldState: WorldState, storyHistory: StorySegment[]): Promise<boolean> {
+  private async isSignificantChoice(
+    choice: string,
+    worldState: WorldState,
+    storyHistory: StorySegment[]
+  ): Promise<boolean> {
     const systemInstruction = QUANTUM_NARRATIVE_SYSTEM_PROMPT;
     const prompt = QUANTUM_NARRATIVE_PROMPT(choice);
 
@@ -78,7 +82,7 @@ export class QuantumNarrativeEngine {
         'story'
       );
       if (commands[0]?.type === 'displayText') {
-        return commands[0].payload.content.toLowerCase().includes('yes');
+        return commands[0].payload.content.toUpperCase().includes('BRANCH');
       }
     } catch (error) {
       console.error('Significance analysis failed:', error);

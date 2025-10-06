@@ -1,13 +1,12 @@
 /**
- * Grok-4 Fast Reasoning API Integration
+ * Grok-4 Fast API Integration
  *
- * Implements X.AI's Grok-4-fast-reasoning model with 2M token context window
- * and advanced reasoning capabilities (thinking mode).
+ * Implements X.AI's Grok-4-fast model.
  */
 
 // X.AI API configuration
 const XAI_API_BASE = 'https://api.x.ai/v1';
-const GROK_MODEL = 'grok-4-fast-reasoning';
+const GROK_MODEL = 'grok-4-fast';
 
 interface GrokMessage {
   role: 'system' | 'user' | 'assistant';
@@ -20,7 +19,7 @@ interface GrokRequest {
   temperature?: number;
   max_tokens?: number;
   top_p?: number;
-  thinking?: boolean; // Enable reasoning mode
+  thinking?: boolean; 
   stream?: boolean;
 }
 
@@ -34,7 +33,7 @@ interface GrokResponse {
     message: {
       role: string;
       content: string;
-      thinking?: string; // Reasoning trace when thinking mode enabled
+      thinking?: string;
     };
     finish_reason: string;
   }[];
@@ -53,7 +52,7 @@ interface GrokImage {
 }
 
 /**
- * X.AI API client for text generation with thinking mode
+ * X.AI API client for text generation
  */
 export class XAIAPIClient {
   private apiKey: string;
@@ -69,7 +68,7 @@ export class XAIAPIClient {
   }
 
   /**
-   * Generate text with Grok-4 Fast Reasoning
+   * Generate text with Grok-4 Fast
    */
   async generateText(
     systemInstruction: string,
@@ -97,7 +96,7 @@ export class XAIAPIClient {
       temperature: config.temperature ?? 1.0,
       max_tokens: config.maxTokens ?? 8192,
       top_p: config.topP ?? 0.95,
-      thinking: config.enableThinking ?? true, // Enable thinking by default
+      thinking: config.enableThinking ?? true,
       stream: false
     };
 
@@ -206,7 +205,7 @@ export class XAIAPIClient {
           {
             maxTokens: 100,
             temperature: 0.1,
-            enableThinking: false // Don't need thinking for simple test
+            enableThinking: false
           }
         );
 
@@ -214,7 +213,7 @@ export class XAIAPIClient {
         return {
           success: true,
           model: GROK_MODEL,
-          contextWindow: 2000000, // 2M tokens
+          contextWindow: 2000000,
           testType: 'text',
         };
       } else {
@@ -258,10 +257,10 @@ export class XAIAPIClient {
     return {
       name: GROK_MODEL,
       provider: 'X.AI',
-      contextWindow: 2000000, // 2 million tokens
-      supportsFunctions: false, // Grok-4 doesn't support function calling yet
-      supportsThinking: true, // Advanced reasoning mode
-      supportsImages: true, // Attempting image generation (experimental/future compatibility)
+      contextWindow: 2000000,
+      supportsFunctions: false, 
+      supportsThinking: true, 
+      supportsImages: true,
     };
   }
 }

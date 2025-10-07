@@ -31,7 +31,7 @@
 ## 🚀 Quick Start
 
 ### Prerequisites
-- **Node.js 18+** (20+ recommended for optimal performance)
+- **Node.js 20.19.0+** (as specified in `package.json`)
 - **npm 8+** or **yarn 3+** for package management  
 - **Grok API key** (primary AI model - from X.AI)
 - **Google Gemini API key** (fallback model - optional but recommended)
@@ -139,9 +139,9 @@ Gemini 2.5 Flash (Final fallback)
 Static thematic error responses
 ```
 
-## 🧠 Revolutionary 8-Module AI Engine System
+## 🧠 Revolutionary 9-Module AI Engine System
 
-Apophenia features the most advanced AI-driven interactive storytelling system ever created, consisting of **8 interconnected revolutionary engines** that work together to create unprecedented personalized horror experiences:
+Apophenia features the most advanced AI-driven interactive storytelling system ever created, consisting of **9 interconnected revolutionary engines** that work together to create unprecedented personalized horror experiences:
 
 ### 🎯 Core Revolutionary Engines
 
@@ -156,11 +156,12 @@ Apophenia features the most advanced AI-driven interactive storytelling system e
 6. **🧬 Neural Echo Chambers** - Cross-session memory persistence using encrypted localStorage, maintaining player psychological profiles between gaming sessions
 7. **⚗️ Semantic Choice Archaeology** - Deep psychological analysis of player choice patterns, excavating meaning from decision sequences to understand player psyche  
 8. **🧬 Adaptive Narrative DNA** - Evolutionary story genetics that adapt and mutate over time based on player engagement, creating unique narrative branches
+9. **💥 Breaking the Fifth Wall** - The AI can manipulate the browser environment itself, breaking the ultimate barrier between game and reality.
 
 ### 🎮 System Integration
 
-All 8 engines work in perfect harmony during gameplay:
-- Every player choice is processed through **all 8 modules simultaneously**
+All 9 engines work in perfect harmony during gameplay:
+- Every player choice is processed through **all 9 modules simultaneously**
 - Cross-engine data sharing creates emergent psychological experiences
 - Real-time adaptation ensures no two playthroughs are ever identical
 - Complete session memory with 2M token context for perfect narrative continuity
@@ -190,11 +191,11 @@ src/
 │   └── imageCacheStore.ts   # LRU+TTL image caching (50 items, 30min TTL)
 ├── services/               # Business logic and AI orchestration
 │   ├── ai/                 # AI service integrations
-│   │   ├── grokService.ts   # Grok-4 Fast Reasoning with 2M context
+│   │   ├── engines/          # Revolutionary AI Engine System
+│   │   ├── grokService.ts    # Grok-4 Fast Reasoning with 2M context
 │   │   ├── unifiedAIService.ts  # Multi-model routing and fallbacks
-│   │   ├── genkit.ts       # Google Gemini 2.5 Pro with fallbacks
-│   │   ├── imageGeneration.ts  # Multi-service image generation
-│   │   └── revolutionaryFeatures.ts  # Advanced AI capabilities
+│   │   ├── genkit.ts        # Google Gemini 2.5 Pro with fallbacks
+│   │   └── imageGeneration.ts  # Multi-service image generation
 │   ├── flows/              # Game flow orchestration
 │   │   ├── conceptFlow.ts  # Initial story concept generation
 │   │   ├── nextStepFlow.ts # Story progression with context awareness
@@ -331,7 +332,7 @@ The visual design follows a **cosmic horror aesthetic**:
 
 ## 📈 Performance
 
-- **📦 Bundle Size**: ~252KB (74KB gzipped)
+- **📦 Bundle Size**: ~252KB (72KB gzipped)
 - **⚡ Load Time**: <3 seconds on average connection
 - **📱 Mobile Optimized**: Responsive design for all screen sizes
 - **🖼️ Image Optimization**: Smart caching and progressive loading

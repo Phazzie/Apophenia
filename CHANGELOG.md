@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- **Frontend Architecture**: Refactored the `GameScreen.tsx` component by extracting core logic into `useGameLoop` and `useGameEffects` custom hooks. This improves separation of concerns and component readability.
+- **Testing Framework**: Migrated the test runner from Jest to Vitest to resolve persistent ES Module (ESM) compatibility issues. This involved updating the test scripts in `package.json` and adding a test configuration to `vite.config.mjs`.
+
 ## [1.1.0] - 2025-01-XX - "The Complete Revolutionary Engine"
 
 ### Added - Complete 8-Module Revolutionary AI System ✨

@@ -1,23 +1,25 @@
 import React, { useEffect } from 'react';
 import { useGameStateStore } from './stores/gameStateStore';
 import { useWorldStateStore } from './stores/worldStateStore';
+import { useUserStore } from './stores/userStore';
 import { GameState } from './types';
 import StartScreen from './components/StartScreen';
 import GameScreen from './components/GameScreen';
 import EndScreen from './components/EndScreen';
+import LoginScreen from './components/LoginScreen';
 import CompactModelSelector from './components/CompactModelSelector';
 import { GameErrorBoundary } from './components/ErrorBoundary';
 import { GameStateManager } from './services/gameStateManager';
+import ThematicLoading from './components/ThematicLoading';
 
 const App: React.FC = () => {
   const { gameState } = useGameStateStore();
   const { worldState } = useWorldStateStore();
+  const { session, loading: userLoading } = useUserStore();
 
   // Initialize game services on app start
   useEffect(() => {
     GameStateManager.initialize();
-    
-    // Cleanup on unmount
     return () => {
       GameStateManager.cleanup();
     };
@@ -34,9 +36,28 @@ const App: React.FC = () => {
       case GameState.ENDED:
         return <EndScreen />;
       default:
-        return <div>Unknown game state</div>;
+        return <div>Unknown game state: {gameState}</div>;
     }
   };
+
+  if (userLoading) {
+    return (
+      <div id="app-container" className="loading-container">
+        <ThematicLoading />
+        <p>Connecting to the void...</p>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return (
+      <GameErrorBoundary>
+        <div id="app-container">
+          <LoginScreen />
+        </div>
+      </GameErrorBoundary>
+    );
+  }
 
   return (
     <GameErrorBoundary>

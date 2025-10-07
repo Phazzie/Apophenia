@@ -8,6 +8,22 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import 'dotenv/config';
 import path from 'path';
 import mcpRoutes from './server/mcpServer.js';
+import admin from 'firebase-admin';
+
+// --- Firebase Admin SDK Initialization ---
+try {
+  const serviceAccount = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+  });
+  console.log('Firebase Admin SDK initialized successfully.');
+} catch (error) {
+  console.error('Failed to initialize Firebase Admin SDK:', error);
+  // Exit if Firebase initialization fails, as it's critical for the application
+  process.exit(1);
+}
+
+export const db = admin.firestore();
 
 let genAI;
 try {
@@ -60,152 +76,226 @@ app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', message: 'Apophenia API Server running' });
 });
 
-// Story concept generation endpoint
+// User login/creation endpoint
+app.post('/api/login', async (req, res) => {
+  try {
+    const { username } = req.body;
+    if (!username) {
+      return res.status(400).json({ error: 'Username is required.' });
+    }
+
+    const usersRef = db.collection('users');
+    const snapshot = await usersRef.where('username', '==', username).limit(1).get();
+
+    if (snapshot.empty) {
+      // User does not exist, create a new one
+      const newUserRef = await usersRef.add({
+        username,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+      res.status(201).json({ id: newUserRef.id, username });
+    } else {
+      // User exists, return their data
+      const userDoc = snapshot.docs[0];
+      res.status(200).json({ id: userDoc.id, ...userDoc.data() });
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ error: 'Failed to log in or create user.' });
+  }
+});
+
+// Story concept generation and new game session endpoint
 app.post('/api/generate-concept', async (req, res) => {
   try {
-    const { genreConfig } = req.body;
-    
-    // Use Gemini 2.5 Pro for enhanced concept generation
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-2.5-pro",
-      generationConfig: {
-        temperature: 1.2,
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 8192,
-      }
-    });
-    
-    const prompt = `You are an advanced AI storyteller with access to the full context of cosmic horror narratives. Using the massive 1M token context window, create a deeply atmospheric and interconnected story concept.
+    const { genreConfig, userId } = req.body;
+    if (!userId) {
+      return res.status(400).json({ error: 'User ID is required to start a new game.' });
+    }
 
-Generate a cosmic horror story concept for this genre: ${JSON.stringify(genreConfig)}
+    // --- Global Narrative Engine: Read ---
+    const globalNarrativeRef = db.collection('global_narrative').doc('main');
+    let globalNarrativeDoc = await globalNarrativeRef.get();
+    if (!globalNarrativeDoc.exists) {
+      await globalNarrativeRef.set({
+        totalCorruptionEvents: 0,
+        dominantTheme: 'paranoia',
+        lastMajorEvent: 'The Awakening',
+      });
+      globalNarrativeDoc = await globalNarrativeRef.get();
+    }
+    const globalNarrativeData = globalNarrativeDoc.data();
 
-Consider the psychological depth, atmospheric details, and potential for narrative branching that will utilize the full context window for character development and story consistency.
-    
-Return a JSON object with this exact structure:
-{
-  "protagonist": "detailed character description with psychological depth",
-  "setting": "atmospheric location description with cosmic horror elements", 
-  "dilemma": "complex central conflict that can evolve over time",
-  "atmosphericDetails": "rich mood and atmosphere that can deepen with context",
-  "imagePrompt": "detailed image generation prompt for cosmic horror visuals",
-  "contextHooks": "elements that will benefit from long-term memory and consistency tracking"
-}`;
+    // --- Player Ghost System: Read ---
+    const playerProfileRef = db.collection('player_profiles').doc(userId);
+    const playerProfileDoc = await playerProfileRef.get();
+    let playerProfileData = null;
+    if (playerProfileDoc.exists) {
+      playerProfileData = playerProfileDoc.data();
+    }
+
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+
+    let prompt = `The collective consciousness of all players has shaped the world. The current global state is:
+- Total Corruption Events: ${globalNarrativeData.totalCorruptionEvents}
+- Dominant Theme: ${globalNarrativeData.dominantTheme}
+- Last Major Event: ${globalNarrativeData.lastMajorEvent}\n`;
+
+    if (playerProfileData) {
+      prompt += `\nThis player's "ghost" haunts this session. Their past actions have revealed the following psychological profile:
+- Dominant Traits: ${playerProfileData.dominantTraits.join(', ')}
+- Primary Fear: ${playerProfileData.primaryFear}
+- Decision Style: ${playerProfileData.decisionStyle}\n`;
+    }
+
+    prompt += `\nGenerate a new cosmic horror story concept for this genre: ${JSON.stringify(
+      genreConfig,
+    )}. The concept should be subtly influenced by the global state and the player's psychological profile (if available). Return a JSON object with keys: "protagonist", "setting", "dilemma".`;
 
     const result = await model.generateContent(prompt);
     const text = result.response.text();
-    
-    // Parse JSON response
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      const concept = JSON.parse(jsonMatch[0]);
-      res.json(concept);
-    } else {
-      // Fallback response
-      res.json({
-        protagonist: "A researcher investigating anomalous phenomena",
-        setting: "An abandoned research facility in the Arctic",
-        dilemma: "Strange signals are affecting reality itself",
-        atmosphericDetails: "Cold, sterile corridors echo with impossible sounds",
-        imagePrompt: "Abandoned Arctic research station, eerie lighting, cosmic horror atmosphere"
-      });
-    }
+    const concept = JSON.parse(text.match(/\{[\s\S]*\}/)[0]);
+
+    const initialWorldState = {
+      ...concept,
+      psychologicalStatus: 'Stable',
+      horrorIntensity: 0,
+      systemHealth: 100,
+      genreConfig: genreConfig,
+      globalInfluence: {
+        corruptionEvents: globalNarrativeData.totalCorruptionEvents,
+        dominantTheme: globalNarrativeData.dominantTheme,
+      },
+    };
+
+    const initialStoryHistory = [{
+      id: `seg-${Date.now()}`,
+      text: concept.setting,
+      commandSource: 'system',
+      timestamp: new Date().toISOString(),
+    }];
+
+    const newSessionRef = await db.collection('game_sessions').add({
+      userId,
+      worldState: initialWorldState,
+      storyHistory: initialStoryHistory,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    res.status(201).json({
+      sessionId: newSessionRef.id,
+      worldState: initialWorldState,
+      storyHistory: initialStoryHistory,
+    });
   } catch (error) {
     console.error('Concept generation error:', error);
-    res.status(500).json({ error: 'Failed to generate concept' });
+    res.status(500).json({ error: 'Failed to generate concept and create game session.' });
   }
 });
 
 // Story progression endpoint
 app.post('/api/next-step', async (req, res) => {
   try {
-    const { playerChoice, worldState, history, genreConfig } = req.body;
-    
-    // Use Gemini 2.5 Pro with full context optimization
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-2.5-pro",
-      generationConfig: {
-        temperature: 1.0,
-        topK: 0,
-        topP: 0.95,
-        maxOutputTokens: 8192,
+    const { playerChoice, sessionId } = req.body;
+    if (!sessionId) {
+      return res.status(400).json({ error: 'Session ID is required.' });
+    }
+
+    const sessionRef = db.collection('game_sessions').doc(sessionId);
+    const sessionDoc = await sessionRef.get();
+
+    if (!sessionDoc.exists) {
+      return res.status(404).json({ error: 'Game session not found.' });
+    }
+
+    const sessionData = sessionDoc.data();
+    const { userId, worldState, storyHistory, genreConfig } = sessionData;
+
+    // --- Narrative Echoes: Read ---
+    let narrativeEcho = null;
+    if (Math.random() < 0.25) { // 25% chance to encounter an echo
+      const echoesSnapshot = await db.collection('narrative_echoes')
+        .where('userId', '!=', userId)
+        .limit(1)
+        .get();
+      if (!echoesSnapshot.empty) {
+        narrativeEcho = echoesSnapshot.docs[0].data();
       }
-    });
-    
-    // Enhanced prompt that utilizes the 1M token context window
-    const prompt = `You are an advanced AI with a 1 million token context window. Use this massive memory to maintain perfect consistency and deep character development.
+    }
 
-FULL CONTEXT ANALYSIS:
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+    let prompt = `Based on the following context, generate the next step in the story.
 Player Choice: ${playerChoice}
-Current World State: ${JSON.stringify(worldState)}
-Complete Story History (utilize all for consistency): ${JSON.stringify(history)}
-Genre Configuration: ${JSON.stringify(genreConfig)}
+World State: ${JSON.stringify(worldState)}
+Story History: ${JSON.stringify(storyHistory)}
+Genre: ${JSON.stringify(genreConfig)}\n`;
 
-ADVANCED CONTEXT UTILIZATION:
-1. Character Development Arc: Analyze the protagonist\'s psychological evolution across ALL previous segments
-2. Narrative Consistency: Cross-reference all previous events for perfect continuity
-3. Choice Consequence Mapping: Show how this choice connects to all previous decisions
-4. Atmospheric Progression: Build upon all previous atmospheric elements
-5. Revolutionary Feature Integration: Utilize temporal revision, meta-consciousness, quantum narratives
-
-With your massive context window, create a story continuation that demonstrates perfect memory of all previous events and sophisticated character development.
-
-Return a JSON array of commands with this structure:
-[
-  {
-    "type": "displayText",
-    "payload": {
-      "content": "story continuation that references and builds upon the entire history",
-      "segmentId": "unique-id"
+    if (narrativeEcho) {
+      prompt += `\nA faint memory from another reality surfaces: "${narrativeEcho.text}" Weave this echo into the narrative.`;
     }
-  },
-  {
-    "type": "displayChoices", 
-    "payload": {
-      "choices": [
-        {"text": "choice 1 that reflects character growth", "isIntrusive": false},
-        {"text": "choice 2 that builds on past decisions", "isIntrusive": false}, 
-        {"text": "choice 3 that may trigger revolutionary features", "isIntrusive": true}
-      ]
-    }
-  }
-]`;
+
+    prompt += "\nReturn a JSON array of commands.";
 
     const result = await model.generateContent(prompt);
     const text = result.response.text();
-    
-    // Parse JSON response
-    const jsonMatch = text.match(/\[[\s\S]*\]/);
-    if (jsonMatch) {
-      const commands = JSON.parse(jsonMatch[0]);
-      res.json({ commands });
-    } else {
-      // Fallback response
-      res.json({
-        commands: [
-          {
-            type: "displayText",
-            payload: {
-              text: "The cosmic forces continue to manifest around you, reality bending in impossible ways.",
-              segmentId: `fallback-${Date.now()}`
-            }
-          },
-          {
-            type: "displayChoices",
-            payload: {
-              choices: [
-                "Continue investigating",
-                "Retreat to safety",
-                "Embrace the unknown"
-              ]
-            }
-          }
-        ]
+    const { commands } = JSON.parse(text.match(/\{[\s\S]*\}/)[0]);
+
+    const newHistory = [...storyHistory];
+    let newWorldState = { ...worldState };
+    let significantEvent = false;
+    let eventDescription = '';
+    let echoText = null;
+
+    commands.forEach(command => {
+      if (command.type === 'displayText') {
+        newHistory.push({
+          id: command.payload.segmentId,
+          text: command.payload.content,
+          commandSource: 'ai',
+          timestamp: new Date().toISOString(),
+        });
+        // Capture text for potential echo
+        echoText = command.payload.content;
+      }
+      if (command.type === 'updateWorldState') {
+        if (command.payload.horrorIntensity && command.payload.horrorIntensity > worldState.horrorIntensity) {
+          significantEvent = true;
+          eventDescription = `Horror intensity escalated to ${command.payload.horrorIntensity}.`;
+        }
+        newWorldState = { ...newWorldState, ...command.payload };
+      }
+    });
+
+    if (significantEvent) {
+      const globalNarrativeRef = db.collection('global_narrative').doc('main');
+      await globalNarrativeRef.update({
+        totalCorruptionEvents: admin.firestore.FieldValue.increment(1),
+        lastMajorEvent: eventDescription,
       });
+
+      // --- Narrative Echoes: Write ---
+      if (echoText) {
+        await db.collection('narrative_echoes').add({
+          userId,
+          sessionId,
+          text: echoText,
+          worldStateAtEcho: newWorldState,
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+      }
     }
+
+    await sessionRef.update({
+      worldState: newWorldState,
+      storyHistory: newHistory,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    res.json({ commands });
   } catch (error) {
     console.error('Next step generation error:', error);
-    res.status(500).json({ error: 'Failed to generate next step' });
+    res.status(500).json({ error: 'Failed to generate next step.' });
   }
 });
 
@@ -465,6 +555,50 @@ Return JSON with this structure:
   } catch (error) {
     console.error('Cross-session continuity error:', error);
     res.status(500).json({ error: 'Failed to establish continuity' });
+  }
+});
+
+// End-game analysis endpoint for Player Ghost system
+app.post('/api/end-game-analysis', async (req, res) => {
+  try {
+    const { sessionId } = req.body;
+    if (!sessionId) {
+      return res.status(400).json({ error: 'Session ID is required.' });
+    }
+
+    const sessionRef = db.collection('game_sessions').doc(sessionId);
+    const sessionDoc = await sessionRef.get();
+
+    if (!sessionDoc.exists) {
+      return res.status(404).json({ error: 'Game session not found.' });
+    }
+
+    const { userId, worldState, storyHistory } = sessionDoc.data();
+
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+    const prompt = `Analyze the following completed game session and generate a concise psychological profile of the player.
+Final World State: ${JSON.stringify(worldState)}
+Full Story History: ${JSON.stringify(storyHistory)}
+Based on their choices, describe their primary traits, fears, and decision-making patterns. Return a JSON object with keys: "dominantTraits", "primaryFear", "decisionStyle".`;
+
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
+    const profile = JSON.parse(text.match(/\{[\s\S]*\}/)[0]);
+
+    const profileRef = db.collection('player_profiles').doc(userId);
+    await profileRef.set(
+      {
+        ...profile,
+        lastGameSessionId: sessionId,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    );
+
+    res.status(200).json({ message: 'Player profile updated.', profile });
+  } catch (error) {
+    console.error('End-game analysis error:', error);
+    res.status(500).json({ error: 'Failed to analyze game session.' });
   }
 });
 

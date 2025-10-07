@@ -1,4 +1,3 @@
-
 import { GenreConfig } from '../types';
 
 export const DEFAULT_GENRE: GenreConfig = {

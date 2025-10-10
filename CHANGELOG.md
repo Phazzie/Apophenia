@@ -8,6 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Changed
 - **Frontend Architecture**: Refactored the `GameScreen.tsx` component by extracting core logic into `useGameLoop` and `useGameEffects` custom hooks. This improves separation of concerns and component readability.
 - **Testing Framework**: Migrated the test runner from Jest to Vitest to resolve persistent ES Module (ESM) compatibility issues. This involved updating the test scripts in `package.json` and adding a test configuration to `vite.config.mjs`.
+### Added
+- **Architectural Decision Records (ADRs):** Established a new `docs/adr` directory to formally document significant architectural decisions, starting with `0001-record-architecture-decisions.md`.
+- **Expert-Level Project Documentation:** Created and distributed `agents.md` (explaining the AI architecture for humans) and `gemini.md` (providing instructions for the AI assistant) across the root, `.github`, and `docs` directories to ensure maximum visibility and utility.
+
+### Changed
+- **Comprehensive README Update:** Overhauled the `README.md` to include a detailed architectural deep-dive, an expert development workflow, and information on the revolutionary 9-module AI engine system.
+- **Node Version Update:** Updated the `engines` field in `package.json` to require `node >= 20.19.0` to match modern development standards.
+- **Changelog Update:** Significantly updated this `CHANGELOG.md` to accurately reflect recent, crucial documentation and architectural enhancements.
 
 ## [1.1.0] - 2025-01-XX - "The Complete Revolutionary Engine"
 
@@ -113,18 +121,6 @@ The most significant update in Apophenia's history - the complete implementation
 
 ### Security
 - Removed hardcoded Google GenAI API key from `src/services/config.ts`. The key is now securely loaded from the `VITE_GEMINI_API_KEY` environment variable.
-
-## [Unreleased]
-
-### Added
-- **Documentation Audit & Archive System**: Created systematic documentation organization with archive folder for deprecated files
-- **Expert-Level Documentation**: Enhanced README, agents.md, and copilot-instructions.md to expert level
-- **DigitalOcean Deployment Guide**: Brand new comprehensive deployment guide for DigitalOcean platform
-- **Detailed Changelog**: Comprehensive git-based changelog with granular changes tracking
-
-### Changed
-- **Documentation Organization**: Moved 10+ deprecated files to `docs/archive/` folder with clear deprecation notes
-- **Repository Structure**: Cleaned up root directory by archiving completed analysis documents
 
 ## [1.0.0] - 2025-09-23
 

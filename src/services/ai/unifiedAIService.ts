@@ -1,4 +1,4 @@
-/**
+E/**
  * Unified AI Service with Model Selection
  * 
  * Routes AI requests to the appropriate service (Grok or Gemini) based on user selection
@@ -39,8 +39,8 @@ export async function generateWithSelectedModel(
   }
 
   try {
-    if (selectedModel.id === 'grok-4-fast-reasoning') {
-      console.log('Using X.AI/Grok-4 for text generation');
+    if (selectedModel.id === 'grok-4-fast') {
+      console.log('Using X.AI/grok-4-fast for text generation');
       return await generateWithGrok(systemInstruction, prompt, gameState);
     } else {
       console.log('Using Gemini for text generation');
@@ -53,7 +53,7 @@ export async function generateWithSelectedModel(
 }
 
 /**
- * Generate with X.AI Grok-4 Fast Reasoning
+ * Generate with X.AI Grok-4 Fast
  */
 async function generateWithGrok(
   systemInstruction: string,
@@ -64,7 +64,7 @@ async function generateWithGrok(
   try {
     const config = getConfigForUseCase(useCase);
     
-    console.log('Generating with X.AI Grok-4:', { useCase, config });
+    console.log('Generating with X.AI grok-4-fast:', { useCase, config });
     const result = await xaiClient.generateText(systemInstruction, prompt, {
       temperature: config.temperature,
       maxTokens: config.maxOutputTokens,
@@ -135,8 +135,8 @@ export async function generateConceptWithSelectedModel(
 ): Promise<{ protagonist: string; setting: string; dilemma: string }> {
   const selectedModel = useAIModelStore.getState().getSelectedModel();
   
-  if (selectedModel?.id === 'grok-4-fast-reasoning') {
-    console.log('Generating concept with X.AI/Grok-4');
+  if (selectedModel?.id === 'grok-4-fast') {
+    console.log('Generating concept with X.AI/grok-4-fast');
     return await generateConceptWithGrok(genreConfig);
   } else {
     console.log('Generating concept with Gemini');
@@ -204,8 +204,8 @@ export async function generateNextStepWithSelectedModel(
   const selectedModel = useAIModelStore.getState().getSelectedModel();
   const gameState = getFullGameState(playerChoice, worldState, storyHistory);
 
-  if (selectedModel?.id === 'grok-4-fast-reasoning') {
-    console.log('Generating next step with X.AI/Grok-4');
+  if (selectedModel?.id === 'grok-4-fast') {
+    console.log('Generating next step with X.AI/grok-4-fast');
     return await generateNextStepWithGrok(playerChoice, worldState, storyHistory, genreConfig);
   } else {
     console.log('Generating next step with Gemini');

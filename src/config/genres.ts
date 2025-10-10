@@ -1,4 +1,3 @@
-
 import { GenreConfig } from '../types';
 
 export const DEFAULT_GENRE: GenreConfig = {
@@ -16,3 +15,6 @@ export const DEFAULT_GENRE: GenreConfig = {
   conceptPrompt: 'Generate a cosmic horror story concept.',
   aiSystemInstruction: 'You are an AI that generates cosmic horror stories.',
 };
+
+export const genres: GenreConfig[] = [DEFAULT_GENRE];
+export const defaultGenre = DEFAULT_GENRE;

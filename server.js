@@ -154,7 +154,11 @@ app.post('/api/generate-concept', async (req, res) => {
 
     const result = await model.generateContent(prompt);
     const text = result.response.text();
-    const concept = JSON.parse(text.match(/\{[\s\S]*\}/)[0]);
+    const match = text.match(/\{[\s\S]*\}/);
+    if (!match) {
+      throw new Error('No JSON object found in model response');
+    }
+    const concept = JSON.parse(match[0]);
 
     const initialWorldState = {
       ...concept,

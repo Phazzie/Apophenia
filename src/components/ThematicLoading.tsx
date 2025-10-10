@@ -52,7 +52,7 @@ const ThematicLoading: React.FC = () => {
 
   return (
     <div className="loading-container">
-      <div className="loading-spinner"></div>
+      <div className="loading-spinner" data-testid="loading-spinner"></div>
       <p style={glitchStyle}>{phrase}</p>
     </div>
   );

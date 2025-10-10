@@ -7,21 +7,20 @@ import { useWorldStateStore } from '../../stores/worldStateStore';
 import { useAIModelStore } from '../../stores/aiModelStore';
 import * as gameService from '../../services/gameService';
 import StartScreen from '../StartScreen';
-import { vi } from 'vitest';
 import { GameState } from '../../types';
 
 // Mock the zustand stores and services
-vi.mock('../../stores/gameStateStore');
-vi.mock('../../stores/storyHistoryStore');
-vi.mock('../../stores/worldStateStore');
-vi.mock('../../stores/aiModelStore');
-vi.mock('../../services/gameService');
+jest.mock('../../stores/gameStateStore');
+jest.mock('../../stores/storyHistoryStore');
+jest.mock('../../stores/worldStateStore');
+jest.mock('../../stores/aiModelStore');
+jest.mock('../../services/gameService');
 
-const mockSetGameState = vi.fn();
-const mockReplaceStoryHistory = vi.fn();
-const mockUpdateWorldState = vi.fn();
-const mockSetGenreConfig = vi.fn();
-const mockGenerateConcept = vi.spyOn(gameService, 'generateConcept');
+const mockSetGameState = jest.fn();
+const mockReplaceStoryHistory = jest.fn();
+const mockUpdateWorldState = jest.fn();
+const mockSetGenreConfig = jest.fn();
+const mockGenerateConcept = jest.spyOn(gameService, 'generateConcept');
 
 describe('StartScreen', () => {
   beforeEach(() => {
@@ -38,9 +37,9 @@ describe('StartScreen', () => {
       updateWorldState: mockUpdateWorldState,
     });
     (useAIModelStore as unknown as jest.Mock).mockReturnValue({
-      getSelectedModel: vi.fn().mockReturnValue({ id: 'test-model', name: 'Test Model' }),
+      getSelectedModel: jest.fn().mockReturnValue({ id: 'test-model', name: 'Test Model' }),
     });
-    mockGenerateConcept.mockResolvedValue({ 
+    mockGenerateConcept.mockResolvedValue({
         protagonist: { name: 'Guy', description: 'A guy', personality: 'bland' },
         setting: 'A new world',
         atmosphere: 'exciting',
@@ -50,7 +49,7 @@ describe('StartScreen', () => {
   });
 
   afterEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   it('renders the start screen with a new game button', () => {

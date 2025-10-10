@@ -2,7 +2,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ErrorBoundary, GameErrorBoundary } from '../ErrorBoundary';
-import { vi } from 'vitest';
 
 // A component that throws an error
 const ErrorComponent = () => {
@@ -12,7 +11,7 @@ const ErrorComponent = () => {
 describe('ErrorBoundary', () => {
   // Suppress console.error output from the error boundary
   beforeAll(() => {
-    vi.spyOn(console, 'error').mockImplementation(() => {});
+    jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterAll(() => {

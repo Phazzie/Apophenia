@@ -14,14 +14,16 @@ module.exports = {
     '^../../services/ai/unifiedAIService$': '<rootDir>/src/services/__mocks__/ai/unifiedAIService.ts',
     '^../ai/unifiedAIService$': '<rootDir>/src/services/__mocks__/ai/unifiedAIService.ts',
     '\\.(css|less|scss)$': 'identity-obj-proxy',
+    // Mocks for services using import.meta.env
+    '^./genkit$': '<rootDir>/src/services/__mocks__/ai/genkit.ts',
+    '^../services/ai/genkit$': '<rootDir>/src/services/__mocks__/ai/genkit.ts',
+    '^./grokService$': '<rootDir>/src/services/__mocks__/ai/grokService.ts',
   },
   transform: {
     '^.+\\.tsx?$': [
       'ts-jest',
       {
-        tsconfig: {
-          module: 'esnext',
-        },
+        tsconfig: 'tsconfig.test.json',
       },
     ],
   },
@@ -58,13 +60,4 @@ module.exports = {
       statements: 34,
     },
   },
-  // Mock import.meta.env for Vite compatibility
-  globals: {
-    'import.meta': {
-      env: {
-        VITE_GEMINI_API_KEY: 'test-key',
-        VITE_XAI_API_KEY: 'test-key',
-      }
-    }
-  }
 };

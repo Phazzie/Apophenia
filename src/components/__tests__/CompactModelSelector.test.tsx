@@ -3,14 +3,13 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { useAIModelStore } from '../../stores/aiModelStore';
 import CompactModelSelector from '../CompactModelSelector';
-import { vi } from 'vitest';
 
 // Mock the zustand store
-vi.mock('../../stores/aiModelStore');
+jest.mock('../../stores/aiModelStore');
 
-const mockGetAllModels = vi.fn();
-const mockGetSelectedModel = vi.fn();
-const mockSetSelectedModel = vi.fn();
+const mockGetAllModels = jest.fn();
+const mockGetSelectedModel = jest.fn();
+const mockSetSelectedModel = jest.fn();
 
 const mockModels = [
   { id: 'grok-1', name: 'Grok 1', provider: 'xAI', contextWindow: 1000, supportsThinking: true, supportsImages: false },
@@ -28,7 +27,7 @@ describe('CompactModelSelector', () => {
   });
 
   afterEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   it('renders the button with the selected model name', () => {

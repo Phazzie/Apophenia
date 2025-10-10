@@ -2,7 +2,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import Button from '../Button';
-import { vi } from 'vitest';
 
 describe('Button', () => {
   it('renders the button with the correct text', () => {
@@ -11,14 +10,14 @@ describe('Button', () => {
   });
 
   it('calls the onClick handler when clicked', () => {
-    const handleClick = vi.fn();
+    const handleClick = jest.fn();
     render(<Button onClick={handleClick}>Click me</Button>);
     fireEvent.click(screen.getByText('Click me'));
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
 
   it('disables the button when the disabled prop is true', () => {
-    const handleClick = vi.fn();
+    const handleClick = jest.fn();
     render(<Button onClick={handleClick} disabled>Click me</Button>);
     const button = screen.getByText('Click me');
     expect(button).toBeDisabled();

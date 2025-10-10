@@ -31,7 +31,7 @@ const GlitchedText: React.FC<GlitchedTextProps> = ({ text }) => {
     return () => clearInterval(interval);
   }, [text]);
 
-  return <h1 className="glitched-title">{glitchedText}</h1>;
+  return <h1 className="glitched-title" data-testid="glitched-text">{glitchedText.length > 0 ? glitchedText : text}</h1>;
 };
 
 export default GlitchedText;

@@ -6,19 +6,18 @@ import { useStoryHistoryStore } from '../../stores/storyHistoryStore';
 import { useWorldStateStore } from '../../stores/worldStateStore';
 import * as gameService from '../../services/gameService';
 import GameScreen from '../GameScreen';
-import { vi } from 'vitest';
 import { GameState } from '../../types';
 
 // Mock the zustand stores and services
-vi.mock('../../stores/gameStateStore');
-vi.mock('../../stores/storyHistoryStore');
-vi.mock('../../stores/worldStateStore');
-vi.mock('../../services/gameService');
+jest.mock('../../stores/gameStateStore');
+jest.mock('../../stores/storyHistoryStore');
+jest.mock('../../stores/worldStateStore');
+jest.mock('../../services/gameService');
 
-const mockSetGameState = vi.fn();
-const mockAddStorySegment = vi.fn();
-const mockUpdateWorldState = vi.fn();
-const mockGetNextStep = vi.spyOn(gameService, 'getNextStep');
+const mockSetGameState = jest.fn();
+const mockAddStorySegment = jest.fn();
+const mockUpdateWorldState = jest.fn();
+const mockGetNextStep = jest.spyOn(gameService, 'getNextStep');
 
 describe('GameScreen', () => {
   beforeEach(() => {
@@ -28,12 +27,12 @@ describe('GameScreen', () => {
       gameState: GameState.PLAYING,
       setGameState: mockSetGameState,
       isGenerating: false,
-      setIsGenerating: vi.fn(),
+      setIsGenerating: jest.fn(),
     });
     (useStoryHistoryStore as unknown as jest.Mock).mockReturnValue({
       storyHistory: [{ id: '1', text: 'Initial story', images: {} }],
       addStorySegment: mockAddStorySegment,
-      replaceStoryHistory: vi.fn(),
+      replaceStoryHistory: jest.fn(),
     });
     (useWorldStateStore as unknown as jest.Mock).mockReturnValue({
       worldState: { protagonist: 'John Doe', setting: 'A dark and stormy night' },
@@ -43,7 +42,7 @@ describe('GameScreen', () => {
   });
 
   afterEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   it('renders the last story segment and choices', () => {
@@ -66,7 +65,7 @@ describe('GameScreen', () => {
       gameState: GameState.PLAYING,
       setGameState: mockSetGameState,
       isGenerating: true,
-      setIsGenerating: vi.fn(),
+      setIsGenerating: jest.fn(),
     });
     const { container } = render(<GameScreen />);
     expect(container.querySelector('.loading-spinner')).toBeInTheDocument();

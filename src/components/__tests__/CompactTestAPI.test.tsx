@@ -5,16 +5,15 @@ import { useAIModelStore } from '../../stores/aiModelStore';
 import { imageGenerationService } from '../../services/ai/imageGeneration';
 import { unifiedAIService } from '../../services/ai/unifiedAIService';
 import CompactTestAPI from '../CompactTestAPI';
-import { vi } from 'vitest';
 
 // Mock the zustand store and services
-vi.mock('../../stores/aiModelStore');
-vi.mock('../../services/ai/imageGeneration');
-vi.mock('../../services/ai/unifiedAIService');
+jest.mock('../../stores/aiModelStore');
+jest.mock('../../services/ai/imageGeneration');
+jest.mock('../../services/ai/unifiedAIService');
 
-const mockGetSelectedModel = vi.fn();
-const mockGenerateImageVariations = vi.fn();
-const mockGenerateText = vi.fn();
+const mockGetSelectedModel = jest.fn();
+const mockGenerateImageVariations = jest.fn();
+const mockGenerateText = jest.fn();
 
 describe('CompactTestAPI', () => {
   beforeEach(() => {
@@ -26,7 +25,7 @@ describe('CompactTestAPI', () => {
   });
 
   afterEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   it('renders the test buttons', () => {

@@ -8,8 +8,8 @@ interface UserState {
   loading: boolean;
   setSession: (session: Session | null) => void;
   setUser: (user: User | null) => void;
-  signUp: (email, password) => Promise<void>;
-  signIn: (email, password) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
 

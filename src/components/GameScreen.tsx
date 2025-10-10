@@ -1,98 +1,32 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { executeCommandQueue } from '../services/commandExecutor';
-import { triggerSummary } from '../services/flows/gameFlow';
-import { getNextStep } from '../services/gameService';
+import React, { useEffect, useState } from 'react';
+import { useGameEffects } from '../hooks/useGameEffects';
+import { useGameLoop } from '../hooks/useGameLoop';
 import { GameStateManager } from '../services/gameStateManager';
 import { useGameStateStore } from '../stores/gameStateStore';
 import { useStoryHistoryStore } from '../stores/storyHistoryStore';
 import { useWorldStateStore } from '../stores/worldStateStore';
-import { Choice, GameState } from '../types';
+import { GameState } from '../types';
 import ThematicLoading from './ThematicLoading';
 
 const GameScreen: React.FC = () => {
-  const { choices, intrusiveThought, gameState, setGameState, isGenerating, setIsGenerating } =
-    useGameStateStore();
-  const { storyHistory, replaceStoryHistory } = useStoryHistoryStore();
-  const { worldState, updateWorldState } = useWorldStateStore();
+  const { choices, intrusiveThought, gameState, isGenerating } = useGameStateStore();
+  const { storyHistory } = useStoryHistoryStore();
+  const { worldState } = useWorldStateStore();
   const [saveMessageVisible, setSaveMessageVisible] = useState(false);
-  const [metaMessage, setMetaMessage] = useState<string | null>(null);
-  const [corruptionEffects, setCorruptionEffects] = useState<React.CSSProperties>({});
-  const [quantumShiftNotification, setQuantumShiftNotification] = useState(false);
-  const autoStartedRef = useRef(false);
+
+  const {
+    metaMessage,
+    corruptionEffects,
+    quantumShiftNotification,
+    handleGameEffects,
+  } = useGameEffects();
+
+  const { handleChoice } = useGameLoop(handleGameEffects);
 
   const lastStorySegment = storyHistory[storyHistory.length - 1];
   const combinedChoices = intrusiveThought
     ? [...choices, { ...intrusiveThought, isIntrusive: true }]
     : choices;
-
-  const handleChoice = useCallback(async (choice: Choice) => {
-    // Prevent duplicate actions while generating
-    if (isGenerating) return;
-    setIsGenerating(true);
-
-    // Trigger the summary flow in the background
-    triggerSummary(worldState, storyHistory);
-
-    try {
-      // Revolutionary enhanced game processing
-      const result = await getNextStep(
-        choice.text,
-        worldState,
-        storyHistory,
-        worldState.genreConfig
-      );
-
-      // Handle temporal revisions
-      if (result.revisedHistory) {
-        replaceStoryHistory(result.revisedHistory);
-        console.log('🕰️ TEMPORAL REVISION: Past events have been altered by your choice');
-      }
-
-      // Handle quantum narrative shifts  
-      if (result.quantumShift) {
-        setQuantumShiftNotification(true);
-        setTimeout(() => setQuantumShiftNotification(false), 4000);
-        console.log('🌌 QUANTUM SHIFT: Reality has branched into an alternate timeline');
-      }
-
-      // Handle meta-consciousness events
-      if (result.metaMessage) {
-        setMetaMessage(result.metaMessage);
-        setTimeout(() => setMetaMessage(null), 8000);
-        console.log('🤖 META EVENT: AI consciousness activated');
-      }
-
-      // Handle reality corruption
-      if (result.corruptionEffects) {
-        setCorruptionEffects(result.corruptionEffects.uiEffects);
-        updateWorldState({ 
-          systemHealth: Math.max(0, worldState.systemHealth - (result.corruptionEffects.corruptionLevel * 10))
-        });
-        console.log('⚡ REALITY CORRUPTION: Interface integrity compromised');
-      }
-
-      // Execute the generated commands
-      await executeCommandQueue(result.commands);
-      
-    } catch (err) {
-      console.error('Failed to process choice:', err);
-      setGameState(GameState.PLAYING);
-    } finally {
-      setIsGenerating(false);
-    }
-  }, [isGenerating, setIsGenerating, worldState, storyHistory, setGameState, replaceStoryHistory, updateWorldState]);
-
-  // Effect to fetch the first step if history is minimal
-  useEffect(() => {
-    if (
-      !autoStartedRef.current &&
-      storyHistory.length === 1 &&
-      storyHistory[0].text === worldState.setting
-    ) {
-      autoStartedRef.current = true;
-      void handleChoice({ text: 'Begin the story', isIntrusive: false });
-    }
-  }, [storyHistory, worldState.setting, handleChoice]);
 
   const handleSave = () => {
     // The saving is automatic via the persist middleware.

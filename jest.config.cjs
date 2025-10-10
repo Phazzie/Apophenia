@@ -1,10 +1,12 @@
 /** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
-  preset: 'ts-jest',
+  preset: 'ts-jest/presets/default-esm',
   testEnvironment: 'jsdom',
+  extensionsToTreatAsEsm: ['.ts', '.tsx'],
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
   setupFiles: ['whatwg-fetch'],
   moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1',
     '^../../config$': '<rootDir>/src/services/__mocks__/config.ts',
     '^../../services/config$': '<rootDir>/src/services/__mocks__/config.ts',
     '^../config$': '<rootDir>/src/services/__mocks__/config.ts',
@@ -19,15 +21,13 @@ module.exports = {
     '^.+\\.tsx?$': [
       'ts-jest',
       {
+        useESM: true,
         tsconfig: {
           module: 'esnext',
         },
       },
     ],
   },
-  transformIgnorePatterns: [
-    'node_modules/(?!(.*\\.mjs$))'
-  ],
   testMatch: [
     '<rootDir>/src/**/__tests__/**/*.test.{ts,tsx}',
     '<rootDir>/src/**/*.spec.{ts,tsx}'
@@ -58,13 +58,4 @@ module.exports = {
       statements: 34,
     },
   },
-  // Mock import.meta.env for Vite compatibility
-  globals: {
-    'import.meta': {
-      env: {
-        VITE_GEMINI_API_KEY: 'test-key',
-        VITE_XAI_API_KEY: 'test-key',
-      }
-    }
-  }
 };

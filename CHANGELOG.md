@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Changed
+- **Frontend Architecture**: Refactored the `GameScreen.tsx` component by extracting core logic into `useGameLoop` and `useGameEffects` custom hooks. This improves separation of concerns and component readability.
+- **Testing Framework**: Migrated the test runner from Jest to Vitest to resolve persistent ES Module (ESM) compatibility issues. This involved updating the test scripts in `package.json` and adding a test configuration to `vite.config.mjs`.
 ### Added
 - **Architectural Decision Records (ADRs):** Established a new `docs/adr` directory to formally document significant architectural decisions, starting with `0001-record-architecture-decisions.md`.
 - **Expert-Level Project Documentation:** Created and distributed `agents.md` (explaining the AI architecture for humans) and `gemini.md` (providing instructions for the AI assistant) across the root, `.github`, and `docs` directories to ensure maximum visibility and utility.

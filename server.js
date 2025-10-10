@@ -583,7 +583,18 @@ Based on their choices, describe their primary traits, fears, and decision-makin
 
     const result = await model.generateContent(prompt);
     const text = result.response.text();
-    const profile = JSON.parse(text.match(/\{[\s\S]*\}/)[0]);
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    let profile;
+    if (jsonMatch) {
+      profile = JSON.parse(jsonMatch[0]);
+    } else {
+      // Fallback profile if no JSON object is found
+      profile = {
+        dominantTraits: ["Unknown"],
+        primaryFear: "Unknown",
+        decisionStyle: "Unknown"
+      };
+    }
 
     const profileRef = db.collection('player_profiles').doc(userId);
     await profileRef.set(

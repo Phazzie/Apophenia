@@ -151,3 +151,22 @@ export type GameCommand = Command; // Alias for backward compatibility
 export type AIModel = z.infer<typeof aiModelSchema>;
 export type ModelTestResult = z.infer<typeof modelTestResultSchema>;
 export type AIDirectorAnalysisPayload = z.infer<typeof aiDirectorAnalysisPayloadSchema>;
+
+// Game Step Result Type (for revolutionary features)
+export interface GameStepResult {
+  commands: Command[];
+  revisedHistory?: StorySegment[];
+  metaMessage?: string;
+  quantumShift?: boolean;
+  corruptionEffects?: {
+    corruptionLevel: number;
+    uiEffects: React.CSSProperties;
+  };
+  echoMessage?: string;
+  semanticInsight?: string;
+  narrativeEvolution?: {
+    generation: number;
+    psychProfile: string;
+    hiddenMotivations: string[];
+  };
+}

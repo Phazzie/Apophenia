@@ -55,7 +55,7 @@ export const useImageCacheStore = create<ImageCacheStore>((set, get) => ({
       };
       
       const newCache = { ...state.imageCache, [prompt]: newEntry };
-      let newTelemetry = { ...state.telemetry };
+      const newTelemetry = { ...state.telemetry };
       
       // Check if we need to evict entries
       const entries = Object.entries(newCache);
@@ -109,7 +109,7 @@ export const useImageCacheStore = create<ImageCacheStore>((set, get) => ({
     if (now - entry.timestamp > CACHE_TTL) {
       // Remove expired entry
       set((state) => {
-        const { [prompt]: removed, ...rest } = state.imageCache;
+        const { [prompt]: _removed, ...rest } = state.imageCache;
         
         const updatedTelemetry = { 
           ...newTelemetry, 

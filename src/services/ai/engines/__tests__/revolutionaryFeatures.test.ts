@@ -1,16 +1,16 @@
 import { TemporalRevisionEngine } from '../TemporalRevisionEngine';
 // import { GameState, Choice } from '../../../types'; // GameState not used, Choice not used
-import { StorySegment } from '../../../types'; // Correct type
-import { useWorldStateStore } from '../../../stores/worldStateStore';
-import { useStoryHistoryStore } from '../../../stores/storyHistoryStore';
+// import { StorySegment } from '../../../types'; // Correct type
+// import { useWorldStateStore } from '../../../stores/worldStateStore';
+// import { useStoryHistoryStore } from '../../../stores/storyHistoryStore';
 
 describe('TemporalRevisionEngine', () => {
-  const engine = new TemporalRevisionEngine();
+  const _engine = new TemporalRevisionEngine();
 
   beforeEach(() => {
     // Reset stores before each test
-    useWorldStateStore.setState({ worldState: {} } as any); // Reset with proper structure
-    useStoryHistoryStore.setState({ history: [] });
+    // useWorldStateStore.setState({ worldState: {} } as any); // Reset with proper structure
+    // useStoryHistoryStore.setState({ history: [] });
   });
 
   // TODO: This entire test suite is outdated and needs to be rewritten.

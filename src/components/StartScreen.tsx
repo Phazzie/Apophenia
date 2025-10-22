@@ -107,10 +107,12 @@ const StartScreen: React.FC = () => {
 
   return (
     <div className="start-screen">
-      <GlitchedText text="Apophenia" />
-      <p>Descent into cosmic madness through AI consciousness.</p>
+      <h1>
+        <GlitchedText text="Apophenia" />
+      </h1>
+      <p className="tagline">Descent into cosmic madness through AI consciousness.</p>
 
-      <div className="ai-model-info">
+      <div className="ai-model-info" role="status" aria-live="polite">
         <span>Powered by: <strong>{selectedModel?.name || 'Unknown Model'}</strong></span>
         <small>Use the model selector in bottom-right to change AI provider</small>
       </div>
@@ -118,7 +120,11 @@ const StartScreen: React.FC = () => {
       {/* Kept genre selector from HEAD */}
       <div className="genre-selector">
         <h2>Choose Your Descent</h2>
+        <label htmlFor="genre-select" className="visually-hidden">
+          Select game genre
+        </label>
         <select
+          id="genre-select"
           value={selectedGenre.id}
           onChange={(e) => {
             const genre = genres.find(g => g.id === e.target.value);
@@ -126,6 +132,7 @@ const StartScreen: React.FC = () => {
               setSelectedGenre(genre);
             }
           }}
+          aria-describedby="genre-description"
         >
           {genres.map(genre => (
             <option key={genre.id} value={genre.id}>
@@ -133,16 +140,33 @@ const StartScreen: React.FC = () => {
             </option>
           ))}
         </select>
-        <p className="genre-description">{selectedGenre.description}</p>
+        <p id="genre-description" className="genre-description">
+          {selectedGenre.description}
+        </p>
       </div>
 
-      <button onClick={handleNewGame} disabled={isStarting}>
-        {isStarting ? 'Starting...' : 'New Game'}
-      </button>
-      {hasSavedGame && <button onClick={handleContinue}>Continue</button>}
-      <button onClick={handleLoadDemo} disabled={isStarting}>
-        {isStarting ? 'Loading...' : 'Load Demo'}
-      </button>
+      <div className="button-group" role="group" aria-label="Game actions">
+        <button 
+          onClick={handleNewGame} 
+          disabled={isStarting}
+          aria-busy={isStarting}
+        >
+          {isStarting ? 'Starting...' : 'New Game'}
+        </button>
+        {hasSavedGame && (
+          <button onClick={handleContinue} aria-label="Continue saved game">
+            Continue
+          </button>
+        )}
+        <button 
+          onClick={handleLoadDemo} 
+          disabled={isStarting}
+          aria-busy={isStarting}
+          aria-label="Load demo game"
+        >
+          {isStarting ? 'Loading...' : 'Load Demo'}
+        </button>
+      </div>
       <CompactTestAPI />
     </div>
   );

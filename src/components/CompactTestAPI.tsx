@@ -2,7 +2,8 @@
 import React from 'react';
 import { generateMultipleImages } from '../services/gameService';
 import { generateNextStepWithSelectedModel } from '../services/ai/unifiedAIService';
-import { useAIModelStore } from '../stores/aiModelStore';
+// useAIModelStore is not currently used
+// import { useAIModelStore } from '../stores/aiModelStore';
 import { WorldState, StorySegment, GenreConfig } from '../types';
 import { DEFAULT_GENRE } from '../config/genres';
 
@@ -27,7 +28,8 @@ const mockStoryHistory: StorySegment[] = [
 
 
 const CompactTestAPI: React.FC = () => {
-  const { getSelectedModel } = useAIModelStore();
+  // AI model is available but not currently used
+  // const { getSelectedModel } = useAIModelStore();
 
   const handleTestImageGeneration = async () => {
     console.log("--- Testing Image Generation ---");

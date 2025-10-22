@@ -1,4 +1,4 @@
-E/**
+/**
  * Unified AI Service with Model Selection
  * 
  * Routes AI requests to the appropriate service (Grok or Gemini) based on user selection
@@ -28,7 +28,7 @@ export async function generateWithSelectedModel(
   prompt: string,
   worldState: WorldState,
   storyHistory: StorySegment[],
-  useCase: 'concept' | 'story' | 'summary' = 'story'
+  _useCase: 'concept' | 'story' | 'summary' = 'story'
 ): Promise<GameCommand[]> {
   const selectedModel = useAIModelStore.getState().getSelectedModel();
   const gameState = getFullGameState(prompt, worldState, storyHistory);
@@ -58,7 +58,12 @@ export async function generateWithSelectedModel(
 async function generateWithGrok(
   systemInstruction: string,
   prompt: string,
-  gameState: any, // Using 'any' to avoid circular dependency issues with full type import
+  gameState: {
+    playerChoice: string;
+    worldState: WorldState;
+    history: StorySegment[];
+    genreConfig: GenreConfig;
+  },
   useCase: 'concept' | 'story' | 'summary' = 'story'
 ): Promise<GameCommand[]> {
   try {

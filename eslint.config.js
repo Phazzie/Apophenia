@@ -30,5 +30,5 @@ export default [
         ]
     },
   },
-  { ignores: ["dist", "eslint.config.js"] },
+  { ignores: ["dist", "eslint.config.js", "**/*.manual-test.js"] },
 ];

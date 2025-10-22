@@ -1,0 +1,206 @@
+/**
+ * Accessibility Enhancements for Apophenia
+ * 
+ * WCAG 2.1 AA Compliant Styles
+ */
+
+/* ===== FOCUS INDICATORS ===== */
+/* Visible focus indicators with 3:1 contrast ratio */
+*:focus {
+  outline: 3px solid #00ff00; /* High contrast green */
+  outline-offset: 2px;
+}
+
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+*:focus-visible {
+  outline: 3px solid #00ff00;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(0, 255, 0, 0.3);
+}
+
+/* Button focus states */
+button:focus-visible {
+  outline: 3px solid #00ff00;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(0, 255, 0, 0.3);
+}
+
+/* Link focus states */
+a:focus-visible {
+  outline: 3px solid #00ff00;
+  outline-offset: 2px;
+  text-decoration: underline;
+}
+
+/* Input focus states */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 3px solid #00ff00;
+  outline-offset: 2px;
+  border-color: #00ff00;
+}
+
+/* ===== SKIP LINKS ===== */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: #000;
+  color: #00ff00;
+  padding: 8px;
+  text-decoration: none;
+  z-index: 10000;
+  border: 2px solid #00ff00;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* ===== SCREEN READER ONLY TEXT ===== */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.sr-only-focusable:active,
+.sr-only-focusable:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+/* ===== KEYBOARD NAVIGATION INDICATORS ===== */
+.keyboard-nav-active *:focus {
+  outline: 3px solid #00ff00 !important;
+  outline-offset: 2px !important;
+}
+
+/* ===== HIGH CONTRAST MODE SUPPORT ===== */
+@media (prefers-contrast: high) {
+  *:focus-visible {
+    outline-width: 4px;
+    outline-offset: 3px;
+  }
+  
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    border-width: 2px;
+  }
+}
+
+/* ===== REDUCED MOTION SUPPORT ===== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ===== COLOR CONTRAST ENHANCEMENTS ===== */
+/* Ensure minimum 4.5:1 contrast ratio for normal text */
+.text-primary {
+  color: #ffffff; /* White on dark backgrounds */
+}
+
+.text-secondary {
+  color: #e0e0e0; /* Light gray for secondary text */
+}
+
+.text-accent {
+  color: #00ff00; /* High contrast accent */
+}
+
+/* ===== LOADING STATES ===== */
+.loading-indicator {
+  role: status;
+  aria-live: polite;
+  aria-label: "Loading content";
+}
+
+/* ===== ERROR STATES ===== */
+.error-message {
+  role: alert;
+  aria-live: assertive;
+  color: #ff4444; /* High contrast red */
+  background: #330000;
+  border: 2px solid #ff4444;
+  padding: 12px;
+  margin: 8px 0;
+}
+
+/* ===== CHOICE BUTTONS ACCESSIBILITY ===== */
+.choice-button {
+  min-height: 44px; /* WCAG touch target minimum */
+  min-width: 44px;
+  padding: 12px 20px;
+  margin: 8px 0;
+  cursor: pointer;
+  position: relative;
+}
+
+.choice-button:hover {
+  transform: translateX(5px);
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+}
+
+.choice-button:active {
+  transform: translateX(8px);
+}
+
+/* Disabled state */
+.choice-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ===== KEYBOARD-ONLY USERS ===== */
+/* Indicate keyboard focus for interactive elements */
+.interactive:focus-visible::before {
+  content: '▶';
+  position: absolute;
+  left: -20px;
+  color: #00ff00;
+  font-size: 16px;
+}
+
+/* ===== LANGUAGE SUPPORT ===== */
+html[lang="en"] {
+  /* English-specific styles if needed */
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+  .no-print,
+  button,
+  .choice-button {
+    display: none;
+  }
+  
+  * {
+    background: white !important;
+    color: black !important;
+  }
+}

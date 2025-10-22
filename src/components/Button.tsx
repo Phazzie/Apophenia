@@ -7,9 +7,19 @@ type ButtonProps = {
   disabled?: boolean;
   variant?: 'primary' | 'secondary';
   className?: string;
+  ariaLabel?: string;
+  type?: 'button' | 'submit' | 'reset';
 };
 
-const Button: React.FC<ButtonProps> = ({ children, onClick, disabled, variant = 'primary', className = '' }) => {
+const Button: React.FC<ButtonProps> = ({ 
+  children, 
+  onClick, 
+  disabled, 
+  variant = 'primary', 
+  className = '',
+  ariaLabel,
+  type = 'button'
+}) => {
   const baseClasses = 'btn';
   const variantClasses = {
     primary: 'btn-primary',
@@ -19,7 +29,14 @@ const Button: React.FC<ButtonProps> = ({ children, onClick, disabled, variant = 
   const classes = `${baseClasses} ${variantClasses[variant]} ${className}`.trim();
 
   return (
-    <button onClick={onClick} disabled={disabled} className={classes}>
+    <button 
+      type={type}
+      onClick={onClick} 
+      disabled={disabled} 
+      className={classes}
+      aria-label={ariaLabel || (typeof children === 'string' ? children : undefined)}
+      aria-disabled={disabled}
+    >
       {children}
     </button>
   );

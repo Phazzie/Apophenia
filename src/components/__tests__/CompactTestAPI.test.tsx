@@ -3,7 +3,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { useAIModelStore } from '../../stores/aiModelStore';
 import { imageGenerationService } from '../../services/ai/imageGeneration';
-import { unifiedAIService } from '../../services/ai/unifiedAIService';
+import * as unifiedAIService from '../../services/ai/unifiedAIService';
 import CompactTestAPI from '../CompactTestAPI';
 import { vi } from 'vitest';
 
@@ -22,7 +22,7 @@ describe('CompactTestAPI', () => {
       getSelectedModel: mockGetSelectedModel.mockReturnValue({ id: 'grok-1' }),
     });
     (imageGenerationService.generateImageVariations as jest.Mock).mockImplementation(mockGenerateImageVariations);
-    (unifiedAIService.generateText as jest.Mock).mockImplementation(mockGenerateText);
+    vi.spyOn(unifiedAIService, 'generateWithSelectedModel').mockImplementation(mockGenerateText);
   });
 
   afterEach(() => {

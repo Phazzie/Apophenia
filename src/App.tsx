@@ -36,13 +36,17 @@ const App: React.FC = () => {
       case GameState.ENDED:
         return <EndScreen />;
       default:
-        return <div>Unknown game state: {gameState}</div>;
+        return (
+          <div role="alert" aria-live="assertive">
+            Unknown game state: {gameState}
+          </div>
+        );
     }
   };
 
   if (userLoading) {
     return (
-      <div id="app-container" className="loading-container">
+      <div id="app-container" className="loading-container" role="status" aria-live="polite">
         <ThematicLoading />
         <p>Connecting to the void...</p>
       </div>
@@ -62,8 +66,12 @@ const App: React.FC = () => {
   return (
     <GameErrorBoundary>
       <div id="app-container" style={worldState.uiDistortion}>
-        {renderGameState()}
-        <CompactModelSelector />
+        <main id="main-content" role="main">
+          {renderGameState()}
+        </main>
+        <aside aria-label="AI Model Selector">
+          <CompactModelSelector />
+        </aside>
       </div>
     </GameErrorBoundary>
   );

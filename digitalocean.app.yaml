@@ -31,8 +31,11 @@ services:
         value: production
       - key: SERVE_STATIC
         value: "true" # Tells the Express server to serve the built frontend from the 'dist' directory
-      - key: GEMINI_API_KEY
-        scope: RUN_TIME
+      - key: VITE_GEMINI_API_KEY
+        scope: RUN_AND_BUILD_TIME
+        type: SECRET
+      - key: VITE_XAI_API_KEY
+        scope: RUN_AND_BUILD_TIME
         type: SECRET
 
 # Alerting rules

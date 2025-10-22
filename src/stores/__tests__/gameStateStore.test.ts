@@ -75,7 +75,7 @@ describe('useGameStateStore', () => {
   it('should reset the store to its initial state', () => {
     // First, modify the state
     act(() => {
-      useGameStateStore.getState().setGameState(GameState.GAME_OVER);
+      useGameStateStore.getState().setGameState(GameState.ENDED);
       useGameStateStore.getState().setIsGenerating(true);
       useGameStateStore.getState().setChoices([{ text: 'A choice', isIntrusive: false }]);
     });

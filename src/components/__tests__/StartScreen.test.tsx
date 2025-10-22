@@ -41,11 +41,9 @@ describe('StartScreen', () => {
       getSelectedModel: vi.fn().mockReturnValue({ id: 'test-model', name: 'Test Model' }),
     });
     mockGenerateConcept.mockResolvedValue({ 
-        protagonist: { name: 'Guy', description: 'A guy', personality: 'bland' },
+        protagonist: 'Guy - A guy with a bland personality',
         setting: 'A new world',
-        atmosphere: 'exciting',
-        npcs: [],
-        genre: 'fantasy'
+        dilemma: 'What to do next'
     });
   });
 

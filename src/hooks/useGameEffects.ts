@@ -24,12 +24,12 @@ export const useGameEffects = () => {
     }
 
     // Handle reality corruption
-    if (result.corruptionEffects) {
-      setCorruptionEffects(result.corruptionEffects.uiEffects);
+    if (result.corruptionEffect) {
+      setCorruptionEffects(result.corruptionEffect.visualEffect);
       updateWorldState({
         systemHealth: Math.max(
           0,
-          worldState.systemHealth - result.corruptionEffects.corruptionLevel * 10,
+          worldState.systemHealth - result.corruptionEffect.level * 10,
         ),
       });
       console.log('⚡ REALITY CORRUPTION: Interface integrity compromised');

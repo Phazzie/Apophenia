@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type React from 'react';
 
 // Enums
 export enum GameState {
@@ -151,3 +152,21 @@ export type GameCommand = Command; // Alias for backward compatibility
 export type AIModel = z.infer<typeof aiModelSchema>;
 export type ModelTestResult = z.infer<typeof modelTestResultSchema>;
 export type AIDirectorAnalysisPayload = z.infer<typeof aiDirectorAnalysisPayloadSchema>;
+
+// Game Step Result Type for Revolutionary Features
+export interface GameStepResult {
+  storySegment?: StorySegment;
+  worldStateUpdate?: Partial<WorldState>;
+  choices?: Choice[];
+  // Revolutionary features
+  quantumShift?: boolean;
+  metaMessage?: string;
+  corruptionEffect?: {
+    level: number;
+    visualEffect: React.CSSProperties;
+  };
+  temporalRevision?: {
+    segmentId: string;
+    newText: string;
+  };
+}

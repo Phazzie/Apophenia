@@ -32,6 +32,7 @@
 }
 
 .refresh-button,
+.export-button,
 .clear-button {
   padding: 0.5rem 1rem;
   font-family: 'Courier New', monospace;
@@ -43,9 +44,19 @@
   transition: all 0.3s ease;
 }
 
-.refresh-button:hover {
+.refresh-button:hover,
+.export-button:hover {
   background: rgba(139, 92, 246, 0.2);
   transform: scale(1.05);
+}
+
+.export-button {
+  border-color: #10b981;
+  color: #6ee7b7;
+}
+
+.export-button:hover {
+  background: rgba(16, 185, 129, 0.2);
 }
 
 .clear-button {

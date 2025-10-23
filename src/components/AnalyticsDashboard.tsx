@@ -27,6 +27,23 @@ const AnalyticsDashboard: React.FC = () => {
     }
   };
 
+  const handleExportData = () => {
+    const data = {
+      exportedAt: new Date().toISOString(),
+      currentSession: currentSession,
+      engagementMetrics: engagementMetrics,
+      allEvents: analyticsService.getAllEvents()
+    };
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `apophenia-analytics-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const formatDuration = (ms: number): string => {
     const seconds = Math.floor(ms / 1000);
     const minutes = Math.floor(seconds / 60);
@@ -52,6 +69,9 @@ const AnalyticsDashboard: React.FC = () => {
         <div className="header-actions">
           <button onClick={handleRefresh} className="refresh-button">
             🔄 Refresh
+          </button>
+          <button onClick={handleExportData} className="export-button">
+            📥 Export
           </button>
           <button onClick={handleClearData} className="clear-button">
             🗑️ Clear Data

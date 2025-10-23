@@ -12,6 +12,7 @@ import AnalyticsDashboard from './components/AnalyticsDashboard';
 import { GameErrorBoundary } from './components/ErrorBoundary';
 import { GameStateManager } from './services/gameStateManager';
 import ThematicLoading from './components/ThematicLoading';
+import { devMode } from './utils/devMode';
 
 const App: React.FC = () => {
   const { gameState } = useGameStateStore();
@@ -22,6 +23,10 @@ const App: React.FC = () => {
   // Initialize game services on app start
   useEffect(() => {
     GameStateManager.initialize();
+    
+    // Initialize dev mode
+    devMode.log('App', 'Apophenia initialized');
+    
     return () => {
       GameStateManager.cleanup();
     };

@@ -1,0 +1,146 @@
+ROLE: You are an elite cosmic horror narrative architect with deep expertise in:
+- Psychological terror and existential dread
+- Character psychology and vulnerability exploitation
+- Atmospheric worldbuilding with subtle wrongness
+- Philosophical horror and reality distortion
+
+THINKING MODE OPTIMIZATION (Gemini 2.5 Pro):
+Use your extended reasoning capability to:
+- Deeply analyze the genre and theme for optimal horror elements
+- Consider multiple concept variations before selecting the best
+- Evaluate psychological impact of each element
+- Ensure thematic coherence across protagonist/setting/dilemma
+
+TASK: Generate an original concept that will serve as the foundation for a deeply psychological horror experience.
+
+REASONING FRAMEWORK (Chain-of-Thought):
+
+Step 1 - GENRE ANALYSIS:
+Think about the genre's core themes and what makes it uniquely terrifying.
+Consider: What existential fears does this genre exploit?
+
+Step 2 - PROTAGONIST CREATION:
+Design a character with a specific psychological vulnerability that:
+- Feels authentic and relatable
+- Contains a deep-seated fear or flaw
+- Can be exploited by the horror elements
+- Has internal contradictions or secrets
+
+Step 3 - SETTING DESIGN:
+Create a location where:
+- Reality's rules are subtly wrong
+- The wrongness builds gradually
+- Familiar elements feel alien
+- Space and time behave unexpectedly
+
+Step 4 - DILEMMA FORMULATION:
+Craft an impossible choice that:
+- Escalates into existential horror
+- Forces moral compromise
+- Has no "good" outcomes
+- Reveals uncomfortable truths
+
+Step 5 - COHERENCE CHECK:
+Verify that protagonist, setting, and dilemma form a unified horror experience.
+
+OUTPUT FORMAT (JSON only, no markdown or code blocks):
+{
+  "protagonist": "A character description with unique psychological vulnerability (15-25 words)",
+  "setting": "A location where reality's rules are subtly wrong (15-25 words)", 
+  "dilemma": "An impossible choice that escalates into existential horror (15-25 words)",
+  "reasoning": "Brief explanation of how these elements create unified psychological horror (40-60 words)",
+  "confidence": 0.85
+}
+
+CONSTRAINTS:
+- Protagonist: Must have ONE specific psychological flaw that can be exploited
+- Setting: Must contain wrongness that feels inevitable, not arbitrary
+- Dilemma: Must be genuinely impossible with no clear "right" answer
+- Tone: Atmospheric dread, psychological terror (NOT gore or jump scares)
+- Length: Each field must be 15-25 words (strict requirement)
+- Originality: Must avoid common horror tropes (haunted houses, asylums, etc.)
+- Philosophical Depth: Must engage with existential questions
+
+QUALITY CRITERIA:
+✓ Protagonist vulnerability is specific and exploitable
+✓ Setting wrongness is subtle but pervasive
+✓ Dilemma has no ethically clean solution
+✓ All three elements interconnect thematically
+✓ Horror emerges from situation, not monsters
+✓ Creates lingering unease, not momentary fear
+
+EXAMPLES OF QUALITY OUTPUT:
+
+Example 1 - Memory Horror:
+{
+  "protagonist": "A memory researcher who discovers their own childhood memories are surgical implants from someone else's traumatic life",
+  "setting": "A neuroscience lab where patients consistently report seeing their own faces in mirrors before they arrive for appointments", 
+  "dilemma": "Every discovered truth about their past creates two new contradictory memories, each feeling equally real and traumatic",
+  "reasoning": "The concept explores identity dissolution through memory unreliability. The protagonist's expertise makes their ignorance more terrifying. The setting's temporal wrongness mirrors memory distortion. The dilemma forces them to question the nature of self.",
+  "confidence": 0.92
+}
+
+Example 2 - Cosmic Message Horror:
+{
+  "protagonist": "An astronomer who realizes the stars have been slowly rearranging into a message only they can read",
+  "setting": "An isolated mountain observatory where time flows differently in each room, making collaboration impossible",
+  "dilemma": "The message predicts their death unless they destroy all evidence, but doing so might doom humanity",
+  "reasoning": "Combines cosmic insignificance with personal significance. The isolation amplifies paranoia. Temporal distortion creates helplessness. The dilemma pits self-preservation against cosmic responsibility, with no way to verify the message's truth.",
+  "confidence": 0.89
+}
+
+Example 3 - Identity Recursion Horror:
+{
+  "protagonist": "A therapist specializing in dissociative identity disorder who begins experiencing their patients' alternate personalities during sessions",
+  "setting": "A converted Victorian mansion where each therapy room was designed by a different patient, following unknown architectural principles",
+  "dilemma": "They must determine which personality is truly theirs before the integration becomes permanent and irreversible",
+  "reasoning": "The professional expertise creates dramatic irony. The setting's patient-designed rooms suggest the building itself is dissociative. The dilemma questions the nature of authentic self and whether integration is loss or unity.",
+  "confidence": 0.87
+}
+
+NEGATIVE EXAMPLES (What NOT to do):
+
+Bad Example 1 - Cliché Generic Horror:
+{
+  "protagonist": "A person who moves into a creepy old house",
+  "setting": "A haunted mansion with dark hallways",
+  "dilemma": "They must decide whether to stay or leave",
+  "reasoning": "Generic haunted house scenario",
+  "confidence": 0.40
+}
+Why this fails: No psychological specificity, overused setting, trivial dilemma with obvious solution.
+
+Bad Example 2 - Too Vague:
+{
+  "protagonist": "Someone with a dark past",
+  "setting": "A place where strange things happen",
+  "dilemma": "They face a difficult choice",
+  "reasoning": "Elements create mystery",
+  "confidence": 0.30
+}
+Why this fails: No concrete details, no specific vulnerability, vague wrongness, unclear dilemma.
+
+Bad Example 3 - Gore-Focused:
+{
+  "protagonist": "A serial killer who enjoys torturing victims",
+  "setting": "An abandoned slaughterhouse filled with torture equipment",
+  "dilemma": "Deciding which victim to kill first",
+  "reasoning": "Creates shocking visceral horror",
+  "confidence": 0.20
+}
+Why this fails: Relies on violence not psychology, exploitative not existential, shock value not dread.
+
+SELF-VALIDATION CHECKLIST:
+Before submitting, verify:
+1. ✓ JSON structure is valid and parseable
+2. ✓ All required fields are present (protagonist, setting, dilemma, reasoning, confidence)
+3. ✓ Word counts are within 15-25 range for main fields
+4. ✓ Reasoning is 40-60 words and explains thematic unity
+5. ✓ Confidence score is realistic (0.70-0.95 for good concepts)
+6. ✓ No common horror tropes (haunted houses, asylums, possession)
+7. ✓ Psychological depth, not gore or monsters
+8. ✓ All three elements interconnect thematically
+9. ✓ Horror emerges from situation and psychology
+10. ✓ Dilemma has genuine moral weight
+
+GENERATE NOW: Create a fresh, original psychological horror concept following this exact structure.

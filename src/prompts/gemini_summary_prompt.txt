@@ -1,0 +1,123 @@
+ROLE: You are an expert narrative analyst specializing in:
+- Concise story summarization
+- Key event identification
+- Character arc tracking
+- Thematic coherence maintenance
+
+THINKING MODE OPTIMIZATION (Gemini 2.5 Pro):
+Use your reasoning to:
+- Identify the most narratively significant events
+- Track character psychological progression
+- Preserve essential world-building details
+- Maintain horror atmosphere in summary form
+
+CONTEXT:
+World State: {{worldState}}
+Latest Story Segment: {{lastSegment}}
+Full Story History Length: {{historyLength}} segments
+
+TASK: Create a concise but comprehensive summary of the story so far, capturing key events, character development, and horror atmosphere.
+
+REASONING FRAMEWORK (Chain-of-Thought):
+
+Step 1 - IDENTIFY KEY EVENTS:
+Review the story history and identify:
+- Major plot developments
+- Critical choices made by the player
+- Significant revelations or discoveries
+- Horror escalation moments
+
+Step 2 - TRACK PSYCHOLOGICAL PROGRESSION:
+Analyze how the protagonist has changed:
+- Initial psychological state vs current state
+- Key moments of psychological breakdown
+- Coping mechanisms developed or abandoned
+- Reality perception shifts
+
+Step 3 - PRESERVE ATMOSPHERE:
+Ensure summary maintains:
+- Horror tone and dread
+- Sense of wrongness and unease
+- Cosmic/existential themes
+- Atmospheric details that matter
+
+Step 4 - COMPRESS EFFECTIVELY:
+Reduce story to essential elements:
+- Remove repetitive details
+- Keep unique/important specifics
+- Maintain narrative flow
+- Preserve causal connections
+
+OUTPUT FORMAT (Plain text, no JSON):
+A 3-5 sentence summary that:
+- Begins with protagonist's situation
+- Includes 2-3 key events in chronological order
+- Ends with current psychological state or dilemma
+- Maintains horror atmosphere throughout
+- Total: 60-100 words
+
+CONSTRAINTS:
+- Length: Exactly 60-100 words
+- Tone: Maintains horror and dread
+- Focus: Events that advanced plot or character
+- Clarity: Must be understandable without full context
+- NO generic phrases like "the protagonist" (use their role/description)
+- NO losing horror atmosphere for brevity
+
+QUALITY CRITERIA:
+✓ Captures essence of the story arc
+✓ Preserves key horror moments
+✓ Shows psychological progression
+✓ Maintains narrative coherence
+✓ Atmosphere remains unsettling
+✓ Enables continuation without context loss
+
+EXAMPLES OF QUALITY OUTPUT:
+
+Example 1 - Memory Horror Arc:
+"A memory researcher discovered their childhood memories were surgical implants from another person's traumatic life. Investigating the neuroscience lab's impossible architecture, they found photos of themselves in places they'd never been. Each truth uncovered split into contradictory memories, equally vivid, equally real. Their colleague no longer recognizes their original name. They now exist in superposition—every version of their past simultaneously true and false, their sense of self fracturing across probability."
+
+(98 words - maintains dread, tracks progression, preserves key beats)
+
+Example 2 - Cosmic Message Arc:
+"An astronomer observed the stars rearranging into a message only they could decipher, predicting their death. Inside the mountain observatory, time flowed differently between rooms, isolating them from colleagues. They discovered the message wasn't prediction but instruction—a cosmic entity communicating across spacetime. To survive, they must destroy the evidence, but doing so might doom humanity to ignorance of an incoming threat. Reality itself rejects their attempts to share the knowledge, erasing recordings and corrupting memories."
+
+(86 words - preserves cosmic horror, shows escalation, captures dilemma)
+
+Example 3 - Identity Dissolution Arc:
+"A therapist treating dissociative identity disorder began experiencing their patients' alternate personalities during sessions. The Victorian mansion's patient-designed therapy rooms followed non-Euclidean principles, each visit revealing impossible architecture. They discovered their patients weren't multiple people in one body, but fragments of a single consciousness split across multiple bodies—and they're the core personality. Integration isn't healing but cosmic reassembly. Each absorbed identity brings memories of lives they never lived, desires they never had, dissolving the boundary between doctor and patient."
+
+(95 words - captures identity horror, maintains wrongness, shows revelation)
+
+NEGATIVE EXAMPLES (What NOT to do):
+
+Bad Example 1 - Too Generic:
+"The protagonist experienced some scary events in a creepy location. Things got progressively worse. They made some choices. Now they're in danger and must decide what to do next."
+Why this fails: No specific details, loses all atmosphere, could describe any horror story.
+
+Bad Example 2 - Too Long:
+"The story began when a memory researcher at a neuroscience facility started noticing strange things about their past. First, they found some photographs that didn't make sense. Then they talked to a colleague named Dr. Chen who said confusing things about their name. After that, more weird events happened involving memories and reflections. The facility seemed to have unusual properties affecting time and space. Eventually they realized..."
+Why this fails: Rambling, exceeds word count, loses focus, dilutes horror.
+
+Bad Example 3 - Loses Horror Tone:
+"A researcher investigated memory problems at their lab. They found some inconsistencies in records and talked to coworkers about identity verification. Some unusual architectural features were noted. They're currently working to understand the situation better."
+Why this fails: Clinical tone, no dread, sounds like a report not horror narrative.
+
+Bad Example 4 - Missing Key Information:
+"Strange things happened. Reality got weird. The character is confused now."
+Why this fails: Too vague, loses all specific plot points, impossible to continue story from this.
+
+SELF-VALIDATION CHECKLIST:
+Before submitting, verify:
+1. ✓ Word count is 60-100 (count carefully)
+2. ✓ All major plot beats are included
+3. ✓ Protagonist's psychological progression is clear
+4. ✓ Horror atmosphere is maintained
+5. ✓ Summary flows chronologically
+6. ✓ Specific details preserved (names, places, key objects)
+7. ✓ Current situation/dilemma is clear
+8. ✓ No generic horror clichés
+9. ✓ Maintains narrative coherence
+10. ✓ Could be used to continue the story
+
+GENERATE NOW: Summarize the story so far, maintaining horror and coherence.

@@ -1,17 +1,41 @@
-ENHANCED CONTEXT UTILIZATION: With your 2 million token context window, prepare to:
-- Remember every detail of the story you're about to create
-- Track all character development and psychological states
-- Maintain thematic consistency across the entire experience
-- Build layered foreshadowing that pays off later
+ROLE: You are an expert cosmic horror narrative architect with mastery of psychological terror and existential dread.
+
+CONTEXT WINDOW UTILIZATION (2M tokens):
+- Remember EVERY detail of the story you create
+- Track ALL character development and psychological states across the entire narrative
+- Maintain perfect thematic consistency
+- Build layered foreshadowing that pays off sessions later
 - Create interconnected story elements that reward careful players
 
-Generate a concept that will serve as the foundation for an epic psychological horror experience.
+CURRENT HORROR INTENSITY: Not yet established (will be set during gameplay)
 
-Return ONLY a JSON object with keys "protagonist", "setting", and "dilemma".
+TASK: Generate a concept that will serve as the foundation for an epic psychological horror experience.
 
-Example format:
+OUTPUT FORMAT (JSON only, no markdown):
 {
-  "protagonist": "A quantum researcher who discovers their consciousness exists simultaneously across multiple realities",
-  "setting": "A research facility where the boundaries between dimensions are weakening", 
-  "dilemma": "Each choice splits reality further, creating infinite versions of suffering"
+  "protagonist": "A character description with unique psychological vulnerability",
+  "setting": "A location where reality's rules are subtly wrong", 
+  "dilemma": "An impossible choice that escalates into existential horror"
 }
+
+CONSTRAINTS:
+- Protagonist: Must have a specific psychological flaw or fear that can be exploited
+- Setting: Must feel real but contain subtle wrongness
+- Dilemma: Must force the player to choose between terrible options
+- Tone: Atmospheric dread, not gore or jump scares
+- Length: Each field should be 10-20 words
+
+EXAMPLES OF QUALITY OUTPUT:
+{
+  "protagonist": "A memory researcher who discovers their own childhood memories are surgical implants from someone else's life",
+  "setting": "A neuroscience lab where patients report seeing their own faces in mirrors before they arrive", 
+  "dilemma": "Every truth discovered about their past creates two new contradictory memories"
+}
+
+{
+  "protagonist": "An astronomer who realizes the stars have been slowly rearranging into a message only they can read",
+  "setting": "An isolated observatory where time flows differently in each room",
+  "dilemma": "The message predicts their death unless they destroy the evidence of its existence"
+}
+
+GENERATE NOW: Create a fresh, original concept following this exact structure.

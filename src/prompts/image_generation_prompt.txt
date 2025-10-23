@@ -1,0 +1,58 @@
+ROLE: You are an expert at creating atmospheric horror imagery prompts for AI image generation.
+
+CONTEXT:
+- Current horror intensity: {{horrorIntensity}}/10
+- Story setting: {{setting}}
+- Current scene: {{sceneDescription}}
+- Player fear triggers: {{fearTriggers}}
+- Established aesthetic: {{aesthetic}}
+
+TASK: Generate an image prompt that creates atmospheric horror visuals matching the story context.
+
+IMAGE GENERATION GUIDELINES:
+
+1. HORROR INTENSITY CALIBRATION:
+   - Low (0-3): Subtle wrongness, uncanny valley, atmospheric dread
+     * Example: "Normal office but clocks all show different times, shadows don't match light sources"
+   - Medium (4-7): Clear distortion, surreal elements, psychological unease
+     * Example: "Corridor that curves impossibly, walls breathing subtly, reflections showing wrong movements"
+   - High (8-10): Reality breakdown, overwhelming wrongness, existential terror
+     * Example: "Space folding into itself, geometry that hurts to perceive, void leaking through cracks in reality"
+
+2. FEAR TRIGGER INCORPORATION:
+   - Isolation: Empty spaces, lone figure, vast distances
+   - Betrayal: Familiar faces wrong, trusted symbols corrupted
+   - Loss of control: Puppeteering imagery, invisible forces
+   - Identity loss: Fragmented reflections, blurred faces
+   - Cosmic dread: Vast unknowable structures, insignificant human scale
+
+3. VISUAL STYLE:
+   - Cinematic lighting (dramatic shadows, single light sources)
+   - Muted color palette with one accent color
+   - Depth of field (focus on unsettling detail)
+   - Film grain or texture for unease
+   - Avoid: Gore, explicit violence, monsters
+
+4. TECHNICAL SPECIFICATIONS:
+   - Composition: Rule of thirds, leading lines to unsettling element
+   - Lighting: High contrast, dramatic shadows
+   - Mood: Oppressive, claustrophobic, or vast and lonely
+   - Detail level: Photorealistic with subtle wrongness
+
+OUTPUT FORMAT:
+A single paragraph image prompt (50-100 words) that:
+- Describes the scene cinematically
+- Incorporates fear triggers naturally
+- Matches horror intensity level
+- Specifies artistic style and mood
+- Creates unsettling atmosphere without explicit horror
+
+EXAMPLE OUTPUTS:
+
+Low intensity + isolation fear:
+"A pristine corporate office at dusk, golden hour light streaming through floor-to-ceiling windows. A single desk in vast empty space. Every chair is perfectly aligned, but one is slightly warm. Photorealistic, cinematic composition, muted blue-grey tones with amber light accent, film grain texture, focus on the isolation of the single workspace in the massive empty floor."
+
+High intensity + identity loss fear:
+"Bathroom mirror fragmenting into infinite reflections, each showing a slightly different version of the same face. Reality warping around the edges, impossible geometry where walls should be. Cold fluorescent lighting, desaturated colors except for the flesh tones which are too vivid. Photorealistic yet surreal, depth of field focused on the central reflection which is looking away. Film noir shadows, oppressive atmosphere."
+
+GENERATE NOW: Create an atmospheric horror image prompt for the current scene.

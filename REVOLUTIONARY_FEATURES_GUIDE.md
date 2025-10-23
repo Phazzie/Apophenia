@@ -405,7 +405,8 @@ class AnalyticsService {
   }
 
   private generateSessionId(): string {
-    return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    // Use crypto.randomUUID() for cryptographically secure session IDs
+    return `session_${Date.now()}_${crypto.randomUUID()}`;
   }
 
   trackEvent(type: AnalyticsEvent['type'], data: Record<string, unknown> = {}) {
@@ -486,7 +487,10 @@ export const analytics = new AnalyticsService();
 
 ```typescript
 // public/service-worker.js
-const CACHE_NAME = 'apophenia-v1';
+// Use build timestamp or version for cache busting
+// You can inject this value during build with your build tool (Vite, Webpack, etc.)
+const CACHE_VERSION = self.APP_VERSION || 'v1';
+const CACHE_NAME = `apophenia-${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -597,6 +601,9 @@ interface ApopheniaDB extends DBSchema {
 
 class OfflineStorageService {
   private db: IDBPDatabase<ApopheniaDB> | null = null;
+  
+  // Cache expiry time: 1 hour in milliseconds
+  private readonly CACHE_EXPIRY_MS = 3600000;
 
   async init() {
     this.db = await openDB<ApopheniaDB>('apophenia-db', 1, {
@@ -641,8 +648,8 @@ class OfflineStorageService {
     if (!this.db) await this.init();
     const cached = await this.db!.get('cached-responses', prompt);
     
-    // Return cached response if less than 1 hour old
-    if (cached && Date.now() - cached.timestamp < 3600000) {
+    // Return cached response if less than CACHE_EXPIRY_MS old
+    if (cached && Date.now() - cached.timestamp < this.CACHE_EXPIRY_MS) {
       return cached.response;
     }
     

@@ -51,14 +51,20 @@ export function validateEnvironment(): void {
  * Sanitize user input to prevent XSS
  * @param input - Raw user input
  * @returns Sanitized string
+ * 
+ * Note: For production use, consider using DOMPurify library for comprehensive XSS protection.
+ * This basic implementation handles common HTML entity encoding but may not cover all edge cases.
  */
 export function sanitizeInput(input: string): string {
   return input
+    .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#x27;')
-    .replace(/\//g, '&#x2F;');
+    .replace(/\//g, '&#x2F;')
+    .replace(/`/g, '&#x60;')
+    .replace(/=/g, '&#x3D;');
 }
 
 /**

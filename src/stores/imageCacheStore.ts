@@ -32,15 +32,71 @@ interface ImageCacheStore {
 // Use configurable cache parameters
 const MAX_CACHE_SIZE = CACHE_CONFIG.IMAGE_CACHE_MAX_SIZE;
 const CACHE_TTL = CACHE_CONFIG.IMAGE_CACHE_TTL;
+const STORAGE_KEY = 'apophenia_image_cache';
+const TELEMETRY_KEY = 'apophenia_cache_telemetry';
 
-export const useImageCacheStore = create<ImageCacheStore>((set, get) => ({
-  imageCache: {},
-  telemetry: {
+/**
+ * Load cache from localStorage
+ */
+function loadCacheFromStorage(): Record<string, CachedImage> {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const cache = JSON.parse(stored) as Record<string, CachedImage>;
+      console.log(`📦 Loaded ${Object.keys(cache).length} images from cache storage`);
+      return cache;
+    }
+  } catch (error) {
+    console.warn('Failed to load image cache from storage:', error);
+  }
+  return {};
+}
+
+/**
+ * Load telemetry from localStorage
+ */
+function loadTelemetryFromStorage(): CacheTelemetry {
+  try {
+    const stored = localStorage.getItem(TELEMETRY_KEY);
+    if (stored) {
+      return JSON.parse(stored) as CacheTelemetry;
+    }
+  } catch (error) {
+    console.warn('Failed to load cache telemetry from storage:', error);
+  }
+  return {
     hits: 0,
     misses: 0,
     evictions: 0,
     totalRequests: 0,
-  },
+  };
+}
+
+/**
+ * Save cache to localStorage
+ */
+function saveCacheToStorage(cache: Record<string, CachedImage>): void {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cache));
+  } catch (error) {
+    console.warn('Failed to save image cache to storage:', error);
+  }
+}
+
+/**
+ * Save telemetry to localStorage
+ */
+function saveTelemetryToStorage(telemetry: CacheTelemetry): void {
+  try {
+    localStorage.setItem(TELEMETRY_KEY, JSON.stringify(telemetry));
+  } catch (error) {
+    console.warn('Failed to save cache telemetry to storage:', error);
+  }
+}
+
+export const useImageCacheStore = create<ImageCacheStore>((set, get) => ({
+  imageCache: loadCacheFromStorage(),
+  telemetry: loadTelemetryFromStorage(),
   
   addToCache: (prompt, url) =>
     set((state) => {
@@ -79,8 +135,16 @@ export const useImageCacheStore = create<ImageCacheStore>((set, get) => ({
           console.log(`Image cache evicted ${evictedCount} entries`);
         }
         
+        // Save to localStorage
+        saveCacheToStorage(evictedCache);
+        saveTelemetryToStorage(newTelemetry);
+        
         return { imageCache: evictedCache, telemetry: newTelemetry };
       }
+      
+      // Save to localStorage
+      saveCacheToStorage(newCache);
+      saveTelemetryToStorage(newTelemetry);
       
       return { imageCache: newCache, telemetry: newTelemetry };
     }),
@@ -170,6 +234,10 @@ export const useImageCacheStore = create<ImageCacheStore>((set, get) => ({
         evictions: state.telemetry.evictions + evictedCount 
       };
       
+      // Save to localStorage
+      saveCacheToStorage(freshCache);
+      saveTelemetryToStorage(newTelemetry);
+      
       return { 
         imageCache: freshCache,
         telemetry: CACHE_CONFIG.ENABLE_CACHE_TELEMETRY ? newTelemetry : state.telemetry,
@@ -178,15 +246,25 @@ export const useImageCacheStore = create<ImageCacheStore>((set, get) => ({
     
   getCacheSize: () => Object.keys(get().imageCache).length,
   
-  clearCache: () => set({ 
-    imageCache: {},
-    telemetry: {
-      hits: 0,
-      misses: 0,
-      evictions: 0,
-      totalRequests: 0,
+  clearCache: () => {
+    // Clear localStorage
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(TELEMETRY_KEY);
+    } catch (error) {
+      console.warn('Failed to clear cache from storage:', error);
     }
-  }),
+    
+    set({ 
+      imageCache: {},
+      telemetry: {
+        hits: 0,
+        misses: 0,
+        evictions: 0,
+        totalRequests: 0,
+      }
+    });
+  },
   
   getTelemetry: () => get().telemetry,
   

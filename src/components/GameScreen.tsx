@@ -7,6 +7,7 @@ import { useStoryHistoryStore } from '../stores/storyHistoryStore';
 import { useWorldStateStore } from '../stores/worldStateStore';
 import { GameState } from '../types';
 import ThematicLoading from './ThematicLoading';
+import { analyticsService } from '../services/analyticsService';
 
 const GameScreen: React.FC = () => {
   const { choices, intrusiveThought, gameState, isGenerating } = useGameStateStore();
@@ -35,6 +36,10 @@ const GameScreen: React.FC = () => {
   };
 
   const handleNewGame = () => {
+    // End current analytics session
+    analyticsService.endSession();
+    console.log('Ended analytics session');
+    
     GameStateManager.resetAllStores();
     // The reset will automatically set the gameState to MENU, triggering a re-render to the StartScreen
   };

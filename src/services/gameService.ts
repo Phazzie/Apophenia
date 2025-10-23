@@ -161,6 +161,12 @@ export const getNextStep = async (
   console.log('World state:', { protagonist: worldState.protagonist, psychologicalStatus: worldState.psychologicalStatus });
   console.log('Story history length:', history.length);
 
+  // Track player choice in analytics
+  analyticsService.trackChoice(playerChoice, history.length, {
+    horrorIntensity: worldState.horrorIntensity || 0,
+    psychologicalStatus: worldState.psychologicalStatus
+  });
+
   try {
     const echoMessage = _processNeuralEchoes(playerChoice, worldState);
     const semanticAnalysis = await _analyzePlayerChoice(playerChoice, worldState, history);
@@ -200,6 +206,14 @@ export const getNextStep = async (
     console.log(`AI response received in ${responseTimeMs}ms. Evolving narrative DNA...`);
     narrativeDNA.evolveNarrative(playerChoice, responseTimeMs, worldState);
 
+    // Track horror triggers if identified
+    if (semanticAnalysis.psychProfile) {
+      analyticsService.trackHorrorTrigger(
+        semanticAnalysis.psychProfile,
+        worldState.horrorIntensity || 0
+      );
+    }
+
     console.log('Generated', commands.length, 'commands for next step');
     
     return {
@@ -220,6 +234,13 @@ export const getNextStep = async (
     console.error('Error in getNextStep:', error);
     console.error('Player choice that caused error:', playerChoice);
     console.error('World state at error:', worldState);
+    
+    // Track error in analytics
+    analyticsService.trackError(
+      'getNextStep_failure',
+      error instanceof Error ? error.message : 'Unknown error',
+      { playerChoice, worldStateSnapshot: JSON.stringify(worldState) }
+    );
     
     // Return fallback error commands with revolutionary features structure
     return {
@@ -281,7 +302,28 @@ export const generateConcept = async (
 };
 
 export const generateImage = async (prompt: string): Promise<string> => {
-  return generateImageFlow(prompt);
+  const startTime = Date.now();
+  try {
+    const imageData = await generateImageFlow(prompt);
+    const duration = Date.now() - startTime;
+    
+    // Track successful image generation
+    analyticsService.trackImageGeneration(prompt, duration, false, true);
+    
+    return imageData;
+  } catch (error) {
+    const duration = Date.now() - startTime;
+    
+    // Track failed image generation
+    analyticsService.trackImageGeneration(prompt, duration, false, false);
+    analyticsService.trackError(
+      'image_generation_failure',
+      error instanceof Error ? error.message : 'Unknown error',
+      { prompt }
+    );
+    
+    throw error; // Re-throw for upstream handling
+  }
 };
 
 /**
@@ -304,6 +346,7 @@ export const generateMultipleImages = async (
 };
 
 import { generateDirectorAnalysis } from './ai/director';
+import { analyticsService } from './analyticsService';
 
 /**
  * Advanced AI Director functionality

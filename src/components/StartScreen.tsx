@@ -9,6 +9,7 @@ import { GameState, GenreConfig, StorySegment, WorldState } from '../types';
 import { genres, defaultGenre } from '../config/genres';
 import GlitchedText from './GlitchedText';
 import CompactTestAPI from './CompactTestAPI';
+import { analyticsService } from '../services/analyticsService';
 
 
 const StartScreen: React.FC = () => {
@@ -33,6 +34,10 @@ const StartScreen: React.FC = () => {
 
     // Clear all previous game data from stores using unified GameStateManager
     GameStateManager.resetAllStores();
+
+    // Start analytics session
+    const sessionId = analyticsService.startSession();
+    console.log('Started analytics session:', sessionId);
 
     setGameState(GameState.GENERATING_CONCEPT);
 
@@ -60,6 +65,11 @@ const StartScreen: React.FC = () => {
   const handleContinue = () => {
     // The stores are already rehydrated by the persist middleware.
     // We just need to navigate to the game screen.
+    
+    // Start a new session for continued game
+    const sessionId = analyticsService.startSession();
+    console.log('Started analytics session for continued game:', sessionId);
+    
     setGameState(GameState.PLAYING);
   };
 

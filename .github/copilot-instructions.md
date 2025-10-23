@@ -442,6 +442,119 @@ describe('GeminiAIService', () => {
 });
 ```
 
+## GitHub Copilot Coding Agent Guidelines
+
+### When to Deploy Coding Agents
+
+**✅ Use coding agents for**:
+- Large, self-contained features (e.g., "Build analytics dashboard")
+- Performance optimization tasks with clear metrics
+- Comprehensive audits across multiple files
+- Refactoring projects with well-defined scope
+- Implementation of complex features that take 1+ days
+
+**❌ Don't use coding agents for**:
+- Small bug fixes (< 50 lines of code)
+- Documentation updates
+- Quick configuration changes
+- Exploratory work without clear requirements
+- Tasks requiring human judgment/design decisions
+
+### Agent Deployment Best Practices
+
+**CRITICAL RULE: Each agent should work in its own separate PR/branch**
+
+```bash
+# ✅ CORRECT: Each agent gets its own PR
+Agent 1 → New PR: "feat/analytics-dashboard" 
+Agent 2 → New PR: "perf/image-cache-optimization"
+Agent 3 → New PR: "refactor/ai-prompts-audit"
+
+# ❌ WRONG: Multiple agents in same PR
+Agent 1, 2, 3 → Same PR #64 (causes conflicts, unclear ownership)
+```
+
+**Why separate PRs?**
+1. **Parallel work** - Agents don't block each other
+2. **Clear ownership** - Each agent owns its changes
+3. **Easy review** - Smaller, focused PRs are easier to review
+4. **Rollback safety** - Can revert one feature without affecting others
+5. **CI isolation** - Build failures don't block other work
+
+**Exception: Agents can share a PR when**:
+- Tasks are strictly sequential (Agent 2 depends on Agent 1's output)
+- Tasks are tightly coupled (e.g., "Add feature X" + "Add tests for feature X")
+- Total combined scope is still small (< 500 lines of code)
+
+### Agent Performance Expectations
+
+Coding agents work **much faster** than the estimates below suggest:
+
+| Task Complexity | Initial Estimate | Actual Time | Notes |
+|----------------|------------------|-------------|-------|
+| Small feature | 1-2 days | 2-6 hours | Most agents finish in one session |
+| Medium feature | 3-5 days | 4-12 hours | Usually done in 1-2 sessions |
+| Large refactor | 7-10 days | 12-24 hours | Rarely takes more than a day |
+
+**Typical agent workflow**:
+1. **Planning** (5-15 min) - Agent reads codebase, plans approach
+2. **Implementation** (1-6 hours) - Agent writes code, commits incrementally
+3. **Testing** (30 min - 2 hours) - Agent validates changes
+4. **Documentation** (15-30 min) - Agent updates docs
+
+**Monitor agent progress**:
+- Check PR commits every 1-2 hours
+- Agents commit frequently (every 15-30 minutes)
+- If no commits for 3+ hours, check agent status
+- Intervene if agent appears stuck or off-track
+
+### How to Deploy an Agent
+
+```bash
+# Use the github-pull-request_copilot-coding-agent tool
+
+# 1. Create clear, specific task description
+# 2. Define success criteria
+# 3. Specify files to modify
+# 4. Provide context and constraints
+# 5. Set realistic expectations
+
+# Example:
+{
+  "title": "Implement Image Cache with LRU Eviction",
+  "body": "Create imageCacheService.ts with memory + IndexedDB tiers...",
+  # Agent will create NEW PR automatically
+}
+```
+
+### Agent Task Sizing
+
+**Small task** (1 agent, 2-6 hours):
+- Single feature addition
+- Isolated bug fix
+- Component optimization
+- Example: "Add export analytics to JSON"
+
+**Medium task** (1 agent, 4-12 hours):
+- Multi-file feature
+- Service refactoring
+- Performance optimization
+- Example: "Implement image caching system"
+
+**Large task** (1-2 agents, 12-24 hours):
+- Comprehensive audit
+- Architecture changes
+- Multiple interconnected features
+- Example: "Audit all AI services and upgrade prompts"
+
+**Very large task** (Split into multiple agents):
+- Major system overhaul
+- Multiple independent features
+- Example: "Optimize entire app" → Split into:
+  - Agent 1: Image optimization
+  - Agent 2: React optimization
+  - Agent 3: Bundle optimization
+
 ## Contributing Guidelines
 
 When contributing to Apophenia, follow these practices:
@@ -454,6 +567,7 @@ When contributing to Apophenia, follow these practices:
 - **Documentation**: Update relevant documentation for API changes
 - **PR Template**: Fill out the provided `.github/PULL_REQUEST_TEMPLATE.md` completely
 - **CHANGELOG**: Update `CHANGELOG.md` in the "Unreleased" section for user-facing changes
+- **Agent PRs**: If deploying coding agents, create separate PRs for each agent (see Agent Guidelines above)
 
 ### Code Review Checklist
 - [ ] All tests pass (`npm test`)

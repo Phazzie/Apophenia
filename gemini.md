@@ -67,5 +67,54 @@ The global state is managed in `src/stores/worldStateStore.ts`.
 2.  **Update the Processor:** In the client-side game loop where commands are processed, add a `case` for your new command type and implement the logic to handle it.
 3.  **Instruct the AI:** Update the core AI prompts (`grok_next_step_prompt.txt` or the prompts in `genkit.ts`) to teach the AI how and when to use your new command. Provide clear instructions and examples.
 
+## 5. GitHub Copilot Coding Agents
+
+### When to Deploy Coding Agents
+
+Use GitHub Copilot coding agents for large, well-defined tasks:
+
+**✅ Good use cases:**
+- Features requiring 1+ days of work
+- Performance optimizations with clear metrics
+- Multi-file audits or refactors
+- Tasks that can run autonomously
+
+**❌ Bad use cases:**
+- Small bug fixes (< 50 lines)
+- Documentation updates
+- Tasks requiring design decisions
+
+### Critical: One Agent = One PR
+
+**Each coding agent MUST work in its own separate PR/branch.**
+
+```bash
+# ✅ CORRECT
+Agent 1 → New PR: "feat/analytics-dashboard"
+Agent 2 → New PR: "perf/image-cache"
+
+# ❌ WRONG
+Multiple agents → Same PR (causes conflicts)
+```
+
+**Exception:** Agents can share a PR only when tasks are:
+- Strictly sequential (one depends on the other)
+- Tightly coupled (< 500 lines total)
+
+### Agent Deployment
+
+When deploying an agent:
+1. **Define clear objectives** with success criteria
+2. **Specify files to modify**
+3. **Provide constraints** (what NOT to do)
+4. **Set realistic expectations** (most tasks finish in hours, not days)
+
+Agents work fast:
+- "3-day" tasks often finish in 4-12 hours
+- "1-week" tasks often finish in 12-24 hours
+- Agents commit every 15-30 minutes
+
 ---
 By following these guidelines, you will help maintain the quality and integrity of the Apophenia codebase.
+
+````

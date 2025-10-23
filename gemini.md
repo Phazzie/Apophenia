@@ -101,18 +101,36 @@ Multiple agents → Same PR (causes conflicts)
 - Strictly sequential (one depends on the other)
 - Tightly coupled (< 500 lines total)
 
-### Agent Deployment
+### Agent Performance Reality
+
+**CRITICAL**: Agents complete tasks in **7-15 minutes**, not hours/days:
+
+| Human Estimate | Agent Reality | Duration |
+|---------------|---------------|----------|
+| "1-2 days" | **7-15 min** | Single session |
+| "3-5 days" | **15-30 min** | Still one session |
+| "1 week" | **30-60 min** | Longest tasks |
+
+**Monitor progress**: Check PRs every 10-15 minutes, not hours.
+
+### Deploying Multiple Agents Simultaneously
+
+**When to deploy 3-5 agents in parallel**:
+- ✅ Tasks are independent (no file overlap)
+- ✅ Different parts of codebase
+- ✅ Can merge in any order
+- ❌ Same core files = merge conflicts
+
+**Best practice**: Deploy each agent to its own PR, monitor every 10-15 minutes, merge as they complete.
+
+### Agent Deployment Checklist
 
 When deploying an agent:
 1. **Define clear objectives** with success criteria
-2. **Specify files to modify**
+2. **Specify files to modify** (be explicit)
 3. **Provide constraints** (what NOT to do)
-4. **Set realistic expectations** (most tasks finish in hours, not days)
-
-Agents work fast:
-- "3-day" tasks often finish in 4-12 hours
-- "1-week" tasks often finish in 12-24 hours
-- Agents commit every 15-30 minutes
+4. **Set realistic expectations** (7-15 min for most tasks)
+5. **Create separate PR** (one agent = one PR)
 
 ---
 By following these guidelines, you will help maintain the quality and integrity of the Apophenia codebase.

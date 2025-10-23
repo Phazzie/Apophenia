@@ -488,19 +488,22 @@ Agent 1, 2, 3 → Same PR #64 (causes conflicts, unclear ownership)
 
 ### Agent Performance Expectations
 
-Coding agents work **much faster** than the estimates below suggest:
+**REALITY CHECK**: Most agents complete tasks in **7-15 minutes**, NOT hours or days.
 
-| Task Complexity | Initial Estimate | Actual Time | Notes |
-|----------------|------------------|-------------|-------|
-| Small feature | 1-2 days | 2-6 hours | Most agents finish in one session |
-| Medium feature | 3-5 days | 4-12 hours | Usually done in 1-2 sessions |
-| Large refactor | 7-10 days | 12-24 hours | Rarely takes more than a day |
+| Task Complexity | Human Estimate | Agent Reality | Notes |
+|----------------|----------------|---------------|-------|
+| Small feature | "1-2 days" | **7-15 min** | One coding session |
+| Medium feature | "3-5 days" | **15-30 min** | Still just one session |
+| Large refactor | "1 week" | **30-60 min** | Multiple commits, same session |
+| Comprehensive audit | "2 weeks" | **1-3 hours** | Longest tasks, still same day |
 
-**Typical agent workflow**:
-1. **Planning** (5-15 min) - Agent reads codebase, plans approach
-2. **Implementation** (1-6 hours) - Agent writes code, commits incrementally
-3. **Testing** (30 min - 2 hours) - Agent validates changes
-4. **Documentation** (15-30 min) - Agent updates docs
+**Actual agent workflow**:
+1. **Planning** (1-2 min) - Agent reads context, plans approach
+2. **Implementation** (5-12 min) - Agent writes code, commits every 2-3 min
+3. **Testing** (1-3 min) - Agent validates changes
+4. **Documentation** (1-2 min) - Agent updates docs
+
+**Total**: 7-15 minutes for most tasks, 30-60 min for complex work
 
 **Monitor agent progress**:
 - Check PR commits every 1-2 hours
@@ -527,33 +530,91 @@ Coding agents work **much faster** than the estimates below suggest:
 }
 ```
 
+### Deploying Multiple Agents Simultaneously
+
+**When to deploy multiple agents**:
+- ✅ Tasks are **completely independent** (no shared files)
+- ✅ Can be reviewed/merged separately
+- ✅ Won't cause merge conflicts
+- ✅ Each task is self-contained
+
+**How many agents to deploy at once**:
+```typescript
+// Good: 3-5 agents on independent tasks
+Agent 1 → PR "feat/analytics-dashboard"     (src/services/analyticsService.ts)
+Agent 2 → PR "perf/image-cache"             (src/services/imageCacheService.ts)
+Agent 3 → PR "docs/api-documentation"       (docs/API.md)
+Agent 4 → PR "test/unit-test-coverage"      (src/**/__tests__/*.test.ts)
+Agent 5 → PR "refactor/error-handling"      (src/utils/errorHandler.ts)
+
+// Bad: 10 agents touching same files
+Agent 1-10 → All modifying gameService.ts  ❌ Merge conflict nightmare
+```
+
+**Best practices for parallel deployment**:
+1. **Analyze file dependencies** - Check which files each task needs
+2. **Stagger if overlapping** - Deploy Agent 1, wait 5 min for initial commits, then deploy Agent 2
+3. **Monitor all agents** - Check PR commits every 10-15 minutes
+4. **Merge in order** - Merge completed PRs as they finish to reduce conflicts
+5. **Maximum 5-6 agents** - More than that becomes hard to monitor
+
+**Example workflow**:
+```bash
+# 9:00 AM - Deploy 4 agents on independent tasks
+Agent A → Analytics (services/analytics*)
+Agent B → Image optimization (services/image*)
+Agent C → Documentation (docs/*)
+Agent D → Testing (src/**/__tests__/*)
+
+# 9:15 AM - Check progress (all should have initial commits)
+# 9:30 AM - Agents A, C, D complete (review & merge)
+# 9:45 AM - Agent B complete (review & merge)
+
+# Total time: 45 minutes for 4 major features
+```
+
+**When NOT to deploy multiple agents**:
+- ❌ Tasks touch the same core files
+- ❌ Tasks have dependencies (B needs A's output)
+- ❌ You can't monitor them all
+- ❌ Tasks are tightly coupled conceptually
+
 ### Agent Task Sizing
 
-**Small task** (1 agent, 2-6 hours):
+**Small task** (1 agent, **7-15 min**):
 - Single feature addition
 - Isolated bug fix
 - Component optimization
 - Example: "Add export analytics to JSON"
+- Files: 1-3
+- Lines changed: <200
 
-**Medium task** (1 agent, 4-12 hours):
+**Medium task** (1 agent, **15-30 min**):
 - Multi-file feature
 - Service refactoring
 - Performance optimization
 - Example: "Implement image caching system"
+- Files: 3-8
+- Lines changed: 200-800
 
-**Large task** (1-2 agents, 12-24 hours):
+**Large task** (1 agent, **30-60 min**):
 - Comprehensive audit
 - Architecture changes
 - Multiple interconnected features
 - Example: "Audit all AI services and upgrade prompts"
+- Files: 8-20
+- Lines changed: 800-2000
 
-**Very large task** (Split into multiple agents):
+**Very large task** (Split into **3-5 agents**, each **15-30 min**):
 - Major system overhaul
 - Multiple independent features
 - Example: "Optimize entire app" → Split into:
-  - Agent 1: Image optimization
-  - Agent 2: React optimization
-  - Agent 3: Bundle optimization
+  - Agent 1: Image optimization (15 min)
+  - Agent 2: React optimization (20 min)
+  - Agent 3: Bundle optimization (15 min)
+  - Agent 4: API optimization (25 min)
+  - Agent 5: Testing suite (30 min)
+- Total time: **30 min** (parallel) vs. 105 min (sequential)
 
 ## Contributing Guidelines
 

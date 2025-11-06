@@ -28,11 +28,11 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Set up Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
+    - name: Setup Node.js with smart caching
+      uses: ./.github/actions/setup-node-cached
       with:
         node-version: ${{ matrix.node-version }}
-        cache: 'npm'
+        enable-profiling: ${{ matrix.node-version == env.NODE_VERSION }}
 
     - name: Validate environment configuration
       run: |
@@ -43,27 +43,32 @@ jobs:
         if [ ! -f "eslint.config.js" ]; then echo "❌ eslint.config.js missing"; exit 1; fi
         echo "✅ All configuration files present"
 
-    - name: Install dependencies
-      run: npm ci
-
-    - name: Check package-lock.json integrity
-      run: npm ci --dry-run
-
     - name: Run ESLint
       run: npm run lint
+      continue-on-error: false
 
     - name: TypeScript type checking
       run: npm run typecheck
+      continue-on-error: false
 
     - name: Run tests with coverage
+      id: tests
       run: npm test -- --coverage --watchAll=false
       env:
         CI: true
 
     - name: Check coverage thresholds
+      id: coverage
       run: |
         # Coverage thresholds are enforced by Jest configuration
         echo "✅ Coverage thresholds met"
+
+        # Extract coverage percentage for reporting
+        if [ -f "coverage/coverage-summary.json" ]; then
+          COVERAGE=$(node -pe "JSON.parse(require('fs').readFileSync('coverage/coverage-summary.json')).total.lines.pct || 0")
+          echo "coverage=$COVERAGE" >> $GITHUB_OUTPUT
+          echo "📊 Line Coverage: ${COVERAGE}%"
+        fi
         
     - name: Upload coverage artifact
       uses: actions/upload-artifact@v4

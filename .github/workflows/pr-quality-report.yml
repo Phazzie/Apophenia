@@ -1,0 +1,213 @@
+name: PR Quality Report
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [ main, develop ]
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  quality-report:
+    name: Generate Quality Report
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+    - name: Checkout PR
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        ref: ${{ github.event.pull_request.head.sha }}
+
+    - name: Setup Node.js with caching
+      uses: ./.github/actions/setup-node-cached
+      with:
+        node-version: '20.x'
+        enable-profiling: 'true'
+
+    - name: Run quality checks
+      id: quality
+      run: |
+        # Lint
+        echo "🔍 Running ESLint..."
+        LINT_OUTPUT=$(npm run lint 2>&1 || true)
+        LINT_STATUS=$?
+
+        # Type check
+        echo "📝 Running TypeScript..."
+        TYPE_OUTPUT=$(npm run typecheck 2>&1 || true)
+        TYPE_STATUS=$?
+
+        # Tests
+        echo "🧪 Running tests..."
+        TEST_OUTPUT=$(npm test -- --coverage --watchAll=false 2>&1 || true)
+        TEST_STATUS=$?
+
+        # Build
+        echo "🏗️  Building project..."
+        BUILD_OUTPUT=$(npm run build 2>&1 || true)
+        BUILD_STATUS=$?
+
+        # Save results
+        echo "lint_status=$LINT_STATUS" >> $GITHUB_OUTPUT
+        echo "type_status=$TYPE_STATUS" >> $GITHUB_OUTPUT
+        echo "test_status=$TEST_STATUS" >> $GITHUB_OUTPUT
+        echo "build_status=$BUILD_STATUS" >> $GITHUB_OUTPUT
+
+    - name: Analyze code changes
+      id: analysis
+      run: |
+        # Get changed files
+        CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...${{ github.head_ref }} | wc -l)
+
+        # Get lines changed
+        LINES_ADDED=$(git diff --numstat origin/${{ github.base_ref }}...${{ github.head_ref }} | awk '{sum+=$1} END {print sum}')
+        LINES_REMOVED=$(git diff --numstat origin/${{ github.base_ref }}...${{ github.head_ref }} | awk '{sum+=$2} END {print sum}')
+
+        # Get complexity estimate
+        TS_FILES=$(git diff --name-only origin/${{ github.base_ref }}...${{ github.head_ref }} | grep -E '\.(ts|tsx)$' | wc -l)
+        TEST_FILES=$(git diff --name-only origin/${{ github.base_ref }}...${{ github.head_ref }} | grep -E '\.test\.(ts|tsx)$' | wc -l)
+
+        echo "changed_files=$CHANGED_FILES" >> $GITHUB_OUTPUT
+        echo "lines_added=$LINES_ADDED" >> $GITHUB_OUTPUT
+        echo "lines_removed=$LINES_REMOVED" >> $GITHUB_OUTPUT
+        echo "ts_files=$TS_FILES" >> $GITHUB_OUTPUT
+        echo "test_files=$TEST_FILES" >> $GITHUB_OUTPUT
+
+    - name: Extract coverage
+      id: coverage
+      run: |
+        if [ -f "coverage/coverage-summary.json" ]; then
+          LINES_PCT=$(node -pe "JSON.parse(require('fs').readFileSync('coverage/coverage-summary.json')).total.lines.pct || 0")
+          BRANCHES_PCT=$(node -pe "JSON.parse(require('fs').readFileSync('coverage/coverage-summary.json')).total.branches.pct || 0")
+          FUNCTIONS_PCT=$(node -pe "JSON.parse(require('fs').readFileSync('coverage/coverage-summary.json')).total.functions.pct || 0")
+
+          echo "lines=$LINES_PCT" >> $GITHUB_OUTPUT
+          echo "branches=$BRANCHES_PCT" >> $GITHUB_OUTPUT
+          echo "functions=$FUNCTIONS_PCT" >> $GITHUB_OUTPUT
+        else
+          echo "lines=0" >> $GITHUB_OUTPUT
+          echo "branches=0" >> $GITHUB_OUTPUT
+          echo "functions=0" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Calculate quality score
+      id: score
+      run: |
+        # Simple quality score calculation
+        SCORE=0
+
+        # Lint (25 points)
+        if [ "${{ steps.quality.outputs.lint_status }}" == "0" ]; then
+          SCORE=$((SCORE + 25))
+        fi
+
+        # Type check (25 points)
+        if [ "${{ steps.quality.outputs.type_status }}" == "0" ]; then
+          SCORE=$((SCORE + 25))
+        fi
+
+        # Tests (25 points)
+        if [ "${{ steps.quality.outputs.test_status }}" == "0" ]; then
+          SCORE=$((SCORE + 25))
+        fi
+
+        # Build (25 points)
+        if [ "${{ steps.quality.outputs.build_status }}" == "0" ]; then
+          SCORE=$((SCORE + 25))
+        fi
+
+        echo "score=$SCORE" >> $GITHUB_OUTPUT
+
+        # Grade
+        if [ $SCORE -ge 90 ]; then
+          echo "grade=A" >> $GITHUB_OUTPUT
+        elif [ $SCORE -ge 75 ]; then
+          echo "grade=B" >> $GITHUB_OUTPUT
+        elif [ $SCORE -ge 60 ]; then
+          echo "grade=C" >> $GITHUB_OUTPUT
+        else
+          echo "grade=F" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Post quality report
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const lintStatus = ${{ steps.quality.outputs.lint_status }} === 0 ? '✅' : '❌';
+          const typeStatus = ${{ steps.quality.outputs.type_status }} === 0 ? '✅' : '❌';
+          const testStatus = ${{ steps.quality.outputs.test_status }} === 0 ? '✅' : '❌';
+          const buildStatus = ${{ steps.quality.outputs.build_status }} === 0 ? '✅' : '❌';
+
+          const score = ${{ steps.score.outputs.score }};
+          const grade = '${{ steps.score.outputs.grade }}';
+
+          const changedFiles = ${{ steps.analysis.outputs.changed_files }};
+          const linesAdded = ${{ steps.analysis.outputs.lines_added }};
+          const linesRemoved = ${{ steps.analysis.outputs.lines_removed }};
+          const tsFiles = ${{ steps.analysis.outputs.ts_files }};
+          const testFiles = ${{ steps.analysis.outputs.test_files }};
+
+          const linesCoverage = ${{ steps.coverage.outputs.lines }};
+          const branchesCoverage = ${{ steps.coverage.outputs.branches }};
+          const functionsCoverage = ${{ steps.coverage.outputs.functions }};
+
+          // Determine color
+          let scoreEmoji = '🟢';
+          if (score < 60) scoreEmoji = '🔴';
+          else if (score < 75) scoreEmoji = '🟡';
+          else if (score < 90) scoreEmoji = '🟢';
+          else scoreEmoji = '💚';
+
+          const body = `## ${scoreEmoji} PR Quality Report - Grade: ${grade} (${score}/100)
+
+### 🎯 Quality Checks
+
+| Check | Status | Score |
+|-------|--------|-------|
+| 🔍 ESLint | ${lintStatus} | ${lintStatus === '✅' ? '25/25' : '0/25'} |
+| 📝 TypeScript | ${typeStatus} | ${typeStatus === '✅' ? '25/25' : '0/25'} |
+| 🧪 Tests | ${testStatus} | ${testStatus === '✅' ? '25/25' : '0/25'} |
+| 🏗️ Build | ${buildStatus} | ${buildStatus === '✅' ? '25/25' : '0/25'} |
+
+### 📊 Code Coverage
+
+| Metric | Coverage |
+|--------|----------|
+| Lines | ${linesCoverage.toFixed(1)}% |
+| Branches | ${branchesCoverage.toFixed(1)}% |
+| Functions | ${functionsCoverage.toFixed(1)}% |
+
+### 📈 Change Analysis
+
+| Metric | Value |
+|--------|-------|
+| Files Changed | ${changedFiles} |
+| Lines Added | +${linesAdded} |
+| Lines Removed | -${linesRemoved} |
+| TypeScript Files | ${tsFiles} |
+| Test Files | ${testFiles} |
+
+### 🎓 Code Quality Assessment
+
+${score >= 90 ? '**Excellent!** 💚 This PR maintains high quality standards.' : ''}
+${score >= 75 && score < 90 ? '**Good!** 🟢 Minor improvements could be made.' : ''}
+${score >= 60 && score < 75 ? '**Fair** 🟡 Some quality issues need attention.' : ''}
+${score < 60 ? '**Needs Work** 🔴 Significant quality issues detected.' : ''}
+
+${testFiles === 0 && tsFiles > 0 ? '⚠️ **Warning:** No test files modified. Consider adding tests for new functionality.' : ''}
+${linesCoverage < 80 ? '⚠️ **Warning:** Coverage is below 80%. Consider adding more tests.' : ''}
+
+---
+*Automated quality report generated by CI/CD pipeline*`;
+
+          await github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: body
+          });

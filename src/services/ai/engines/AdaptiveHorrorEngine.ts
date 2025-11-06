@@ -1,6 +1,7 @@
 import { StorySegment, WorldState } from '../../../types';
 import { REVOLUTIONARY_FEATURES } from '../../config';
 import { generateWithSelectedModel } from '../unifiedAIService';
+import { StorageManager } from '../../../utils/storageUtils';
 
 /**
  * ADAPTIVE HORROR ENGINE
@@ -19,10 +20,20 @@ interface PlayerProfile {
 const STORAGE_KEY = 'apophenia_player_profile';
 const MAX_PROFILE_ITEMS = 15; // Increased from 10 for better profiling
 
+const DEFAULT_PROFILE: PlayerProfile = {
+  preferredChoices: [],
+  fearTriggers: [],
+  decisionPatterns: [],
+  psychologicalVulnerabilities: [],
+  lastUpdated: Date.now(),
+};
+
 export class AdaptiveHorrorEngine {
   private playerProfile: PlayerProfile;
+  private storage: StorageManager<PlayerProfile>;
 
   constructor() {
+    this.storage = new StorageManager(STORAGE_KEY, DEFAULT_PROFILE, false, true);
     this.playerProfile = this.loadProfileFromStorage();
   }
 
@@ -30,39 +41,27 @@ export class AdaptiveHorrorEngine {
    * Load player profile from localStorage
    */
   private loadProfileFromStorage(): PlayerProfile {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const profile = JSON.parse(stored) as PlayerProfile;
-        console.log('📊 Loaded player profile from storage:', {
-          fearTriggers: profile.fearTriggers.length,
-          choices: profile.preferredChoices.length,
-        });
-        return profile;
-      }
-    } catch (error) {
-      console.warn('Failed to load player profile:', error);
+    const profile = this.storage.load();
+
+    if (profile.preferredChoices.length > 0 || profile.fearTriggers.length > 0) {
+      console.log('📊 Loaded player profile from storage:', {
+        fearTriggers: profile.fearTriggers.length,
+        choices: profile.preferredChoices.length,
+      });
     }
-    
-    return {
-      preferredChoices: [],
-      fearTriggers: [],
-      decisionPatterns: [],
-      psychologicalVulnerabilities: [],
-      lastUpdated: Date.now(),
-    };
+
+    return profile;
   }
 
   /**
    * Save player profile to localStorage
    */
   private saveProfileToStorage(): void {
-    try {
-      this.playerProfile.lastUpdated = Date.now();
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.playerProfile));
+    this.playerProfile.lastUpdated = Date.now();
+    const success = this.storage.save(this.playerProfile);
+
+    if (success) {
       console.log('💾 Saved player profile to storage');
-    } catch (error) {
-      console.warn('Failed to save player profile:', error);
     }
   }
 

@@ -14,6 +14,7 @@ import {
 } from '../../types';
 import { useWorldStateStore } from '../../stores/worldStateStore';
 import { AI_MODELS } from '../config';
+import { extractJSONArray, extractJSONObject } from '../../utils/jsonExtractor';
 
 const googleApiKey =
   (typeof process !== 'undefined' ? process.env.VITE_GEMINI_API_KEY : import.meta.env.VITE_GEMINI_API_KEY) || '';
@@ -75,16 +76,9 @@ async function runAIFlowWithFallback(
     const result = await model.generateContent(prompt);
     const response = result.response;
     const text = response.text();
-    
+
     // Extract JSON from response (handling thinking mode output)
-    const jsonStart = text.indexOf('[');
-    const jsonEnd = text.lastIndexOf(']') + 1;
-    if (jsonStart === -1 || jsonEnd === 0) {
-      throw new Error('No valid JSON found in response');
-    }
-    
-    const jsonText = text.substring(jsonStart, jsonEnd);
-    const commands = JSON.parse(jsonText);
+    const commands = extractJSONArray(text, false); // Don't clean markdown, just extract array
     return commandArraySchema.parse(commands);
     
   } catch (primaryError) {
@@ -107,8 +101,7 @@ async function runAIFlowWithFallback(
       const result = await fallbackModel.generateContent(prompt);
       const response = result.response;
       const text = response.text();
-      const jsonText = text.substring(text.indexOf('['), text.lastIndexOf(']') + 1);
-      const commands = JSON.parse(jsonText);
+      const commands = extractJSONArray(text, false);
       return commandArraySchema.parse(commands);
       
     } catch (fallbackError) {
@@ -202,7 +195,7 @@ Example format:
     const result = await model.generateContent(enhancedPrompt);
     const response = result.response;
     const text = response.text();
-    const json = JSON.parse(text.replace(/```json|```/g, '').trim());
+    const json = extractJSONObject(text, true);
     
     // Enhanced fallbacks with more sophisticated concepts
     const enhancedFallbacks = {

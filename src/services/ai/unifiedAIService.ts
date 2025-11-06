@@ -1,6 +1,6 @@
 /**
  * Unified AI Service with Model Selection
- * 
+ *
  * Routes AI requests to the appropriate service (Grok or Gemini) based on user selection
  */
 
@@ -9,6 +9,7 @@ import { xaiClient } from './grokService';
 import { generateConceptFlow, nextStepFlow } from './genkit';
 import { GameCommand, GenreConfig, WorldState, StorySegment } from '../../types';
 import { AI_MODELS } from '../config';
+import { extractJSONArray, extractJSONObject } from '../../utils/jsonExtractor';
 
 // Helper to get the full, current game state for fallback operations
 function getFullGameState(playerChoice: string, worldState: WorldState, storyHistory: StorySegment[]) {
@@ -73,24 +74,13 @@ async function generateWithGrok(
     });
 
     const content = result.content;
-    const cleanedContent = content.replace(/```json|```/g, '').trim();
-    
-    const jsonStart = cleanedContent.indexOf('[');
-    const jsonEnd = cleanedContent.lastIndexOf(']') + 1;
-    
-    if (jsonStart === -1 || jsonEnd === 0) {
-      console.error('No valid JSON array found in X.AI response:', cleanedContent);
-      throw new Error('No valid JSON array found in X.AI response');
-    }
-    
-    const jsonText = cleanedContent.substring(jsonStart, jsonEnd);
-    const commands = JSON.parse(jsonText);
-    
+    const commands = extractJSONArray(content, true); // Clean markdown and extract array
+
     if (!Array.isArray(commands)) {
       console.error('Invalid command format from X.AI:', commands);
       throw new Error('Invalid command format from X.AI');
     }
-    
+
     console.log('X.AI generated', commands.length, 'commands');
     return commands;
   } catch (error) {
@@ -177,9 +167,9 @@ Example format:
       topP: AI_MODELS.CONCEPT_GENERATION.topP,
       enableThinking: true,
     });
-    
+
     const content = result.content;
-    const json = JSON.parse(content.replace(/```json|```/g, '').trim());
+    const json = extractJSONObject(content, true);
     
     return {
       protagonist: json.protagonist || 'A confused individual',

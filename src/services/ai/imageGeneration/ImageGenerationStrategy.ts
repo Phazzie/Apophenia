@@ -88,10 +88,8 @@ export class ImagenPrimaryStrategy implements ImageGenerationStrategy {
   private googleApiKey: string;
 
   constructor() {
-    this.googleApiKey =
-      (typeof process !== 'undefined'
-        ? process.env.VITE_GEMINI_API_KEY
-        : import.meta.env.VITE_GEMINI_API_KEY) || '';
+    // Note: Google Imagen API disabled - using X.AI/Grok via backend API instead
+    this.googleApiKey = '';
 
     if (this.googleApiKey) {
       this.genAI = new GoogleGenerativeAI(this.googleApiKey);
@@ -182,10 +180,8 @@ export class ImagenSecondaryStrategy implements ImageGenerationStrategy {
   private googleApiKey: string;
 
   constructor() {
-    this.googleApiKey =
-      (typeof process !== 'undefined'
-        ? process.env.VITE_GEMINI_API_KEY
-        : import.meta.env.VITE_GEMINI_API_KEY) || '';
+    // Note: Google Imagen API disabled - using X.AI/Grok via backend API instead
+    this.googleApiKey = '';
 
     if (this.googleApiKey) {
       this.genAI = new GoogleGenerativeAI(this.googleApiKey);

@@ -44,10 +44,8 @@ class ImageFallbackService {
   private genAI: GoogleGenerativeAI | null = null;
 
   constructor() {
-    this.googleApiKey =
-      (typeof process !== 'undefined'
-        ? process.env.VITE_GEMINI_API_KEY
-        : import.meta.env.VITE_GEMINI_API_KEY) || '';
+    // Note: Google Imagen API disabled - using X.AI/Grok via backend API instead
+    this.googleApiKey = '';
 
     if (this.googleApiKey) {
       this.genAI = new GoogleGenerativeAI(this.googleApiKey);

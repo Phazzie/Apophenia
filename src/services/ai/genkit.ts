@@ -23,8 +23,8 @@ import {
   buildNextStepPrompt,
 } from './promptTemplates';
 
-const googleApiKey =
-  (typeof process !== 'undefined' ? process.env.VITE_GEMINI_API_KEY : import.meta.env.VITE_GEMINI_API_KEY) || '';
+// Note: Google Generative AI client disabled - using X.AI/Grok via backend API instead
+const googleApiKey = '';
 const genAI = new GoogleGenerativeAI(googleApiKey);
 
 const safetySettings = [

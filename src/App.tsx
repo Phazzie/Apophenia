@@ -60,7 +60,10 @@ const App: React.FC = () => {
     }
   };
 
-  if (userLoading) {
+  // Only require auth if explicitly enabled
+  const authEnabled = import.meta.env.VITE_ENABLE_AUTH === 'true';
+
+  if (authEnabled && userLoading) {
     return (
       <div id="app-container" className="loading-container">
         <ThematicLoading />
@@ -69,7 +72,7 @@ const App: React.FC = () => {
     );
   }
 
-  if (!session) {
+  if (authEnabled && !session) {
     return (
       <GameErrorBoundary>
         <div id="app-container">

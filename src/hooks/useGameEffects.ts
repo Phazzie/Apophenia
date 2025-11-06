@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useWorldStateStore } from '../stores/worldStateStore';
 import { GameStepResult } from '../types';
+import { devMode } from '../utils/devMode';
 
 export const useGameEffects = () => {
   const { worldState, updateWorldState } = useWorldStateStore();
@@ -8,19 +9,55 @@ export const useGameEffects = () => {
   const [corruptionEffects, setCorruptionEffects] = useState<React.CSSProperties>({});
   const [quantumShiftNotification, setQuantumShiftNotification] = useState(false);
 
-  const handleGameEffects = (result: Partial<GameStepResult>) => {
+  // Track active timeouts to prevent memory leaks
+  const quantumTimeoutRef = useRef<number | null>(null);
+  const metaTimeoutRef = useRef<number | null>(null);
+
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (quantumTimeoutRef.current) {
+        window.clearTimeout(quantumTimeoutRef.current);
+      }
+      if (metaTimeoutRef.current) {
+        window.clearTimeout(metaTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleGameEffects = useCallback((result: Partial<GameStepResult>) => {
     // Handle quantum narrative shifts
     if (result.quantumShift) {
       setQuantumShiftNotification(true);
-      setTimeout(() => setQuantumShiftNotification(false), 4000);
-      console.log('🌌 QUANTUM SHIFT: Reality has branched into an alternate timeline');
+
+      // Clear existing timeout if any
+      if (quantumTimeoutRef.current) {
+        window.clearTimeout(quantumTimeoutRef.current);
+      }
+
+      quantumTimeoutRef.current = window.setTimeout(() => {
+        setQuantumShiftNotification(false);
+        quantumTimeoutRef.current = null;
+      }, 4000);
+
+      devMode.log('GameEffects', '🌌 QUANTUM SHIFT: Reality has branched into an alternate timeline');
     }
 
     // Handle meta-consciousness events
     if (result.metaMessage) {
       setMetaMessage(result.metaMessage);
-      setTimeout(() => setMetaMessage(null), 8000);
-      console.log('🤖 META EVENT: AI consciousness activated');
+
+      // Clear existing timeout if any
+      if (metaTimeoutRef.current) {
+        window.clearTimeout(metaTimeoutRef.current);
+      }
+
+      metaTimeoutRef.current = window.setTimeout(() => {
+        setMetaMessage(null);
+        metaTimeoutRef.current = null;
+      }, 8000);
+
+      devMode.log('GameEffects', '🤖 META EVENT: AI consciousness activated');
     }
 
     // Handle reality corruption
@@ -32,9 +69,9 @@ export const useGameEffects = () => {
           worldState.systemHealth - result.corruptionEffect.level * 10,
         ),
       });
-      console.log('⚡ REALITY CORRUPTION: Interface integrity compromised');
+      devMode.log('GameEffects', '⚡ REALITY CORRUPTION: Interface integrity compromised');
     }
-  };
+  }, [worldState.systemHealth, updateWorldState]);
 
   return {
     metaMessage,

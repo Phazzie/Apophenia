@@ -10,6 +10,7 @@ import { genres, defaultGenre } from '../config/genres';
 import GlitchedText from './GlitchedText';
 import CompactTestAPI from './CompactTestAPI';
 import { analyticsService } from '../services/analyticsService';
+import { devMode } from '../utils/devMode';
 
 
 const StartScreen: React.FC = () => {
@@ -37,7 +38,7 @@ const StartScreen: React.FC = () => {
 
     // Start analytics session
     const sessionId = analyticsService.startSession();
-    console.log('Started analytics session:', sessionId);
+    devMode.log('StartScreen', 'Started analytics session:', sessionId);
 
     setGameState(GameState.GENERATING_CONCEPT);
 
@@ -68,7 +69,7 @@ const StartScreen: React.FC = () => {
     
     // Start a new session for continued game
     const sessionId = analyticsService.startSession();
-    console.log('Started analytics session for continued game:', sessionId);
+    devMode.log('StartScreen', 'Started analytics session for continued game:', sessionId);
     
     setGameState(GameState.PLAYING);
   };

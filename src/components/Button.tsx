@@ -11,11 +11,11 @@ type ButtonProps = {
   type?: 'button' | 'submit' | 'reset';
 };
 
-const Button: React.FC<ButtonProps> = ({ 
-  children, 
-  onClick, 
-  disabled, 
-  variant = 'primary', 
+const Button: React.FC<ButtonProps> = ({
+  children,
+  onClick,
+  disabled,
+  variant = 'primary',
   className = '',
   ariaLabel,
   type = 'button'
@@ -29,10 +29,10 @@ const Button: React.FC<ButtonProps> = ({
   const classes = `${baseClasses} ${variantClasses[variant]} ${className}`.trim();
 
   return (
-    <button 
+    <button
       type={type}
-      onClick={onClick} 
-      disabled={disabled} 
+      onClick={onClick}
+      disabled={disabled}
       className={classes}
       aria-label={ariaLabel || (typeof children === 'string' ? children : undefined)}
       aria-disabled={disabled}
@@ -42,4 +42,5 @@ const Button: React.FC<ButtonProps> = ({
   );
 };
 
-export default Button;
+// Memoize to prevent unnecessary re-renders when parent re-renders
+export default React.memo(Button);

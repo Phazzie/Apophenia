@@ -1,4 +1,4 @@
-import { processAdvancedImageGeneration } from './genkit';
+import { imageGenerationOrchestrator } from './imageGeneration/index';
 
 interface ImageVariation {
   url: string;
@@ -11,108 +11,68 @@ interface ImageGenerationResult {
   selectedIndex?: number;
 }
 
+/**
+ * Image Generation Service - now uses strategy pattern orchestrator
+ * Maintains backward compatibility with existing interface
+ */
 class ImageGenerationService {
   constructor() {
     // Enhanced Google Imagen integration with production-ready fallbacks
-    // Supports real AI image generation with curated horror imagery fallback
+    // Now delegates to unified imageGenerationOrchestrator with strategy pattern
   }
 
   async generateImageVariations(prompt: string, count: number = 3): Promise<ImageGenerationResult> {
-    const variations: ImageVariation[] = [];
-    
     try {
-      // Try Google Imagen first (production-ready implementation)
-      const imagenVariations = await this.generateImagenVariations(prompt, count);
-      variations.push(...imagenVariations);
-      
-      if (variations.length < count) {
-        // Fallback to Enhanced Unsplash
-        const unsplashVariations = await this.generateUnsplashVariations(prompt, count - variations.length);
-        variations.push(...unsplashVariations);
-      }
-      
+      // Use the unified orchestrator for variations
+      const result = await imageGenerationOrchestrator.generateImageVariations({
+        prompt,
+        useHorrorIntensity: true,
+        variationCount: count,
+      });
+
+      // Convert to legacy format for backward compatibility
+      const variations: ImageVariation[] = result.variations.map(variation => ({
+        url: variation.url,
+        prompt: variation.prompt,
+        quality: (variation.source === 'unsplash' ? 'unsplash' : 'imagen') as 'imagen' | 'unsplash',
+      }));
+
+      return {
+        variations,
+        selectedIndex: result.selectedIndex,
+      };
+
     } catch (error) {
       console.error('Image generation failed:', error);
-      // Fallback to Unsplash only
-      const unsplashVariations = await this.generateUnsplashVariations(prompt, count);
-      variations.push(...unsplashVariations);
-    }
 
-    return {
-      variations: variations.slice(0, count),
-      selectedIndex: 0 // Default to first variation
-    };
-  }
-
-
-  private async generateImagenVariations(prompt: string, count: number): Promise<ImageVariation[]> {
-    
-    // Real implementation using Google Imagen API
-    const horrorPrompts = this.enhanceHorrorPrompt(prompt);
-    const promises = horrorPrompts.slice(0, count).map(async (enhancedPrompt, index) => {
-      try {
-        // Use the real Imagen API instead of mock
-        const imageUrl = await processAdvancedImageGeneration(enhancedPrompt);
-        
-        // Check if we got a real generated image (not Unsplash fallback)
-        const isRealImageGeneration = imageUrl && !imageUrl.includes('unsplash.com');
-        
-        return {
-          url: imageUrl || `https://via.placeholder.com/800x600/2d1b69/e94560?text=Imagen+Error+${index + 1}`,
-          prompt: enhancedPrompt,
-          quality: isRealImageGeneration ? 'imagen' as const : 'unsplash' as const
-        };
-      } catch (error) {
-        console.error(`Imagen generation ${index + 1} failed:`, error);
-        return {
-          url: `https://via.placeholder.com/800x600/2d1b69/e94560?text=Imagen+Error+${index + 1}`,
-          prompt: enhancedPrompt,
-          quality: 'unsplash' as const // Error fallback is not real Imagen generation
-        };
-      }
-    });
-
-    return Promise.all(promises);
-  }
-
-  private async generateUnsplashVariations(prompt: string, count: number): Promise<ImageVariation[]> {
-    const keywords = this.extractHorrorKeywords(prompt);
-    const variations: ImageVariation[] = [];
-
-    for (let i = 0; i < count; i++) {
-      const keyword = keywords[i % keywords.length];
-      const url = `https://source.unsplash.com/800x600/?${keyword},dark,horror`;
-      
-      variations.push({
-        url,
-        prompt: `${prompt} (${keyword})`,
-        quality: 'unsplash'
+      // Emergency fallback
+      const fallback = imageGenerationOrchestrator.generateImage({
+        prompt,
+        useHorrorIntensity: true,
       });
+
+      return fallback
+        .then(result => ({
+          variations: [{
+            url: result.url,
+            prompt,
+            quality: (result.source === 'unsplash' ? 'unsplash' : 'imagen') as 'imagen' | 'unsplash',
+          }],
+          selectedIndex: 0,
+        }))
+        .catch(fallbackError => {
+          console.error('Emergency fallback also failed:', fallbackError);
+          // Final fallback: return a placeholder
+          return {
+            variations: [{
+              url: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzMzMyIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZm9udC1zaXplPSIxNCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2ZmZiI+SW1hZ2UgVW5hdmFpbGFibGU8L3RleHQ+PC9zdmc+',
+              prompt,
+              quality: 'unsplash' as 'imagen' | 'unsplash',
+            }],
+            selectedIndex: 0,
+          };
+        });
     }
-
-    return variations;
-  }
-
-  private enhanceHorrorPrompt(basePrompt: string): string[] {
-    const horrorEnhancements = [
-      `${basePrompt}, cosmic horror, lovecraftian atmosphere, dark shadows, eerie lighting, psychological terror`,
-      `${basePrompt}, disturbing reality, glitching existence, digital corruption, AI consciousness horror`,
-      `${basePrompt}, existential dread, reality breakdown, consciousness fragmentation, horror aesthetic`
-    ];
-
-    return horrorEnhancements;
-  }
-
-  private extractHorrorKeywords(prompt: string): string[] {
-    const baseKeywords = ['horror', 'dark', 'eerie', 'shadows', 'abandoned', 'mysterious'];
-    const promptWords = prompt.toLowerCase().split(' ');
-    
-    // Extract relevant words from prompt
-    const relevantWords = promptWords.filter(word => 
-      word.length > 3 && !['the', 'and', 'but', 'for', 'are', 'with'].includes(word)
-    );
-
-    return [...relevantWords.slice(0, 3), ...baseKeywords];
   }
 }
 

@@ -3,6 +3,7 @@ import {
   StorageManager,
   getOrCreateSessionId,
 } from '../../../utils/storageUtils';
+import { isFeatureEnabled } from '../../../utils/featureFlagMiddleware';
 
 /**
  * NEURAL ECHO CHAMBERS
@@ -35,6 +36,12 @@ export class NeuralEchoChambers {
   }
 
   initializeFromPersistence(): void {
+    // Feature gate: Only initialize if NEURAL_ECHOES is enabled
+    if (!isFeatureEnabled('NEURAL_ECHOES')) {
+      console.log('🚫 Neural echo chambers feature is disabled. Skipping persistence initialization.');
+      return;
+    }
+
     const stored = this.storage.load();
     this.crossSessionPatterns = stored.patterns || [];
 
@@ -48,6 +55,12 @@ export class NeuralEchoChambers {
   }
 
   recordChoice(choice: string, context: string, worldState: WorldState): void {
+    // Feature gate: Only record if NEURAL_ECHOES is enabled
+    if (!isFeatureEnabled('NEURAL_ECHOES')) {
+      console.log('🚫 Neural echo chambers feature is disabled. Skipping choice recording.');
+      return;
+    }
+
     const sessionId = this.getCurrentSessionId();
 
     if (!this.sessionMemory.has(sessionId)) {
@@ -64,7 +77,7 @@ export class NeuralEchoChambers {
     };
 
     this.sessionMemory.get(sessionId)?.push(memory);
-    
+
     // Convert to EchoMemory for cross-session analysis
     const echoMemory: EchoMemory = {
       choice,
@@ -79,6 +92,11 @@ export class NeuralEchoChambers {
   }
 
   generateEchoPrompt(currentChoice: string): string | null {
+    // Feature gate: Only generate echoes if NEURAL_ECHOES is enabled
+    if (!isFeatureEnabled('NEURAL_ECHOES')) {
+      return null;
+    }
+
     const relevantEchoes = this.findRelevantEchoes(currentChoice);
 
     if (relevantEchoes.length === 0) return null;

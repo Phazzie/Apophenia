@@ -1,5 +1,6 @@
 import { Command, GenreConfig, StorySegment, WorldState } from '../../types';
 import { apiClient } from '../secureApiClient';
+import { imageGenerationOrchestrator } from './imageGeneration/index';
 
 /**
  * Secure AI Integration for Apophenia
@@ -66,60 +67,25 @@ export const nextStepFlow = async (input: {
 };
 
 export const generateImageFlow = async (prompt: string): Promise<string> => {
-  try {
-    console.log('Generating image using secure backend API...');
-    const response = await apiClient.generateImage(prompt);
-    return response.fallbackUrl || generateUnsplashFallback(prompt);
-  } catch (error) {
-    console.warn('Backend API unavailable, using Unsplash fallback:', error);
-    return generateUnsplashFallback(prompt);
-  }
+  console.log('Generating image using secure backend API...');
+
+  // Use the unified orchestrator with strategy pattern
+  const result = await imageGenerationOrchestrator.generateImage({
+    prompt,
+    useHorrorIntensity: true,
+  });
+
+  return result.url;
 };
 
 export const processAdvancedImageGeneration = async (prompt: string): Promise<string> => {
   console.log('Advanced AI image generation requested for prompt:', prompt);
-  
-  try {
-    console.log('Attempting secure backend image generation...');
-    const response = await apiClient.generateImage(prompt);
-    
-    if (response.fallbackUrl) {
-      console.log('Using curated horror imagery from backend');
-      return response.fallbackUrl;
-    }
-  } catch (error) {
-    console.warn('Backend image generation failed:', error);
-  }
-  
-  console.log('Using enhanced Unsplash integration');
-  return generateUnsplashFallback(prompt);
-};
 
-// Enhanced Unsplash fallback with horror-specific keywords
-function generateUnsplashFallback(prompt: string): string {
-  const horrorKeywords = [
-    'dark', 'horror', 'nightmare', 'cosmic', 'surreal', 'atmospheric', 
-    'eerie', 'ominous', 'mysterious', 'otherworldly', 'abstract', 'shadows'
-  ];
-  
-  // Extract meaningful words from prompt
-  const promptWords = prompt.toLowerCase()
-    .split(/\s+/)
-    .filter(word => word.length > 3)
-    .slice(0, 2);
-  
-  // Select random horror keywords
-  const selectedKeywords = [];
-  for (let i = 0; i < 3; i++) {
-    const randomIndex = Math.floor(Math.random() * horrorKeywords.length);
-    selectedKeywords.push(horrorKeywords[randomIndex]);
-  }
-  
-  // Combine with prompt words
-  const allKeywords = [...selectedKeywords, ...promptWords];
-  const keywordString = allKeywords.join(',');
-  
-  console.log('Using enhanced Unsplash fallback with keywords:', keywordString);
-  
-  return `https://source.unsplash.com/1920x1080/?${encodeURIComponent(keywordString)}`;
-}
+  // Use the unified orchestrator with full fallback chain
+  const result = await imageGenerationOrchestrator.generateImage({
+    prompt,
+    useHorrorIntensity: true,
+  });
+
+  return result.url;
+};

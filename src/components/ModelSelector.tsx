@@ -1,10 +1,10 @@
 /**
  * AI Model Selector Component
- * 
+ *
  * Allows users to select between available AI models and test their connectivity
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useAIModelStore } from '../stores/aiModelStore';
 import { AIModel } from '../types';
 
@@ -27,13 +27,13 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ isVisible, onClose }) => 
   const [expandedModel, setExpandedModel] = useState<string | null>(null);
   const models = getAllModels();
 
-  const handleModelSelect = (modelId: string) => {
+  const handleModelSelect = useCallback((modelId: string) => {
     setSelectedModel(modelId);
-  };
+  }, [setSelectedModel]);
 
-  const handleTestModel = async (modelId: string) => {
+  const handleTestModel = useCallback(async (modelId: string) => {
     await testModel(modelId);
-  };
+  }, [testModel]);
 
   const renderModelCard = (model: AIModel) => {
     const isSelected = model.id === selectedModelId;

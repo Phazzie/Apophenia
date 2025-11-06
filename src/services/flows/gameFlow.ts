@@ -19,12 +19,15 @@ export const triggerSummary = (
   history: StorySegment[]
 ) => {
   if (history.length > 0) {
-    summarizeHistory(worldState, history[history.length - 1]).then(
-      (summary) => {
+    summarizeHistory(worldState, history[history.length - 1])
+      .then((summary) => {
         if (summary) {
           useWorldStateStore.getState().updateWorldState({ summary });
         }
-      }
-    );
+      })
+      .catch((error) => {
+        console.warn('Background summary generation failed:', error);
+        // Non-critical: summary is a background enhancement, not required for gameplay
+      });
   }
 };

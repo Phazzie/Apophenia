@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useGameEffects } from '../hooks/useGameEffects';
 import { useGameLoop } from '../hooks/useGameLoop';
 import { GameStateManager } from '../services/gameStateManager';
@@ -8,6 +8,8 @@ import { useWorldStateStore } from '../stores/worldStateStore';
 import { GameState } from '../types';
 import ThematicLoading from './ThematicLoading';
 import { analyticsService } from '../services/analyticsService';
+import { retryImageGeneration } from '../commands/generateImage';
+import { devMode } from '../utils/devMode';
 
 const GameScreen: React.FC = () => {
   const { choices, intrusiveThought, gameState, isGenerating } = useGameStateStore();
@@ -24,25 +26,29 @@ const GameScreen: React.FC = () => {
 
   const { handleChoice } = useGameLoop(handleGameEffects);
 
-  const lastStorySegment = storyHistory[storyHistory.length - 1];
-  const combinedChoices = intrusiveThought
-    ? [...choices, { ...intrusiveThought, isIntrusive: true }]
-    : choices;
+  const lastStorySegment = useMemo(() => storyHistory[storyHistory.length - 1], [storyHistory]);
 
-  const handleSave = () => {
+  const combinedChoices = useMemo(() =>
+    intrusiveThought
+      ? [...choices, { ...intrusiveThought, isIntrusive: true }]
+      : choices,
+    [choices, intrusiveThought]
+  );
+
+  const handleSave = useCallback(() => {
     // The saving is automatic via the persist middleware.
     // This button is just for user feedback.
     setSaveMessageVisible(true);
-  };
+  }, []);
 
-  const handleNewGame = () => {
+  const handleNewGame = useCallback(() => {
     // End current analytics session
     analyticsService.endSession();
-    console.log('Ended analytics session');
-    
+    devMode.log('GameScreen', 'Ended analytics session');
+
     GameStateManager.resetAllStores();
     // The reset will automatically set the gameState to MENU, triggering a re-render to the StartScreen
-  };
+  }, []);
 
   // Auto-hide the save message after a short delay
   useEffect(() => {
@@ -91,15 +97,13 @@ const GameScreen: React.FC = () => {
               <div className="image-error-overlay">
                 <div className="error-icon">⚠</div>
                 <p>Scene generation disrupted</p>
-                <button 
+                <button
                   className="retry-button"
                   onClick={() => {
                     if (lastStorySegment?.id) {
-                      import('../commands/generateImage').then(({ retryImageGeneration }) => {
-                        // Try to extract prompt from segment or use default
-                        const prompt = `${lastStorySegment.text} cosmic horror atmospheric dark`;
-                        retryImageGeneration(lastStorySegment.id, prompt);
-                      });
+                      // Try to extract prompt from segment or use default
+                      const prompt = `${lastStorySegment.text} cosmic horror atmospheric dark`;
+                      retryImageGeneration(lastStorySegment.id, prompt);
                     }
                   }}
                 >
@@ -141,17 +145,20 @@ const GameScreen: React.FC = () => {
         {isGenerating ? (
           <ThematicLoading />
         ) : (
-          combinedChoices.map((choice, index) => (
-            <button
-              key={index}
-              onClick={() => void handleChoice(choice)}
-              disabled={isGenerating}
-              className={`choice-button ${choice.isIntrusive ? 'intrusive-thought' : ''}`}
-            >
-              {choice.isIntrusive && <span className="intrusive-icon">👁️</span>}
-              {choice.text}
-            </button>
-          ))
+          combinedChoices.map((choice, index) => {
+            const handleChoiceClick = () => void handleChoice(choice);
+            return (
+              <button
+                key={index}
+                onClick={handleChoiceClick}
+                disabled={isGenerating}
+                className={`choice-button ${choice.isIntrusive ? 'intrusive-thought' : ''}`}
+              >
+                {choice.isIntrusive && <span className="intrusive-icon">👁️</span>}
+                {choice.text}
+              </button>
+            );
+          })
         )}
         <div className="game-actions">
           <button onClick={handleSave} disabled={isGenerating} className="action-button">

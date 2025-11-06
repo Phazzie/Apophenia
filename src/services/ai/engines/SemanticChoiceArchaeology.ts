@@ -1,3 +1,5 @@
+import { isFeatureEnabled } from '../../../utils/featureFlagMiddleware';
+
 /**
  * Semantic analysis result interface for type safety
  */
@@ -35,6 +37,16 @@ export class SemanticChoiceArchaeology {
     hiddenMotivations: string[];
     semanticInsight: string;
   } {
+    // Feature gate: Return minimal analysis if SEMANTIC_ARCHAEOLOGY is disabled
+    if (!isFeatureEnabled('SEMANTIC_ARCHAEOLOGY')) {
+      console.log('🚫 Semantic archaeology feature is disabled. Returning minimal analysis.');
+      return {
+        psychProfile: 'Analysis unavailable (feature disabled)',
+        hiddenMotivations: [],
+        semanticInsight: 'No semantic analysis performed',
+      };
+    }
+
     const analysis = this.performSemanticAnalysis(choice, availableChoices);
     this.updateSemanticProfile(analysis);
 

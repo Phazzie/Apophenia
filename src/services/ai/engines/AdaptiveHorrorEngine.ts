@@ -2,6 +2,8 @@ import { StorySegment, WorldState } from '../../../types';
 import { REVOLUTIONARY_FEATURES } from '../../config';
 import { generateWithSelectedModel } from '../unifiedAIService';
 import { StorageManager } from '../../../utils/storageUtils';
+import { isFeatureEnabled } from '../../../utils/featureFlagMiddleware';
+import { buildFearAnalysisRequest, buildPersonalizedHorrorRequest } from '../promptTemplates';
 
 /**
  * ADAPTIVE HORROR ENGINE
@@ -71,27 +73,21 @@ export class AdaptiveHorrorEngine {
     worldState: WorldState,
     storyHistory: StorySegment[]
   ): Promise<void> {
-    if (!REVOLUTIONARY_FEATURES.ADAPTIVE_HORROR.enabled) {
+    // Feature gate: Only analyze if ADAPTIVE_HORROR is enabled
+    if (!isFeatureEnabled('ADAPTIVE_HORROR')) {
+      console.log('🚫 Adaptive horror feature is disabled');
       return;
     }
 
     console.log('🧠 Analyzing player choice for fear profiling...');
     this.playerProfile.preferredChoices.push(choice);
 
-    const systemInstruction = `You are a psychological profiler AI specializing in horror game analysis. Analyze player choices to identify deep-seated fears and psychological patterns.`;
-    
-    const prompt = `Player chose: "${choice}" in context: "${context}".
-    
-Previous choices: ${this.playerProfile.preferredChoices.slice(-5).join(', ')}
-    
-Identify 2-3 specific psychological fear triggers this choice reveals. Focus on:
-- Deep psychological fears (isolation, betrayal, powerlessness, identity loss, cosmic dread)
-- Avoidance patterns (what they're trying to escape)
-- Confrontation patterns (what they're willing to face)
-- Control needs (how they try to maintain agency)
-
-Return ONLY a comma-separated list of 2-3 fear triggers, nothing else.
-Example: isolation, loss of control, betrayal`;
+    const previousChoices = this.playerProfile.preferredChoices.slice(-5);
+    const { systemInstruction, prompt } = buildFearAnalysisRequest(
+      choice,
+      context,
+      previousChoices
+    );
 
     try {
       const commands = await generateWithSelectedModel(
@@ -133,7 +129,7 @@ Example: isolation, loss of control, betrayal`;
     storyHistory: StorySegment[]
   ): Promise<string> {
     const fearTriggers = this.getTopFearTriggers(3);
-    
+
     if (fearTriggers.length === 0) {
       console.log('📝 No fear triggers yet, using base prompt');
       return basePrompt;
@@ -141,20 +137,11 @@ Example: isolation, loss of control, betrayal`;
 
     console.log('😱 Personalizing horror with triggers:', fearTriggers);
 
-    const systemInstruction = `You are an expert horror narrative adapter. Enhance story prompts by weaving in psychological fear triggers naturally and subtly.`;
-    
-    const prompt = `Base prompt: "${basePrompt}"
-
-Player's top fear triggers: ${fearTriggers.join(', ')}
-Horror intensity: ${worldState.horrorIntensity || 5}/10
-
-Enhance this prompt by:
-1. Incorporating these fear triggers naturally (don't be obvious)
-2. Making the horror feel personalized to this player
-3. Matching the horror intensity level
-4. Keeping the core story intact
-
-Return ONLY the enhanced prompt, nothing else. Keep it 100-150 words.`;
+    const { systemInstruction, prompt } = buildPersonalizedHorrorRequest(
+      basePrompt,
+      fearTriggers,
+      worldState.horrorIntensity || 5
+    );
 
     try {
       const commands = await generateWithSelectedModel(

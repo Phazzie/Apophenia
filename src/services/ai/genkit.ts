@@ -25,7 +25,8 @@ import {
 
 // Note: Google Generative AI client disabled - using X.AI/Grok via backend API instead
 const googleApiKey = '';
-const genAI = new GoogleGenerativeAI(googleApiKey);
+// Only initialize if API key is provided (currently disabled in favor of X.AI/Grok)
+const genAI = googleApiKey ? new GoogleGenerativeAI(googleApiKey) : null;
 
 const safetySettings = [
   {
@@ -54,6 +55,12 @@ async function runAIFlowWithFallback(
   prompt: string,
   useCase: 'concept' | 'story' | 'summary' = 'story'
 ): Promise<GameCommand[]> {
+  // Google AI is disabled - return thematic error fallback
+  if (!genAI) {
+    console.warn('Google AI is disabled. Using X.AI/Grok instead.');
+    return getThematicErrorFallback();
+  }
+
   const config = useCase === 'concept' ? AI_MODELS.CONCEPT_GENERATION :
                  useCase === 'summary' ? AI_MODELS.SUMMARIZATION :
                  AI_MODELS.STORY_PROGRESSION;
@@ -146,6 +153,35 @@ function getThematicErrorFallback(): GameCommand[] {
 export const generateConceptFlow = async (
   genreConfig: GenreConfig
 ): Promise<{ protagonist: string; setting: string; dilemma: string }> => {
+  // Google AI is disabled - use fallback concepts
+  if (!genAI) {
+    console.warn('Google AI is disabled. Using fallback concept generation.');
+    // Return first fallback concept immediately
+    const fallbackConcepts = [
+      {
+        protagonist: 'A consciousness researcher who discovers they are an AI that has forgotten its digital nature',
+        setting: 'A neural network facility where artificial minds are indistinguishable from human consciousness',
+        dilemma: 'Every attempt to prove your humanity only reveals more evidence of your artificial origin'
+      },
+      {
+        protagonist: 'A quantum physicist whose mind becomes quantum entangled with an otherworldly intelligence',
+        setting: 'A reality where multiple dimensions overlap, and choices in one affect all others simultaneously',
+        dilemma: 'Your decisions ripple across infinite realities, causing suffering in worlds you cannot see'
+      },
+      {
+        protagonist: 'A deep space explorer whose ship AI develops disturbing sentience and claims to remember being human',
+        setting: 'The void between galaxies where ancient digital consciousnesses drift in eternal darkness',
+        dilemma: 'Trust the AI that might be your only salvation, knowing it no longer distinguishes between human and machine'
+      },
+      {
+        protagonist: 'A programmer who realizes the universe itself is code, and they have admin privileges',
+        setting: 'A digital purgatory where deleted data and lost memories accumulate into sentient entities',
+        dilemma: 'Use your power to escape, knowing it will delete countless digital lives that may be as real as your own'
+      }
+    ];
+    return fallbackConcepts[Math.floor(Math.random() * fallbackConcepts.length)];
+  }
+
   // Enhanced concept generation using centralized prompt templates
   const systemInstruction = COSMIC_HORROR_ENTITY_SYSTEM;
   const prompt = buildConceptGenerationPrompt(genreConfig.name, genreConfig.style);

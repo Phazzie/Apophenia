@@ -253,7 +253,7 @@ export class XAIAPIClient {
       console.error('X.AI API test failed:', error);
       return {
         success: false,
-        model: GROK_MODEL,
+        model: GROK_TEXT_MODEL,
         contextWindow: 2000000,
         testType,
         error: error instanceof Error ? error.message : 'Unknown error'

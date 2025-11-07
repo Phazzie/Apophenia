@@ -59,7 +59,8 @@ test_with_retry() {
         else
             retry_count=$((retry_count + 1))
             if [ $retry_count -lt $MAX_RETRIES ]; then
-                wait_time=$((RETRY_DELAY * retry_count))
+                # Exponential backoff: 2^retry_count seconds (2s, 4s, 8s)
+                wait_time=$((2 ** retry_count))
                 echo -e "${YELLOW}⚠️  Attempt $retry_count failed. Retrying in ${wait_time}s...${NC}"
                 sleep $wait_time
             fi

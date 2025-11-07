@@ -149,7 +149,7 @@ export function generateCSP(): string {
     "style-src 'self' 'unsafe-inline'", // Required for styled components
     "img-src 'self' data: https: blob:",
     "font-src 'self' data:",
-    "connect-src 'self' https://generativelanguage.googleapis.com https://api.x.ai wss://api.x.ai",
+    "connect-src 'self' https://api.x.ai wss://api.x.ai",
     "media-src 'self' data:",
     "object-src 'none'",
     "frame-ancestors 'none'",

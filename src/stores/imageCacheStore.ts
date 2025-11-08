@@ -111,7 +111,7 @@ export const useImageCacheStore = create<ImageCacheStore>((set, get) => ({
       };
       
       const newCache = { ...state.imageCache, [prompt]: newEntry };
-      let newTelemetry = { ...state.telemetry };
+      const newTelemetry = { ...state.telemetry };
       
       // Check if we need to evict entries
       const entries = Object.entries(newCache);

@@ -1,4 +1,4 @@
-import { vi, Mock } from 'vitest';
+import { vi } from 'vitest';
 import { NeuralEchoChambers } from '../NeuralEchoChambers';
 import { BreakingFifthWall } from '../BreakingFifthWall';
 import { WorldState } from '../../../../types';

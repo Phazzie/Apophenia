@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useState, useMemo, } from 'react';
 import { useGameStateStore } from './stores/gameStateStore';
 import { useWorldStateStore } from './stores/worldStateStore';
 import { useUserStore } from './stores/userStore';

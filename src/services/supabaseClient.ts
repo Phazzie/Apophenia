@@ -1,10 +1,28 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Supabase URL and anon key are required.');
-}
+// Create mock client for when auth is disabled
+const createMockClient = (): any => {
+  console.warn('Supabase credentials not configured. Auth features disabled.');
+  return {
+    auth: {
+      getSession: async () => ({ data: { session: null }, error: null }),
+      onAuthStateChange: () => {
+        return {
+          data: { subscription: { unsubscribe: () => {} } },
+          error: null
+        };
+      },
+      signUp: async () => ({ data: null, error: new Error('Auth disabled') }),
+      signInWithPassword: async () => ({ data: null, error: new Error('Auth disabled') }),
+      signOut: async () => ({ data: null, error: null }),
+    }
+  };
+};
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Export either real or mock client
+export const supabase: SupabaseClient = (!supabaseUrl || !supabaseAnonKey)
+  ? createMockClient()
+  : createClient(supabaseUrl, supabaseAnonKey);

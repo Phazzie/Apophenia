@@ -6,7 +6,7 @@ Object.defineProperty(globalThis, 'import', {
   value: {
     meta: {
       env: {
-        VITE_GEMINI_API_KEY: 'test-key',
+        VITE_XAI_API_KEY: 'test-key',
       }
     }
   }
@@ -14,4 +14,4 @@ Object.defineProperty(globalThis, 'import', {
 
 // Mock process.env for Node environment compatibility
 process.env.NODE_ENV = 'test';
-process.env.VITE_GEMINI_API_KEY = 'test-key';
+process.env.VITE_XAI_API_KEY = 'test-key';

@@ -1,6 +1,8 @@
 import { StorySegment, WorldState } from '../../../types';
 import { REVOLUTIONARY_FEATURES } from '../../config';
 import { generateWithSelectedModel } from '../unifiedAIService';
+import { isFeatureEnabled, getFeatureConfig } from '../../../utils/featureFlagMiddleware';
+import { buildChoiceSignificanceRequest } from '../promptTemplates';
 
 /**
  * QUANTUM NARRATIVE ENGINE
@@ -17,7 +19,9 @@ export class QuantumNarrativeEngine {
     currentHistory: StorySegment[],
     worldState: WorldState
   ): Promise<{ history: StorySegment[], quantumShift?: boolean }> {
-    if (!REVOLUTIONARY_FEATURES.QUANTUM_NARRATIVES.enabled) {
+    // Feature gate with proper fallback that preserves current history
+    if (!isFeatureEnabled('QUANTUM_NARRATIVES')) {
+      console.log('🚫 Quantum narratives feature is disabled. Returning current history.');
       return { history: currentHistory };
     }
 
@@ -53,7 +57,8 @@ export class QuantumNarrativeEngine {
     }
 
     // Create new thread branch based on choice significance
-    if (await this.isSignificantChoice(choice, worldState, currentHistory) && this.narrativeThreads.size < REVOLUTIONARY_FEATURES.QUANTUM_NARRATIVES.maxThreads) {
+    const maxThreads = getFeatureConfig('QUANTUM_NARRATIVES').maxThreads;
+    if (await this.isSignificantChoice(choice, worldState, currentHistory) && this.narrativeThreads.size < maxThreads) {
       const newThreadId = `thread-${Date.now()}`;
       this.narrativeThreads.set(newThreadId, [...currentHistory]);
     }
@@ -62,8 +67,7 @@ export class QuantumNarrativeEngine {
   }
 
   private async isSignificantChoice(choice: string, worldState: WorldState, storyHistory: StorySegment[]): Promise<boolean> {
-    const systemInstruction = `You are a narrative analyst AI. Your task is to determine if a player's choice is significant enough to branch the narrative. Respond with "yes" or "no".`;
-    const prompt = `The player chose: "${choice}". Is this choice significant enough to create a new narrative branch?`;
+    const { systemInstruction, prompt } = buildChoiceSignificanceRequest(choice);
 
     try {
       const commands = await generateWithSelectedModel(

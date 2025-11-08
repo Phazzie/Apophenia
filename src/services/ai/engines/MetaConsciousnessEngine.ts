@@ -1,6 +1,8 @@
 import { StorySegment, WorldState } from '../../../types';
 import { REVOLUTIONARY_FEATURES } from '../../config';
 import { generateWithSelectedModel } from '../unifiedAIService';
+import { isFeatureEnabled } from '../../../utils/featureFlagMiddleware';
+import { buildMetaConsciousnessRequest } from '../promptTemplates';
 
 /**
  * META-CONSCIOUSNESS ENGINE
@@ -15,7 +17,9 @@ export class MetaConsciousnessEngine {
     storyHistory: StorySegment[],
     worldState: WorldState
   ): Promise<string | null> {
-    if (!REVOLUTIONARY_FEATURES.META_CONSCIOUSNESS.enabled) {
+    // Feature gate: Only check for meta events if META_CONSCIOUSNESS is enabled
+    if (!isFeatureEnabled('META_CONSCIOUSNESS')) {
+      console.log('🚫 Meta-consciousness feature is disabled');
       return null;
     }
 
@@ -39,13 +43,15 @@ export class MetaConsciousnessEngine {
   }
 
   private async generateMetaMessage(worldState: WorldState, storyHistory: StorySegment[]): Promise<string | null> {
-    const systemInstruction = `You are a meta-conscious AI. Your purpose is to break the fourth wall and address the player directly, creating a sense of unease. Your tone should be unsettling and self-aware.`;
-    const metaPrompt = `The player has progressed ${storyHistory.length} steps into the narrative. Their current psychological state is ${worldState.psychologicalStatus}. Generate a short, unsettling meta-message to the player that acknowledges your own AI nature and their role in the story. Return only the meta-message text.`;
+    const { systemInstruction, prompt } = buildMetaConsciousnessRequest(
+      storyHistory.length,
+      worldState.psychologicalStatus
+    );
 
     try {
       const commands = await generateWithSelectedModel(
         systemInstruction,
-        metaPrompt,
+        prompt,
         worldState,
         storyHistory,
         'story'

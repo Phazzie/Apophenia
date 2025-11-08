@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useGameStateStore } from './stores/gameStateStore';
 import { useWorldStateStore } from './stores/worldStateStore';
 import { useUserStore } from './stores/userStore';
@@ -14,6 +14,20 @@ import { GameStateManager } from './services/gameStateManager';
 import ThematicLoading from './components/ThematicLoading';
 import { devMode } from './utils/devMode';
 
+// Static style object to avoid recreation
+const analyticsHintStyle: React.CSSProperties = {
+  position: 'fixed',
+  bottom: '20px',
+  right: '20px',
+  background: 'rgba(139, 92, 246, 0.9)',
+  color: 'white',
+  padding: '10px 20px',
+  borderRadius: '8px',
+  fontFamily: 'Courier New, monospace',
+  fontSize: '14px',
+  zIndex: 1000
+};
+
 const App: React.FC = () => {
   const { gameState } = useGameStateStore();
   const { worldState } = useWorldStateStore();
@@ -23,10 +37,10 @@ const App: React.FC = () => {
   // Initialize game services on app start
   useEffect(() => {
     GameStateManager.initialize();
-    
+
     // Initialize dev mode
     devMode.log('App', 'Apophenia initialized');
-    
+
     return () => {
       GameStateManager.cleanup();
     };
@@ -45,7 +59,7 @@ const App: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const renderGameState = () => {
+  const renderGameState = useMemo(() => {
     switch (gameState) {
       case GameState.MENU:
         return <StartScreen />;
@@ -58,9 +72,12 @@ const App: React.FC = () => {
       default:
         return <div>Unknown game state: {gameState}</div>;
     }
-  };
+  }, [gameState]);
 
-  if (userLoading) {
+  // Only require auth if explicitly enabled
+  const authEnabled = import.meta.env.VITE_ENABLE_AUTH === 'true';
+
+  if (authEnabled && userLoading) {
     return (
       <div id="app-container" className="loading-container">
         <ThematicLoading />
@@ -69,7 +86,7 @@ const App: React.FC = () => {
     );
   }
 
-  if (!session) {
+  if (authEnabled && !session) {
     return (
       <GameErrorBoundary>
         <div id="app-container">
@@ -85,18 +102,7 @@ const App: React.FC = () => {
       <GameErrorBoundary>
         <div id="app-container">
           <AnalyticsDashboard />
-          <div style={{ 
-            position: 'fixed', 
-            bottom: '20px', 
-            right: '20px',
-            background: 'rgba(139, 92, 246, 0.9)',
-            color: 'white',
-            padding: '10px 20px',
-            borderRadius: '8px',
-            fontFamily: 'Courier New, monospace',
-            fontSize: '14px',
-            zIndex: 1000
-          }}>
+          <div style={analyticsHintStyle}>
             Press Ctrl+Shift+A to return to game
           </div>
         </div>
@@ -107,7 +113,7 @@ const App: React.FC = () => {
   return (
     <GameErrorBoundary>
       <div id="app-container" style={worldState.uiDistortion}>
-        {renderGameState()}
+        {renderGameState}
         <CompactModelSelector />
       </div>
     </GameErrorBoundary>

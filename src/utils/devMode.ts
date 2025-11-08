@@ -1,8 +1,26 @@
 /**
  * Developer Mode Utilities
- * 
+ *
  * Toggle debug features and advanced controls for development
  */
+
+// Type extensions for Chrome-specific APIs
+interface MemoryInfo {
+  usedJSHeapSize: number;
+  totalJSHeapSize: number;
+  jsHeapSizeLimit: number;
+}
+
+interface PerformanceMemory extends Performance {
+  memory?: MemoryInfo;
+}
+
+interface WindowWithDebug extends Window {
+  __GAME_STATE__?: unknown;
+  __WORLD_STATE__?: unknown;
+  __STORY_HISTORY__?: unknown;
+  devMode?: DevModeService;
+}
 
 interface DevModeState {
   enabled: boolean;
@@ -105,11 +123,13 @@ class DevModeService {
       return {};
     }
 
+    const perfWithMemory = performance as PerformanceMemory;
+
     return {
-      memory: (performance as any).memory ? {
-        usedJSHeapSize: ((performance as any).memory.usedJSHeapSize / 1048576).toFixed(2) + ' MB',
-        totalJSHeapSize: ((performance as any).memory.totalJSHeapSize / 1048576).toFixed(2) + ' MB',
-        jsHeapSizeLimit: ((performance as any).memory.jsHeapSizeLimit / 1048576).toFixed(2) + ' MB'
+      memory: perfWithMemory.memory ? {
+        usedJSHeapSize: (perfWithMemory.memory.usedJSHeapSize / 1048576).toFixed(2) + ' MB',
+        totalJSHeapSize: (perfWithMemory.memory.totalJSHeapSize / 1048576).toFixed(2) + ' MB',
+        jsHeapSizeLimit: (perfWithMemory.memory.jsHeapSizeLimit / 1048576).toFixed(2) + ' MB'
       } : 'Not available',
       timing: {
         loadTime: (performance.timing.loadEventEnd - performance.timing.navigationStart) + ' ms',
@@ -129,13 +149,15 @@ class DevModeService {
       return;
     }
 
+    const win = window as WindowWithDebug;
+
     // Gather all store states
     const gameState = {
       timestamp: new Date().toISOString(),
       stores: {
-        game: (window as any).__GAME_STATE__ || 'Not available',
-        world: (window as any).__WORLD_STATE__ || 'Not available',
-        story: (window as any).__STORY_HISTORY__ || 'Not available'
+        game: win.__GAME_STATE__ || 'Not available',
+        world: win.__WORLD_STATE__ || 'Not available',
+        story: win.__STORY_HISTORY__ || 'Not available'
       },
       performance: this.getPerformanceSnapshot()
     };
@@ -235,5 +257,5 @@ export const devMode = new DevModeService();
 
 // Expose to window for console access
 if (typeof window !== 'undefined') {
-  (window as any).devMode = devMode;
+  (window as WindowWithDebug).devMode = devMode;
 }

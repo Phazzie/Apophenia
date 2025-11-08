@@ -1,6 +1,6 @@
 /**
  * Unified AI Service with Model Selection
- * 
+ *
  * Routes AI requests to the appropriate service (Grok or Gemini) based on user selection
  */
 
@@ -9,6 +9,12 @@ import { xaiClient } from './grokService';
 import { generateConceptFlow, nextStepFlow } from './genkit';
 import { GameCommand, GenreConfig, WorldState, StorySegment } from '../../types';
 import { AI_MODELS } from '../config';
+import { extractJSONArray, extractJSONObject } from '../../utils/jsonExtractor';
+import {
+  COSMIC_HORROR_ENTITY_SYSTEM,
+  buildGrokConceptPrompt,
+  buildGrokNextStepPrompt,
+} from './promptTemplates';
 
 // Helper to get the full, current game state for fallback operations
 function getFullGameState(playerChoice: string, worldState: WorldState, storyHistory: StorySegment[]) {
@@ -73,24 +79,13 @@ async function generateWithGrok(
     });
 
     const content = result.content;
-    const cleanedContent = content.replace(/```json|```/g, '').trim();
-    
-    const jsonStart = cleanedContent.indexOf('[');
-    const jsonEnd = cleanedContent.lastIndexOf(']') + 1;
-    
-    if (jsonStart === -1 || jsonEnd === 0) {
-      console.error('No valid JSON array found in X.AI response:', cleanedContent);
-      throw new Error('No valid JSON array found in X.AI response');
-    }
-    
-    const jsonText = cleanedContent.substring(jsonStart, jsonEnd);
-    const commands = JSON.parse(jsonText);
-    
+    const commands = extractJSONArray(content, true); // Clean markdown and extract array
+
     if (!Array.isArray(commands)) {
       console.error('Invalid command format from X.AI:', commands);
       throw new Error('Invalid command format from X.AI');
     }
-    
+
     console.log('X.AI generated', commands.length, 'commands');
     return commands;
   } catch (error) {
@@ -150,37 +145,21 @@ export async function generateConceptWithSelectedModel(
 async function generateConceptWithGrok(
   genreConfig: GenreConfig
 ): Promise<{ protagonist: string; setting: string; dilemma: string }> {
-  const enhancedSystemInstruction = `${genreConfig.aiSystemInstruction}\n\nENHANCED REASONING DIRECTIVE: You are now powered by X.AI Grok-4 Fast Reasoning with 2 million token context...`;
-  const conceptPromptTemplate = `ENHANCED CONTEXT UTILIZATION: With your 2 million token context window, prepare to:
-- Remember every detail of the story you're about to create
-- Track all character development and psychological states
-- Maintain thematic consistency across the entire experience
-- Build layered foreshadowing that pays off later
-- Create interconnected story elements that reward careful players
-
-Generate a concept that will serve as the foundation for an epic psychological horror experience.
-
-Return ONLY a JSON object with keys "protagonist", "setting", and "dilemma".
-
-Example format:
-{
-  "protagonist": "A quantum researcher who discovers their consciousness exists simultaneously across multiple realities",
-  "setting": "A research facility where the boundaries between dimensions are weakening",
-  "dilemma": "Each choice splits reality further, creating infinite versions of suffering"
-}`;
-  const enhancedPrompt = `${genreConfig.conceptPrompt}\n\n${conceptPromptTemplate}`;
+  // Use centralized prompt templates for Grok
+  const systemInstruction = `${COSMIC_HORROR_ENTITY_SYSTEM}\n\nENHANCED REASONING DIRECTIVE: You are now powered by X.AI Grok-4 Fast Reasoning with 2 million token context...`;
+  const prompt = buildGrokConceptPrompt(genreConfig.name, genreConfig.style);
 
   try {
-    const result = await xaiClient.generateText(enhancedSystemInstruction, enhancedPrompt, {
+    const result = await xaiClient.generateText(systemInstruction, prompt, {
       temperature: AI_MODELS.CONCEPT_GENERATION.temperature,
       maxTokens: 4096,
       topP: AI_MODELS.CONCEPT_GENERATION.topP,
       enableThinking: true,
     });
-    
+
     const content = result.content;
-    const json = JSON.parse(content.replace(/```json|```/g, '').trim());
-    
+    const json = extractJSONObject(content, true);
+
     return {
       protagonist: json.protagonist || 'A confused individual',
       setting: json.setting || 'A reality that cannot be trusted',
@@ -222,47 +201,11 @@ async function generateNextStepWithGrok(
   storyHistory: StorySegment[],
   genreConfig: GenreConfig
 ): Promise<GameCommand[]> {
-  const systemInstruction = `${genreConfig.aiSystemInstruction}\n\nX.AI GROK-4 ENHANCED REASONING: You have 2 million token context...`;
-  
-  const promptTemplate = `COMPLETE STORY CONTEXT (utilizing 2M token window):
-WORLD STATE: {{worldState}}
-CURRENT HORROR INTENSITY: {{horrorIntensity}}/10
-
-COMPLETE STORY HISTORY:
-{{storyHistory}}
-
-LATEST HUMAN DECISION: "{{playerChoice}}"
-
-ENHANCED REASONING DIRECTIVE: The human has made a choice. Using your 2M context window and advanced reasoning:
-
-1. DEEP PSYCHOLOGICAL STATE ANALYSIS: How has their cumulative choices shaped their mental state?
-2. NARRATIVE ESCALATION WITH MEMORY: Based on the HORROR INTENSITY of {{horrorIntensity}}/10, what horror elements should build on everything that came before? A low score (0-3) means subtle, atmospheric horror. A medium score (4-7) means more direct psychological horror. A high score (8-10) means extreme, reality-bending horror.
-3. REALITY DISTORTION WITH CONSISTENCY: How should reality be altered while maintaining internal logic?
-4. DYNAMIC INTRUSIVE THOUGHT: If the HORROR INTENSITY is high (e.g., > 4), generate a single, compelling intrusive thought. This thought should be a tempting, unsettling, or dangerous action that reflects the player\'s psychological state.
-5. VISUAL HORROR WITH THEMATIC COHERENCE: What atmospheric imagery reinforces the established themes and HORROR INTENSITY?
-
-Generate the next narrative beat that:
-- Adjusts its tone and severity based on the HOROR INTENSITY.
-- References and builds upon previous story elements
-- Introduces elements that connect to earlier subtle hints
-- Creates 2-3 standard choices that seem meaningful but are all paths to horror.
-- If the HORROR INTENSITY is high enough, generates a single intrusive thought and places it in the \'intrusiveThought\' field of the \'displayChoices\' payload.
-- Maintains perfect consistency with established world rules
-
-Return a JSON array of game commands following this structure:
-[
-  {"type": "displayText", "payload": {"content": "story text here", "segmentId": "unique-id"}},
-  {"type": "generateImage", "payload": {"prompt": "atmospheric image prompt", "segmentId": "same-unique-id"}},
-  {"type": "displayChoices", "payload": {"choices": [{"text": "Standard Choice 1", "isIntrusive": false}, {"text": "Standard Choice 2", "isIntrusive": false}], "intrusiveThought": {"text": "A dynamically generated intrusive thought.", "isIntrusive": true}}},
-  {"type": "updateWorldState", "payload": {"psychologicalStatus": "evolved_mental_state"}}
-]`;
-  const contextualPrompt = promptTemplate
-    .replace('{{worldState}}', JSON.stringify(worldState))
-    .replace('{{horrorIntensity}}', String(worldState.horrorIntensity))
-    .replace('{{storyHistory}}', storyHistory.map((s, i) => `[SEGMENT ${i + 1}]: ${s.text}`).join('\n'))
-    .replace('{{playerChoice}}', playerChoice);
+  // Use centralized prompt templates for Grok
+  const systemInstruction = `${COSMIC_HORROR_ENTITY_SYSTEM}\n\nX.AI GROK-4 ENHANCED REASONING: You have 2 million token context...`;
+  const prompt = buildGrokNextStepPrompt(worldState, storyHistory, playerChoice);
 
   const gameState = getFullGameState(playerChoice, worldState, storyHistory);
 
-  return await generateWithGrok(systemInstruction, contextualPrompt, gameState, 'story');
+  return await generateWithGrok(systemInstruction, prompt, gameState, 'story');
 }

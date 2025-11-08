@@ -1,0 +1,173 @@
+name: Grok API Health Monitor
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run every 6 hours
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20.x'
+
+jobs:
+  test-grok-api:
+    name: Test Grok API Integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Make test script executable
+      run: chmod +x ./scripts/test-grok-api.sh
+
+    - name: Run Grok API Tests
+      id: api-tests
+      env:
+        VITE_XAI_API_KEY: ${{ secrets.VITE_XAI_API_KEY }}
+      run: |
+        ./scripts/test-grok-api.sh 2>&1 | tee api-test-results.log
+
+    - name: Parse test results
+      id: parse-results
+      if: always()
+      run: |
+        if [ -f api-test-results.log ]; then
+          # Extract success rate
+          SUCCESS_RATE=$(grep "Success Rate:" api-test-results.log | grep -o '[0-9]*%' || echo "0%")
+          TESTS_PASSED=$(grep "Passed:" api-test-results.log | grep -o '[0-9]*' | head -1 || echo "0")
+          TESTS_FAILED=$(grep "Failed:" api-test-results.log | grep -o '[0-9]*' | tail -1 || echo "0")
+
+          echo "success_rate=$SUCCESS_RATE" >> $GITHUB_OUTPUT
+          echo "tests_passed=$TESTS_PASSED" >> $GITHUB_OUTPUT
+          echo "tests_failed=$TESTS_FAILED" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Create test summary
+      if: always()
+      run: |
+        cat << EOF >> $GITHUB_STEP_SUMMARY
+        ## 🤖 Grok API Health Check Results
+
+        **Date:** $(date)
+        **Success Rate:** ${{ steps.parse-results.outputs.success_rate }}
+
+        ### Test Results
+        - ✅ Passed: ${{ steps.parse-results.outputs.tests_passed }}
+        - ❌ Failed: ${{ steps.parse-results.outputs.tests_failed }}
+
+        ### Models Tested
+        - **Text Generation:** grok-4-fast-reasoning
+        - **Image Generation:** grok-2-image-1212
+
+        ### Test Categories
+        1. API Health Check
+        2. Text Generation
+        3. Thinking Mode
+        4. Image Generation
+        5. Rate Limit Handling
+        6. Error Handling
+
+        <details>
+        <summary>📝 Full Test Log</summary>
+
+        \`\`\`
+        $(cat api-test-results.log)
+        \`\`\`
+
+        </details>
+        EOF
+
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: grok-api-test-results
+        path: api-test-results.log
+        retention-days: 30
+
+    - name: Notify on failure
+      if: failure()
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const issue_body = `## 🚨 Grok API Health Check Failed
+
+          **Workflow:** ${{ github.workflow }}
+          **Run:** ${{ github.run_id }}
+          **Commit:** ${{ github.sha }}
+
+          ### Test Results
+          - Success Rate: ${{ steps.parse-results.outputs.success_rate }}
+          - Tests Passed: ${{ steps.parse-results.outputs.tests_passed }}
+          - Tests Failed: ${{ steps.parse-results.outputs.tests_failed }}
+
+          ### Possible Issues
+          1. API key may have expired or become invalid
+          2. X.AI API service may be experiencing downtime
+          3. Rate limits may have been exceeded
+          4. Model names may have changed
+
+          ### Recommended Actions
+          - Check X.AI API status: https://status.x.ai
+          - Verify API key in repository secrets
+          - Review test logs in workflow artifacts
+
+          [View Workflow Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
+
+          // Only create issue if scheduled or manual run
+          if (context.eventName === 'schedule' || context.eventName === 'workflow_dispatch') {
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🚨 Grok API Health Check Failed',
+              body: issue_body,
+              labels: ['api', 'health-check', 'automated']
+            });
+          }
+
+  integration-test:
+    name: Integration Test with Frontend
+    runs-on: ubuntu-latest
+    needs: test-grok-api
+    if: github.event_name == 'pull_request'
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build project
+      run: npm run build
+
+    - name: Test API service integration
+      env:
+        VITE_XAI_API_KEY: ${{ secrets.VITE_XAI_API_KEY }}
+      run: |
+        # Start the app in test mode
+        npm run preview &
+        SERVER_PID=$!
+
+        # Wait for server
+        sleep 5
+
+        # Test that the app can initialize the Grok service
+        curl -f http://localhost:4173 || exit 1
+
+        # Cleanup
+        kill $SERVER_PID
+
+        echo "✅ Integration test passed"

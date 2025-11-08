@@ -1,6 +1,12 @@
 import { StorySegment, WorldState } from '../../../types';
 import { REVOLUTIONARY_FEATURES } from '../../config';
 import { generateWithSelectedModel } from '../unifiedAIService';
+import { isFeatureEnabled } from '../../../utils/featureFlagMiddleware';
+import {
+  NARRATIVE_REVISION_SYSTEM,
+  buildTemporalRevisionRequest,
+  getRandomTemporalRevisionPrompt,
+} from '../promptTemplates';
 
 /**
  * Get a randomized corruption message for error handling
@@ -35,70 +41,188 @@ function getCorruptionMessage(): string {
 export class TemporalRevisionEngine {
   private revisionHistory: Map<string, string[]> = new Map();
 
+  /**
+   * Orchestrates the temporal revision process by analyzing choices,
+   * determining revision points, generating new narratives, and applying changes.
+   *
+   * @param currentChoice - The player's current choice that may trigger temporal effects
+   * @param storyHistory - The complete story history that may be revised
+   * @param worldState - The current world state affecting revision probability and style
+   * @returns A new story history array with revisions applied, or the original if no revision occurs
+   */
   async reviseHistory(
     currentChoice: string,
     storyHistory: StorySegment[],
     worldState: WorldState
   ): Promise<StorySegment[]> {
-    if (!REVOLUTIONARY_FEATURES.TEMPORAL_REVISION.enabled) {
+    // Determine if we should proceed with temporal revision
+    const shouldRevise = await this.analyzeChoiceForTemporalShift(
+      currentChoice,
+      storyHistory,
+      worldState
+    );
+
+    if (!shouldRevise) {
       return storyHistory;
     }
 
+    // Select which segment to revise
+    const revisionPoint = this.determineRevisionPoints(storyHistory);
+    if (!revisionPoint) {
+      return storyHistory;
+    }
+
+    // Generate the revised narrative
+    try {
+      const revisedText = await this.generateRevisionNarrative(
+        revisionPoint.segment,
+        currentChoice,
+        worldState,
+        storyHistory
+      );
+
+      // Apply the revision to the history
+      return this.applyRevisionToHistory(
+        storyHistory,
+        revisionPoint.segmentIndex,
+        revisionPoint.segment,
+        revisedText
+      );
+    } catch (error) {
+      console.error('Temporal revision failed, creating corrupted segment:', error);
+
+      // Fallback to corruption message on error
+      const corruptedText = `[MEMORY FRAGMENT CORRUPTED: ${revisionPoint.segment.text}]`;
+      return this.applyRevisionToHistory(
+        storyHistory,
+        revisionPoint.segmentIndex,
+        revisionPoint.segment,
+        corruptedText
+      );
+    }
+  }
+
+  /**
+   * Analyzes whether the current choice should trigger a temporal shift.
+   * Performs early validation checks and evaluates temporal impact probability.
+   *
+   * @param currentChoice - The player's current choice
+   * @param storyHistory - The complete story history
+   * @param worldState - Current world state affecting revision probability
+   * @returns True if temporal revision should occur, false otherwise
+   */
+  private async analyzeChoiceForTemporalShift(
+    currentChoice: string,
+    storyHistory: StorySegment[],
+    worldState: WorldState
+  ): Promise<boolean> {
+    // Early exit: Feature not enabled
+    if (!isFeatureEnabled('TEMPORAL_REVISION')) {
+      console.log('🚫 Temporal revision feature is disabled');
+      return false;
+    }
+
+    // Early exit: Server-side rendering
     if (this.isServerSide()) {
-      return storyHistory;
+      return false;
     }
 
-    // AI analyzes if current choice should alter past events
-    const shouldRevise = await this.analyzeTemporalImpact(currentChoice, worldState);
-
-    if (shouldRevise && storyHistory.length > 2) {
-      const targetSegmentIndex = Math.floor(Math.random() * (storyHistory.length - 1));
-      const targetSegment = storyHistory[targetSegmentIndex];
-
-      // Store original text for player confusion
-      if (!this.revisionHistory.has(targetSegment.id)) {
-        this.revisionHistory.set(targetSegment.id, [targetSegment.text]);
-      }
-
-      // AI generates revised version that creates horror through inconsistency
-      try {
-        const revisedText = await this.generateRevisedSegment(
-          targetSegment.text,
-          currentChoice,
-          worldState,
-          storyHistory
-        );
-
-        // Update the segment
-        const revisedHistory = [...storyHistory];
-        revisedHistory[targetSegmentIndex] = {
-          ...targetSegment,
-          text: revisedText,
-          isRevised: true,
-          originalText: targetSegment.text,
-        };
-
-        return revisedHistory;
-      } catch (error) {
-          console.error('Temporal revision failed, creating corrupted segment:', error);
-          const revisedHistory = [...storyHistory];
-          revisedHistory[targetSegmentIndex] = {
-              ...targetSegment,
-              text: `[MEMORY FRAGMENT CORRUPTED: ${targetSegment.text}]`,
-              isRevised: true,
-              originalText: targetSegment.text,
-          };
-          return revisedHistory;
-      }
+    // Early exit: Not enough history to revise
+    if (storyHistory.length <= 2) {
+      return false;
     }
 
-    return storyHistory;
+    // Evaluate temporal impact probability
+    return await this.analyzeTemporalImpact(currentChoice, worldState);
+  }
+
+  /**
+   * Determines which segment in the story history should be revised.
+   * Randomly selects a segment to create unpredictable temporal inconsistencies.
+   *
+   * @param storyHistory - The complete story history
+   * @returns An object containing the segment index and segment, or null if no valid target
+   */
+  private determineRevisionPoints(
+    storyHistory: StorySegment[]
+  ): { segmentIndex: number; segment: StorySegment } | null {
+    if (storyHistory.length <= 1) {
+      return null;
+    }
+
+    // Randomly select a segment (excluding the most recent one)
+    const targetSegmentIndex = Math.floor(Math.random() * (storyHistory.length - 1));
+    const targetSegment = storyHistory[targetSegmentIndex];
+
+    return {
+      segmentIndex: targetSegmentIndex,
+      segment: targetSegment,
+    };
+  }
+
+  /**
+   * Generates a revised narrative for a given segment using AI.
+   * Creates subtle but unsettling changes to past events that enhance horror.
+   *
+   * @param targetSegment - The segment to be revised
+   * @param currentChoice - The player's current choice that triggered the revision
+   * @param worldState - Current world state for context
+   * @param storyHistory - Complete story history for context
+   * @returns The revised narrative text
+   * @throws Error if AI generation fails and no fallback is available
+   */
+  private async generateRevisionNarrative(
+    targetSegment: StorySegment,
+    currentChoice: string,
+    worldState: WorldState,
+    storyHistory: StorySegment[]
+  ): Promise<string> {
+    // Delegate to existing generation method
+    return await this.generateRevisedSegment(
+      targetSegment.text,
+      currentChoice,
+      worldState,
+      storyHistory
+    );
+  }
+
+  /**
+   * Applies a revised narrative to the story history, maintaining revision tracking.
+   * Creates a new history array with the revised segment and tracks original text.
+   *
+   * @param storyHistory - The original story history
+   * @param targetSegmentIndex - Index of the segment to revise
+   * @param targetSegment - The original segment being revised
+   * @param revisedText - The new narrative text
+   * @returns A new story history array with the revision applied
+   */
+  private applyRevisionToHistory(
+    storyHistory: StorySegment[],
+    targetSegmentIndex: number,
+    targetSegment: StorySegment,
+    revisedText: string
+  ): StorySegment[] {
+    // Store original text for player confusion tracking
+    if (!this.revisionHistory.has(targetSegment.id)) {
+      this.revisionHistory.set(targetSegment.id, [targetSegment.text]);
+    }
+
+    // Create new history array with the revised segment
+    const revisedHistory = [...storyHistory];
+    revisedHistory[targetSegmentIndex] = {
+      ...targetSegment,
+      text: revisedText,
+      isRevised: true,
+      originalText: targetSegment.text,
+    };
+
+    return revisedHistory;
   }
 
   private async analyzeTemporalImpact(choice: string, worldState: WorldState): Promise<boolean> {
     // Use AI to determine if choice has temporal significance
     const psychCorruption = 1 - (worldState.systemHealth / 100);
-    const baseChance = REVOLUTIONARY_FEATURES.TEMPORAL_REVISION.enabled ? 0.2 : 0;
+    const baseChance = isFeatureEnabled('TEMPORAL_REVISION') ? 0.2 : 0;
 
     return Math.random() < (baseChance + psychCorruption * 0.3);
   }
@@ -109,23 +233,14 @@ export class TemporalRevisionEngine {
     worldState: WorldState,
     storyHistory: StorySegment[]
   ): Promise<string> {
-    // Create subtle but unsettling changes to past events
-    const revisionPrompts = [
-      `Subtly modify this text to suggest the protagonist was never alone: "${originalText}"`,
-      `Alter this passage to hint that previous events were hallucinations: "${originalText}"`,
-      `Revise this text to suggest digital interference: "${originalText}"`,
-      `Change this passage to imply the protagonist is an AI: "${originalText}"`,
-    ];
-
-    const selectedPrompt = revisionPrompts[Math.floor(Math.random() * revisionPrompts.length)];
+    // Use centralized prompt templates for temporal revision
+    const { systemInstruction, prompt } = buildTemporalRevisionRequest(originalText);
 
     // Use AI to generate actual revisions
     try {
-      const systemInstruction = `You are a narrative revision AI. Your task is to subtly alter story text to create unsettling inconsistencies and false memories. Be subtle but impactful.`;
-
       const commands = await generateWithSelectedModel(
         systemInstruction,
-        selectedPrompt,
+        prompt,
         worldState,
         storyHistory,
         'story'

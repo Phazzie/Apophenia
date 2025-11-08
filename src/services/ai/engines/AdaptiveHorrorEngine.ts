@@ -1,6 +1,9 @@
 import { StorySegment, WorldState } from '../../../types';
 import { REVOLUTIONARY_FEATURES } from '../../config';
 import { generateWithSelectedModel } from '../unifiedAIService';
+import { StorageManager } from '../../../utils/storageUtils';
+import { isFeatureEnabled } from '../../../utils/featureFlagMiddleware';
+import { buildFearAnalysisRequest, buildPersonalizedHorrorRequest } from '../promptTemplates';
 
 /**
  * ADAPTIVE HORROR ENGINE
@@ -19,10 +22,20 @@ interface PlayerProfile {
 const STORAGE_KEY = 'apophenia_player_profile';
 const MAX_PROFILE_ITEMS = 15; // Increased from 10 for better profiling
 
+const DEFAULT_PROFILE: PlayerProfile = {
+  preferredChoices: [],
+  fearTriggers: [],
+  decisionPatterns: [],
+  psychologicalVulnerabilities: [],
+  lastUpdated: Date.now(),
+};
+
 export class AdaptiveHorrorEngine {
   private playerProfile: PlayerProfile;
+  private storage: StorageManager<PlayerProfile>;
 
   constructor() {
+    this.storage = new StorageManager(STORAGE_KEY, DEFAULT_PROFILE, false, true);
     this.playerProfile = this.loadProfileFromStorage();
   }
 
@@ -30,39 +43,27 @@ export class AdaptiveHorrorEngine {
    * Load player profile from localStorage
    */
   private loadProfileFromStorage(): PlayerProfile {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const profile = JSON.parse(stored) as PlayerProfile;
-        console.log('📊 Loaded player profile from storage:', {
-          fearTriggers: profile.fearTriggers.length,
-          choices: profile.preferredChoices.length,
-        });
-        return profile;
-      }
-    } catch (error) {
-      console.warn('Failed to load player profile:', error);
+    const profile = this.storage.load();
+
+    if (profile.preferredChoices.length > 0 || profile.fearTriggers.length > 0) {
+      console.log('📊 Loaded player profile from storage:', {
+        fearTriggers: profile.fearTriggers.length,
+        choices: profile.preferredChoices.length,
+      });
     }
-    
-    return {
-      preferredChoices: [],
-      fearTriggers: [],
-      decisionPatterns: [],
-      psychologicalVulnerabilities: [],
-      lastUpdated: Date.now(),
-    };
+
+    return profile;
   }
 
   /**
    * Save player profile to localStorage
    */
   private saveProfileToStorage(): void {
-    try {
-      this.playerProfile.lastUpdated = Date.now();
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.playerProfile));
+    this.playerProfile.lastUpdated = Date.now();
+    const success = this.storage.save(this.playerProfile);
+
+    if (success) {
       console.log('💾 Saved player profile to storage');
-    } catch (error) {
-      console.warn('Failed to save player profile:', error);
     }
   }
 
@@ -72,27 +73,21 @@ export class AdaptiveHorrorEngine {
     worldState: WorldState,
     storyHistory: StorySegment[]
   ): Promise<void> {
-    if (!REVOLUTIONARY_FEATURES.ADAPTIVE_HORROR.enabled) {
+    // Feature gate: Only analyze if ADAPTIVE_HORROR is enabled
+    if (!isFeatureEnabled('ADAPTIVE_HORROR')) {
+      console.log('🚫 Adaptive horror feature is disabled');
       return;
     }
 
     console.log('🧠 Analyzing player choice for fear profiling...');
     this.playerProfile.preferredChoices.push(choice);
 
-    const systemInstruction = `You are a psychological profiler AI specializing in horror game analysis. Analyze player choices to identify deep-seated fears and psychological patterns.`;
-    
-    const prompt = `Player chose: "${choice}" in context: "${context}".
-    
-Previous choices: ${this.playerProfile.preferredChoices.slice(-5).join(', ')}
-    
-Identify 2-3 specific psychological fear triggers this choice reveals. Focus on:
-- Deep psychological fears (isolation, betrayal, powerlessness, identity loss, cosmic dread)
-- Avoidance patterns (what they're trying to escape)
-- Confrontation patterns (what they're willing to face)
-- Control needs (how they try to maintain agency)
-
-Return ONLY a comma-separated list of 2-3 fear triggers, nothing else.
-Example: isolation, loss of control, betrayal`;
+    const previousChoices = this.playerProfile.preferredChoices.slice(-5);
+    const { systemInstruction, prompt } = buildFearAnalysisRequest(
+      choice,
+      context,
+      previousChoices
+    );
 
     try {
       const commands = await generateWithSelectedModel(
@@ -134,7 +129,7 @@ Example: isolation, loss of control, betrayal`;
     storyHistory: StorySegment[]
   ): Promise<string> {
     const fearTriggers = this.getTopFearTriggers(3);
-    
+
     if (fearTriggers.length === 0) {
       console.log('📝 No fear triggers yet, using base prompt');
       return basePrompt;
@@ -142,20 +137,11 @@ Example: isolation, loss of control, betrayal`;
 
     console.log('😱 Personalizing horror with triggers:', fearTriggers);
 
-    const systemInstruction = `You are an expert horror narrative adapter. Enhance story prompts by weaving in psychological fear triggers naturally and subtly.`;
-    
-    const prompt = `Base prompt: "${basePrompt}"
-
-Player's top fear triggers: ${fearTriggers.join(', ')}
-Horror intensity: ${worldState.horrorIntensity || 5}/10
-
-Enhance this prompt by:
-1. Incorporating these fear triggers naturally (don't be obvious)
-2. Making the horror feel personalized to this player
-3. Matching the horror intensity level
-4. Keeping the core story intact
-
-Return ONLY the enhanced prompt, nothing else. Keep it 100-150 words.`;
+    const { systemInstruction, prompt } = buildPersonalizedHorrorRequest(
+      basePrompt,
+      fearTriggers,
+      worldState.horrorIntensity || 5
+    );
 
     try {
       const commands = await generateWithSelectedModel(

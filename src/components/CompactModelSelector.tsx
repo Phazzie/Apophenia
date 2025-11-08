@@ -1,10 +1,10 @@
 /**
  * Compact Model Selector Component
- * 
+ *
  * Small bottom-right button for AI model selection
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useAIModelStore } from '../stores/aiModelStore';
 
 const CompactModelSelector: React.FC = () => {
@@ -19,10 +19,10 @@ const CompactModelSelector: React.FC = () => {
   const models = getAllModels();
   const selectedModel = getSelectedModel();
 
-  const handleModelSelect = (modelId: string) => {
+  const handleModelSelect = useCallback((modelId: string) => {
     setSelectedModel(modelId);
     setIsOpen(false);
-  };
+  }, [setSelectedModel]);
 
   return (
     <div className="compact-model-selector">

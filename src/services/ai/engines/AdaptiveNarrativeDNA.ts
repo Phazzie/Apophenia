@@ -1,4 +1,5 @@
 import { WorldState } from '../../../types';
+import { isFeatureEnabled } from '../../../utils/featureFlagMiddleware';
 
 /**
  * ADAPTIVE NARRATIVE DNA
@@ -25,6 +26,12 @@ export class AdaptiveNarrativeDNA {
   private static readonly MUTABLE_GENE_KEYS = ['paceGenes', 'tensionGenes', 'choiceGenes'] as const;
 
   evolveNarrative(playerChoice: string, responseTime: number, worldState: WorldState): void {
+    // Feature gate: Skip evolution if NARRATIVE_DNA is disabled
+    if (!isFeatureEnabled('NARRATIVE_DNA')) {
+      console.log('🚫 Narrative DNA feature is disabled. Skipping evolution.');
+      return;
+    }
+
     const selectionPressure = this.calculateSelectionPressure(playerChoice, responseTime, worldState);
     this.mutateGenes(selectionPressure);
     this.adaptiveSelection();
@@ -34,6 +41,11 @@ export class AdaptiveNarrativeDNA {
   }
 
   generateAdaptivePrompt(basePrompt: string): string {
+    // Feature gate: Return unmodified prompt if NARRATIVE_DNA is disabled
+    if (!isFeatureEnabled('NARRATIVE_DNA')) {
+      return basePrompt;
+    }
+
     const dnaModifiers = this.expressGenes();
 
     let adaptedPrompt = basePrompt;

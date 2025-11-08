@@ -6,7 +6,8 @@
 
 // X.AI API configuration
 const XAI_API_BASE = 'https://api.x.ai/v1';
-const GROK_MODEL = 'grok-4-fast';
+const GROK_TEXT_MODEL = 'grok-4-fast-reasoning';
+const GROK_IMAGE_MODEL = 'grok-2-image-1212';
 
 interface GrokMessage {
   role: 'system' | 'user' | 'assistant';
@@ -91,7 +92,7 @@ export class XAIAPIClient {
     ];
 
     const request: GrokRequest = {
-      model: GROK_MODEL,
+      model: GROK_TEXT_MODEL,
       messages,
       temperature: config.temperature ?? 1.0,
       max_tokens: config.maxTokens ?? 8192,
@@ -138,24 +139,33 @@ export class XAIAPIClient {
   }
 
   /**
-   * Generate a batch of images using the grok-2-image model
+   * Generate images using the grok-2-image-1212 model
+   * Official endpoint: https://api.x.ai/v1/images/generations
+   * Model: grok-2-image-1212 (latest as of Nov 2025)
+   * Pricing: $0.07 per image
+   * Rate limit: 5 requests/sec, up to 10 images per request
    */
-  async generateImage(prompt: string, n: number = 4): Promise<string[]> {
+  async generateImage(prompt: string, n: number = 1): Promise<string[]> {
     if (!this.apiKey) {
       console.error('X.AI API key not configured - cannot generate images.');
       throw new Error('X.AI API key not configured');
     }
 
+    // Enforce API limits
+    const imageCount = Math.min(Math.max(1, n), 10);
+
     const requestBody = {
-      model: 'grok-2-image',
+      model: GROK_IMAGE_MODEL,
       prompt,
-      n,
-      image_format: 'url',
+      n: imageCount,
+      response_format: 'url', // 'url' or 'b64_json'
     };
 
     try {
-      console.log('Making X.AI image generation request to:', `${this.baseURL}/image/sample_batch`);
-      const response = await fetch(`${this.baseURL}/image/sample_batch`, {
+      console.log(`Making X.AI image generation request to: ${this.baseURL}/images/generations`);
+      console.log(`Model: ${GROK_IMAGE_MODEL}, Images: ${imageCount}`);
+
+      const response = await fetch(`${this.baseURL}/images/generations`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${this.apiKey}`,
@@ -173,12 +183,13 @@ export class XAIAPIClient {
       const data = await response.json();
       console.log('X.AI image API response received:', data);
 
-      if (!data || !Array.isArray(data) || data.length === 0) {
+      // Response format: { created: number, data: [{ url: string }] }
+      if (!data || !data.data || !Array.isArray(data.data) || data.data.length === 0) {
         console.error('No images found in X.AI response');
         throw new Error('No images found in X.AI response');
       }
 
-      return data.map((image: GrokImage) => image.url);
+      return data.data.map((image: { url: string }) => image.url);
 
     } catch (error) {
       console.error('X.AI image generation request failed:', error);
@@ -212,7 +223,7 @@ export class XAIAPIClient {
         console.log('X.AI text test successful');
         return {
           success: true,
-          model: GROK_MODEL,
+          model: GROK_TEXT_MODEL,
           contextWindow: 2000000,
           testType: 'text',
         };
@@ -220,21 +231,21 @@ export class XAIAPIClient {
         // Test X.AI image generation (experimental)
         console.log('Testing X.AI image generation (experimental)...');
         try {
-          const result = await this.generateImage('A simple test image of a red circle');
+          const result = await this.generateImage('A simple test image of a red circle', 1);
           return {
-            success: result !== null,
-            model: GROK_MODEL,
+            success: result !== null && result.length > 0,
+            model: `${GROK_TEXT_MODEL} (text) + ${GROK_IMAGE_MODEL} (image)`,
             contextWindow: 2000000,
             testType: 'image',
-            error: result === null ? 'X.AI image generation not yet available (will fallback to Imagen)' : undefined
+            error: result === null || result.length === 0 ? 'X.AI image generation failed (will fallback to Unsplash)' : undefined
           };
-        } catch {
+        } catch (err) {
           return {
             success: false,
-            model: GROK_MODEL,
+            model: `${GROK_TEXT_MODEL} (text) + ${GROK_IMAGE_MODEL} (image)`,
             contextWindow: 2000000,
             testType: 'image',
-            error: 'X.AI image generation experimental (will fallback to Imagen)'
+            error: err instanceof Error ? err.message : 'X.AI image generation failed'
           };
         }
       }
@@ -242,7 +253,7 @@ export class XAIAPIClient {
       console.error('X.AI API test failed:', error);
       return {
         success: false,
-        model: GROK_MODEL,
+        model: GROK_TEXT_MODEL,
         contextWindow: 2000000,
         testType,
         error: error instanceof Error ? error.message : 'Unknown error'
@@ -255,12 +266,21 @@ export class XAIAPIClient {
    */
   getModelInfo() {
     return {
-      name: GROK_MODEL,
+      name: GROK_TEXT_MODEL,
+      imageModel: GROK_IMAGE_MODEL,
       provider: 'X.AI',
       contextWindow: 2000000,
-      supportsFunctions: false, 
-      supportsThinking: true, 
+      supportsFunctions: false,
+      supportsThinking: true,
       supportsImages: true,
+      pricing: {
+        text: '$5 per 1M input tokens, $15 per 1M output tokens',
+        image: '$0.07 per image'
+      },
+      rateLimits: {
+        text: '60 requests/min',
+        image: '5 requests/sec, max 10 images/request'
+      }
     };
   }
 }

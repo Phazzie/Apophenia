@@ -40,12 +40,17 @@ export const useUserStore = create<UserState>((set) => ({
 }));
 
 // Initialize the store and listen for auth changes
-supabase.auth.getSession().then(({ data: { session } }) => {
-  useUserStore.getState().setSession(session);
-  useUserStore.setState({ loading: false });
-});
+supabase.auth.getSession()
+  .then(({ data: { session } }: { data: { session: Session | null } }) => {
+    useUserStore.getState().setSession(session);
+    useUserStore.setState({ loading: false });
+  })
+  .catch((error) => {
+    console.error('Failed to get initial session:', error);
+    useUserStore.setState({ loading: false });
+  });
 
-supabase.auth.onAuthStateChange((_event, session) => {
+supabase.auth.onAuthStateChange((_event: string, session: Session | null) => {
   useUserStore.getState().setSession(session);
   useUserStore.setState({ loading: false });
 });

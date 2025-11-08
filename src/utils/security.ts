@@ -17,12 +17,6 @@ const envSchema = z.object({
       (val) => !val || /^[a-zA-Z0-9_-]+$/.test(val),
       'XAI API key contains invalid characters'
     ),
-  VITE_GEMINI_API_KEY: z.string()
-    .optional()
-    .refine(
-      (val) => !val || /^[a-zA-Z0-9_-]+$/.test(val),
-      'Gemini API key contains invalid characters'
-    ),
 });
 
 /**
@@ -33,9 +27,8 @@ export function validateEnvironment(): void {
   try {
     const env = {
       VITE_XAI_API_KEY: import.meta.env.VITE_XAI_API_KEY,
-      VITE_GEMINI_API_KEY: import.meta.env.VITE_GEMINI_API_KEY,
     };
-    
+
     envSchema.parse(env);
     console.log('✅ Environment validation passed');
   } catch (error) {
@@ -156,7 +149,7 @@ export function generateCSP(): string {
     "style-src 'self' 'unsafe-inline'", // Required for styled components
     "img-src 'self' data: https: blob:",
     "font-src 'self' data:",
-    "connect-src 'self' https://generativelanguage.googleapis.com https://api.x.ai wss://api.x.ai",
+    "connect-src 'self' https://api.x.ai wss://api.x.ai",
     "media-src 'self' data:",
     "object-src 'none'",
     "frame-ancestors 'none'",

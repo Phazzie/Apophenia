@@ -1,6 +1,8 @@
 import { StorySegment, WorldState } from '../../../types';
 import { REVOLUTIONARY_FEATURES } from '../../config';
 import { generateWithSelectedModel } from '../unifiedAIService';
+import { isFeatureEnabled, getFeatureConfig } from '../../../utils/featureFlagMiddleware';
+import { buildCorruptionEffectsRequest } from '../promptTemplates';
 
 type CorruptionUiEffects = {
   filter: string;
@@ -26,7 +28,8 @@ export class RealityCorruptionEngine {
     worldState: WorldState,
     storyHistory: StorySegment[]
   ): Promise<RealityCorruptionResult> {
-    if (!REVOLUTIONARY_FEATURES.REALITY_CORRUPTION.enabled) {
+    if (!isFeatureEnabled('REALITY_CORRUPTION')) {
+      console.log('🚫 Reality corruption feature is disabled');
       return { uiEffects: this.calculateUIEffects(), corruptionLevel: 0, newEffects: [] };
     }
 
@@ -35,7 +38,7 @@ export class RealityCorruptionEngine {
       this.corruptionLevel += 0.1;
     }
 
-    const { maxCorruption } = REVOLUTIONARY_FEATURES.REALITY_CORRUPTION;
+    const { maxCorruption } = getFeatureConfig('REALITY_CORRUPTION');
     this.corruptionLevel = Math.min(this.corruptionLevel, maxCorruption);
 
     const newEffects = await this.generateCorruptionEffects(
@@ -54,8 +57,7 @@ export class RealityCorruptionEngine {
     worldState: WorldState,
     storyHistory: StorySegment[]
   ): Promise<string[]> {
-    const systemInstruction = `You are a reality corruption AI. Your task is to generate a list of UI corruption effects based on the current corruption level.`;
-    const prompt = `The current reality corruption level is ${this.corruptionLevel}. Based on this, generate a comma-separated list of UI corruption effects. Examples: text-glitch, choice-corruption, reality-tears, image-distortion, audio-glitch.`;
+    const { systemInstruction, prompt } = buildCorruptionEffectsRequest(this.corruptionLevel);
 
     try {
       const commands = await generateWithSelectedModel(

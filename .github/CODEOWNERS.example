@@ -1,0 +1,174 @@
+# CODEOWNERS - Example File
+#
+# This file defines ownership for files in the repository.
+# When PR comments trigger issue creation, the workflow uses this file
+# to automatically assign issues to the appropriate team member.
+#
+# Format: path/pattern @username @team
+#
+# Patterns are matched from bottom to top, with the last matching pattern
+# taking precedence.
+#
+# Copy this file to .github/CODEOWNERS and customize for your team.
+
+# =============================================================================
+# DEFAULT OWNERS
+# =============================================================================
+
+# These owners will be the default for everything in the repo.
+# Unless a later match takes precedence.
+* @Phazzie
+
+# =============================================================================
+# FRONTEND
+# =============================================================================
+
+# React Components
+/src/components/** @Phazzie
+*.tsx @Phazzie
+*.ts @Phazzie
+
+# Styling
+*.css @Phazzie
+*.scss @Phazzie
+/src/styles/** @Phazzie
+
+# Pages and Routes
+/src/pages/** @Phazzie
+/src/routes/** @Phazzie
+
+# UI/UX Assets
+/src/assets/** @Phazzie
+/public/** @Phazzie
+
+# =============================================================================
+# BACKEND
+# =============================================================================
+
+# Server Code
+/server/** @Phazzie
+/api/** @Phazzie
+*.js @Phazzie
+
+# Database
+/migrations/** @Phazzie
+/schemas/** @Phazzie
+/models/** @Phazzie
+
+# Configuration
+/config/** @Phazzie
+.env.example @Phazzie
+
+# =============================================================================
+# TESTING
+# =============================================================================
+
+# Test Files
+*.test.ts @Phazzie
+*.test.tsx @Phazzie
+*.spec.ts @Phazzie
+*.spec.tsx @Phazzie
+/tests/** @Phazzie
+/__tests__/** @Phazzie
+
+# Test Configuration
+jest.config.js @Phazzie
+vitest.config.ts @Phazzie
+
+# =============================================================================
+# DEVOPS & CI/CD
+# =============================================================================
+
+# GitHub Actions
+/.github/workflows/** @Phazzie
+/.github/actions/** @Phazzie
+
+# Docker
+/docker/** @Phazzie
+Dockerfile @Phazzie
+docker-compose.yml @Phazzie
+
+# Build Configuration
+vite.config.ts @Phazzie
+tsconfig.json @Phazzie
+package.json @Phazzie
+package-lock.json @Phazzie
+
+# =============================================================================
+# DOCUMENTATION
+# =============================================================================
+
+# Documentation Files
+*.md @Phazzie
+/docs/** @Phazzie
+README.md @Phazzie
+CONTRIBUTING.md @Phazzie
+
+# =============================================================================
+# DEPENDENCIES & SECURITY
+# =============================================================================
+
+# Dependency Files
+package.json @Phazzie
+package-lock.json @Phazzie
+yarn.lock @Phazzie
+pnpm-lock.yaml @Phazzie
+
+# Security
+SECURITY.md @Phazzie
+/.github/dependabot.yml @Phazzie
+
+# =============================================================================
+# SPECIAL FILES
+# =============================================================================
+
+# Git Configuration
+.gitignore @Phazzie
+.gitattributes @Phazzie
+
+# Editor Configuration
+.editorconfig @Phazzie
+.vscode/** @Phazzie
+
+# Linting & Formatting
+.eslintrc.* @Phazzie
+.prettierrc.* @Phazzie
+eslint.config.js @Phazzie
+
+# =============================================================================
+# EXAMPLES FOR TEAMS
+# =============================================================================
+# Uncomment and customize these examples if you have multiple team members:
+
+# Multiple owners (any of these can be assigned)
+# /src/shared/** @developer1 @developer2
+
+# Teams (requires GitHub team creation)
+# /src/admin/** @org/admin-team
+
+# Specific file types
+# *.py @backend-developer
+# *.java @java-developer
+
+# Path wildcards
+# /src/**/config.ts @config-maintainer
+# /src/lib/**/utils.ts @utils-team
+
+# =============================================================================
+# HOW THIS WORKS WITH PR COMMENTS TO ISSUES
+# =============================================================================
+#
+# When someone creates a PR comment with trigger keywords like "TODO:" or
+# "create issue", the workflow:
+#
+# 1. Identifies the file being commented on
+# 2. Matches it against patterns in this file (bottom to top)
+# 3. Assigns the created issue to the matching owner
+# 4. Falls back to the comment author if no match found
+#
+# Example:
+# - Comment on /src/components/Button.tsx
+# - Matches pattern: *.tsx @Phazzie
+# - Issue assigned to: @Phazzie
+#
+# =============================================================================

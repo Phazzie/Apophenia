@@ -1,0 +1,455 @@
+name: PR Comments to Issues
+
+on:
+  pull_request_review_comment:
+    types: [created]
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  process-comment:
+    name: Convert PR Comment to Issue
+    runs-on: ubuntu-latest
+    # Only run on PR comments (not regular issue comments)
+    if: github.event.issue.pull_request || github.event.pull_request
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        ref: ${{ github.event.pull_request.head.sha || github.event.issue.pull_request.head.sha }}
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+
+    - name: Parse comment for issue creation
+      id: parse
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const comment = context.payload.comment;
+          const body = comment.body.toLowerCase();
+
+          // Check if comment contains trigger keywords
+          const triggers = {
+            bug: /\b(bug|error|broken|issue|fix|problem)\b/i,
+            enhancement: /\b(enhancement|feature|improve|add|todo|implement)\b/i,
+            documentation: /\b(docs?|documentation|readme|comment|explain)\b/i,
+            refactor: /\b(refactor|cleanup|optimize|reorganize)\b/i,
+            test: /\b(test|testing|coverage|spec)\b/i,
+            security: /\b(security|vulnerability|cve|exploit)\b/i
+          };
+
+          // Detect issue type based on keywords
+          let issueType = 'enhancement'; // default
+          let labels = [];
+
+          for (const [type, regex] of Object.entries(triggers)) {
+            if (regex.test(body)) {
+              issueType = type;
+              labels.push(type);
+              break;
+            }
+          }
+
+          // Check for explicit issue creation markers
+          const shouldCreateIssue =
+            body.includes('todo:') ||
+            body.includes('fixme:') ||
+            body.includes('create issue') ||
+            body.includes('track this') ||
+            body.includes('follow up') ||
+            body.includes('follow-up');
+
+          core.setOutput('should_create', shouldCreateIssue);
+          core.setOutput('issue_type', issueType);
+          core.setOutput('labels', JSON.stringify(labels));
+          core.setOutput('comment_body', comment.body);
+          core.setOutput('comment_url', comment.html_url);
+          core.setOutput('comment_id', comment.id);
+
+          return { shouldCreateIssue, issueType, labels };
+
+    - name: Get file ownership
+      id: ownership
+      if: steps.parse.outputs.should_create == 'true'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const path = require('path');
+
+          // Get the file path from the comment
+          let filePath = '';
+          if (context.payload.comment.path) {
+            filePath = context.payload.comment.path;
+          }
+
+          // Try to read CODEOWNERS file
+          let owner = null;
+          const codeownersPath = '.github/CODEOWNERS';
+
+          try {
+            if (fs.existsSync(codeownersPath)) {
+              const codeowners = fs.readFileSync(codeownersPath, 'utf8');
+              const lines = codeowners.split('\n');
+
+              // Match file path to owner (simple implementation)
+              for (const line of lines.reverse()) {
+                if (line.trim() && !line.startsWith('#')) {
+                  const [pattern, ...owners] = line.trim().split(/\s+/);
+
+                  // Simple glob matching (can be enhanced)
+                  if (filePath.includes(pattern.replace('*', ''))) {
+                    owner = owners[0]?.replace('@', '');
+                    break;
+                  }
+                }
+              }
+            }
+          } catch (error) {
+            console.log('No CODEOWNERS file found or error reading it');
+          }
+
+          // Fallback to comment author or PR author
+          if (!owner) {
+            owner = context.payload.comment.user.login;
+          }
+
+          core.setOutput('assignee', owner);
+          core.setOutput('file_path', filePath);
+
+          return owner;
+
+    - name: Get PR details
+      id: pr_details
+      if: steps.parse.outputs.should_create == 'true'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          let prNumber, prTitle, prUrl;
+
+          if (context.payload.pull_request) {
+            // pull_request_review_comment event
+            prNumber = context.payload.pull_request.number;
+            prTitle = context.payload.pull_request.title;
+            prUrl = context.payload.pull_request.html_url;
+          } else if (context.payload.issue.pull_request) {
+            // issue_comment event on PR
+            prNumber = context.payload.issue.number;
+            prTitle = context.payload.issue.title;
+            prUrl = context.payload.issue.html_url;
+          }
+
+          // Get the specific line reference if available
+          const comment = context.payload.comment;
+          let lineRef = '';
+          if (comment.line) {
+            lineRef = `L${comment.line}`;
+            if (comment.start_line && comment.start_line !== comment.line) {
+              lineRef = `L${comment.start_line}-L${comment.line}`;
+            }
+          }
+
+          core.setOutput('pr_number', prNumber);
+          core.setOutput('pr_title', prTitle);
+          core.setOutput('pr_url', prUrl);
+          core.setOutput('line_ref', lineRef);
+
+          return { prNumber, prTitle, prUrl, lineRef };
+
+    - name: Create GitHub Issue
+      id: create_issue
+      if: steps.parse.outputs.should_create == 'true'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const commentBody = process.env.COMMENT_BODY;
+          const commentUrl = process.env.COMMENT_URL;
+          const prNumber = process.env.PR_NUMBER;
+          const prTitle = process.env.PR_TITLE;
+          const prUrl = process.env.PR_URL;
+          const lineRef = process.env.LINE_REF;
+          const filePath = process.env.FILE_PATH;
+          const issueType = process.env.ISSUE_TYPE;
+          const assignee = process.env.ASSIGNEE;
+
+          // Parse labels
+          const labels = JSON.parse(process.env.LABELS || '[]');
+
+          // Add PR label
+          labels.push('from-pr-comment');
+
+          // Create issue title
+          const issueTitle = `[${issueType.toUpperCase()}] ${commentBody.split('\n')[0].substring(0, 80)}`;
+
+          // Create issue body with full context
+          const issueBody = `## Context
+
+          This issue was automatically created from a PR review comment.
+
+          **Source PR:** #${prNumber} - ${prTitle}
+          **Comment:** ${commentUrl}
+          **File:** \`${filePath}\`${lineRef ? ` (${lineRef})` : ''}
+          **Type:** ${issueType}
+
+          ## Original Comment
+
+          ${commentBody}
+
+          ---
+
+          ### Quick Links
+          - [View PR](${prUrl})
+          - [View Comment](${commentUrl})
+          ${lineRef ? `- [View Code](${prUrl}/files#diff-${lineRef})` : ''}
+
+          ### Related Information
+          - **Commented by:** @${context.payload.comment.user.login}
+          - **Date:** ${new Date().toISOString().split('T')[0]}
+          `.replace(/^\s+/gm, '');
+
+          // Create the issue
+          const issue = await github.rest.issues.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: issueTitle,
+            body: issueBody,
+            labels: labels,
+            assignees: assignee ? [assignee] : []
+          });
+
+          core.setOutput('issue_number', issue.data.number);
+          core.setOutput('issue_url', issue.data.html_url);
+
+          return issue.data;
+      env:
+        COMMENT_BODY: ${{ steps.parse.outputs.comment_body }}
+        COMMENT_URL: ${{ steps.parse.outputs.comment_url }}
+        PR_NUMBER: ${{ steps.pr_details.outputs.pr_number }}
+        PR_TITLE: ${{ steps.pr_details.outputs.pr_title }}
+        PR_URL: ${{ steps.pr_details.outputs.pr_url }}
+        LINE_REF: ${{ steps.pr_details.outputs.line_ref }}
+        FILE_PATH: ${{ steps.ownership.outputs.file_path }}
+        ISSUE_TYPE: ${{ steps.parse.outputs.issue_type }}
+        ASSIGNEE: ${{ steps.ownership.outputs.assignee }}
+        LABELS: ${{ steps.parse.outputs.labels }}
+
+    - name: Comment back on PR
+      if: steps.create_issue.outputs.issue_number
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const issueNumber = process.env.ISSUE_NUMBER;
+          const issueUrl = process.env.ISSUE_URL;
+          const commentId = process.env.COMMENT_ID;
+
+          // Reply to the original comment
+          await github.rest.pulls.createReplyForReviewComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            pull_number: context.payload.pull_request?.number || context.payload.issue.number,
+            comment_id: parseInt(commentId),
+            body: `✅ **Issue created:** #${issueNumber}\n\nThis comment has been tracked as an issue. [View Issue](${issueUrl})`
+          }).catch(async (error) => {
+            // Fallback to regular comment if reply fails
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request?.number || context.payload.issue.number,
+              body: `✅ **Issue created from review comment:** #${issueNumber}\n\n[View Issue](${issueUrl})`
+            });
+          });
+      env:
+        ISSUE_NUMBER: ${{ steps.create_issue.outputs.issue_number }}
+        ISSUE_URL: ${{ steps.create_issue.outputs.issue_url }}
+        COMMENT_ID: ${{ steps.parse.outputs.comment_id }}
+
+    - name: Sync to Notion
+      if: steps.create_issue.outputs.issue_number && secrets.NOTION_API_KEY != ''
+      uses: actions/github-script@v7
+      continue-on-error: true
+      with:
+        script: |
+          const https = require('https');
+
+          const issueNumber = process.env.ISSUE_NUMBER;
+          const issueUrl = process.env.ISSUE_URL;
+          const issueTitle = process.env.ISSUE_TITLE;
+          const issueType = process.env.ISSUE_TYPE;
+          const assignee = process.env.ASSIGNEE;
+
+          const notionApiKey = process.env.NOTION_API_KEY;
+          const notionDbId = process.env.NOTION_DATABASE_ID;
+
+          if (!notionApiKey || !notionDbId) {
+            console.log('Notion integration not configured, skipping...');
+            return;
+          }
+
+          // Create Notion page
+          const data = JSON.stringify({
+            parent: { database_id: notionDbId },
+            properties: {
+              Name: {
+                title: [{ text: { content: `#${issueNumber}: ${issueTitle}` } }]
+              },
+              Status: {
+                select: { name: 'To Do' }
+              },
+              Type: {
+                select: { name: issueType }
+              },
+              'GitHub URL': {
+                url: issueUrl
+              },
+              Assignee: assignee ? {
+                rich_text: [{ text: { content: assignee } }]
+              } : undefined
+            }
+          });
+
+          const options = {
+            hostname: 'api.notion.com',
+            path: '/v1/pages',
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${notionApiKey}`,
+              'Content-Type': 'application/json',
+              'Notion-Version': '2022-06-28',
+              'Content-Length': data.length
+            }
+          };
+
+          return new Promise((resolve, reject) => {
+            const req = https.request(options, (res) => {
+              let responseData = '';
+              res.on('data', (chunk) => responseData += chunk);
+              res.on('end', () => {
+                if (res.statusCode === 200) {
+                  console.log('✅ Synced to Notion successfully');
+                  resolve(JSON.parse(responseData));
+                } else {
+                  console.log(`⚠️ Notion sync failed: ${res.statusCode} - ${responseData}`);
+                  resolve(null);
+                }
+              });
+            });
+
+            req.on('error', (error) => {
+              console.log(`⚠️ Notion sync error: ${error.message}`);
+              resolve(null);
+            });
+
+            req.write(data);
+            req.end();
+          });
+      env:
+        NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
+        NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+        ISSUE_NUMBER: ${{ steps.create_issue.outputs.issue_number }}
+        ISSUE_URL: ${{ steps.create_issue.outputs.issue_url }}
+        ISSUE_TITLE: ${{ steps.create_issue.result.title }}
+        ISSUE_TYPE: ${{ steps.parse.outputs.issue_type }}
+        ASSIGNEE: ${{ steps.ownership.outputs.assignee }}
+
+    - name: Sync to ClickUp
+      if: steps.create_issue.outputs.issue_number && secrets.CLICKUP_API_KEY != ''
+      uses: actions/github-script@v7
+      continue-on-error: true
+      with:
+        script: |
+          const https = require('https');
+
+          const issueNumber = process.env.ISSUE_NUMBER;
+          const issueUrl = process.env.ISSUE_URL;
+          const issueTitle = process.env.ISSUE_TITLE;
+          const issueType = process.env.ISSUE_TYPE;
+          const commentBody = process.env.COMMENT_BODY;
+
+          const clickupApiKey = process.env.CLICKUP_API_KEY;
+          const clickupListId = process.env.CLICKUP_LIST_ID;
+
+          if (!clickupApiKey || !clickupListId) {
+            console.log('ClickUp integration not configured, skipping...');
+            return;
+          }
+
+          // Map issue type to ClickUp priority
+          const priorityMap = {
+            bug: 1,        // Urgent
+            security: 1,   // Urgent
+            enhancement: 3, // Normal
+            documentation: 4, // Low
+            refactor: 3,    // Normal
+            test: 3        // Normal
+          };
+
+          const priority = priorityMap[issueType] || 3;
+
+          // Create ClickUp task
+          const data = JSON.stringify({
+            name: `#${issueNumber}: ${issueTitle}`,
+            description: `${commentBody}\n\n---\n**GitHub Issue:** ${issueUrl}`,
+            priority: priority,
+            status: 'to do',
+            tags: [issueType, 'from-github'],
+            custom_fields: [
+              {
+                id: process.env.CLICKUP_GITHUB_URL_FIELD_ID,
+                value: issueUrl
+              }
+            ]
+          });
+
+          const options = {
+            hostname: 'api.clickup.com',
+            path: `/api/v2/list/${clickupListId}/task`,
+            method: 'POST',
+            headers: {
+              'Authorization': clickupApiKey,
+              'Content-Type': 'application/json',
+              'Content-Length': data.length
+            }
+          };
+
+          return new Promise((resolve, reject) => {
+            const req = https.request(options, (res) => {
+              let responseData = '';
+              res.on('data', (chunk) => responseData += chunk);
+              res.on('end', () => {
+                if (res.statusCode === 200) {
+                  console.log('✅ Synced to ClickUp successfully');
+                  resolve(JSON.parse(responseData));
+                } else {
+                  console.log(`⚠️ ClickUp sync failed: ${res.statusCode} - ${responseData}`);
+                  resolve(null);
+                }
+              });
+            });
+
+            req.on('error', (error) => {
+              console.log(`⚠️ ClickUp sync error: ${error.message}`);
+              resolve(null);
+            });
+
+            req.write(data);
+            req.end();
+          });
+      env:
+        CLICKUP_API_KEY: ${{ secrets.CLICKUP_API_KEY }}
+        CLICKUP_LIST_ID: ${{ secrets.CLICKUP_LIST_ID }}
+        CLICKUP_GITHUB_URL_FIELD_ID: ${{ secrets.CLICKUP_GITHUB_URL_FIELD_ID }}
+        ISSUE_NUMBER: ${{ steps.create_issue.outputs.issue_number }}
+        ISSUE_URL: ${{ steps.create_issue.outputs.issue_url }}
+        ISSUE_TITLE: ${{ steps.create_issue.result.title }}
+        ISSUE_TYPE: ${{ steps.parse.outputs.issue_type }}
+        COMMENT_BODY: ${{ steps.parse.outputs.comment_body }}

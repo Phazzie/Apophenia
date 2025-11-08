@@ -64,7 +64,7 @@
     "@typescript-eslint/eslint-plugin": "^8.45.0",
     "@typescript-eslint/parser": "^8.45.0",
     "@vitejs/plugin-react": "^4.3.0",
-    "concurrently": "^8.2.2",
+    "concurrently": "^9.2.1",
     "cross-env": "^10.1.0",
     "eslint": "^9.36.0",
     "eslint-plugin-react": "^7.37.5",

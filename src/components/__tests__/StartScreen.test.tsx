@@ -16,31 +16,64 @@ vi.mock('../../stores/storyHistoryStore');
 vi.mock('../../stores/worldStateStore');
 vi.mock('../../stores/aiModelStore');
 vi.mock('../../services/gameService');
+vi.mock('../../services/gameStateManager', () => ({
+  GameStateManager: {
+    resetAllStores: vi.fn(),
+    initialize: vi.fn(),
+    cleanup: vi.fn(),
+  },
+}));
+vi.mock('../../services/analyticsService', () => ({
+  analyticsService: {
+    startSession: vi.fn().mockReturnValue('test-session-id'),
+  },
+}));
 
 const mockSetGameState = vi.fn();
 const mockReplaceStoryHistory = vi.fn();
 const mockUpdateWorldState = vi.fn();
 const mockSetGenreConfig = vi.fn();
+const mockAddStorySegment = vi.fn();
+const mockSetWorldState = vi.fn();
 const mockGenerateConcept = vi.spyOn(gameService, 'generateConcept');
 
 describe('StartScreen', () => {
   beforeEach(() => {
+    // Mock stores with getState() pattern to match Zustand
     (useGameStateStore as unknown as jest.Mock).mockReturnValue({
       setGameState: mockSetGameState,
     });
+    (useGameStateStore as any).getState = vi.fn().mockReturnValue({
+      setGameState: mockSetGameState,
+    });
+
     (useStoryHistoryStore as unknown as jest.Mock).mockReturnValue({
       storyHistory: [],
       replaceStoryHistory: mockReplaceStoryHistory,
     });
+    (useStoryHistoryStore as any).getState = vi.fn().mockReturnValue({
+      storyHistory: [],
+      replaceStoryHistory: mockReplaceStoryHistory,
+      addStorySegment: mockAddStorySegment,
+    });
+
     (useWorldStateStore as unknown as jest.Mock).mockReturnValue({
       worldState: { protagonist: null, setting: '', atmosphere: '', npcs: [], genre: '' },
       setGenreConfig: mockSetGenreConfig,
       updateWorldState: mockUpdateWorldState,
     });
+    (useWorldStateStore as any).getState = vi.fn().mockReturnValue({
+      worldState: { protagonist: null, setting: '', atmosphere: '', npcs: [], genre: '' },
+      setGenreConfig: mockSetGenreConfig,
+      updateWorldState: mockUpdateWorldState,
+      setWorldState: mockSetWorldState,
+    });
+
     (useAIModelStore as unknown as jest.Mock).mockReturnValue({
       getSelectedModel: vi.fn().mockReturnValue({ id: 'test-model', name: 'Test Model' }),
     });
-    mockGenerateConcept.mockResolvedValue({ 
+
+    mockGenerateConcept.mockResolvedValue({
         protagonist: 'Guy - A guy with a bland personality',
         setting: 'A new world',
         dilemma: 'What to do next'

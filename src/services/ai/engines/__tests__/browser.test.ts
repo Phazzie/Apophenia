@@ -1,3 +1,4 @@
+import { vi, Mock } from 'vitest';
 import { NeuralEchoChambers } from '../NeuralEchoChambers';
 import { BreakingFifthWall } from '../BreakingFifthWall';
 import { WorldState } from '../../../../types';
@@ -129,15 +130,15 @@ describe('BreakingFifthWall', () => {
     // Mock document properties and methods.
     document.title = 'Apophenia';
     const favicon = { href: '' };
-    jest.spyOn(document, 'querySelector').mockReturnValue(favicon as unknown as Element);
-    jest.spyOn(window, 'scrollBy').mockImplementation(() => {});
-    jest.useFakeTimers();
+    vi.spyOn(document, 'querySelector').mockReturnValue(favicon as unknown as Element);
+    vi.spyOn(window, 'scrollBy').mockImplementation(() => {});
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
     engine.deactivateBreakage();
-    jest.useRealTimers();
-    jest.restoreAllMocks();
+    vi.useRealTimers();
+    vi.restoreAllMocks();
   });
 
   it('should not activate if intensity is too low', () => {
@@ -147,12 +148,12 @@ describe('BreakingFifthWall', () => {
 
   it('should manipulate the document title when intensity is high enough', () => {
     // Force the random check to pass for deterministic testing.
-    jest.spyOn(Math, 'random').mockReturnValue(0.1);
+    vi.spyOn(Math, 'random').mockReturnValue(0.1);
 
     engine.activateBreakage(0.4, mockWorldState);
 
     // Fast-forward time to trigger the title change interval.
-    jest.advanceTimersByTime(5000);
+    vi.advanceTimersByTime(5000);
 
     // Title should have been changed to one of the corrupted titles.
     expect(document.title).not.toBe('Apophenia');
@@ -160,33 +161,33 @@ describe('BreakingFifthWall', () => {
 
   it('should manipulate the favicon when intensity is high enough', () => {
     const favicon = { href: 'original.ico' };
-    (document.querySelector as jest.Mock).mockReturnValue(favicon);
+    (document.querySelector as vi.Mock).mockReturnValue(favicon);
 
     // Force the random check to pass for deterministic testing.
-    jest.spyOn(Math, 'random').mockReturnValue(0.1);
+    vi.spyOn(Math, 'random').mockReturnValue(0.1);
 
     engine.activateBreakage(0.6, mockWorldState);
 
-    jest.advanceTimersByTime(10000);
+    vi.advanceTimersByTime(10000);
 
     expect(favicon.href).not.toBe('original.ico');
   });
 
   it('should manipulate the window scroll when intensity is high enough', () => {
-    const scrollSpy = jest.spyOn(window, 'scrollBy');
+    const scrollSpy = vi.spyOn(window, 'scrollBy');
     engine.activateBreakage(0.8, mockWorldState);
 
-    jest.advanceTimersByTime(15000);
+    vi.advanceTimersByTime(15000);
 
     expect(scrollSpy).toHaveBeenCalled();
   });
 
   it('should deactivate all effects and restore the original state', () => {
     // Force the title to corrupt for a deterministic test.
-    jest.spyOn(Math, 'random').mockReturnValue(0.1);
+    vi.spyOn(Math, 'random').mockReturnValue(0.1);
 
     engine.activateBreakage(0.8, mockWorldState);
-    jest.advanceTimersByTime(5000);
+    vi.advanceTimersByTime(5000);
     const corruptedTitle = document.title;
 
     // Verify that the title was indeed corrupted.

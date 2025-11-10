@@ -1,5 +1,4 @@
 import { StorySegment, WorldState } from '../../../types';
-import { REVOLUTIONARY_FEATURES } from '../../config';
 import { generateWithSelectedModel } from '../unifiedAIService';
 import { isFeatureEnabled, getFeatureConfig } from '../../../utils/featureFlagMiddleware';
 import { buildChoiceSignificanceRequest } from '../promptTemplates';

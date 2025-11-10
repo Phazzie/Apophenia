@@ -1,12 +1,7 @@
 import { StorySegment, WorldState } from '../../../types';
-import { REVOLUTIONARY_FEATURES } from '../../config';
 import { generateWithSelectedModel } from '../unifiedAIService';
 import { isFeatureEnabled } from '../../../utils/featureFlagMiddleware';
-import {
-  NARRATIVE_REVISION_SYSTEM,
-  buildTemporalRevisionRequest,
-  getRandomTemporalRevisionPrompt,
-} from '../promptTemplates';
+import { buildTemporalRevisionRequest } from '../promptTemplates';
 
 /**
  * Get a randomized corruption message for error handling

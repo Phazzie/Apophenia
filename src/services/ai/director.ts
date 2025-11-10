@@ -1,7 +1,7 @@
 import { WorldState, AIDirectorAnalysisPayload } from '../../types';
 import { generateWithSelectedModel } from './unifiedAIService';
 import { adaptiveHorror } from './engines';
-import { AI_DIRECTOR_SYSTEM, buildDirectorAnalysisRequest } from './promptTemplates';
+import { buildDirectorAnalysisRequest } from './promptTemplates';
 
 export const generateDirectorAnalysis = async (
   worldState: WorldState,

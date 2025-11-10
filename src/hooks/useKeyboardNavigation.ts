@@ -158,16 +158,16 @@ export function useChoiceNavigation<T>(
  */
 export function useKeyboardDetection() {
   useEffect(() => {
-    let isUsingKeyboard = false;
+    let _isUsingKeyboard = false;
 
     const handleMouseDown = () => {
-      isUsingKeyboard = false;
+      _isUsingKeyboard = false;
       document.body.classList.remove('keyboard-nav-active');
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Tab') {
-        isUsingKeyboard = true;
+        _isUsingKeyboard = true;
         document.body.classList.add('keyboard-nav-active');
       }
     };

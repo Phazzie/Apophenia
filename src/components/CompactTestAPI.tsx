@@ -27,7 +27,7 @@ const mockStoryHistory: StorySegment[] = [
 
 
 const CompactTestAPI: React.FC = () => {
-  const { getSelectedModel } = useAIModelStore();
+  // Model selection handled by unifiedAIService
 
   const handleTestImageGeneration = async () => {
     console.log("--- Testing Image Generation ---");

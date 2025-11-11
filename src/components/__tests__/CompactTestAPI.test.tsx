@@ -33,8 +33,7 @@ describe('CompactTestAPI', () => {
   it('renders the test buttons', () => {
     render(<CompactTestAPI />);
     expect(screen.getByText('Test Image Gen')).toBeInTheDocument();
-    expect(screen.getByText('Story (Groq)')).toBeInTheDocument();
-    expect(screen.getByText('Story (Gemini)')).toBeInTheDocument();
+    expect(screen.getByText('Test Story Gen')).toBeInTheDocument();
   });
 
   it('calls the image generation service when the button is clicked', async () => {
@@ -43,15 +42,9 @@ describe('CompactTestAPI', () => {
     expect(mockGenerateImageVariations).toHaveBeenCalled();
   });
 
-  it('calls the unified AI service for Groq when the button is clicked', async () => {
+  it('calls the unified AI service when the story button is clicked', async () => {
     render(<CompactTestAPI />);
-    fireEvent.click(screen.getByText('Story (Groq)'));
-    expect(mockGenerateText).toHaveBeenCalled();
-  });
-
-  it('calls the unified AI service for Gemini when the button is clicked', async () => {
-    render(<CompactTestAPI />);
-    fireEvent.click(screen.getByText('Story (Gemini)'));
+    fireEvent.click(screen.getByText('Test Story Gen'));
     expect(mockGenerateText).toHaveBeenCalled();
   });
 });

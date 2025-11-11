@@ -24,12 +24,11 @@ export const CACHE_CONFIG = {
     : (import.meta.env.VITE_ENABLE_CACHE_TELEMETRY !== 'false'),
 };
 
-// AI Model Configuration - UPGRADED TO GROK-4 FAST REASONING AS PRIMARY
+// AI Model Configuration - GROK-4 FAST REASONING ONLY (Grok-only deployment)
 export const AI_MODELS = {
   // Primary text generation with Grok-4 Fast Reasoning - 2M token context with thinking
   PRIMARY_TEXT: 'grok-4-fast-reasoning', // Latest Grok model with 2M token context
-  FALLBACK_TEXT: 'gemini-2.5-pro', // Gemini Pro as reliable fallback
-  SECONDARY_FALLBACK: 'gemini-2.5-flash', // Final fallback
+  // Fallback removed - Grok-only deployment per INTEGRATION_PLAN.md
   
   // Image generation pipeline - Attempt Grok first, fallback to Imagen
   PRIMARY_IMAGE: 'grok-4-fast-reasoning', // Primary attempt with Grok-4 (will fallback)
@@ -79,8 +78,8 @@ export const AI_MODELS = {
     maxOutputTokens: 8192,
     enableThinking: true,
     thinkingBudget: 'maximum',
-    // Utilize full 2M token context window - DOUBLED from Gemini
-    contextWindow: 2000000, // 2 million tokens (vs 1M for Gemini)
+    // Utilize full 2M token context window
+    contextWindow: 2000000, // 2 million tokens
     // Advanced context utilization strategies enhanced for 2M tokens
     contextStrategies: {
       // Remember COMPLETE game session for perfect consistency

@@ -21,18 +21,18 @@ This directory contains the AI service layer for the Apophenia game. The archite
 │  • generateConceptWith...()    │  │  • processAdvanced...()   │
 │  • generateNextStepWith...()   │  │                           │
 │                                │  │  Uses backend API to      │
-│  Routes to Grok or Gemini     │  │  keep keys secure         │
-└──────┬──────────────┬──────────┘  └───────────────────────────┘
-       │              │
-       │ (Grok)       │ (Gemini)
-       ▼              ▼
-┌─────────────┐  ┌──────────────┐
-│ grokService │  │  genkit.ts   │
-│ (INTERNAL)  │  │  (INTERNAL)  │
-│             │  │              │
-│ X.AI Grok-4 │  │ Gemini Models│
-│ 2M context  │  │ Pro/Flash    │
-└─────────────┘  └──────────────┘
+│  Routes to Grok (or Mock)  │  │  keep keys secure         │
+└──────┬─────────────────────────┘  └───────────────────────────┘
+       │
+       │ (Grok)
+       ▼
+┌─────────────┐
+│ grokService │
+│ (INTERNAL)  │
+│             │
+│ X.AI Grok-4 │
+│ 2M context  │
+└─────────────┘
                        │
                        ▼
               ┌────────────────────┐
@@ -44,8 +44,10 @@ This directory contains the AI service layer for the Apophenia game. The archite
 ```
 
 **Key Split:**
-- **Text Generation:** Frontend-based, uses `unifiedAIService.ts` → routes to Grok or Gemini
+- **Text Generation:** Frontend-based, uses `unifiedAIService.ts` → routes to Grok (with Mock fallback)
 - **Image Generation:** Backend-based, uses `secureGenkit.ts` → keeps API keys secure on server
+
+**NOTE:** This is a Grok-only deployment per INTEGRATION_PLAN.md
 
 ## Usage Guidelines
 
@@ -102,7 +104,7 @@ import { xaiClient } from './services/ai/grokService';
 **Purpose:** Single entry point for all AI text generation
 
 **Responsibilities:**
-- Route requests to the appropriate AI model (Grok or Gemini)
+- Route requests to Grok (with Mock fallback)
 - Handle model selection based on user preferences
 - Provide consistent fallback behavior
 - Abstract away implementation details
@@ -111,25 +113,6 @@ import { xaiClient } from './services/ai/grokService';
 - `generateWithSelectedModel()` - General-purpose text generation
 - `generateConceptWithSelectedModel()` - Story concept generation
 - `generateNextStepWithSelectedModel()` - Story progression
-
-### genkit.ts (Internal Implementation)
-
-**Purpose:** Gemini AI model integration
-
-**Responsibilities:**
-- Configure and call Google Gemini models (2.5 Pro, 2.5 Flash)
-- Handle Gemini-specific response parsing
-- Manage Gemini safety settings and generation config
-- Image generation with Google Imagen
-- Fallback to Unsplash for images
-
-**Internal Functions:**
-- `generateConceptFlow()` - Gemini concept generation
-- `nextStepFlow()` - Gemini story progression
-- `generateImageFlow()` - Image generation orchestration
-- `processAdvancedImageGeneration()` - Advanced image generation with horror intensity
-
-**Note:** This service uses the shared `jsonExtractor.ts` utility for parsing responses.
 
 ### grokService.ts (Internal Implementation)
 
@@ -218,9 +201,7 @@ import { useAIModelStore } from '../../stores/aiModelStore';
 // Get current model
 const selectedModel = useAIModelStore.getState().getSelectedModel();
 
-// Models available:
-// - Gemini 2.5 Pro (8M context)
-// - Gemini 2.5 Flash (2M context, faster)
+// Models available (Grok-only deployment):
 // - Grok-4 Fast Reasoning (2M context, thinking mode)
 ```
 
@@ -230,8 +211,8 @@ The unified service automatically routes to the selected model.
 
 The service hierarchy implements multi-level fallbacks:
 
-1. **Primary Model** - Selected model (Grok or Gemini Pro)
-2. **Secondary Model** - Gemini Flash (if primary fails)
+1. **Primary Model** - Grok-4 Fast Reasoning
+2. **Mock Fallback** - Mock AI service (if Grok fails)
 3. **Thematic Fallback** - Hardcoded narrative options (if all AI fails)
 
 This ensures the game never completely breaks due to AI failures.
@@ -242,12 +223,11 @@ AI model configurations are centralized in `services/config.ts`:
 
 ```typescript
 export const AI_MODELS = {
-  STORY_PROGRESSION: { model: 'gemini-2.5-pro', temperature: 1.15, ... },
-  CONCEPT_GENERATION: { model: 'gemini-2.5-pro', temperature: 1.3, ... },
-  SUMMARIZATION: { model: 'gemini-2.5-flash', temperature: 0.7, ... },
-  FALLBACK_TEXT: 'gemini-2.5-flash',
-  FALLBACK_IMAGE: 'imagen-3.0-generate-001',
-  SECONDARY_FALLBACK_IMAGE: 'imagen-3.0-fast-generate-001',
+  PRIMARY_TEXT: 'grok-4-fast-reasoning',
+  PRIMARY_IMAGE: 'grok-2-image-1212',
+  CONCEPT_GENERATION: { model: 'grok-4-fast-reasoning', temperature: 1.2, ... },
+  STORY_PROGRESSION: { model: 'grok-4-fast-reasoning', temperature: 1.0, ... },
+  SUMMARIZATION: { model: 'grok-4-fast-reasoning', temperature: 0.3, ... },
 };
 ```
 

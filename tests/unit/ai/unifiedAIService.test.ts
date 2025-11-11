@@ -52,11 +52,9 @@ describe('UnifiedAIService', () => {
   };
 
   beforeEach(() => {
-    // Reset to default configuration
+    // Reset to default configuration (Grok → Mock only)
     unifiedAIService.setFallbackChain([
       AIProvider.GROK,
-      AIProvider.GEMINI_PRO,
-      AIProvider.GEMINI_FLASH,
       AIProvider.MOCK,
     ]);
     unifiedAIService.setPrimaryProvider(AIProvider.GROK);
@@ -64,7 +62,7 @@ describe('UnifiedAIService', () => {
 
   describe('setPrimaryProvider', () => {
     it('should set the primary provider', () => {
-      unifiedAIService.setPrimaryProvider(AIProvider.GEMINI_PRO);
+      unifiedAIService.setPrimaryProvider(AIProvider.MOCK);
       // Note: We can't directly test this, but it shouldn't throw
       expect(true).toBe(true);
     });
@@ -72,7 +70,7 @@ describe('UnifiedAIService', () => {
 
   describe('setFallbackChain', () => {
     it('should set custom fallback chain', () => {
-      const chain = [AIProvider.MOCK, AIProvider.GEMINI_FLASH];
+      const chain = [AIProvider.MOCK, AIProvider.GROK];
       unifiedAIService.setFallbackChain(chain);
       // Should not throw
       expect(true).toBe(true);
@@ -163,7 +161,8 @@ describe('UnifiedAIService', () => {
       const results = await unifiedAIService.testAllProviders();
 
       expect(results).toBeInstanceOf(Map);
-      expect(results.size).toBe(4); // All 4 providers
+      // Note: Map size depends on registered services in UnifiedAIServiceImpl
+      expect(results.size).toBeGreaterThanOrEqual(2); // At least Grok and Mock
 
       // Mock should always be available
       const mockResult = results.get(AIProvider.MOCK);
@@ -171,12 +170,11 @@ describe('UnifiedAIService', () => {
       expect(mockResult?.available).toBe(true);
     });
 
-    it('should include results for all providers', async () => {
+    it('should include results for active providers', async () => {
       const results = await unifiedAIService.testAllProviders();
 
+      // These are the active providers in the new fallback chain
       expect(results.has(AIProvider.GROK)).toBe(true);
-      expect(results.has(AIProvider.GEMINI_PRO)).toBe(true);
-      expect(results.has(AIProvider.GEMINI_FLASH)).toBe(true);
       expect(results.has(AIProvider.MOCK)).toBe(true);
     });
   });

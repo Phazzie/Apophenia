@@ -190,7 +190,9 @@ export class UnravelingFlowImpl implements IUnravelingFlow {
    * All engines are more aggressive during unraveling
    */
   private async executeEnginesAmplified(context: FlowContext): Promise<EngineOutput[]> {
-    const engines = [
+    // Type engines as any[] to avoid TypeScript errors with legacy engine implementations
+    // Runtime checks ensure safe access to engine methods
+    const engines: any[] = [
       temporalRevision,
       metaConsciousness,
       quantumNarrative,

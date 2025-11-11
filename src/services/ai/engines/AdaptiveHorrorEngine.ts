@@ -101,9 +101,9 @@ export class AdaptiveHorrorEngine {
       if (commands[0]?.type === 'displayText') {
         const triggers = commands[0].payload.content
           .split(',')
-          .map(t => t.trim().toLowerCase())
-          .filter(t => t.length > 0);
-        
+          .map((t: string) => t.trim().toLowerCase())
+          .filter((t: string) => t.length > 0);
+
         this.playerProfile.fearTriggers.push(...triggers);
         console.log('🎯 Identified fear triggers:', triggers);
       }

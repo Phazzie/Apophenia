@@ -15,7 +15,6 @@ const mockTestModel = vi.fn();
 
 const mockModels = [
   { id: 'grok-1', name: 'Grok 1', provider: 'xAI', contextWindow: 1000, supportsThinking: true, supportsImages: false, isDefault: true },
-  { id: 'gemini-1', name: 'Gemini 1', provider: 'Google', contextWindow: 2000, supportsThinking: false, supportsImages: true, isDefault: false },
 ];
 
 describe('ModelSelector', () => {
@@ -39,7 +38,6 @@ describe('ModelSelector', () => {
     render(<ModelSelector isVisible={true} onClose={vi.fn()} />);
     expect(screen.getByText('Select AI Model')).toBeInTheDocument();
     expect(screen.getByText('Grok 1')).toBeInTheDocument();
-    expect(screen.getByText('Gemini 1')).toBeInTheDocument();
   });
 
   it('does not render when not visible', () => {
@@ -49,8 +47,8 @@ describe('ModelSelector', () => {
 
   it('calls setSelectedModel when a model is selected', () => {
     render(<ModelSelector isVisible={true} onClose={vi.fn()} />);
-    fireEvent.click(screen.getByText('Gemini 1'));
-    expect(mockSetSelectedModel).toHaveBeenCalledWith('gemini-1');
+    fireEvent.click(screen.getByText('Grok 1'));
+    expect(mockSetSelectedModel).toHaveBeenCalledWith('grok-1');
   });
 
   it('calls testModel when the test button is clicked', () => {

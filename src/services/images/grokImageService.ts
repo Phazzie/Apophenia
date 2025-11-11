@@ -69,12 +69,9 @@ export class GrokImageService extends BaseImageService {
           Authorization: `Bearer ${this.apiKey}`,
         },
         body: JSON.stringify({
-          model: 'grok-2-vision-1212',
+          model: 'grok-2-image-1212',
           prompt: prompt,
-          n: 1,
-          size: '1024x1024',
-          quality: 'hd',
-          style: 'natural',
+          response_format: 'url',
         }),
         signal: controller.signal,
       });

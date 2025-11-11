@@ -135,7 +135,8 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ isVisible, onClose }) => 
                   <li>⚡ Fast reasoning optimized for interactive narratives</li>
                 </ul>
               )}
-              {model.id.startsWith('gemini-') && (
+              {/* Gemini removed - Grok-only deployment */}
+              {/* model.id.startsWith('gemini-') && (
                 <ul>
                   <li>🎨 Image generation capabilities</li>
                   <li>📖 {model.contextWindow / 1000000}M token context window</li>
@@ -143,7 +144,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ isVisible, onClose }) => 
                   <li>🔄 Reliable fallback performance</li>
                   {model.supportsThinking && <li>🧠 Thinking mode support</li>}
                 </ul>
-              )}
+              ) */}
             </div>
           </div>
         )}

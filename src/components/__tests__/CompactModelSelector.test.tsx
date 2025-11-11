@@ -14,7 +14,6 @@ const mockSetSelectedModel = vi.fn();
 
 const mockModels = [
   { id: 'grok-1', name: 'Grok 1', provider: 'xAI', contextWindow: 1000, supportsThinking: true, supportsImages: false },
-  { id: 'gemini-1', name: 'Gemini 1', provider: 'Google', contextWindow: 2000, supportsThinking: false, supportsImages: true },
 ];
 
 describe('CompactModelSelector', () => {
@@ -40,20 +39,19 @@ describe('CompactModelSelector', () => {
     render(<CompactModelSelector />);
     fireEvent.click(screen.getByRole('button'));
     expect(screen.getByText('Grok 1')).toBeInTheDocument();
-    expect(screen.getByText('Gemini 1')).toBeInTheDocument();
   });
 
-  it('calls setSelectedModel when a new model is selected', () => {
+  it('calls setSelectedModel when the same model is clicked', () => {
     render(<CompactModelSelector />);
     fireEvent.click(screen.getByRole('button'));
-    fireEvent.click(screen.getByText('Gemini 1'));
-    expect(mockSetSelectedModel).toHaveBeenCalledWith('gemini-1');
+    fireEvent.click(screen.getByText('Grok 1'));
+    expect(mockSetSelectedModel).toHaveBeenCalledWith('grok-1');
   });
 
   it('closes the dropdown after selecting a model', () => {
     render(<CompactModelSelector />);
     fireEvent.click(screen.getByRole('button'));
-    fireEvent.click(screen.getByText('Gemini 1'));
+    fireEvent.click(screen.getByText('Grok 1'));
     expect(screen.queryByText('Grok 1')).not.toBeInTheDocument();
   });
 });

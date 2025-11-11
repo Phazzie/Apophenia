@@ -157,7 +157,9 @@ export class DescentFlowImpl implements IDescentFlow {
    * Execute all active engines in priority order
    */
   private async executeEngines(context: FlowContext): Promise<EngineOutput[]> {
-    const engines = [
+    // Type engines as any[] to avoid TypeScript errors with legacy engine implementations
+    // Runtime checks ensure safe access to engine methods
+    const engines: any[] = [
       temporalRevision,
       metaConsciousness,
       quantumNarrative,

@@ -3,14 +3,13 @@
  *
  * Coordinates multiple image generation services with caching.
  * - Checks cache first
- * - Tries services in priority order (Grok → Gemini → Unsplash)
+ * - Tries services in priority order (Grok → Unsplash)
  * - Returns null if all fail (best-effort, non-blocking)
  * - Caches successful results transparently
  */
 
 import { ImagePipeline, ImageResult, ImageService } from '../../core/types/seams';
 import { grokImageService } from './grokImageService';
-import { geminiImageService } from './geminiImageService';
 import { unsplashService } from './unsplashService';
 import { lruTTLCache } from '../cache/LRUTTLCache';
 
@@ -26,7 +25,7 @@ export class ImagePipelineImpl implements ImagePipeline {
 
   constructor(services: ImageService[] = []) {
     // Use provided services or default to all available
-    this.services = services.length > 0 ? services : [grokImageService, geminiImageService, unsplashService];
+    this.services = services.length > 0 ? services : [grokImageService, unsplashService];
 
     // Sort by priority (lower number = higher priority)
     this.services.sort((a, b) => a.priority - b.priority);

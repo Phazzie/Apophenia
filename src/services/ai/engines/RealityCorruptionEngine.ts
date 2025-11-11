@@ -68,7 +68,7 @@ export class RealityCorruptionEngine {
         'story'
       );
       if (commands[0]?.type === 'displayText') {
-        return commands[0].payload.content.split(',').map(t => t.trim());
+        return commands[0].payload.content.split(',').map((t: string) => t.trim());
       }
     } catch (error) {
       console.error('Corruption effect generation failed:', error);

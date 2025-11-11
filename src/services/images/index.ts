@@ -9,7 +9,6 @@ export { BaseImageService } from './base/ImageService';
 
 // Service implementations
 export { GrokImageService, grokImageService } from './grokImageService';
-export { GeminiImageService, geminiImageService } from './geminiImageService';
 export { UnsplashService, unsplashService } from './unsplashService';
 
 // Pipeline

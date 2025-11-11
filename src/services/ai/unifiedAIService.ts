@@ -2,7 +2,7 @@
  * Unified AI Service - Facade with Automatic Fallback
  *
  * Implements UnifiedAIService interface from seams.ts
- * Provides automatic fallback chain: Grok → Gemini Pro → Gemini Flash → Mock
+ * Provides automatic fallback chain: Grok → Mock
  */
 
 import {
@@ -14,24 +14,19 @@ import {
   ProviderTestResult,
 } from '../../core/types/seams';
 import { grokService } from './grokService';
-import { geminiProService, geminiFlashService } from './geminiService';
 import { mockService } from './mockService';
 
 export class UnifiedAIServiceImpl implements UnifiedAIService {
   private primaryProvider: AIProvider = AIProvider.GROK;
   private fallbackChain: AIProvider[] = [
     AIProvider.GROK,
-    AIProvider.GEMINI_PRO,
-    AIProvider.GEMINI_FLASH,
     AIProvider.MOCK,
   ];
 
-  private services: Map<AIProvider, AIService> = new Map([
+  private services: Map<AIProvider, AIService> = new Map<AIProvider, AIService>([
     [AIProvider.GROK, grokService],
-    [AIProvider.GEMINI_PRO, geminiProService],
-    [AIProvider.GEMINI_FLASH, geminiFlashService],
     [AIProvider.MOCK, mockService],
-  ]);
+  ] as Array<[AIProvider, AIService]>);
 
   /**
    * Set the primary provider (first choice)
@@ -180,3 +175,34 @@ export class UnifiedAIServiceImpl implements UnifiedAIService {
 
 // Export singleton instance
 export const unifiedAIService = new UnifiedAIServiceImpl();
+
+/**
+ * Legacy wrapper functions for backward compatibility
+ */
+
+/**
+ * Generate AI response with selected model (alias for generateWithFallback)
+ */
+export async function generateWithSelectedModel(
+  request: Omit<AIRequest, 'provider'>
+): Promise<AIResponse> {
+  return unifiedAIService.generateWithFallback(request);
+}
+
+/**
+ * Generate concept with selected model
+ */
+export async function generateConceptWithSelectedModel(
+  request: Omit<AIRequest, 'provider'>
+): Promise<AIResponse> {
+  return unifiedAIService.generateWithFallback(request);
+}
+
+/**
+ * Generate next step with selected model
+ */
+export async function generateNextStepWithSelectedModel(
+  request: Omit<AIRequest, 'provider'>
+): Promise<AIResponse> {
+  return unifiedAIService.generateWithFallback(request);
+}

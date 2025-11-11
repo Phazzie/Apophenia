@@ -1,3 +1,10 @@
+/**
+ * DEPRECATED: This file is no longer used in the Grok-only deployment.
+ * Retained for reference only. See INTEGRATION_PLAN.md for current architecture.
+ *
+ * All Gemini functionality has been removed in favor of Grok-4-fast-reasoning.
+ */
+
 import {
   GoogleGenerativeAI,
   HarmBlockThreshold,
@@ -65,7 +72,7 @@ async function runAIFlowWithFallback(
                  useCase === 'summary' ? AI_MODELS.SUMMARIZATION :
                  AI_MODELS.STORY_PROGRESSION;
 
-  // Try primary model first (Gemini 2.5 Pro)
+  // Try primary model first (DEPRECATED - Gemini removed)
   try {
     const model = genAI.getGenerativeModel({
       model: config.model,
@@ -90,7 +97,7 @@ async function runAIFlowWithFallback(
   } catch (primaryError) {
     console.warn('Primary model failed, trying fallback:', primaryError);
     
-    // Fallback to Gemini 2.5 Flash
+    // Fallback (DEPRECATED - Gemini removed)
     try {
       const fallbackModel = genAI.getGenerativeModel({
         model: AI_MODELS.FALLBACK_TEXT,

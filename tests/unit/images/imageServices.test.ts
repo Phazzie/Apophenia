@@ -1,12 +1,11 @@
 /**
  * Image Services Tests
  *
- * Tests Grok, Gemini, and Unsplash image services.
+ * Tests Grok and Unsplash image services.
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { GrokImageService } from '../../../src/services/images/grokImageService';
-import { GeminiImageService } from '../../../src/services/images/geminiImageService';
 import { UnsplashService } from '../../../src/services/images/unsplashService';
 
 describe('Image Services', () => {
@@ -122,79 +121,6 @@ describe('Image Services', () => {
     });
   });
 
-  describe('GeminiImageService', () => {
-    let service: GeminiImageService;
-
-    beforeEach(() => {
-      // Mock env var before creating service
-      import.meta.env.VITE_GEMINI_API_KEY = 'test-key';
-      service = new GeminiImageService();
-    });
-
-    it('should implement ImageService interface', () => {
-      expect(service.provider).toBe('gemini');
-      expect(service.priority).toBe(2);
-      expect(typeof service.generate).toBe('function');
-      expect(typeof service.isAvailable).toBe('function');
-    });
-
-    it('should return failure when no API key configured', async () => {
-      // Create new service without API key
-      const originalKey = import.meta.env.VITE_GEMINI_API_KEY;
-      try {
-        import.meta.env.VITE_GEMINI_API_KEY = undefined;
-        const service2 = new GeminiImageService();
-
-        const result = await service2.generate('test prompt');
-
-        expect(result.url).toBeNull();
-        expect(result.error).toBeDefined();
-        expect(result.error?.length).toBeGreaterThan(0);
-      } finally {
-        import.meta.env.VITE_GEMINI_API_KEY = originalKey;
-      }
-    });
-
-    it('should successfully generate image and extract URL', async () => {
-      const mockUrl = 'https://example.com/gemini-image.jpg';
-
-      vi.mocked(global.fetch).mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          candidates: [
-            {
-              content: {
-                parts: [
-                  {
-                    text: `Here's the image: ${mockUrl}`,
-                  },
-                ],
-              },
-            },
-          ],
-        }),
-      } as Response);
-
-      const result = await service.generate('cosmic horror');
-
-      expect(result.url).toBe(mockUrl);
-      expect(result.provider).toBe('gemini');
-    });
-
-    it('should handle empty candidates response', async () => {
-      vi.mocked(global.fetch).mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          candidates: [],
-        }),
-      } as Response);
-
-      const result = await service.generate('test prompt');
-
-      expect(result.url).toBeNull();
-      expect(result.error).toBe('Gemini returned no response');
-    });
-  });
 
   describe('UnsplashService', () => {
     let service: UnsplashService;
@@ -292,18 +218,12 @@ describe('Image Services', () => {
   describe('Service Priority Order', () => {
     it('Grok should have highest priority', () => {
       const grok = new GrokImageService();
-      expect(grok.priority).toBeLessThan(2);
+      expect(grok.priority).toBe(1);
     });
 
-    it('Gemini should have medium priority', () => {
-      const gemini = new GeminiImageService();
-      expect(gemini.priority).toBeGreaterThan(1);
-      expect(gemini.priority).toBeLessThan(3);
-    });
-
-    it('Unsplash should have lowest priority', () => {
+    it('Unsplash should have lower priority than Grok', () => {
       const unsplash = new UnsplashService();
-      expect(unsplash.priority).toBeGreaterThan(2);
+      expect(unsplash.priority).toBeGreaterThan(1);
     });
   });
 });

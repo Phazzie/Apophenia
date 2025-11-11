@@ -62,21 +62,27 @@ export class FlowContextBuilder {
    * should be created by Agent 2 for full psychological profiling.
    */
   private buildPlayerProfile(): PlayerProfile {
-    const userProfile = useUserStore.getState().profile;
+    // Note: UserStore doesn't have a profile property yet - using default values
+    // TODO: Create PlayerProfileStore as per SEAMS architecture
     const storyHistory = useStoryHistoryStore.getState().storyHistory;
     const gameState = useGameStateStore.getState();
 
     // Extract choice count and basic metrics
     const choiceCount = storyHistory.filter(seg => seg.text.includes('>')).length;
 
+    // Get first segment timestamp (with fallback for legacy segments without timestamp)
+    const firstSegmentTime = storyHistory[0]
+      ? (storyHistory[0] as any).timestamp || Date.now()
+      : Date.now();
+
     return {
       fearProfile: {
-        claustrophobia: userProfile?.fearProfile?.claustrophobia ?? 0.5,
-        isolation: userProfile?.fearProfile?.isolation ?? 0.5,
-        bodyHorror: userProfile?.fearProfile?.bodyHorror ?? 0.5,
-        cosmicInsignificance: userProfile?.fearProfile?.cosmicInsignificance ?? 0.5,
-        lossOfControl: userProfile?.fearProfile?.lossOfControl ?? 0.5,
-        madness: userProfile?.fearProfile?.madness ?? 0.5,
+        claustrophobia: 0.5,
+        isolation: 0.5,
+        bodyHorror: 0.5,
+        cosmicInsignificance: 0.5,
+        lossOfControl: 0.5,
+        madness: 0.5,
       },
       choicePatterns: {
         riskTaking: 0.5,
@@ -87,9 +93,8 @@ export class FlowContextBuilder {
       engagementMetrics: {
         totalChoices: choiceCount,
         averageResponseTime: 0,
-        sessionDuration: Date.now() - (storyHistory[0]?.timestamp ?? Date.now()),
+        sessionDuration: Date.now() - firstSegmentTime,
       },
-      crossSessionData: userProfile?.crossSessionData,
     };
   }
 

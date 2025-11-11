@@ -52,8 +52,8 @@ describe('ImagePipeline', () => {
       const providers = pipeline.getProviders();
 
       expect(providers.length).toBeGreaterThan(0);
+      // Default services: Grok → Unsplash (Gemini removed)
       expect(providers.map((p) => p.provider)).toContain('grok');
-      expect(providers.map((p) => p.provider)).toContain('gemini');
       expect(providers.map((p) => p.provider)).toContain('unsplash');
     });
 

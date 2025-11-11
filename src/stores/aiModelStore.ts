@@ -9,7 +9,7 @@ import { persist } from 'zustand/middleware';
 import { AIModel, ModelTestResult } from '../types';
 import { xaiClient } from '../services/ai/grokService';
 
-// Available AI models
+// Available AI models (Grok-only deployment)
 export const AVAILABLE_MODELS: AIModel[] = [
   {
     id: 'grok-4-fast-reasoning',
@@ -19,24 +19,6 @@ export const AVAILABLE_MODELS: AIModel[] = [
     supportsThinking: true,
     supportsImages: false,
     isDefault: true,
-  },
-  {
-    id: 'gemini-2.5-pro',
-    name: 'Gemini 2.5 Pro',
-    provider: 'Google',
-    contextWindow: 1000000, // 1M tokens
-    supportsThinking: true,
-    supportsImages: true,
-    isDefault: false,
-  },
-  {
-    id: 'gemini-2.5-flash',
-    name: 'Gemini 2.5 Flash',
-    provider: 'Google',
-    contextWindow: 1000000, // 1M tokens
-    supportsThinking: false,
-    supportsImages: true,
-    isDefault: false,
   },
 ];
 
@@ -103,27 +85,6 @@ export const useAIModelStore = create<AIModelStore>()(
               ...testResult,
               responseTime: Date.now() - startTime,
             };
-          } else if (modelId.startsWith('gemini-')) {
-            // Test Gemini models with appropriate capability
-            if (testType === 'text') {
-              console.log('Testing Gemini text generation...');
-              result = {
-                success: true,
-                model: modelId,
-                contextWindow: 1000000,
-                responseTime: Date.now() - startTime,
-                testType: 'text',
-              };
-            } else {
-              console.log('Testing Gemini image generation...');
-              result = {
-                success: true,
-                model: modelId,
-                contextWindow: 1000000,
-                responseTime: Date.now() - startTime,
-                testType: 'image',
-              };
-            }
           } else {
             console.error('Unknown model for testing:', modelId);
             result = {

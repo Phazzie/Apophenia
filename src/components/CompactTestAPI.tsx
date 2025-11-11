@@ -41,8 +41,8 @@ const CompactTestAPI: React.FC = () => {
     console.log("--- Test Complete ---");
   };
 
-  const generateHorrorStory = async (model: 'groq' | 'gemini') => {
-    console.log(`--- Generating story with ${model} ---`);
+  const generateHorrorStory = async () => {
+    console.log('--- Generating story with selected AI model ---');
     const prompt = "Write a 100-word short story about someone's descent into insanity, in a cosmic horror style.";
     try {
       const commands = await generateNextStepWithSelectedModel(
@@ -56,9 +56,9 @@ const CompactTestAPI: React.FC = () => {
       const textCommand = commands.find(c => c.type === 'displayText');
       const result = textCommand && 'content' in textCommand.payload ? textCommand.payload.content : "No text returned.";
 
-      console.log(`Story from ${model}:`, result);
+      console.log('Story generated:', result);
     } catch (error) {
-      console.error(`Story generation with ${model} failed:`, error);
+      console.error('Story generation failed:', error);
     }
     console.log("--- Test Complete ---");
   };
@@ -68,11 +68,8 @@ const CompactTestAPI: React.FC = () => {
       <button onClick={handleTestImageGeneration} style={{ fontSize: '10px', padding: '2px 5px' }}>
         Test Image Gen
       </button>
-      <button onClick={() => generateHorrorStory('groq')} style={{ fontSize: '10px', padding: '2px 5px' }}>
-        Story (Groq)
-      </button>
-      <button onClick={() => generateHorrorStory('gemini')} style={{ fontSize: '10px', padding: '2px 5px' }}>
-        Story (Gemini)
+      <button onClick={generateHorrorStory} style={{ fontSize: '10px', padding: '2px 5px' }}>
+        Test Story Gen
       </button>
     </div>
   );

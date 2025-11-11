@@ -1,47 +1,44 @@
-// Mock configuration for Jest tests
+// Mock configuration for Jest tests (Grok-only deployment)
 export const API_KEYS = {
-  googleGenAI: 'test-key',
-  googleImagen: 'test-imagen-key',
   xaiAPI: 'test-xai-key',
 };
 
 export const getConfig = () => ({
-  geminiApiKey: API_KEYS.googleGenAI,
-  imageApiKey: API_KEYS.googleImagen,
-  imagenKey: API_KEYS.googleImagen,
   xaiApiKey: API_KEYS.xaiAPI,
 });
 
 export const AI_MODELS = {
-  PRIMARY_TEXT: 'gemini-2.5-flash-experimental',
-  FALLBACK_TEXT: 'gemini-2.5-flash',
-  PRIMARY_IMAGE: 'imagen-3.0-generate-001',
-  FALLBACK_IMAGE: 'imagen-2.0-generate-001',
+  PRIMARY_TEXT: 'grok-4-fast-reasoning',
+  PRIMARY_IMAGE: 'grok-2-image-1212',
   CONCEPT_GENERATION: {
-    model: 'gemini-2.5-flash-experimental',
+    model: 'grok-4-fast-reasoning',
     temperature: 1.2,
     topK: 40,
     topP: 0.95,
     maxOutputTokens: 8192,
     enableThinking: true,
     thinkingBudget: 'high',
+    contextWindow: 2000000,
   },
   STORY_PROGRESSION: {
-    model: 'gemini-2.5-flash-experimental',
+    model: 'grok-4-fast-reasoning',
     temperature: 1.0,
     topK: 0,
     topP: 0.95,
     maxOutputTokens: 8192,
     enableThinking: true,
     thinkingBudget: 'high',
+    contextWindow: 2000000,
   },
   SUMMARIZATION: {
-    model: 'gemini-2.5-flash',
+    model: 'grok-4-fast-reasoning',
     temperature: 0.3,
     topK: 20,
     topP: 0.8,
-    maxOutputTokens: 2048,
-    enableThinking: false,
+    maxOutputTokens: 4096,
+    enableThinking: true,
+    thinkingBudget: 'medium',
+    contextWindow: 2000000,
   }
 };
 

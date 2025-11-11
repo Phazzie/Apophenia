@@ -6,7 +6,6 @@
 
 // Individual services
 export { GrokService, grokService } from './grokService';
-export { GeminiService, geminiProService, geminiFlashService } from './geminiService';
 export { MockService, mockService } from './mockService';
 
 // Unified service (facade)

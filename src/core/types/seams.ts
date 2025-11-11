@@ -45,7 +45,7 @@ export interface Choice {
   id: string;
   text: string;
   consequence?: string;
-  isIntrusive?: boolean;             // Special disturbing choice
+  isIntrusive: boolean;              // Special disturbing choice (required)
   psychologicalWeight?: number;      // How much this affects player profile
 }
 
@@ -94,8 +94,8 @@ export interface BrowserEffect {
 
 export enum AIProvider {
   GROK = 'grok',
-  GEMINI_PRO = 'gemini-pro',
-  GEMINI_FLASH = 'gemini-flash',
+  // GEMINI_PRO = 'gemini-pro',     // REMOVED - Grok-only deployment
+  // GEMINI_FLASH = 'gemini-flash', // REMOVED - Grok-only deployment
   MOCK = 'mock'
 }
 

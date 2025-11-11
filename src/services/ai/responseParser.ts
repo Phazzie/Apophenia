@@ -13,7 +13,7 @@ const ChoiceSchema = z.object({
   id: z.string(),
   text: z.string(),
   consequence: z.string().optional(),
-  isIntrusive: z.boolean().optional(),
+  isIntrusive: z.boolean().default(false), // Required but defaults to false if not provided
   psychologicalWeight: z.number().optional(),
 });
 

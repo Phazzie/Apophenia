@@ -16,9 +16,9 @@
 
 ### ✨ Core Features
 - **🧠 Grok-4 Fast Reasoning AI**: X.AI's latest model with 2M token context and advanced reasoning
-- **🔄 Multi-Model Support**: Switch between Grok-4, Gemini 2.5 Pro, and Gemini Flash
-- **🔍 Test API System**: Built-in connectivity testing for all AI providers
-- **🎨 Atmospheric Visuals**: Enhanced image generation for immersive scenes
+- **🎨 Grok-2-image-1212**: X.AI's image generation model for atmospheric horror visuals
+- **🔄 Mock AI Mode**: Full demo mode works without API keys for testing
+- **🏗️ Seams-Based Architecture**: Modular design with 9 revolutionary AI engines
 - **🧠 Psychological Profiling**: AI adapts story direction based on player decisions with 2M token memory
 - **👁️ Intrusive Thoughts**: Disturbing choice options that reveal character psychology
 - **📱 Responsive Design**: Seamless experience on mobile and desktop
@@ -32,9 +32,8 @@
 
 ### Prerequisites
 - **Node.js 20.19.0+** (as specified in `package.json`)
-- **npm 8+** or **yarn 3+** for package management  
-- **Grok API key** (primary AI model - from X.AI)
-- **Google Gemini API key** (fallback model - optional but recommended)
+- **npm 8+** or **yarn 3+** for package management
+- **X.AI API key** (optional - works without for demo/mock mode)
 - **Modern browser** with JavaScript enabled
 
 ### Expert Installation
@@ -53,9 +52,8 @@ npm run build && npm test
 # Create environment configuration
 cp .env.example .env.local
 
-# Configure API keys for full functionality
+# Configure API keys for full functionality (optional - works without)
 echo "VITE_XAI_API_KEY=your-xai-api-key-here" >> .env.local
-echo "VITE_GEMINI_API_KEY=your-google-gemini-api-key" >> .env.local
 
 # Start development with hot module replacement
 npm run dev
@@ -105,21 +103,26 @@ VITE_LOG_LEVEL=error
 
 ---
 
-## 🧠 AI Model System
+## 🧠 AI System
 
-Apophenia features a sophisticated multi-model AI system with **Grok-4 Fast Reasoning** as the primary engine, supported by Google Gemini models as reliable fallbacks.
+Apophenia uses **X.AI's Grok models** exclusively for unprecedented narrative power:
 
-### 🚀 Grok-4 Fast Reasoning (Primary)
+### 🚀 Grok-4 Fast Reasoning (Text Generation)
 - **Provider**: X.AI (xAI)
-- **Context Window**: 2 Million tokens (2x larger than Gemini)
+- **Context Window**: 2 Million tokens (complete session memory)
 - **Advanced Reasoning**: Built-in thinking mode for complex narrative decisions
 - **Specialized For**: Interactive storytelling, psychological analysis, narrative consistency
 
-### 🔄 Model Selection Interface
-- **Dynamic Switching**: Change AI models without restarting the game
-- **Real-time Testing**: Test API connectivity for each provider
-- **Feature Comparison**: View context windows, reasoning capabilities, and image support
-- **Persistent Selection**: Your choice is saved across sessions
+### 🎨 Grok-2-image-1212 (Image Generation)
+- **Provider**: X.AI (xAI)
+- **Format**: High-quality JPG images
+- **Style**: Atmospheric horror imagery
+- **Fallback**: Unsplash API (no key required)
+
+### 🔄 Demo Mode
+- **Mock AI**: Works without API keys
+- **Rich Content**: Pre-written narratives and demo images
+- **Full Features**: All 9 engines operational in demo mode
 
 ### 🎯 Premium Features (2M Token Context)
 - **Complete Session Memory**: Remember every choice and story beat across the entire game
@@ -130,13 +133,15 @@ Apophenia features a sophisticated multi-model AI system with **Grok-4 Fast Reas
 
 ### 🛡️ Fallback System
 ```
-Grok-4 Fast Reasoning (Primary)
+Grok-4 Fast Reasoning (Text)
     ↓ (on failure)
-Gemini 2.5 Pro (Secondary)
-    ↓ (on failure)  
-Gemini 2.5 Flash (Final fallback)
+Mock AI (Demo mode)
+
+Grok-2-image-1212 (Images)
     ↓ (on failure)
-Static thematic error responses
+Unsplash API (Free)
+    ↓ (on failure)
+null (graceful degradation)
 ```
 
 ## 🧠 Revolutionary 9-Module AI Engine System
@@ -223,10 +228,11 @@ src/
 - **Zustand**: Lightweight state management with middleware support
 
 **AI Integration Layer**:
-- **Google Gemini 2.5 Pro**: Primary narrative generation
-- **Gemini 2.0 Flash Experimental**: Advanced creative AI features
-- **Multi-service Fallbacks**: Robust error handling and service degradation
-- **Context Management**: Intelligent summarization for long narrative sessions
+- **X.AI Grok-4 Fast Reasoning**: Primary narrative generation with 2M token context
+- **X.AI Grok-2-image-1212**: AI-generated atmospheric horror imagery
+- **Mock AI Service**: Full demo mode without API keys
+- **Unified AI Service**: Seamless provider switching and fallbacks
+- **Context Management**: 2M token session memory for perfect narrative continuity
 
 **Development & Quality**:
 - **Jest + Testing Library**: 40+ tests with 85%+ coverage
@@ -254,10 +260,6 @@ src/
 
 ---
 
-Update to:
-NODE_ENV=production
-XAI_API_KEY=your-production-xai-key
-GEMINI_API_KEY=your-production-gemini-key
 ## 🌐 Expert Deployment Guide
 
 For detailed and secure deployment instructions, please see the [Comprehensive Deployment Guide](DEPLOYMENT.md).
@@ -271,21 +273,20 @@ For detailed and secure deployment instructions, please see the [Comprehensive D
 Create `.env.local` file:
 
 ```env
-# Google Gemini AI (Optional - graceful fallbacks included)
-VITE_GEMINI_API_KEY=your-google-gemini-api-key
+# X.AI Grok API (Optional - works without for demo mode)
+VITE_XAI_API_KEY=your-xai-api-key-here
 
-# Additional AI services (Future)
-# VITE_OPENAI_API_KEY=your-openai-key
+# For both text (grok-4-fast-reasoning) and images (grok-2-image-1212)
 ```
 
 ### API Key Setup
 
-1. **Google Gemini API**:
-   - Visit [Google AI Studio](https://aistudio.google.com/app/apikey)
+1. **X.AI API**:
+   - Visit [X.AI Console](https://console.x.ai)
    - Generate an API key
-   - Add to `.env.local`
+   - Add to `.env.local` as `VITE_XAI_API_KEY`
 
-> **Note**: The game includes graceful fallbacks and works without API keys for development and testing.
+> **Note**: The game works perfectly without API keys using Mock AI mode for development and testing.
 
 ---
 

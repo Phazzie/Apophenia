@@ -34,7 +34,7 @@ export const worldStateSchema = z.object({
   setting: z.string(),
   dilemma: z.string(),
   summary: z.string(),
-  psychologicalStatus: z.enum(['Stable', 'Uneasy', 'Paranoid', 'Fragmented']),
+  psychologicalStatus: z.enum(['stable', 'uneasy', 'paranoid', 'fragmented', 'shattered']),
   systemHealth: z.number(),
   // The horrorIntensity score (0-10) dynamically adjusts the game's difficulty and tone.
   // It is calculated based on player choices and narrative events.
@@ -50,11 +50,12 @@ export const worldStateSchema = z.object({
 export const storySegmentSchema = z.object({
   id: z.string(),
   text: z.string(),
+  timestamp: z.number(),
   images: z.object({
     main: z.string().optional(),
     inset: z.array(z.string()).optional(),
     mainStatus: z.enum(['loading', 'loaded', 'failed', 'retrying']).optional(),
-  }),
+  }).optional(),
   // Revolutionary features
   isRevised: z.boolean().optional(),
   originalText: z.string().optional(),
@@ -64,10 +65,13 @@ export const storySegmentSchema = z.object({
 });
 
 export const choiceSchema = z.object({
+  id: z.string(),
   text: z.string(),
   isIntrusive: z.boolean(),
   // Optional segment identifier for command routing (e.g., retry-last-action)
   segmentId: z.string().optional(),
+  consequence: z.string().optional(),
+  psychologicalWeight: z.number().optional(),
 });
 
 // Command Payloads Schemas
@@ -82,7 +86,7 @@ export const updateWorldStatePayloadSchema = z.object({
   setting: z.string().optional(),
   dilemma: z.string().optional(),
   summary: z.string().optional(),
-  psychologicalStatus: z.enum(['Stable', 'Uneasy', 'Paranoid', 'Fragmented']).optional(),
+  psychologicalStatus: z.enum(['stable', 'uneasy', 'paranoid', 'fragmented', 'shattered']).optional(),
   systemHealth: z.number().optional(),
 });
 export const displayChoicesPayloadSchema = z.object({

@@ -238,16 +238,19 @@ export class TemporalRevisionEngine {
 
     // Use AI to generate actual revisions
     try {
-      const commands = await generateWithSelectedModel(
-        systemInstruction,
-        prompt,
-        worldState,
-        storyHistory,
-        'story'
-      );
+      const response = await generateWithSelectedModel({
+        prompt: systemInstruction + '\n\n' + prompt,
+        context: {
+          worldState: worldState as any,
+          recentHistory: storyHistory as any,
+          playerProfile: {} as any,
+          genrePrompts: [],
+          engineInstructions: [],
+        },
+      });
 
-      if (commands[0]?.type === 'displayText') {
-        return commands[0].payload.content;
+      if (response.commands[0]?.type === 'displayText') {
+        return response.commands[0].payload.content;
       }
     } catch (error) {
       console.error('AI revision generation failed, propagating error:', error);

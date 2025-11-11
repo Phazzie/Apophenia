@@ -134,7 +134,7 @@ export class FlowContextBuilder {
    * Map current psychological status to seams enum
    */
   private mapPsychologicalStatus(
-    status: 'Stable' | 'Uneasy' | 'Paranoid' | 'Fragmented'
+    status: 'stable' | 'uneasy' | 'paranoid' | 'fragmented' | 'shattered'
   ): import('../core/types/seams').PsychologicalStatus {
     // Import at top of file, but use type assertion here for mapping
     // to avoid circular dependencies
@@ -147,14 +147,16 @@ export class FlowContextBuilder {
     };
 
     switch (status) {
-      case 'Stable':
+      case 'stable':
         return PsychologicalStatus.STABLE as any;
-      case 'Uneasy':
+      case 'uneasy':
         return PsychologicalStatus.UNEASY as any;
-      case 'Paranoid':
+      case 'paranoid':
         return PsychologicalStatus.PARANOID as any;
-      case 'Fragmented':
+      case 'fragmented':
         return PsychologicalStatus.FRAGMENTED as any;
+      case 'shattered':
+        return PsychologicalStatus.SHATTERED as any;
       default:
         return PsychologicalStatus.STABLE as any;
     }

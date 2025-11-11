@@ -97,10 +97,10 @@ async function runAIFlowWithFallback(
   } catch (primaryError) {
     console.warn('Primary model failed, trying fallback:', primaryError);
     
-    // Fallback (DEPRECATED - Gemini removed)
+    // Fallback (DEPRECATED - Gemini removed, using PRIMARY_TEXT as fallback)
     try {
       const fallbackModel = genAI.getGenerativeModel({
-        model: AI_MODELS.FALLBACK_TEXT,
+        model: AI_MODELS.PRIMARY_TEXT,
         systemInstruction,
         generationConfig: {
           temperature: 1,
@@ -149,8 +149,8 @@ function getThematicErrorFallback(): GameCommand[] {
       type: 'displayChoices',
       payload: {
         choices: [
-          { text: 'Attempt to reestablish connection', isIntrusive: false, segmentId: 'retry-connection' },
-          { text: 'Embrace the digital void', isIntrusive: true, segmentId: 'accept-failure' },
+          { id: 'retry-connection', text: 'Attempt to reestablish connection', isIntrusive: false, segmentId: 'retry-connection' },
+          { id: 'accept-failure', text: 'Embrace the digital void', isIntrusive: true, segmentId: 'accept-failure' },
         ],
       },
     },

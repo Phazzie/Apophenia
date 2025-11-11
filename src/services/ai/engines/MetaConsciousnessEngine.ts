@@ -49,15 +49,18 @@ export class MetaConsciousnessEngine {
     );
 
     try {
-      const commands = await generateWithSelectedModel(
-        systemInstruction,
-        prompt,
-        worldState,
-        storyHistory,
-        'story'
-      );
-      if (commands[0]?.type === 'displayText') {
-        return commands[0].payload.content;
+      const response = await generateWithSelectedModel({
+        prompt: systemInstruction + '\n\n' + prompt,
+        context: {
+          worldState: worldState as any,
+          recentHistory: storyHistory as any,
+          playerProfile: {} as any,
+          genrePrompts: [],
+          engineInstructions: [],
+        },
+      });
+      if (response.commands[0]?.type === 'displayText') {
+        return response.commands[0].payload.content;
       }
     } catch (error) {
       console.error('Meta-consciousness message generation failed:', error);

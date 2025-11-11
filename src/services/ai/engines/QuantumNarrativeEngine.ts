@@ -70,15 +70,18 @@ export class QuantumNarrativeEngine {
     const { systemInstruction, prompt } = buildChoiceSignificanceRequest(choice);
 
     try {
-      const commands = await generateWithSelectedModel(
-        systemInstruction,
-        prompt,
-        worldState,
-        storyHistory,
-        'story'
-      );
-      if (commands[0]?.type === 'displayText') {
-        return commands[0].payload.content.toLowerCase().includes('yes');
+      const response = await generateWithSelectedModel({
+        prompt: systemInstruction + '\n\n' + prompt,
+        context: {
+          worldState: worldState as any,
+          recentHistory: storyHistory as any,
+          playerProfile: {} as any,
+          genrePrompts: [],
+          engineInstructions: [],
+        },
+      });
+      if (response.commands[0]?.type === 'displayText') {
+        return response.commands[0].payload.content.toLowerCase().includes('yes');
       }
     } catch (error) {
       console.error('Significance analysis failed:', error);

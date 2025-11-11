@@ -236,3 +236,40 @@ export function getGameStats() {
     totalSegments: segments.length,
   };
 }
+
+/**
+ * Generate image (stub for backward compatibility)
+ */
+export async function generateImage(prompt: string): Promise<string> {
+  const { imageGenerationService } = await import('./ai/imageGeneration');
+  const result = await imageGenerationService.generateImageVariations(prompt, 1);
+  return result.variations[0]?.url || '';
+}
+
+/**
+ * Generate multiple images (stub for backward compatibility)
+ */
+export async function generateMultipleImages(prompts: string[]): Promise<string[]> {
+  return Promise.all(prompts.map(prompt => generateImage(prompt)));
+}
+
+/**
+ * Generate concept (re-export)
+ */
+export { generateConceptFlow as generateConcept } from './ai/genkit';
+
+/**
+ * Get next step (stub for backward compatibility)
+ */
+export async function getNextStep(choice: Choice): Promise<void> {
+  // This is handled by processPlayerChoice now
+  return processPlayerChoice(choice);
+}
+
+/**
+ * Summarize history (stub for backward compatibility)
+ */
+export async function summarizeHistory(): Promise<string> {
+  const segments = useHistoryStore.getState().segments;
+  return segments.map(s => s.text).join('\n\n');
+}

@@ -90,16 +90,19 @@ export class AdaptiveHorrorEngine {
     );
 
     try {
-      const commands = await generateWithSelectedModel(
-        systemInstruction,
-        prompt,
-        worldState,
-        storyHistory,
-        'story'
-      );
-      
-      if (commands[0]?.type === 'displayText') {
-        const triggers = commands[0].payload.content
+      const response = await generateWithSelectedModel({
+        prompt: systemInstruction + '\n\n' + prompt,
+        context: {
+          worldState: worldState as any,
+          recentHistory: storyHistory as any,
+          playerProfile: {} as any,
+          genrePrompts: [],
+          engineInstructions: [],
+        },
+      });
+
+      if (response.commands[0]?.type === 'displayText') {
+        const triggers = response.commands[0].payload.content
           .split(',')
           .map((t: string) => t.trim().toLowerCase())
           .filter((t: string) => t.length > 0);
@@ -144,16 +147,19 @@ export class AdaptiveHorrorEngine {
     );
 
     try {
-      const commands = await generateWithSelectedModel(
-        systemInstruction,
-        prompt,
-        worldState,
-        storyHistory,
-        'story'
-      );
-      
-      if (commands[0]?.type === 'displayText') {
-        const enhanced = commands[0].payload.content;
+      const response = await generateWithSelectedModel({
+        prompt: systemInstruction + '\n\n' + prompt,
+        context: {
+          worldState: worldState as any,
+          recentHistory: storyHistory as any,
+          playerProfile: {} as any,
+          genrePrompts: [],
+          engineInstructions: [],
+        },
+      });
+
+      if (response.commands[0]?.type === 'displayText') {
+        const enhanced = response.commands[0].payload.content;
         console.log('✨ Generated personalized horror prompt');
         return enhanced;
       }

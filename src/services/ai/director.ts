@@ -17,17 +17,20 @@ export const generateDirectorAnalysis = async (
   );
 
   try {
-    const response = await generateWithSelectedModel(
-      systemInstruction,
-      prompt,
-      worldState,
-      [], // No history needed for this analysis
-      'summary' // Using summary use case for this analysis
-    );
+    const response = await generateWithSelectedModel({
+      prompt: systemInstruction + '\n\n' + prompt,
+      context: {
+        worldState: worldState as any, // Type conversion needed
+        recentHistory: [],
+        playerProfile: {} as any,
+        genrePrompts: [],
+        engineInstructions: [],
+      },
+    });
 
     // Assuming the AI returns a single 'displayText' command with the JSON string
-    if (response[0]?.type === 'displayText') {
-      const analysisString = response[0].payload.content;
+    if (response.commands[0]?.type === 'displayText') {
+      const analysisString = response.commands[0].payload.content;
       const analysis: AIDirectorAnalysisPayload = JSON.parse(analysisString);
       return analysis;
     }

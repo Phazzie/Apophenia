@@ -60,15 +60,18 @@ export class RealityCorruptionEngine {
     const { systemInstruction, prompt } = buildCorruptionEffectsRequest(this.corruptionLevel);
 
     try {
-      const commands = await generateWithSelectedModel(
-        systemInstruction,
-        prompt,
-        worldState,
-        storyHistory,
-        'story'
-      );
-      if (commands[0]?.type === 'displayText') {
-        return commands[0].payload.content.split(',').map((t: string) => t.trim());
+      const response = await generateWithSelectedModel({
+        prompt: systemInstruction + '\n\n' + prompt,
+        context: {
+          worldState: worldState as any,
+          recentHistory: storyHistory as any,
+          playerProfile: {} as any,
+          genrePrompts: [],
+          engineInstructions: [],
+        },
+      });
+      if (response.commands[0]?.type === 'displayText') {
+        return response.commands[0].payload.content.split(',').map((t: string) => t.trim());
       }
     } catch (error) {
       console.error('Corruption effect generation failed:', error);

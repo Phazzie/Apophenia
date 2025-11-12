@@ -12,6 +12,7 @@ import {
   WorldState,
   Choice,
   StorySegment,
+  PlayerProfile,
 } from '../../core/types/seams';
 
 export class PromptBuilderImpl implements PromptBuilder {
@@ -162,7 +163,7 @@ ${instructions.map((instruction, i) => `${i + 1}. ${instruction}`).join('\n')}
   /**
    * Summarize player fear profile
    */
-  private summarizeFearProfile(profile: any): string {
+  private summarizeFearProfile(profile: PlayerProfile): string {
     const fears = profile.fearProfile || {};
     const fearEntries = Object.entries(fears)
       .filter(([_, value]) => (value as number) > 0)
@@ -178,7 +179,7 @@ ${instructions.map((instruction, i) => `${i + 1}. ${instruction}`).join('\n')}
   /**
    * Summarize player choice patterns
    */
-  private summarizeChoicePatterns(profile: any): string {
+  private summarizeChoicePatterns(profile: PlayerProfile): string {
     const patterns = profile.choicePatterns || {};
     return `Risk Taking: ${((patterns.riskTaking || 0) * 100).toFixed(0)}%
 Curiosity: ${((patterns.curiosity || 0) * 100).toFixed(0)}%

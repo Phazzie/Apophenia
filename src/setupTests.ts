@@ -1,4 +1,5 @@
 // Jest setup file for testing environment
+import '@testing-library/jest-dom';
 
 // Mock import.meta for Jest environment
 Object.defineProperty(globalThis, 'import', {

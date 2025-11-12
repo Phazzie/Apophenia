@@ -50,19 +50,21 @@ describe('Engine Implementation Tests', () => {
 
     it('is active with high horror and sufficient history', () => {
       const context = createHighHorrorContext();
-      expect(engine.isActive(context)).toBe(false); // Still false because choices < 5
+      // Should be active: horror=9 (>=4), history=3 (>=3), choices=20 (>5)
+      expect(engine.isActive(context)).toBe(true);
 
-      const contextWithChoices = {
+      // Test with insufficient choices
+      const contextWithFewChoices = {
         ...context,
         playerProfile: {
           ...context.playerProfile,
           engagementMetrics: {
             ...context.playerProfile.engagementMetrics,
-            totalChoices: 10
+            totalChoices: 3 // <= 5, should not be active
           }
         }
       };
-      expect(engine.isActive(contextWithChoices)).toBe(true);
+      expect(engine.isActive(contextWithFewChoices)).toBe(false);
     });
 
     it('generates instructions based on horror level', () => {

@@ -89,7 +89,7 @@ export function extractJSONFromText(
  * @returns The parsed JSON object or array
  * @throws Error if extraction or parsing fails
  */
-export function extractAndParseJSON<T = any>(
+export function extractAndParseJSON<T = unknown>(
   text: string,
   options: JSONExtractionOptions = {}
 ): T {
@@ -111,7 +111,7 @@ export function extractAndParseJSON<T = any>(
  * @returns The parsed JSON array
  * @throws Error if not a valid array
  */
-export function extractJSONArray<T = any>(
+export function extractJSONArray<T = unknown>(
   text: string,
   cleanMarkdown: boolean = true
 ): T[] {
@@ -136,7 +136,7 @@ export function extractJSONArray<T = any>(
  * @returns The parsed JSON object
  * @throws Error if not a valid object
  */
-export function extractJSONObject<T extends object = any>(
+export function extractJSONObject<T extends object = Record<string, unknown>>(
   text: string,
   cleanMarkdown: boolean = true
 ): T {

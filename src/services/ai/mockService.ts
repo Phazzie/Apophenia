@@ -11,6 +11,8 @@ import {
   AIRequest,
   AIResponse,
   Command,
+  Choice,
+  AIContext,
 } from '../../core/types/seams';
 
 export class MockService implements AIService {
@@ -137,7 +139,7 @@ export class MockService implements AIService {
   /**
    * Generate mock narrative text
    */
-  private generateMockNarrative(context: any): string {
+  private generateMockNarrative(context: AIContext): string {
     const narratives = [
       `The shadows in ${context.worldState.setting} seem to move independently of any light source. ${context.worldState.protagonist} notices patterns that shouldn't exist—fractals of impossible geometry that hurt to look at directly.`,
       `Time feels wrong here. ${context.worldState.protagonist} can't remember if they've been here for minutes or hours. The walls whisper in frequencies just below perception.`,
@@ -154,7 +156,7 @@ export class MockService implements AIService {
   /**
    * Generate mock image prompt
    */
-  private generateMockImagePrompt(context: any): string {
+  private generateMockImagePrompt(context: AIContext): string {
     const prompts = [
       `Dark corridor in ${context.worldState.setting}, impossible geometry, ${context.worldState.genreConfig.visualStyle.atmosphere} atmosphere`,
       `Abstract horror, cosmic insignificance, void staring back, ${context.worldState.genreConfig.visualStyle.primaryColor} tones`,
@@ -169,22 +171,25 @@ export class MockService implements AIService {
   /**
    * Generate mock choices
    */
-  private generateMockChoices(context: any): any[] {
+  private generateMockChoices(context: AIContext): Choice[] {
     const choiceSets = [
       [
         {
           id: `choice-${Date.now()}-1`,
           text: 'Investigate the source of the whispers',
+          isIntrusive: false,
           psychologicalWeight: 0.7,
         },
         {
           id: `choice-${Date.now()}-2`,
           text: 'Try to find a way back',
+          isIntrusive: false,
           psychologicalWeight: 0.3,
         },
         {
           id: `choice-${Date.now()}-3`,
           text: 'Embrace the impossible geometry',
+          isIntrusive: false,
           psychologicalWeight: 0.9,
         },
       ],
@@ -192,16 +197,19 @@ export class MockService implements AIService {
         {
           id: `choice-${Date.now()}-1`,
           text: 'Look directly at the reflection',
+          isIntrusive: false,
           psychologicalWeight: 0.8,
         },
         {
           id: `choice-${Date.now()}-2`,
           text: 'Close your eyes and count to ten',
+          isIntrusive: false,
           psychologicalWeight: 0.4,
         },
         {
           id: `choice-${Date.now()}-3`,
           text: 'Break the mirror',
+          isIntrusive: false,
           psychologicalWeight: 0.6,
         },
       ],
@@ -209,16 +217,19 @@ export class MockService implements AIService {
         {
           id: `choice-${Date.now()}-1`,
           text: 'Call out to the presence',
+          isIntrusive: false,
           psychologicalWeight: 0.75,
         },
         {
           id: `choice-${Date.now()}-2`,
           text: 'Hide and wait for it to pass',
+          isIntrusive: false,
           psychologicalWeight: 0.5,
         },
         {
           id: `choice-${Date.now()}-3`,
           text: 'Try to understand what it wants',
+          isIntrusive: false,
           psychologicalWeight: 0.85,
         },
       ],
@@ -230,7 +241,7 @@ export class MockService implements AIService {
   /**
    * Generate an intrusive thought
    */
-  private generateIntrusiveThought(context: any): any {
+  private generateIntrusiveThought(context: AIContext): Choice {
     const thoughts = [
       {
         id: `intrusive-${Date.now()}`,

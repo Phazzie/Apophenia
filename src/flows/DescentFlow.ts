@@ -15,6 +15,9 @@ import {
   Choice,
   Command,
   EngineOutput,
+  Engine,
+  EngineEffects,
+  WorldState,
 } from '../core/types/seams';
 import { useWorldStateStore } from '../stores/worldStateStore';
 import { useGameStateStore } from '../stores/gameStateStore';
@@ -155,9 +158,9 @@ export class DescentFlowImpl implements IDescentFlow {
    * Execute all active engines in priority order
    */
   private async executeEngines(context: FlowContext): Promise<EngineOutput[]> {
-    // Type engines as any[] to avoid TypeScript errors with legacy engine implementations
-    // Runtime checks ensure safe access to engine methods
-    const engines: any[] = [
+    // All engines implement the Engine interface from core/engines
+    // They are sorted by priority (highest first) for deterministic execution
+    const engines: Engine[] = [
       temporalRevision,
       metaConsciousness,
       quantumNarrative,
@@ -292,8 +295,8 @@ export class DescentFlowImpl implements IDescentFlow {
   /**
    * Aggregate effects from all engine outputs
    */
-  private aggregateEffects(engineOutputs: EngineOutput[]): any {
-    const aggregated: any = {
+  private aggregateEffects(engineOutputs: EngineOutput[]): EngineEffects {
+    const aggregated: EngineEffects = {
       worldUpdates: {},
       historyRevisions: [],
       profileUpdates: {},
@@ -301,16 +304,16 @@ export class DescentFlowImpl implements IDescentFlow {
     };
 
     for (const output of engineOutputs) {
-      if (output.effects.worldUpdates) {
+      if (output.effects.worldUpdates && aggregated.worldUpdates) {
         Object.assign(aggregated.worldUpdates, output.effects.worldUpdates);
       }
-      if (output.effects.historyRevisions) {
+      if (output.effects.historyRevisions && aggregated.historyRevisions) {
         aggregated.historyRevisions.push(...output.effects.historyRevisions);
       }
-      if (output.effects.profileUpdates) {
+      if (output.effects.profileUpdates && aggregated.profileUpdates) {
         Object.assign(aggregated.profileUpdates, output.effects.profileUpdates);
       }
-      if (output.effects.corruptionChanges) {
+      if (output.effects.corruptionChanges !== undefined && aggregated.corruptionChanges !== undefined) {
         aggregated.corruptionChanges += output.effects.corruptionChanges;
       }
     }
@@ -321,7 +324,7 @@ export class DescentFlowImpl implements IDescentFlow {
   /**
    * Apply engine effects to stores
    */
-  private applyEngineEffects(effects: any): void {
+  private applyEngineEffects(effects: EngineEffects): void {
     const worldStateStore = useWorldStateStore.getState();
 
     // Apply world updates
@@ -330,7 +333,7 @@ export class DescentFlowImpl implements IDescentFlow {
     }
 
     // Apply corruption changes
-    if (effects.corruptionChanges !== 0) {
+    if (effects.corruptionChanges !== undefined && effects.corruptionChanges !== 0) {
       const currentCorruption = this.getCorruptionLevel(worldStateStore.worldState);
       const newCorruption = Math.max(0, Math.min(100, currentCorruption + effects.corruptionChanges));
 
@@ -345,12 +348,9 @@ export class DescentFlowImpl implements IDescentFlow {
   /**
    * Get corruption level from world state
    */
-  private getCorruptionLevel(worldState: any): number {
-    // Extract from UI distortion
-    const transform = worldState.uiDistortion?.transform || '';
-    const rotationMatch = transform.match(/rotate\(([0-9.]+)deg\)/);
-    const rotation = rotationMatch ? parseFloat(rotationMatch[1]) : 0;
-    return Math.min(100, (rotation / 20) * 100);
+  private getCorruptionLevel(worldState: WorldState): number {
+    // Return corruption level directly from world state
+    return worldState.corruptionLevel;
   }
 
   /**

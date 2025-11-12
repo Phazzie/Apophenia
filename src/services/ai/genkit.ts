@@ -204,7 +204,7 @@ export const generateConceptFlow = async (
     const result = await model.generateContent(prompt);
     const response = result.response;
     const text = response.text();
-    const json = extractJSONObject(text, true);
+    const json = extractJSONObject<{ protagonist?: string; setting?: string; dilemma?: string }>(text, true);
 
     // Enhanced fallbacks with more sophisticated concepts
     const enhancedFallbacks = {

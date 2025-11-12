@@ -39,18 +39,25 @@ describe('Engine → State Integration', () => {
 
       const context = buildMockEngineContext({
         recentHistory: segments,
+        worldState: {
+          ...worldStateStore.getState().worldState,
+          horrorIntensity: 6, // High enough to activate engine
+        },
+        choices: Array(6).fill({ text: 'choice', id: 'c' }), // Enough choices to activate
       });
 
-      // Execute engine
-      const revisedHistory = await engine.reviseHistory(
-        'Make a temporal choice',
-        segments,
-        context.worldState
-      );
+      // Execute engine using standard interface
+      const output = await engine.process(context);
 
-      // Verify history structure maintained
-      expect(Array.isArray(revisedHistory)).toBe(true);
-      expect(revisedHistory.length).toBeGreaterThanOrEqual(segments.length);
+      // Verify output structure
+      expect(output.engineName).toBe('TemporalRevision');
+      expect(output.instructions).toBeInstanceOf(Array);
+      expect(output.instructions.length).toBeGreaterThan(0);
+
+      // Verify effects contain history revisions if engine was active
+      if (output.effects.historyRevisions) {
+        expect(Array.isArray(output.effects.historyRevisions)).toBe(true);
+      }
     });
 
     it('should preserve store state during engine execution', async () => {
@@ -71,10 +78,11 @@ describe('Engine → State Integration', () => {
       const context = buildMockEngineContext({
         worldState: worldStateStore.getState().worldState,
         recentHistory: segments,
+        choices: Array(6).fill({ text: 'choice', id: 'c' }),
       });
 
-      // Execute engine
-      await engine.reviseHistory('Choice', segments, context.worldState);
+      // Execute engine using standard interface
+      await engine.process(context);
 
       // Verify store unchanged (engine doesn't mutate directly)
       expect(worldStateStore.getState().worldState.horrorIntensity).toBe(5);

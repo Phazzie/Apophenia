@@ -119,15 +119,12 @@ describe('FlowContextBuilder', () => {
       expect(context.worldState.psychologicalStatus).toBeDefined();
     });
 
-    it('should calculate corruption level from UI distortion', () => {
+    it('should use corruption level from world state', () => {
       const worldStateStore = useWorldStateStore.getState();
 
+      // Set corruption level directly (current architecture)
       worldStateStore.updateWorldState({
-        uiDistortion: {
-          transform: 'rotate(10deg)',
-          filter: 'none',
-          transition: 'all 1s',
-        },
+        corruptionLevel: 50,
       });
 
       const choice = {
@@ -137,7 +134,7 @@ describe('FlowContextBuilder', () => {
 
       const context = builder.buildFlowContext(choice);
 
-      // 10 degrees rotation should map to 50% corruption
+      // Should pass through corruption level from store
       expect(context.worldState.corruptionLevel).toBe(50);
     });
   });

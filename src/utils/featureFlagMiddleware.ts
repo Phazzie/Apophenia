@@ -14,7 +14,7 @@ export type FeatureFlagKey = keyof typeof REVOLUTIONARY_FEATURES;
 /**
  * Configuration options for feature-gated operations
  */
-export interface FeatureGateOptions<T = any> {
+export interface FeatureGateOptions<T = unknown> {
   /**
    * The feature flag to check
    */
@@ -109,19 +109,20 @@ export function withFeatureGateAsync<TArgs extends any[], TReturn>(
  *   }
  * }
  */
-export function FeatureGated<T = any>(options: FeatureGateOptions<T>) {
+export function FeatureGated<T = unknown>(options: FeatureGateOptions<T>) {
   return function (
-    target: any,
+    target: unknown,
     propertyKey: string,
     descriptor: PropertyDescriptor
   ) {
     const originalMethod = descriptor.value;
 
-    descriptor.value = function (...args: any[]) {
+    descriptor.value = function (...args: unknown[]) {
       if (!REVOLUTIONARY_FEATURES[options.feature].enabled) {
         if (!options.silent) {
+          const targetName = (target as { constructor: { name: string } }).constructor.name;
           const message = options.disabledMessage ||
-            `Feature "${options.feature}" is disabled in ${target.constructor.name}.${propertyKey}. Returning fallback value.`;
+            `Feature "${options.feature}" is disabled in ${targetName}.${propertyKey}. Returning fallback value.`;
           console.log(`🚫 ${message}`);
         }
         return options.fallback;
@@ -145,19 +146,20 @@ export function FeatureGated<T = any>(options: FeatureGateOptions<T>) {
  *   }
  * }
  */
-export function AsyncFeatureGated<T = any>(options: FeatureGateOptions<T>) {
+export function AsyncFeatureGated<T = unknown>(options: FeatureGateOptions<T>) {
   return function (
-    target: any,
+    target: unknown,
     propertyKey: string,
     descriptor: PropertyDescriptor
   ) {
     const originalMethod = descriptor.value;
 
-    descriptor.value = async function (...args: any[]) {
+    descriptor.value = async function (...args: unknown[]) {
       if (!REVOLUTIONARY_FEATURES[options.feature].enabled) {
         if (!options.silent) {
+          const targetName = (target as { constructor: { name: string } }).constructor.name;
           const message = options.disabledMessage ||
-            `Feature "${options.feature}" is disabled in ${target.constructor.name}.${propertyKey}. Returning fallback value.`;
+            `Feature "${options.feature}" is disabled in ${targetName}.${propertyKey}. Returning fallback value.`;
           console.log(`🚫 ${message}`);
         }
         return options.fallback;

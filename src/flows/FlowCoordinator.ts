@@ -20,6 +20,7 @@ import {
   EngineOutput,
   ExecutionResult,
   Command,
+  Engine,
 } from '../core/types/seams';
 import { useGameStateStore } from '../stores/gameStateStore';
 import { descentFlow } from './DescentFlow';
@@ -103,9 +104,9 @@ export class FlowCoordinatorImpl implements IFlowCoordinator {
    * Execute all active engines for a given context
    */
   async executeEngines(context: FlowContext): Promise<EngineOutput[]> {
-    // Type engines as any[] to avoid TypeScript errors with legacy engine implementations
-    // Runtime checks ensure safe access to engine methods
-    const engines: any[] = [
+    // All engines implement the Engine interface from core/engines
+    // They are sorted by priority (highest first) for deterministic execution
+    const engines: Engine[] = [
       temporalRevision,
       metaConsciousness,
       quantumNarrative,

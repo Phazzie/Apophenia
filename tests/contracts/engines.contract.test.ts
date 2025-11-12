@@ -27,15 +27,15 @@ import type {
 } from '../../src/core/types/seams';
 
 // Import engine implementations
-import { TemporalRevisionEngine } from '../../src/services/ai/engines/TemporalRevisionEngine';
-import { QuantumNarrativeEngine } from '../../src/services/ai/engines/QuantumNarrativeEngine';
-import { RealityCorruptionEngine } from '../../src/services/ai/engines/RealityCorruptionEngine';
-import { AdaptiveHorrorEngine } from '../../src/services/ai/engines/AdaptiveHorrorEngine';
-import { MetaConsciousnessEngine } from '../../src/services/ai/engines/MetaConsciousnessEngine';
-import { NeuralEchoChambers } from '../../src/services/ai/engines/NeuralEchoChambers';
-import { SemanticChoiceArchaeology } from '../../src/services/ai/engines/SemanticChoiceArchaeology';
-import { AdaptiveNarrativeDNA } from '../../src/services/ai/engines/AdaptiveNarrativeDNA';
-import { BreakingFifthWall } from '../../src/services/ai/engines/BreakingFifthWall';
+import { TemporalRevisionEngine } from '../../src/core/engines/TemporalRevisionEngine';
+import { QuantumNarrativeEngine } from '../../src/core/engines/QuantumNarrativeEngine';
+import { RealityCorruptionEngine } from '../../src/core/engines/RealityCorruptionEngine';
+import { AdaptiveHorrorEngine } from '../../src/core/engines/AdaptiveHorrorEngine';
+import { MetaConsciousnessEngine } from '../../src/core/engines/MetaConsciousnessEngine';
+import { NeuralEchoChamberEngine } from '../../src/core/engines/NeuralEchoChamberEngine';
+import { SemanticChoiceArchaeologyEngine } from '../../src/core/engines/SemanticChoiceArchaeologyEngine';
+import { AdaptiveNarrativeDNAEngine } from '../../src/core/engines/AdaptiveNarrativeDNAEngine';
+import { FifthWallEngine } from '../../src/core/engines/FifthWallEngine';
 
 // Import EngineRegistry
 import { EngineRegistry } from '../../src/core/engines/EngineRegistry';
@@ -137,10 +137,10 @@ describe('Contract Tests: Engines (Seam #3)', () => {
       { name: 'RealityCorruptionEngine', instance: new RealityCorruptionEngine() },
       { name: 'AdaptiveHorrorEngine', instance: new AdaptiveHorrorEngine() },
       { name: 'MetaConsciousnessEngine', instance: new MetaConsciousnessEngine() },
-      { name: 'NeuralEchoChambers', instance: new NeuralEchoChambers() },
-      { name: 'SemanticChoiceArchaeology', instance: new SemanticChoiceArchaeology() },
-      { name: 'AdaptiveNarrativeDNA', instance: new AdaptiveNarrativeDNA() },
-      { name: 'BreakingFifthWall', instance: new BreakingFifthWall() }
+      { name: 'NeuralEchoChamberEngine', instance: new NeuralEchoChamberEngine() },
+      { name: 'SemanticChoiceArchaeologyEngine', instance: new SemanticChoiceArchaeologyEngine() },
+      { name: 'AdaptiveNarrativeDNAEngine', instance: new AdaptiveNarrativeDNAEngine() },
+      { name: 'FifthWallEngine', instance: new FifthWallEngine() }
     ];
 
     engineInstances.forEach(({ name, instance }) => {
@@ -241,10 +241,10 @@ describe('Contract Tests: Engines (Seam #3)', () => {
         new RealityCorruptionEngine(),
         new AdaptiveHorrorEngine(),
         new MetaConsciousnessEngine(),
-        new NeuralEchoChambers(),
-        new SemanticChoiceArchaeology(),
-        new AdaptiveNarrativeDNA(),
-        new BreakingFifthWall()
+        new NeuralEchoChamberEngine(),
+        new SemanticChoiceArchaeologyEngine(),
+        new AdaptiveNarrativeDNAEngine(),
+        new FifthWallEngine()
       ];
 
       for (const engine of engines) {
@@ -342,7 +342,7 @@ describe('Contract Tests: Engines (Seam #3)', () => {
     });
 
     it('NeuralEchoChamberEngine should implement extended interface', () => {
-      const engine = new NeuralEchoChambers() as any;
+      const engine = new NeuralEchoChamberEngine() as any;
 
       // Check for extended methods
       expect(typeof engine.loadCrossSessionMemory).toBe('function');
@@ -351,7 +351,7 @@ describe('Contract Tests: Engines (Seam #3)', () => {
     });
 
     it('SemanticChoiceArchaeologyEngine should implement extended interface', () => {
-      const engine = new SemanticChoiceArchaeology() as any;
+      const engine = new SemanticChoiceArchaeologyEngine() as any;
 
       // Check for extended methods
       expect(typeof engine.analyzeChoiceSequence).toBe('function');
@@ -359,7 +359,7 @@ describe('Contract Tests: Engines (Seam #3)', () => {
     });
 
     it('AdaptiveNarrativeDNAEngine should implement extended interface', () => {
-      const engine = new AdaptiveNarrativeDNA() as any;
+      const engine = new AdaptiveNarrativeDNAEngine() as any;
 
       // Check for extended properties/methods
       expect(engine).toHaveProperty('genome');
@@ -368,7 +368,7 @@ describe('Contract Tests: Engines (Seam #3)', () => {
     });
 
     it('FifthWallEngine should implement extended interface', () => {
-      const engine = new BreakingFifthWall() as any;
+      const engine = new FifthWallEngine() as any;
 
       // Check for extended methods
       expect(typeof engine.canManipulateBrowser).toBe('function');
@@ -611,10 +611,10 @@ describe('Contract Tests: Engines (Seam #3)', () => {
       new RealityCorruptionEngine(),
       new AdaptiveHorrorEngine(),
       new MetaConsciousnessEngine(),
-      new NeuralEchoChambers(),
-      new SemanticChoiceArchaeology(),
-      new AdaptiveNarrativeDNA(),
-      new BreakingFifthWall()
+      new NeuralEchoChamberEngine(),
+      new SemanticChoiceArchaeologyEngine(),
+      new AdaptiveNarrativeDNAEngine(),
+      new FifthWallEngine()
     ];
 
     engines.forEach(engine => {

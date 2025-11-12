@@ -76,6 +76,7 @@ export type Command =
   | { type: 'displayText'; payload: { content: string; segmentId: string } }
   | { type: 'displayChoices'; payload: { choices: Choice[]; intrusiveThought?: Choice } }
   | { type: 'generateImage'; payload: { prompt: string; segmentId: string; priority?: 'high' | 'low' } }
+  | { type: 'pregenerateImage'; payload: { prompt: string } }
   | { type: 'generateAmbiance'; payload: { description: string } }
   | { type: 'updateWorldState'; payload: Partial<WorldState> }
   | { type: 'wait'; payload: { duration: number } }

@@ -19,52 +19,61 @@ vi.mock('../../../src/services/commandExecutor', () => ({
   executeCommandQueue: vi.fn().mockResolvedValue([]),
 }));
 
-// Mock the engines
-vi.mock('../../../src/services/ai/engines', () => ({
-  temporalRevision: {
-    name: 'TemporalRevision',
-    isActive: () => false,
-    generateInstructions: () => [],
+// Mock the engine classes
+vi.mock('../../../src/core/engines', () => ({
+  TemporalRevisionEngine: class {
+    name = 'TemporalRevision';
+    isActive() { return false; }
+    generateInstructions() { return []; }
+    process() { return Promise.resolve({ engineName: 'TemporalRevision', instructions: [], effects: {}, metadata: {} }); }
   },
-  metaConsciousness: {
-    name: 'MetaConsciousness',
-    isActive: () => false,
-    generateInstructions: () => [],
+  MetaConsciousnessEngine: class {
+    name = 'MetaConsciousness';
+    isActive() { return false; }
+    generateInstructions() { return []; }
+    process() { return Promise.resolve({ engineName: 'MetaConsciousness', instructions: [], effects: {}, metadata: {} }); }
   },
-  quantumNarrative: {
-    name: 'QuantumNarrative',
-    isActive: () => false,
-    generateInstructions: () => [],
+  QuantumNarrativeEngine: class {
+    name = 'QuantumNarrative';
+    isActive() { return false; }
+    generateInstructions() { return []; }
+    process() { return Promise.resolve({ engineName: 'QuantumNarrative', instructions: [], effects: {}, metadata: {} }); }
   },
-  adaptiveHorror: {
-    name: 'AdaptiveHorror',
-    isActive: () => true,
-    generateInstructions: () => ['Test instruction'],
+  AdaptiveHorrorEngine: class {
+    name = 'AdaptiveHorror';
+    isActive() { return true; }
+    generateInstructions() { return ['Test instruction']; }
+    process() { return Promise.resolve({ engineName: 'AdaptiveHorror', instructions: ['Test instruction'], effects: {}, metadata: {} }); }
   },
-  realityCorruption: {
-    name: 'RealityCorruption',
-    isActive: () => true,
-    generateInstructions: () => ['Test instruction'],
+  RealityCorruptionEngine: class {
+    name = 'RealityCorruption';
+    isActive() { return true; }
+    generateInstructions() { return ['Test instruction']; }
+    process() { return Promise.resolve({ engineName: 'RealityCorruption', instructions: ['Test instruction'], effects: {}, metadata: {} }); }
   },
-  neuralEchoChambers: {
-    name: 'NeuralEcho',
-    isActive: () => false,
-    generateInstructions: () => [],
+  NeuralEchoChamberEngine: class {
+    name = 'NeuralEcho';
+    isActive() { return false; }
+    generateInstructions() { return []; }
+    process() { return Promise.resolve({ engineName: 'NeuralEcho', instructions: [], effects: {}, metadata: {} }); }
   },
-  semanticArchaeology: {
-    name: 'SemanticArchaeology',
-    isActive: () => false,
-    generateInstructions: () => [],
+  SemanticChoiceArchaeologyEngine: class {
+    name = 'SemanticArchaeology';
+    isActive() { return false; }
+    generateInstructions() { return []; }
+    process() { return Promise.resolve({ engineName: 'SemanticArchaeology', instructions: [], effects: {}, metadata: {} }); }
   },
-  narrativeDNA: {
-    name: 'NarrativeDNA',
-    isActive: () => false,
-    generateInstructions: () => [],
+  AdaptiveNarrativeDNAEngine: class {
+    name = 'NarrativeDNA';
+    isActive() { return false; }
+    generateInstructions() { return []; }
+    process() { return Promise.resolve({ engineName: 'NarrativeDNA', instructions: [], effects: {}, metadata: {} }); }
   },
-  fifthWallBreaker: {
-    name: 'FifthWall',
-    isActive: () => false,
-    generateInstructions: () => [],
+  FifthWallEngine: class {
+    name = 'FifthWall';
+    isActive() { return false; }
+    generateInstructions() { return []; }
+    process() { return Promise.resolve({ engineName: 'FifthWall', instructions: [], effects: {}, metadata: {} }); }
   },
 }));
 

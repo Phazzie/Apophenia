@@ -3,7 +3,7 @@ import React from 'react';
 import { generateMultipleImages } from '../services/gameService';
 import { generateNextStepWithSelectedModel } from '../services/ai/unifiedAIService';
 import { useAIModelStore } from '../stores/aiModelStore';
-import { WorldState, StorySegment, GenreConfig } from '../types';
+import { WorldState, StorySegment, GenreConfig, PsychologicalStatus } from '../types';
 import { DEFAULT_GENRE } from '../config/genres';
 
 // Create mock data for testing
@@ -14,7 +14,7 @@ const mockWorldState: WorldState = {
   setting: 'A sterile, white room',
   dilemma: 'The walls are starting to melt.',
   summary: 'A test of the AI system.',
-  psychologicalStatus: 'stable',
+  psychologicalStatus: PsychologicalStatus.STABLE,
   systemHealth: 100,
   horrorIntensity: 1,
   corruptionLevel: 0,

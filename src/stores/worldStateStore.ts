@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { cosmicHorrorGenre } from '../config/gameConfig';
-import { GenreConfig, WorldState } from '../types';
+import { GenreConfig, WorldState, PsychologicalStatus } from '../types';
 
 interface WorldStateStore {
   worldState: WorldState;
@@ -16,7 +16,7 @@ const initialState: WorldState = {
   setting: '',
   dilemma: '',
   summary: '',
-  psychologicalStatus: 'stable',
+  psychologicalStatus: PsychologicalStatus.STABLE,
   systemHealth: 100,
   horrorIntensity: 0,
   corruptionLevel: 0,

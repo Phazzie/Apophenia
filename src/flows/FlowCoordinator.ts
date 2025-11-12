@@ -27,16 +27,27 @@ import { unravelingFlow } from './UnravelingFlow';
 import { flowContextBuilder } from './FlowContextBuilder';
 import { executeCommandQueue } from '../services/commandExecutor';
 import {
-  temporalRevision,
-  metaConsciousness,
-  quantumNarrative,
-  adaptiveHorror,
-  realityCorruption,
-  neuralEchoChambers,
-  semanticArchaeology,
-  narrativeDNA,
-  fifthWallBreaker,
-} from '../services/ai/engines';
+  TemporalRevisionEngine,
+  MetaConsciousnessEngine,
+  QuantumNarrativeEngine,
+  AdaptiveHorrorEngine,
+  RealityCorruptionEngine,
+  NeuralEchoChamberEngine,
+  SemanticChoiceArchaeologyEngine,
+  AdaptiveNarrativeDNAEngine,
+  FifthWallEngine,
+} from '../core/engines';
+
+// Instantiate engine singletons
+const temporalRevision = new TemporalRevisionEngine();
+const metaConsciousness = new MetaConsciousnessEngine();
+const quantumNarrative = new QuantumNarrativeEngine();
+const adaptiveHorror = new AdaptiveHorrorEngine();
+const realityCorruption = new RealityCorruptionEngine();
+const neuralEchoChambers = new NeuralEchoChamberEngine();
+const semanticArchaeology = new SemanticChoiceArchaeologyEngine();
+const narrativeDNA = new AdaptiveNarrativeDNAEngine();
+const fifthWallBreaker = new FifthWallEngine();
 
 /**
  * FlowCoordinator Implementation

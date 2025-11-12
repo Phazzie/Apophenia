@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { TemporalRevisionEngine } from '../../../src/services/ai/engines/TemporalRevisionEngine';
+import { TemporalRevisionEngine } from '../../../src/core/engines/TemporalRevisionEngine';
 import { buildMockEngineContext, ContextBuilder } from '../../mocks/mockContexts';
 import { mockStorySegment } from '../../mocks/mockStores';
 import { assertEngineInterface, assertValidEngineOutput } from '../../utils/testHelpers';

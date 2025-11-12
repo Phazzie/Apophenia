@@ -1,5 +1,5 @@
 import { commandExecutors, ExecutionContext } from '../core/commands';
-import { GameCommand } from '../types';
+import { Command } from '../core/types/seams';
 
 const NON_BLOCKING_COMMANDS = [
   'generateImage',
@@ -7,7 +7,7 @@ const NON_BLOCKING_COMMANDS = [
   'generateAmbiance',
 ];
 
-export const executeCommandQueue = async (commands: GameCommand[]) => {
+export const executeCommandQueue = async (commands: Command[]) => {
   console.log('Executing command queue with', commands.length, 'commands');
 
   for (const command of commands) {

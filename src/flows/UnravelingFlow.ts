@@ -16,6 +16,7 @@ import {
   Command,
   BrowserEffect,
   EngineOutput,
+  PsychologicalStatus,
 } from '../core/types/seams';
 import { useWorldStateStore } from '../stores/worldStateStore';
 import { useStoryHistoryStore } from '../stores/storyHistoryStore';
@@ -24,16 +25,27 @@ import { flowContextBuilder } from './FlowContextBuilder';
 import { generateWithSelectedModel } from '../services/ai/unifiedAIService';
 import { executeCommandQueue } from '../services/commandExecutor';
 import {
-  temporalRevision,
-  metaConsciousness,
-  quantumNarrative,
-  adaptiveHorror,
-  realityCorruption,
-  neuralEchoChambers,
-  semanticArchaeology,
-  narrativeDNA,
-  fifthWallBreaker,
-} from '../services/ai/engines';
+  TemporalRevisionEngine,
+  MetaConsciousnessEngine,
+  QuantumNarrativeEngine,
+  AdaptiveHorrorEngine,
+  RealityCorruptionEngine,
+  NeuralEchoChamberEngine,
+  SemanticChoiceArchaeologyEngine,
+  AdaptiveNarrativeDNAEngine,
+  FifthWallEngine,
+} from '../core/engines';
+
+// Instantiate engine singletons
+const temporalRevision = new TemporalRevisionEngine();
+const metaConsciousness = new MetaConsciousnessEngine();
+const quantumNarrative = new QuantumNarrativeEngine();
+const adaptiveHorror = new AdaptiveHorrorEngine();
+const realityCorruption = new RealityCorruptionEngine();
+const neuralEchoChambers = new NeuralEchoChamberEngine();
+const semanticArchaeology = new SemanticChoiceArchaeologyEngine();
+const narrativeDNA = new AdaptiveNarrativeDNAEngine();
+const fifthWallBreaker = new FifthWallEngine();
 
 /**
  * UnravelingFlow Implementation
@@ -53,7 +65,7 @@ export class UnravelingFlowImpl implements IUnravelingFlow {
     // Dramatically increase horror and corruption
     worldStateStore.updateWorldState({
       horrorIntensity: Math.min(10, (worldStateStore.worldState.horrorIntensity || 0) + 2),
-      psychologicalStatus: 'fragmented',
+      psychologicalStatus: PsychologicalStatus.FRAGMENTED,
       systemHealth: Math.max(0, worldStateStore.worldState.systemHealth - 30),
     });
 

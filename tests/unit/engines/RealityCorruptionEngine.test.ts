@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { RealityCorruptionEngine } from '../../../src/services/ai/engines/RealityCorruptionEngine';
+import { RealityCorruptionEngine } from '../../../src/core/engines/RealityCorruptionEngine';
 import { buildMockEngineContext, ContextBuilder } from '../../mocks/mockContexts';
 
 describe('RealityCorruptionEngine', () => {

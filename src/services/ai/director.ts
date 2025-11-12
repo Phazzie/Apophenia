@@ -1,8 +1,11 @@
 import { WorldState, AIDirectorAnalysisPayload } from '../../types';
 import { generateWithSelectedModel } from './unifiedAIService';
-import { adaptiveHorror } from './engines';
+import { AdaptiveHorrorEngine } from '../../core/engines/AdaptiveHorrorEngine';
 import { AI_DIRECTOR_SYSTEM, buildDirectorAnalysisRequest } from './promptTemplates';
 import { buildAIContext } from '../../utils/typeConverters';
+
+// Instantiate adaptive horror engine
+const adaptiveHorror = new AdaptiveHorrorEngine();
 
 export const generateDirectorAnalysis = async (
   worldState: WorldState,

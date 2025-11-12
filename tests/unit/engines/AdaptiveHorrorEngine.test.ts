@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { AdaptiveHorrorEngine } from '../../../src/services/ai/engines/AdaptiveHorrorEngine';
+import { AdaptiveHorrorEngine } from '../../../src/core/engines/AdaptiveHorrorEngine';
 import { buildMockEngineContext } from '../../mocks/mockContexts';
 import { mockPlayerProfile } from '../../mocks/mockStores';
 

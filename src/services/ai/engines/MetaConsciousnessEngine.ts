@@ -3,6 +3,7 @@ import { REVOLUTIONARY_FEATURES } from '../../config';
 import { generateWithSelectedModel } from '../unifiedAIService';
 import { isFeatureEnabled } from '../../../utils/featureFlagMiddleware';
 import { buildMetaConsciousnessRequest } from '../promptTemplates';
+import { buildAIContext } from '../../../utils/typeConverters';
 
 /**
  * META-CONSCIOUSNESS ENGINE
@@ -51,13 +52,10 @@ export class MetaConsciousnessEngine {
     try {
       const response = await generateWithSelectedModel({
         prompt: systemInstruction + '\n\n' + prompt,
-        context: {
-          worldState: worldState as any,
-          recentHistory: storyHistory as any,
-          playerProfile: {} as any,
-          genrePrompts: [],
-          engineInstructions: [],
-        },
+        context: buildAIContext({
+          worldState,
+          storyHistory,
+        }),
       });
       if (response.commands[0]?.type === 'displayText') {
         return response.commands[0].payload.content;

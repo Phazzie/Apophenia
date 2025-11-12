@@ -3,6 +3,7 @@ import { REVOLUTIONARY_FEATURES } from '../../config';
 import { generateWithSelectedModel } from '../unifiedAIService';
 import { isFeatureEnabled, getFeatureConfig } from '../../../utils/featureFlagMiddleware';
 import { buildCorruptionEffectsRequest } from '../promptTemplates';
+import { buildAIContext } from '../../../utils/typeConverters';
 
 type CorruptionUiEffects = {
   filter: string;
@@ -62,13 +63,10 @@ export class RealityCorruptionEngine {
     try {
       const response = await generateWithSelectedModel({
         prompt: systemInstruction + '\n\n' + prompt,
-        context: {
-          worldState: worldState as any,
-          recentHistory: storyHistory as any,
-          playerProfile: {} as any,
-          genrePrompts: [],
-          engineInstructions: [],
-        },
+        context: buildAIContext({
+          worldState,
+          storyHistory,
+        }),
       });
       if (response.commands[0]?.type === 'displayText') {
         return response.commands[0].payload.content.split(',').map((t: string) => t.trim());

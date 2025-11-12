@@ -3,6 +3,7 @@ import { REVOLUTIONARY_FEATURES } from '../../config';
 import { generateWithSelectedModel } from '../unifiedAIService';
 import { isFeatureEnabled, getFeatureConfig } from '../../../utils/featureFlagMiddleware';
 import { buildChoiceSignificanceRequest } from '../promptTemplates';
+import { buildAIContext } from '../../../utils/typeConverters';
 
 /**
  * QUANTUM NARRATIVE ENGINE
@@ -46,6 +47,7 @@ export class QuantumNarrativeEngine {
           id: `quantum-shift-${Date.now()}`,
           text: '// QUANTUM NARRATIVE COLLAPSE // Reality shifts... you remember events differently now.',
           images: {},
+          timestamp: Date.now(),
           isQuantumShift: true,
         };
 
@@ -72,13 +74,10 @@ export class QuantumNarrativeEngine {
     try {
       const response = await generateWithSelectedModel({
         prompt: systemInstruction + '\n\n' + prompt,
-        context: {
-          worldState: worldState as any,
-          recentHistory: storyHistory as any,
-          playerProfile: {} as any,
-          genrePrompts: [],
-          engineInstructions: [],
-        },
+        context: buildAIContext({
+          worldState,
+          storyHistory,
+        }),
       });
       if (response.commands[0]?.type === 'displayText') {
         return response.commands[0].payload.content.toLowerCase().includes('yes');

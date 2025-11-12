@@ -55,7 +55,7 @@ export interface StorySegment {
   images?: {
     main?: string;
     inset?: string[];
-    mainStatus?: 'loading' | 'loaded' | 'failed';
+    mainStatus?: 'loading' | 'loaded' | 'failed' | 'retrying';
   };
   timestamp: number;
 
@@ -76,6 +76,7 @@ export type Command =
   | { type: 'displayText'; payload: { content: string; segmentId: string } }
   | { type: 'displayChoices'; payload: { choices: Choice[]; intrusiveThought?: Choice } }
   | { type: 'generateImage'; payload: { prompt: string; segmentId: string; priority?: 'high' | 'low' } }
+  | { type: 'generateAmbiance'; payload: { description: string } }
   | { type: 'updateWorldState'; payload: Partial<WorldState> }
   | { type: 'wait'; payload: { duration: number } }
   | { type: 'applyCorruption'; payload: { level: number; effects: string[] } }

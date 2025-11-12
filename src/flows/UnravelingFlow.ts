@@ -18,8 +18,8 @@ import {
   EngineOutput,
 } from '../core/types/seams';
 import { useWorldStateStore } from '../stores/worldStateStore';
-import { useGameStateStore } from '../stores/gameStateStore';
 import { useStoryHistoryStore } from '../stores/storyHistoryStore';
+import { useGameStateStore } from '../stores/gameStateStore';
 import { flowContextBuilder } from './FlowContextBuilder';
 import { generateWithSelectedModel } from '../services/ai/unifiedAIService';
 import { executeCommandQueue } from '../services/commandExecutor';
@@ -53,7 +53,7 @@ export class UnravelingFlowImpl implements IUnravelingFlow {
     // Dramatically increase horror and corruption
     worldStateStore.updateWorldState({
       horrorIntensity: Math.min(10, (worldStateStore.worldState.horrorIntensity || 0) + 2),
-      psychologicalStatus: 'Fragmented',
+      psychologicalStatus: 'fragmented',
       systemHealth: Math.max(0, worldStateStore.worldState.systemHealth - 30),
     });
 
@@ -305,17 +305,34 @@ export class UnravelingFlowImpl implements IUnravelingFlow {
     prompt: string;
   }): Promise<Command[]> {
     const worldState = useWorldStateStore.getState().worldState;
-    const storyHistory = [];
+    const storyHistory = useStoryHistoryStore.getState().storyHistory;
 
-    const commands = await generateWithSelectedModel(
-      request.systemInstruction,
-      request.prompt,
-      worldState,
-      storyHistory,
-      'story'
-    );
+    // Call unified AI service with proper AIRequest format
+    const response = await generateWithSelectedModel({
+      prompt: request.prompt,
+      context: {
+        worldState,
+        recentHistory: storyHistory.slice(-10), // Last 10 segments
+        genre: worldState.genreConfig,
+        playerProfile: {
+          fearProfile: {},
+          choicePatterns: {
+            riskTaking: 0.5,
+            curiosity: 0.5,
+            aggression: 0.3,
+            avoidance: 0.4,
+          },
+          engagementMetrics: {
+            totalChoices: 0,
+            averageResponseTime: 0,
+            sessionDuration: 0,
+          },
+        },
+      },
+    });
 
-    return commands as unknown as Command[];
+    // Extract commands from response
+    return response.commands || [];
   }
 
   /**
@@ -418,16 +435,10 @@ export class UnravelingFlowImpl implements IUnravelingFlow {
    */
   private updateUIDistortion(corruptionLevel: number): void {
     const worldStateStore = useWorldStateStore.getState();
-    const normalized = corruptionLevel / 100;
 
     // More extreme distortion during unraveling
-    worldStateStore.updateWorldState({
-      uiDistortion: {
-        filter: `hue-rotate(${normalized * 360}deg) brightness(${1 - normalized * 0.5}) contrast(${1 + normalized})`,
-        transform: `scale(${1 + normalized * 0.05}) rotate(${normalized * 45}deg) skew(${normalized * 5}deg)`,
-        transition: 'all 0.5s ease-in-out',
-      },
-    });
+    // UI distortion now handled by corruptionLevel
+    worldStateStore.updateWorldState({});
   }
 }
 

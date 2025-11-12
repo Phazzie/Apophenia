@@ -6,3 +6,4 @@
 
 export * from './defaults';
 export * from './genres';
+export * from './ConfigProvider';

@@ -29,9 +29,9 @@ const getFallbackCommands = (): Command[] => [
     type: 'displayChoices' as const,
     payload: {
       choices: [
-        { text: "Continue investigating the anomalies", isIntrusive: false },
-        { text: "Attempt to retreat to safety", isIntrusive: false },
-        { text: "Embrace the unknown forces", isIntrusive: true }
+        { id: 'choice-1', text: "Continue investigating the anomalies", isIntrusive: false },
+        { id: 'choice-2', text: "Attempt to retreat to safety", isIntrusive: false },
+        { id: 'choice-3', text: "Embrace the unknown forces", isIntrusive: true }
       ]
     }
   }

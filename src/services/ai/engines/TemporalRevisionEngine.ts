@@ -7,6 +7,7 @@ import {
   buildTemporalRevisionRequest,
   getRandomTemporalRevisionPrompt,
 } from '../promptTemplates';
+import { buildAIContext } from '../../../utils/typeConverters';
 
 /**
  * Get a randomized corruption message for error handling
@@ -240,13 +241,10 @@ export class TemporalRevisionEngine {
     try {
       const response = await generateWithSelectedModel({
         prompt: systemInstruction + '\n\n' + prompt,
-        context: {
-          worldState: worldState as any,
-          recentHistory: storyHistory as any,
-          playerProfile: {} as any,
-          genrePrompts: [],
-          engineInstructions: [],
-        },
+        context: buildAIContext({
+          worldState,
+          storyHistory,
+        }),
       });
 
       if (response.commands[0]?.type === 'displayText') {

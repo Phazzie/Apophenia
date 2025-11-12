@@ -14,15 +14,15 @@ const mockWorldState: WorldState = {
   setting: 'A sterile, white room',
   dilemma: 'The walls are starting to melt.',
   summary: 'A test of the AI system.',
-  psychologicalStatus: 'Stable',
+  psychologicalStatus: 'stable',
   systemHealth: 100,
   horrorIntensity: 1,
-  uiDistortion: { transform: 'none', filter: 'none', transition: '0.5s' },
+  corruptionLevel: 0,
   genreConfig: mockGenreConfig,
 };
 
 const mockStoryHistory: StorySegment[] = [
-    { id: 'seg-1', text: 'The experiment began.', images: {} }
+    { id: 'seg-1', text: 'The experiment began.', images: {}, timestamp: Date.now() }
 ];
 
 
@@ -31,9 +31,12 @@ const CompactTestAPI: React.FC = () => {
 
   const handleTestImageGeneration = async () => {
     console.log("--- Testing Image Generation ---");
-    const prompt = "A desolate, cosmic landscape with swirling nebulae.";
+    const prompts = [
+      "A desolate, cosmic landscape with swirling nebulae.",
+      "A dark, mysterious void with distant stars."
+    ];
     try {
-      const result = await generateMultipleImages(prompt, 2);
+      const result = await generateMultipleImages(prompts);
       console.log("Image generation service call successful:", result);
     } catch (error) {
       console.error("Image generation service call failed:", error);
@@ -45,16 +48,16 @@ const CompactTestAPI: React.FC = () => {
     console.log('--- Generating story with selected AI model ---');
     const prompt = "Write a 100-word short story about someone's descent into insanity, in a cosmic horror style.";
     try {
-      const commands = await generateNextStepWithSelectedModel(
-        prompt, // This acts as the "playerChoice"
-        mockWorldState,
-        mockStoryHistory,
-        mockGenreConfig
-      );
+      const response = await generateNextStepWithSelectedModel({
+        prompt,
+        worldState: mockWorldState,
+        storyHistory: mockStoryHistory,
+        genreConfig: mockGenreConfig,
+        playerChoice: 'Begin the story'
+      });
 
-      // Extract the text from the returned commands
-      const textCommand = commands.find(c => c.type === 'displayText');
-      const result = textCommand && 'content' in textCommand.payload ? textCommand.payload.content : "No text returned.";
+      // Extract the text from the response
+      const result = response.content || "No text returned.";
 
       console.log('Story generated:', result);
     } catch (error) {

@@ -16,14 +16,10 @@ const initialState: WorldState = {
   setting: '',
   dilemma: '',
   summary: '',
-  psychologicalStatus: 'Stable' as const,
+  psychologicalStatus: 'stable',
   systemHealth: 100,
   horrorIntensity: 0,
-  uiDistortion: {
-    transform: 'none',
-    filter: 'none',
-    transition: 'all 1s ease-in-out',
-  },
+  corruptionLevel: 0,
   genreConfig: cosmicHorrorGenre, // Default genre
 };
 

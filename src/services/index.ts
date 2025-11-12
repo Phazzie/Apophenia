@@ -11,8 +11,7 @@ export * from './ai/mockService';
 export * from './ai/responseParser';
 
 // Image Services
-export * from './images/imagePipeline';
-export * from './images/imageCache';
+export * from './images';
 
 // Cache Services
 // export * from './cache';

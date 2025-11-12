@@ -121,7 +121,7 @@ export class NeuralEchoChambers {
       memory.choice.toLowerCase().includes('trust') ? 'trust-seeker' : null,
       memory.choice.toLowerCase().includes('alone') ? 'isolation-tendency' : null,
       memory.choice.toLowerCase().includes('fight') ? 'aggressive-responder' : null,
-      memory.psychologicalStatus === 'Paranoid' ? 'paranoia-spiral' : null,
+      memory.psychologicalStatus === 'paranoid' ? 'paranoia-spiral' : null,
     ].filter(Boolean);
 
     patterns.forEach(pattern => {

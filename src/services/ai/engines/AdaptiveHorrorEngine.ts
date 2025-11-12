@@ -4,6 +4,7 @@ import { generateWithSelectedModel } from '../unifiedAIService';
 import { StorageManager } from '../../../utils/storageUtils';
 import { isFeatureEnabled } from '../../../utils/featureFlagMiddleware';
 import { buildFearAnalysisRequest, buildPersonalizedHorrorRequest } from '../promptTemplates';
+import { buildAIContext } from '../../../utils/typeConverters';
 
 /**
  * ADAPTIVE HORROR ENGINE
@@ -92,13 +93,10 @@ export class AdaptiveHorrorEngine {
     try {
       const response = await generateWithSelectedModel({
         prompt: systemInstruction + '\n\n' + prompt,
-        context: {
-          worldState: worldState as any,
-          recentHistory: storyHistory as any,
-          playerProfile: {} as any,
-          genrePrompts: [],
-          engineInstructions: [],
-        },
+        context: buildAIContext({
+          worldState,
+          storyHistory,
+        }),
       });
 
       if (response.commands[0]?.type === 'displayText') {
@@ -149,13 +147,10 @@ export class AdaptiveHorrorEngine {
     try {
       const response = await generateWithSelectedModel({
         prompt: systemInstruction + '\n\n' + prompt,
-        context: {
-          worldState: worldState as any,
-          recentHistory: storyHistory as any,
-          playerProfile: {} as any,
-          genrePrompts: [],
-          engineInstructions: [],
-        },
+        context: buildAIContext({
+          worldState,
+          storyHistory,
+        }),
       });
 
       if (response.commands[0]?.type === 'displayText') {

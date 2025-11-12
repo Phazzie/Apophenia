@@ -10,7 +10,7 @@ import { useWorldStateStore } from '../stores/worldStateStore';
 import { useStoryHistoryStore } from '../stores/storyHistoryStore';
 import { useUserStore } from '../stores/userStore';
 import { Choice, StorySegment, WorldState } from '../types';
-import { FlowContext, EngineContext, PlayerProfile } from '../core/types/seams';
+import { FlowContext, EngineContext, PlayerProfile, PsychologicalStatus } from '../core/types/seams';
 
 /**
  * Builds a FlowContext from current store state
@@ -71,8 +71,9 @@ export class FlowContextBuilder {
     const choiceCount = storyHistory.filter(seg => seg.text.includes('>')).length;
 
     // Get first segment timestamp (with fallback for legacy segments without timestamp)
-    const firstSegmentTime = storyHistory[0]
-      ? (storyHistory[0] as any).timestamp || Date.now()
+    const firstSegment = storyHistory[0];
+    const firstSegmentTime = firstSegment && 'timestamp' in firstSegment && typeof firstSegment.timestamp === 'number'
+      ? firstSegment.timestamp
       : Date.now();
 
     return {
@@ -135,45 +136,32 @@ export class FlowContextBuilder {
    */
   private mapPsychologicalStatus(
     status: 'stable' | 'uneasy' | 'paranoid' | 'fragmented' | 'shattered'
-  ): import('../core/types/seams').PsychologicalStatus {
-    // Import at top of file, but use type assertion here for mapping
-    // to avoid circular dependencies
-    const PsychologicalStatus = {
-      STABLE: 'stable' as const,
-      UNEASY: 'uneasy' as const,
-      PARANOID: 'paranoid' as const,
-      FRAGMENTED: 'fragmented' as const,
-      SHATTERED: 'shattered' as const,
-    };
-
+  ): PsychologicalStatus {
+    // The status strings already match the enum values exactly
+    // Return directly without unnecessary type assertion
     switch (status) {
       case 'stable':
-        return PsychologicalStatus.STABLE as any;
+        return PsychologicalStatus.STABLE;
       case 'uneasy':
-        return PsychologicalStatus.UNEASY as any;
+        return PsychologicalStatus.UNEASY;
       case 'paranoid':
-        return PsychologicalStatus.PARANOID as any;
+        return PsychologicalStatus.PARANOID;
       case 'fragmented':
-        return PsychologicalStatus.FRAGMENTED as any;
+        return PsychologicalStatus.FRAGMENTED;
       case 'shattered':
-        return PsychologicalStatus.SHATTERED as any;
+        return PsychologicalStatus.SHATTERED;
       default:
-        return PsychologicalStatus.STABLE as any;
+        return PsychologicalStatus.STABLE;
     }
   }
 
   /**
-   * Calculate corruption level from UI distortion
-   * Converts visual distortion to 0-100 corruption level
+   * Get corruption level from world state
+   * Returns corruptionLevel directly or defaults to 0
    */
   private calculateCorruptionLevel(worldState: WorldState): number {
-    // Extract rotation from transform string
-    const transform = worldState.uiDistortion?.transform || '';
-    const rotationMatch = transform.match(/rotate\(([0-9.]+)deg\)/);
-    const rotation = rotationMatch ? parseFloat(rotationMatch[1]) : 0;
-
-    // Map rotation (0-20 degrees) to corruption (0-100)
-    return Math.min(100, (rotation / 20) * 100);
+    // Corruption level is now a first-class property
+    return worldState.corruptionLevel || 0;
   }
 }
 

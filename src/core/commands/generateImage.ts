@@ -145,3 +145,24 @@ export class GenerateImageExecutor extends BaseCommandExecutor implements ImageG
     return this.imageCache.get(prompt) || null;
   }
 }
+
+/**
+ * Retry image generation for a segment
+ * Helper function for manual retry from UI
+ */
+export function retryImageGeneration(segmentId: string, prompt: string): void {
+  const executor = new GenerateImageExecutor();
+  const command: Command = {
+    type: 'generateImage',
+    payload: {
+      segmentId,
+      prompt,
+      priority: 'high',
+    },
+  };
+
+  // Execute immediately (fire and forget)
+  executor.execute(command).catch((error) => {
+    console.error('Failed to retry image generation:', error);
+  });
+}

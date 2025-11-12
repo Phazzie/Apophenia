@@ -2,6 +2,7 @@ import { WorldState, AIDirectorAnalysisPayload } from '../../types';
 import { generateWithSelectedModel } from './unifiedAIService';
 import { adaptiveHorror } from './engines';
 import { AI_DIRECTOR_SYSTEM, buildDirectorAnalysisRequest } from './promptTemplates';
+import { buildAIContext } from '../../utils/typeConverters';
 
 export const generateDirectorAnalysis = async (
   worldState: WorldState,
@@ -19,13 +20,10 @@ export const generateDirectorAnalysis = async (
   try {
     const response = await generateWithSelectedModel({
       prompt: systemInstruction + '\n\n' + prompt,
-      context: {
-        worldState: worldState as any, // Type conversion needed
-        recentHistory: [],
-        playerProfile: {} as any,
-        genrePrompts: [],
-        engineInstructions: [],
-      },
+      context: buildAIContext({
+        worldState,
+        storyHistory: [],
+      }),
     });
 
     // Assuming the AI returns a single 'displayText' command with the JSON string

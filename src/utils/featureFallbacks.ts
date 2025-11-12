@@ -136,10 +136,14 @@ export function hasFallback(
   feature: string,
   method: string
 ): boolean {
-  return (
-    feature in FEATURE_FALLBACKS &&
-    method in (FEATURE_FALLBACKS as any)[feature]
-  );
+  if (!(feature in FEATURE_FALLBACKS)) {
+    return false;
+  }
+
+  const featureKey = feature as keyof typeof FEATURE_FALLBACKS;
+  const featureFallbacks = FEATURE_FALLBACKS[featureKey];
+
+  return method in featureFallbacks;
 }
 
 /**
@@ -149,8 +153,8 @@ export function hasFallback(
 export const DEFAULT_FALLBACKS = {
   void: undefined,
   null: null,
-  emptyArray: [] as any[],
-  emptyObject: {} as Record<string, any>,
+  emptyArray: [] as unknown[],
+  emptyObject: {} as Record<string, unknown>,
   emptyString: '',
   false: false,
   zero: 0,

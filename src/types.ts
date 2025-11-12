@@ -39,11 +39,7 @@ export const worldStateSchema = z.object({
   // The horrorIntensity score (0-10) dynamically adjusts the game's difficulty and tone.
   // It is calculated based on player choices and narrative events.
   horrorIntensity: z.number().min(0).max(10).default(0),
-  uiDistortion: z.object({
-    transform: z.string(),
-    filter: z.string(),
-    transition: z.string(),
-  }),
+  corruptionLevel: z.number().min(0).max(100).default(0),
   genreConfig: genreConfigSchema,
 });
 

@@ -134,3 +134,6 @@ export class GrokService implements AIService {
 
 // Export singleton instance
 export const grokService = new GrokService();
+
+// Backward compatibility alias
+export const xaiClient = grokService;

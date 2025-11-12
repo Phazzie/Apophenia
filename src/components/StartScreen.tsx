@@ -57,6 +57,7 @@ const StartScreen: React.FC = () => {
       id: crypto.randomUUID(),
       text: settingText,
       images: {},
+      timestamp: Date.now(),
     });
 
     setGameState(GameState.PLAYING);

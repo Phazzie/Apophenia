@@ -149,7 +149,8 @@ export class FlowCoordinatorImpl implements IFlowCoordinator {
 
     try {
       // Use existing command executor
-      await executeCommandQueue(commands as any);
+      // Commands are compatible with GameCommand[] expected by executeCommandQueue
+      await executeCommandQueue(commands as unknown as import('../types').GameCommand[]);
 
       // Convert to ExecutionResults
       return commands.map((command) => ({

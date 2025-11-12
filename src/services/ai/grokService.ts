@@ -130,6 +130,59 @@ export class GrokService implements AIService {
     // Rough estimation: ~4 characters per token for English text
     return Math.ceil(text.length / 4);
   }
+
+  /**
+   * Test connection to X.AI API
+   * Used by aiModelStore for testing model availability
+   */
+  async testConnection(testType: 'text' | 'image' = 'text'): Promise<{
+    success: boolean;
+    model: string;
+    contextWindow: number;
+    testType: string;
+    error?: string;
+  }> {
+    // X.AI Grok doesn't support image generation
+    if (testType === 'image') {
+      return {
+        success: false,
+        model: GROK_MODEL,
+        contextWindow: this.maxTokens,
+        testType: 'image',
+        error: 'X.AI Grok does not support image generation',
+      };
+    }
+
+    // Test text generation capability
+    try {
+      const available = await this.isAvailable();
+
+      if (!available) {
+        return {
+          success: false,
+          model: GROK_MODEL,
+          contextWindow: this.maxTokens,
+          testType: 'text',
+          error: 'API key not configured or service unavailable',
+        };
+      }
+
+      return {
+        success: true,
+        model: GROK_MODEL,
+        contextWindow: this.maxTokens,
+        testType: 'text',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        model: GROK_MODEL,
+        contextWindow: this.maxTokens,
+        testType: 'text',
+        error: error instanceof Error ? error.message : 'Connection test failed',
+      };
+    }
+  }
 }
 
 // Export singleton instance

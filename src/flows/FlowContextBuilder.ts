@@ -112,21 +112,7 @@ export class FlowContextBuilder {
       systemHealth: worldState.systemHealth,
       horrorIntensity: worldState.horrorIntensity,
       corruptionLevel: this.calculateCorruptionLevel(worldState),
-      genreConfig: {
-        id: worldState.genreConfig.id,
-        name: worldState.genreConfig.name,
-        description: worldState.genreConfig.description,
-        systemPrompt: worldState.genreConfig.aiSystemInstruction,
-        themes: [worldState.genreConfig.theme['--background-color'], worldState.genreConfig.theme['--accent-color']],
-        fearCategories: ['cosmic', 'existential', 'psychological'],
-        visualStyle: {
-          primaryColor: worldState.genreConfig.theme['--background-color'],
-          secondaryColor: worldState.genreConfig.theme['--text-color'],
-          accentColor: worldState.genreConfig.theme['--accent-color'],
-          fontFamily: worldState.genreConfig.theme['--font-family'],
-          atmosphere: 'dark' as const,
-        },
-      },
+      genreConfig: worldState.genreConfig, // GenreConfig is now canonical, pass through directly
       summary: worldState.summary,
     };
   }

@@ -62,21 +62,7 @@ export class DescentFlowImpl implements IDescentFlow {
 
     // Initialize world state with genre
     worldStateStore.updateWorldState({
-      genreConfig: {
-        id: genre.id,
-        name: genre.name,
-        description: genre.description,
-        style: '',
-        theme: {
-          '--background-color': genre.visualStyle.primaryColor,
-          '--text-color': genre.visualStyle.secondaryColor,
-          '--accent-color': genre.visualStyle.accentColor,
-          '--font-family': genre.visualStyle.fontFamily,
-        },
-        startScreenImagePrompt: '',
-        conceptPrompt: '',
-        aiSystemInstruction: genre.systemPrompt,
-      },
+      genreConfig: genre, // Use the canonical GenreConfig directly
       horrorIntensity: 1,
       systemHealth: 100,
     });
@@ -280,7 +266,6 @@ export class DescentFlowImpl implements IDescentFlow {
       context: {
         worldState,
         recentHistory: storyHistory.slice(-10), // Last 10 segments
-        genre: worldState.genreConfig,
         playerProfile: {
           fearProfile: {},
           choicePatterns: {
@@ -295,6 +280,8 @@ export class DescentFlowImpl implements IDescentFlow {
             sessionDuration: 0,
           },
         },
+        genrePrompts: [worldState.genreConfig.systemPrompt],
+        engineInstructions: [], // Engines already processed, instructions in prompt
       },
     });
 

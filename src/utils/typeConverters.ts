@@ -29,24 +29,7 @@ export function convertWorldState(legacy: LegacyWorldState): SeamsWorldState {
     systemHealth: legacy.systemHealth,
     horrorIntensity: legacy.horrorIntensity,
     corruptionLevel: calculateCorruptionLevel(legacy),
-    genreConfig: {
-      id: legacy.genreConfig.id,
-      name: legacy.genreConfig.name,
-      description: legacy.genreConfig.description,
-      systemPrompt: legacy.genreConfig.aiSystemInstruction,
-      themes: [
-        legacy.genreConfig.theme['--background-color'],
-        legacy.genreConfig.theme['--accent-color'],
-      ],
-      fearCategories: ['cosmic', 'existential', 'psychological'],
-      visualStyle: {
-        primaryColor: legacy.genreConfig.theme['--background-color'],
-        secondaryColor: legacy.genreConfig.theme['--text-color'],
-        accentColor: legacy.genreConfig.theme['--accent-color'],
-        fontFamily: legacy.genreConfig.theme['--font-family'],
-        atmosphere: 'dark' as const,
-      },
-    },
+    genreConfig: legacy.genreConfig, // GenreConfig is now canonical in both type systems
     summary: legacy.summary,
   };
 }

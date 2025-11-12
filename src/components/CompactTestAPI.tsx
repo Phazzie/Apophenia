@@ -48,12 +48,35 @@ const CompactTestAPI: React.FC = () => {
     console.log('--- Generating story with selected AI model ---');
     const prompt = "Write a 100-word short story about someone's descent into insanity, in a cosmic horror style.";
     try {
+      // Create mock player profile for testing
+      const mockPlayerProfile = {
+        fearProfile: {
+          cosmicInsignificance: 0.7,
+          madness: 0.6,
+          isolation: 0.5,
+        },
+        choicePatterns: {
+          riskTaking: 0.5,
+          curiosity: 0.8,
+          aggression: 0.2,
+          avoidance: 0.3,
+        },
+        engagementMetrics: {
+          totalChoices: 1,
+          averageResponseTime: 5000,
+          sessionDuration: 60000,
+        },
+      };
+
       const response = await generateNextStepWithSelectedModel({
         prompt,
-        worldState: mockWorldState,
-        storyHistory: mockStoryHistory,
-        genreConfig: mockGenreConfig,
-        playerChoice: 'Begin the story'
+        context: {
+          worldState: mockWorldState,
+          recentHistory: mockStoryHistory,
+          playerProfile: mockPlayerProfile,
+          genrePrompts: [mockGenreConfig.systemPrompt],
+          engineInstructions: [],
+        },
       });
 
       // Extract the text from the response

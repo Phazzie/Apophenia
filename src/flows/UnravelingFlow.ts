@@ -325,7 +325,6 @@ export class UnravelingFlowImpl implements IUnravelingFlow {
       context: {
         worldState,
         recentHistory: storyHistory.slice(-10), // Last 10 segments
-        genre: worldState.genreConfig,
         playerProfile: {
           fearProfile: {},
           choicePatterns: {
@@ -340,6 +339,8 @@ export class UnravelingFlowImpl implements IUnravelingFlow {
             sessionDuration: 0,
           },
         },
+        genrePrompts: [worldState.genreConfig.systemPrompt],
+        engineInstructions: [], // Engines already processed, instructions in prompt
       },
     });
 

@@ -191,7 +191,7 @@ export const generateConceptFlow = async (
 
   // Enhanced concept generation using centralized prompt templates
   const systemInstruction = COSMIC_HORROR_ENTITY_SYSTEM;
-  const prompt = buildConceptGenerationPrompt(genreConfig.name, genreConfig.style);
+  const prompt = buildConceptGenerationPrompt(genreConfig.name, genreConfig.themes.join(', '));
 
   try {
     const model = genAI.getGenerativeModel({

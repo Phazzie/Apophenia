@@ -20,21 +20,23 @@ export enum PsychologicalStatus {
 
 // Zod Schemas as the Single Source of Truth
 
-// Core Game Types
+// Core Game Types (aligned with seams.ts canonical definitions)
+export const visualStyleSchema = z.object({
+  primaryColor: z.string(),
+  secondaryColor: z.string(),
+  accentColor: z.string(),
+  fontFamily: z.string(),
+  atmosphere: z.enum(['dark', 'ethereal', 'oppressive', 'fragmented']),
+});
+
 export const genreConfigSchema = z.object({
   id: z.string(),
   name: z.string(),
   description: z.string(),
-  style: z.string(),
-  theme: z.object({
-    '--background-color': z.string(),
-    '--text-color': z.string(),
-    '--accent-color': z.string(),
-    '--font-family': z.string(),
-  }),
-  startScreenImagePrompt: z.string(),
-  conceptPrompt: z.string(),
-  aiSystemInstruction: z.string(),
+  systemPrompt: z.string(),
+  themes: z.array(z.string()),
+  fearCategories: z.array(z.string()),
+  visualStyle: visualStyleSchema,
 });
 
 export const worldStateSchema = z.object({
@@ -170,6 +172,7 @@ export const modelTestResultSchema = z.object({
 // Inferred TypeScript Types from Zod Schemas
 export type WorldState = z.infer<typeof worldStateSchema>;
 export type StorySegment = z.infer<typeof storySegmentSchema>;
+export type VisualStyle = z.infer<typeof visualStyleSchema>;
 export type GenreConfig = z.infer<typeof genreConfigSchema>;
 export type Choice = z.infer<typeof choiceSchema>;
 export type Command = z.infer<typeof commandSchema>;

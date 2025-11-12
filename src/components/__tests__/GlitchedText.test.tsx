@@ -14,28 +14,30 @@ describe('GlitchedText', () => {
   });
 
   it('renders the text correctly', () => {
-    render(<GlitchedText text="Apophenia" />);
-    expect(screen.getByText('Apophenia')).toBeInTheDocument();
+    const { container } = render(<GlitchedText text="Apophenia" />);
+    const title = container.querySelector('.glitched-title');
+    expect(title).toBeInTheDocument();
+    // Text is split into individual spans, so check the combined text content
+    expect(title?.textContent).toBe('Apophenia');
   });
 
   it('applies a glitch effect over time', () => {
     // Mock Math.random to control the glitch effect
     vi.spyOn(Math, 'random').mockReturnValue(0.05); // Should glitch
 
-    render(<GlitchedText text="Apophenia" />);
+    const { container } = render(<GlitchedText text="Apophenia" />);
 
-    // Initial render should have the text
-    expect(screen.getByText('Apophenia')).toBeInTheDocument();
+    // Initial render should have the container with the correct class
+    const title = container.querySelector('.glitched-title');
+    expect(title).toBeInTheDocument();
+    expect(title?.textContent).toBe('Apophenia');
 
     // Advance timers to trigger the glitch effect
     act(() => {
       vi.advanceTimersByTime(2000);
     });
 
-    // Check that the text is still there, but now it might be wrapped in spans with styles
-    // This is a bit tricky to test perfectly without being too brittle.
-    // We'll check that the container has the correct class.
-    const container = screen.getByText('Apophenia');
-    expect(container).toHaveClass('glitched-title');
+    // After glitch effect, text should still be present
+    expect(title?.textContent).toBe('Apophenia');
   });
 });

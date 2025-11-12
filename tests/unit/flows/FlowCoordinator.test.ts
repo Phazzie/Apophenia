@@ -116,12 +116,8 @@ describe('FlowCoordinator', () => {
 
       // Set high horror and corruption to trigger unraveling
       worldStateStore.updateWorldState({
-        horrorIntensity: 10,
-        uiDistortion: {
-          transform: 'rotate(20deg)',
-          filter: 'none',
-          transition: 'all 1s',
-        },
+        horrorIntensity: 10, // Max horror (60% of descent)
+        corruptionLevel: 100, // Max corruption (40% of descent)
       });
 
       const flow = coordinator.getCurrentFlow();

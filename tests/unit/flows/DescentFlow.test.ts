@@ -146,16 +146,12 @@ describe('DescentFlow', () => {
       const worldStateStore = useWorldStateStore.getState();
 
       worldStateStore.updateWorldState({
-        uiDistortion: {
-          transform: 'rotate(20deg)', // Max corruption
-          filter: 'none',
-          transition: 'all 1s',
-        },
+        corruptionLevel: 100, // Max corruption (0-100)
       });
 
       const level = flow.calculateDescentLevel();
 
-      // Max corruption should contribute 40% to descent
+      // Max corruption (100) should contribute 40% to descent
       expect(level).toBeGreaterThan(0);
       expect(level).toBeLessThanOrEqual(40);
     });
@@ -170,17 +166,13 @@ describe('DescentFlow', () => {
       const worldStateStore = useWorldStateStore.getState();
 
       worldStateStore.updateWorldState({
-        horrorIntensity: 10, // Max horror
-        uiDistortion: {
-          transform: 'rotate(20deg)', // Max corruption
-          filter: 'none',
-          transition: 'all 1s',
-        },
+        horrorIntensity: 10, // Max horror (60% of descent)
+        corruptionLevel: 100, // Max corruption (40% of descent)
       });
 
       const shouldUnravel = flow.shouldBeginUnraveling();
 
-      // Max horror + max corruption should exceed 70%
+      // Max horror (60%) + max corruption (40%) = 100% > 70%
       expect(shouldUnravel).toBe(true);
     });
   });
@@ -204,14 +196,10 @@ describe('DescentFlow', () => {
     it('should transition to unraveling when descent level is high', async () => {
       const worldStateStore = useWorldStateStore.getState();
 
-      // Set high horror and corruption
+      // Set high horror and corruption to exceed 70% threshold
       worldStateStore.updateWorldState({
-        horrorIntensity: 10,
-        uiDistortion: {
-          transform: 'rotate(20deg)',
-          filter: 'none',
-          transition: 'all 1s',
-        },
+        horrorIntensity: 10, // Max horror (60% of descent)
+        corruptionLevel: 100, // Max corruption (40% of descent)
       });
 
       const choice = {

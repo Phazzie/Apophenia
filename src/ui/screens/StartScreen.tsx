@@ -29,11 +29,10 @@ export const StartScreen: React.FC<StartScreenProps> = ({
     switch (provider) {
       case AIProvider.GROK:
         return 'Grok-4 (X.AI)';
-      // Gemini providers removed - Grok-only deployment
-      // case AIProvider.GEMINI_PRO:
-      //   return 'Gemini 2.5 Pro';
-      // case AIProvider.GEMINI_FLASH:
-      //   return 'Gemini 2.5 Flash';
+      case AIProvider.GEMINI_PRO:
+        return 'Gemini 2.5 Pro';
+      case AIProvider.GEMINI_FLASH:
+        return 'Gemini 2.5 Flash';
       case AIProvider.MOCK:
         return 'Demo Mode';
       default:

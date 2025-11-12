@@ -110,7 +110,8 @@ describe('ChoiceButton', () => {
 
     const button = screen.getByRole('button');
     expect(button).toHaveAttribute('data-choice-id', 'choice-1');
-    expect(button).toHaveAttribute('data-intrusive', 'false');
+    // React removes boolean attributes when they're false, so check it's not present
+    expect(button).not.toHaveAttribute('data-intrusive');
   });
 });
 

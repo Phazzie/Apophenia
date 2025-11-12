@@ -1,29 +1,32 @@
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { useAIModelStore } from '../../stores/aiModelStore';
-import { imageGenerationService } from '../../services/ai/imageGeneration';
+import * as gameService from '../../services/gameService';
 import * as unifiedAIService from '../../services/ai/unifiedAIService';
 import CompactTestAPI from '../CompactTestAPI';
-import { vi } from 'vitest';
+import { vi, Mock } from 'vitest';
 
 // Mock the zustand store and services
 vi.mock('../../stores/aiModelStore');
-vi.mock('../../services/ai/imageGeneration');
+vi.mock('../../services/gameService');
 vi.mock('../../services/ai/unifiedAIService');
 
 const mockGetSelectedModel = vi.fn();
-const mockGenerateImageVariations = vi.fn();
-const mockGenerateText = vi.fn();
+const mockGenerateMultipleImages = vi.fn();
+const mockGenerateNextStep = vi.fn();
 
 describe('CompactTestAPI', () => {
   beforeEach(() => {
-    (useAIModelStore as unknown as jest.Mock).mockReturnValue({
-      getSelectedModel: mockGetSelectedModel.mockReturnValue({ id: 'grok-1' }),
+    mockGetSelectedModel.mockReturnValue({ id: 'grok-1' });
+    mockGenerateMultipleImages.mockResolvedValue([]);
+    mockGenerateNextStep.mockResolvedValue({ content: 'Test story' });
+
+    (useAIModelStore as unknown as Mock).mockReturnValue({
+      getSelectedModel: mockGetSelectedModel,
     });
-    (imageGenerationService.generateImageVariations as jest.Mock).mockImplementation(mockGenerateImageVariations);
-    // Mock the actual export from unifiedAIService
-    vi.spyOn(unifiedAIService, 'generateWithSelectedModel').mockImplementation(mockGenerateText);
+    vi.spyOn(gameService, 'generateMultipleImages').mockImplementation(mockGenerateMultipleImages);
+    vi.spyOn(unifiedAIService, 'generateNextStepWithSelectedModel').mockImplementation(mockGenerateNextStep);
   });
 
   afterEach(() => {
@@ -39,12 +42,16 @@ describe('CompactTestAPI', () => {
   it('calls the image generation service when the button is clicked', async () => {
     render(<CompactTestAPI />);
     fireEvent.click(screen.getByText('Test Image Gen'));
-    expect(mockGenerateImageVariations).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(mockGenerateMultipleImages).toHaveBeenCalled();
+    });
   });
 
   it('calls the unified AI service when the story button is clicked', async () => {
     render(<CompactTestAPI />);
     fireEvent.click(screen.getByText('Test Story Gen'));
-    expect(mockGenerateText).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(mockGenerateNextStep).toHaveBeenCalled();
+    });
   });
 });

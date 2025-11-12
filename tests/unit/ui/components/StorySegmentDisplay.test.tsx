@@ -31,7 +31,7 @@ describe('StorySegmentDisplay', () => {
 
     render(<StorySegmentDisplay segment={segmentWithImage} />);
 
-    const image = screen.getByAlt('Story illustration');
+    const image = screen.getByAltText('Story illustration');
     expect(image).toBeInTheDocument();
     expect(image).toHaveAttribute('src', 'https://example.com/image.jpg');
   });
@@ -60,7 +60,7 @@ describe('StorySegmentDisplay', () => {
 
     render(<StorySegmentDisplay segment={segmentWithImage} showImage={false} />);
 
-    expect(screen.queryByAlt('Story illustration')).not.toBeInTheDocument();
+    expect(screen.queryByAltText('Story illustration')).not.toBeInTheDocument();
   });
 
   it('renders revised badge when segment is revised', () => {
@@ -187,7 +187,7 @@ describe('StoryHistoryDisplay', () => {
 
     render(<StoryHistoryDisplay segments={segmentsWithImages} showImages={true} />);
 
-    expect(screen.getByAlt('Story illustration')).toBeInTheDocument();
+    expect(screen.getByAltText('Story illustration')).toBeInTheDocument();
   });
 
   it('applies custom className', () => {

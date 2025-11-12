@@ -7,7 +7,7 @@ import { useWorldStateStore } from '../../stores/worldStateStore';
 import { useAIModelStore } from '../../stores/aiModelStore';
 import * as gameService from '../../services/gameService';
 import StartScreen from '../StartScreen';
-import { vi } from 'vitest';
+import { vi, Mock } from 'vitest';
 import { GameState } from '../../types';
 
 // Mock the zustand stores and services
@@ -16,8 +16,17 @@ vi.mock('../../stores/storyHistoryStore');
 vi.mock('../../stores/worldStateStore');
 vi.mock('../../stores/aiModelStore');
 vi.mock('../../services/gameService');
+// Create a mock that will be called by resetAllStores
+const mockResetAllStores = vi.fn();
+
+vi.mock('../../services/gameStateManager', () => ({
+  GameStateManager: {
+    resetAllStores: mockResetAllStores
+  }
+}));
 
 const mockSetGameState = vi.fn();
+const mockAddStorySegment = vi.fn();
 const mockReplaceStoryHistory = vi.fn();
 const mockUpdateWorldState = vi.fn();
 const mockSetGenreConfig = vi.fn();
@@ -25,22 +34,40 @@ const mockGenerateConcept = vi.spyOn(gameService, 'generateConcept');
 
 describe('StartScreen', () => {
   beforeEach(() => {
-    (useGameStateStore as unknown as jest.Mock).mockReturnValue({
+    // Mock store hooks
+    (useGameStateStore as unknown as Mock).mockReturnValue({
       setGameState: mockSetGameState,
     });
-    (useStoryHistoryStore as unknown as jest.Mock).mockReturnValue({
+    (useStoryHistoryStore as unknown as Mock).mockReturnValue({
       storyHistory: [],
       replaceStoryHistory: mockReplaceStoryHistory,
+      addStorySegment: mockAddStorySegment,
     });
-    (useWorldStateStore as unknown as jest.Mock).mockReturnValue({
+    (useWorldStateStore as unknown as Mock).mockReturnValue({
       worldState: { protagonist: null, setting: '', atmosphere: '', npcs: [], genre: '' },
       setGenreConfig: mockSetGenreConfig,
       updateWorldState: mockUpdateWorldState,
     });
-    (useAIModelStore as unknown as jest.Mock).mockReturnValue({
+    (useAIModelStore as unknown as Mock).mockReturnValue({
       getSelectedModel: vi.fn().mockReturnValue({ id: 'test-model', name: 'Test Model' }),
     });
-    mockGenerateConcept.mockResolvedValue({ 
+
+    // Mock store getState() calls that are used directly in component
+    useStoryHistoryStore.getState = vi.fn().mockReturnValue({
+      addStorySegment: mockAddStorySegment,
+      replaceStoryHistory: mockReplaceStoryHistory,
+    });
+    useWorldStateStore.getState = vi.fn().mockReturnValue({
+      updateWorldState: mockUpdateWorldState,
+      setGenreConfig: mockSetGenreConfig,
+    });
+
+    // Mock resetAllStores to call replaceStoryHistory([])
+    mockResetAllStores.mockImplementation(() => {
+      mockReplaceStoryHistory([]);
+    });
+
+    mockGenerateConcept.mockResolvedValue({
         protagonist: 'Guy - A guy with a bland personality',
         setting: 'A new world',
         dilemma: 'What to do next'
@@ -52,8 +79,11 @@ describe('StartScreen', () => {
   });
 
   it('renders the start screen with a new game button', () => {
-    render(<StartScreen />);
-    expect(screen.getByText('Apophenia')).toBeInTheDocument();
+    const { container } = render(<StartScreen />);
+    // GlitchedText splits text into spans, so check the container
+    const glitchedTitle = container.querySelector('.glitched-title');
+    expect(glitchedTitle).toBeInTheDocument();
+    expect(glitchedTitle?.textContent).toBe('Apophenia');
     expect(screen.getByText('New Game')).toBeInTheDocument();
   });
 
@@ -63,16 +93,22 @@ describe('StartScreen', () => {
   });
 
   it('shows the continue button when there is a saved game', () => {
-    (useStoryHistoryStore as unknown as jest.Mock).mockReturnValueOnce({
-      storyHistory: [{ id: '1', text: 'Once upon a time...', images: {} }],
+    // Override the mock for this test (not Once, because component may call multiple times)
+    (useStoryHistoryStore as unknown as Mock).mockReturnValue({
+      storyHistory: [{ id: '1', text: 'Once upon a time...', images: {}, timestamp: Date.now() }],
       replaceStoryHistory: mockReplaceStoryHistory,
+      addStorySegment: mockAddStorySegment,
     });
-    (useWorldStateStore as unknown as jest.Mock).mockReturnValueOnce({
+    (useWorldStateStore as unknown as Mock).mockReturnValue({
       worldState: { protagonist: { name: 'Jane Doe', description: 'A person', personality: 'curious' }, setting: 'A place', atmosphere: 'tense', npcs: [], genre: 'mystery' },
       setGenreConfig: mockSetGenreConfig,
       updateWorldState: mockUpdateWorldState,
     });
-    render(<StartScreen />);
+
+    const { container } = render(<StartScreen />);
+    // Check for the glitched title
+    const glitchedTitle = container.querySelector('.glitched-title');
+    expect(glitchedTitle?.textContent).toBe('Apophenia');
     expect(screen.getByText('Continue')).toBeInTheDocument();
   });
 

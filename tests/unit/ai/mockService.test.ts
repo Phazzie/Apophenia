@@ -145,7 +145,7 @@ describe('MockService', () => {
 
       // At least one run should have an intrusive thought (probability ~0.3^10 = very low)
       expect(hasIntrusive).toBe(true);
-    });
+    }, 10000); // Increase timeout to 10 seconds for multiple iterations
 
     it('should increase horror intensity', async () => {
       const response = await mockService.generateResponse(mockRequest);

@@ -161,8 +161,8 @@ export class FlowCoordinatorImpl implements IFlowCoordinator {
 
     try {
       // Use existing command executor
-      // Commands are compatible with GameCommand[] expected by executeCommandQueue
-      await executeCommandQueue(commands as unknown as import('../types').GameCommand[]);
+      // Command[] from seams.ts is compatible with executeCommandQueue's expected type
+      await executeCommandQueue(commands);
 
       // Convert to ExecutionResults
       return commands.map((command) => ({

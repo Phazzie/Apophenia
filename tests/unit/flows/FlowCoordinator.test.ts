@@ -89,9 +89,9 @@ describe('FlowCoordinator', () => {
   });
 
   describe('getCurrentFlow', () => {
-    it('should return descent flow for PLAYING state', () => {
+    it('should return descent flow for DESCENDING state', () => {
       const gameStateStore = useGameStateStore.getState();
-      gameStateStore.setGameState(GameState.PLAYING);
+      gameStateStore.setGameState(SeamsGameState.DESCENDING);
 
       const flow = coordinator.getCurrentFlow();
 
@@ -100,7 +100,7 @@ describe('FlowCoordinator', () => {
 
     it('should return descent flow for MENU state', () => {
       const gameStateStore = useGameStateStore.getState();
-      gameStateStore.setGameState(GameState.MENU);
+      gameStateStore.setGameState(SeamsGameState.MENU);
 
       const flow = coordinator.getCurrentFlow();
 
@@ -111,8 +111,8 @@ describe('FlowCoordinator', () => {
       const gameStateStore = useGameStateStore.getState();
       const worldStateStore = useWorldStateStore.getState();
 
-      // Set to PLAYING
-      gameStateStore.setGameState(GameState.PLAYING);
+      // Set to DESCENDING
+      gameStateStore.setGameState(SeamsGameState.DESCENDING);
 
       // Set high horror and corruption to trigger unraveling
       worldStateStore.updateWorldState({
@@ -133,7 +133,7 @@ describe('FlowCoordinator', () => {
 
       const gameState = useGameStateStore.getState().gameState;
 
-      expect(gameState).toBe(GameState.PLAYING);
+      expect(gameState).toBe(SeamsGameState.DESCENDING);
     });
 
     it('should update current flow after transition', async () => {

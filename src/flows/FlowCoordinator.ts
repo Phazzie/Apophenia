@@ -45,6 +45,13 @@ export class FlowCoordinatorImpl implements IFlowCoordinator {
     // gameState is already the seams GameState enum (MENU, GENERATING, DESCENDING, UNRAVELING, COLLAPSED)
     switch (gameState) {
       case GameState.DESCENDING:
+        // Check if we should be in unraveling based on descent level
+        const descentLevel = descentFlow.calculateDescentLevel();
+        if (descentLevel > DESCENT_CONSTANTS.UNRAVELING_THRESHOLD) {
+          return unravelingFlow;
+        }
+        return descentFlow;
+
       case GameState.GENERATING:
         return descentFlow;
 

@@ -4,9 +4,9 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { DescentFlowImpl } from '../../../src/flows/DescentFlow';
-import { useGameStateStore } from '../../../src/stores/gameStateStore';
-import { useWorldStateStore } from '../../../src/stores/worldStateStore';
-import { useStoryHistoryStore } from '../../../src/stores/storyHistoryStore';
+import { useGameStateStore } from '../../../src/core/state/gameStateStore';
+import { useWorldStateStore } from '../../../src/core/state/worldStateStore';
+import { useHistoryStore } from '../../../src/core/state/historyStore';
 import { GameState } from '../../../src/core/types/seams';
 
 // Mock the AI service
@@ -70,7 +70,7 @@ describe('DescentFlow', () => {
     // Reset stores
     useGameStateStore.getState().reset();
     useWorldStateStore.getState().reset();
-    useStoryHistoryStore.getState().reset();
+    useHistoryStore.getState().reset();
   });
 
   describe('initialize', () => {

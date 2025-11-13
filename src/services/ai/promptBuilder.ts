@@ -14,6 +14,7 @@ import {
   StorySegment,
   PlayerProfile,
 } from '../../core/types/seams';
+import { sanitizeForPrompt } from './promptHelpers';
 
 export class PromptBuilderImpl implements PromptBuilder {
   /**
@@ -71,11 +72,17 @@ ${genre.systemPrompt}`;
     const fearProfile = this.summarizeFearProfile(context.playerProfile);
     const choicePatterns = this.summarizeChoicePatterns(context.playerProfile);
 
+    // Sanitize user-provided text to prevent prompt injection
+    const sanitizedProtagonist = sanitizeForPrompt(context.worldState.protagonist || '', 300);
+    const sanitizedSetting = sanitizeForPrompt(context.worldState.setting || '', 300);
+    const sanitizedDilemma = sanitizeForPrompt(context.worldState.dilemma || '', 300);
+    const sanitizedPsychStatus = sanitizeForPrompt(context.worldState.psychologicalStatus || '', 200);
+
     return `CURRENT WORLD STATE:
-Protagonist: ${context.worldState.protagonist}
-Setting: ${context.worldState.setting}
-Dilemma: ${context.worldState.dilemma}
-Psychological Status: ${context.worldState.psychologicalStatus}
+Protagonist: ${sanitizedProtagonist}
+Setting: ${sanitizedSetting}
+Dilemma: ${sanitizedDilemma}
+Psychological Status: ${sanitizedPsychStatus}
 System Health: ${context.worldState.systemHealth}/100
 Horror Intensity: ${context.worldState.horrorIntensity}/10
 Corruption Level: ${context.worldState.corruptionLevel}/100
@@ -100,9 +107,15 @@ ${context.genrePrompts.join('\n')}`;
    * Build prompt for player choice processing
    */
   buildChoicePrompt(worldState: WorldState, previousChoice: Choice): string {
-    return `PLAYER CHOSE: "${previousChoice.text}"
+    // Sanitize user choice text to prevent prompt injection
+    const sanitizedChoiceText = sanitizeForPrompt(previousChoice.text, 500);
+    const sanitizedConsequence = previousChoice.consequence
+      ? sanitizeForPrompt(previousChoice.consequence, 300)
+      : '';
+
+    return `PLAYER CHOSE: "${sanitizedChoiceText}"
 Choice ID: ${previousChoice.id}
-${previousChoice.consequence ? `Expected Consequence: ${previousChoice.consequence}` : ''}
+${sanitizedConsequence ? `Expected Consequence: ${sanitizedConsequence}` : ''}
 ${previousChoice.isIntrusive ? 'This was an INTRUSIVE THOUGHT - reflect the psychological weight of this choice' : ''}
 ${previousChoice.psychologicalWeight ? `Psychological Weight: ${previousChoice.psychologicalWeight}` : ''}
 

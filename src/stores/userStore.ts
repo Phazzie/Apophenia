@@ -45,7 +45,7 @@ supabase.auth.getSession()
     useUserStore.getState().setSession(session);
     useUserStore.setState({ loading: false });
   })
-  .catch((error) => {
+  .catch((error: unknown) => {
     console.error('Failed to get initial session:', error);
     useUserStore.setState({ loading: false });
   });

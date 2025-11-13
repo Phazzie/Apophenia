@@ -67,6 +67,15 @@ export const useWorldStateStore = create<WorldStateStore>()(
           },
         })),
 
+      // Backwards compatibility alias for updateWorld
+      updateWorldState: (partial: Partial<WorldState>) =>
+        set((state) => ({
+          worldState: {
+            ...state.worldState,
+            ...partial,
+          },
+        })),
+
       increaseHorror: (amount: number) =>
         set((state) => ({
           worldState: {

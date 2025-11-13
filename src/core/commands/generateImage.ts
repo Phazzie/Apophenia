@@ -22,10 +22,27 @@ export class GenerateImageExecutor extends BaseCommandExecutor implements ImageG
   // Simple in-memory cache for this session
   private imageCache: Map<string, string> = new Map();
 
+  /**
+   * Check if this executor can handle the given command
+   *
+   * @param command - The command to check
+   * @returns true if this executor can handle the command
+   */
   canExecute(command: Command): boolean {
     return command.type === 'generateImage';
   }
 
+  /**
+   * Validate the generateImage command before execution
+   *
+   * Checks for:
+   * - Required fields (prompt, segmentId)
+   * - Type correctness (prompt must be string)
+   * - Segment existence
+   *
+   * @param command - The command to validate
+   * @returns Validation result with any errors
+   */
   validate(command: Command): ValidationResult {
     if (command.type !== 'generateImage') {
       return { valid: false, errors: ['Wrong command type'] };
@@ -41,6 +58,13 @@ export class GenerateImageExecutor extends BaseCommandExecutor implements ImageG
 
     if (typeof command.payload.prompt !== 'string') {
       return { valid: false, errors: ['Prompt must be a string'] };
+    }
+
+    // Verify segment exists
+    const segments = useHistoryStore.getState().segments;
+    const segment = segments.find(s => s.id === command.payload.segmentId);
+    if (!segment) {
+      return { valid: false, errors: [`Segment not found: ${command.payload.segmentId}`] };
     }
 
     return { valid: true, errors: [] };

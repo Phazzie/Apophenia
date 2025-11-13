@@ -36,27 +36,45 @@ export const useHistoryStore = create<HistoryStore>()(
         })),
 
       updateSegment: (id: string, updates: Partial<StorySegment>) =>
-        set((state) => ({
-          segments: state.segments.map((segment) =>
-            segment.id === id
-              ? { ...segment, ...updates }
-              : segment
-          ),
-        })),
+        set((state) => {
+          // Validate segment exists
+          const exists = state.segments.some(seg => seg.id === id);
+          if (!exists) {
+            console.warn(`updateSegment: Segment ${id} not found`);
+            return state; // No change
+          }
+
+          return {
+            segments: state.segments.map((segment) =>
+              segment.id === id
+                ? { ...segment, ...updates }
+                : segment
+            ),
+          };
+        }),
 
       reviseSegment: (id: string, newText: string) =>
-        set((state) => ({
-          segments: state.segments.map((segment) =>
-            segment.id === id
-              ? {
-                  ...segment,
-                  text: newText,
-                  isRevised: true,
-                  originalText: segment.originalText || segment.text,
-                }
-              : segment
-          ),
-        })),
+        set((state) => {
+          // Validate segment exists
+          const exists = state.segments.some(seg => seg.id === id);
+          if (!exists) {
+            console.warn(`reviseSegment: Segment ${id} not found`);
+            return state; // No change
+          }
+
+          return {
+            segments: state.segments.map((segment) =>
+              segment.id === id
+                ? {
+                    ...segment,
+                    text: newText,
+                    isRevised: true,
+                    originalText: segment.originalText || segment.text,
+                  }
+                : segment
+            ),
+          };
+        }),
 
       getRecent: (count: number) => {
         const { segments } = get();

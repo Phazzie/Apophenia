@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useWorldStateStore } from '../stores/worldStateStore';
+import { useWorldStateStore } from '../core/state/worldStateStore';
 import { GameStepResult } from '../types';
 import { devMode } from '../utils/devMode';
 
 export const useGameEffects = () => {
-  const { worldState, updateWorldState } = useWorldStateStore();
+  const { worldState, updateWorld } = useWorldStateStore();
   const [metaMessage, setMetaMessage] = useState<string | null>(null);
   const [corruptionEffects, setCorruptionEffects] = useState<React.CSSProperties>({});
   const [quantumShiftNotification, setQuantumShiftNotification] = useState(false);
@@ -63,7 +63,7 @@ export const useGameEffects = () => {
     // Handle reality corruption
     if (result.corruptionEffect) {
       setCorruptionEffects(result.corruptionEffect.visualEffect);
-      updateWorldState({
+      updateWorld({
         systemHealth: Math.max(
           0,
           worldState.systemHealth - result.corruptionEffect.level * 10,
@@ -71,7 +71,7 @@ export const useGameEffects = () => {
       });
       devMode.log('GameEffects', '⚡ REALITY CORRUPTION: Interface integrity compromised');
     }
-  }, [worldState.systemHealth, updateWorldState]);
+  }, [worldState.systemHealth, updateWorld]);
 
   return {
     metaMessage,

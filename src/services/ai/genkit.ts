@@ -19,10 +19,10 @@ import {
   WorldState,
   commandArraySchema,
 } from '../../types';
-import { useWorldStateStore } from '../../stores/worldStateStore';
+import { useWorldStateStore } from '../../core/state/worldStateStore';
 import { AI_MODELS } from '../config';
 import { extractJSONArray, extractJSONObject } from '../../utils/jsonExtractor';
-import { imageGenerationOrchestrator } from './imageGeneration/index';
+import { imageFallbackService } from './imageFallbackService';
 import {
   COSMIC_HORROR_ENTITY_SYSTEM,
   buildCosmicHorrorSystemWithThinking,
@@ -261,7 +261,7 @@ export const processAdvancedImageGeneration = async (
   console.log(`Advanced AI image generation for prompt: "${prompt}"`);
 
   if (generateMultiple) {
-    const result = await imageGenerationOrchestrator.generateImageVariations({
+    const result = await imageFallbackService.generateImageVariations({
       prompt,
       useHorrorIntensity: true,
       variationCount: 3,
@@ -273,7 +273,7 @@ export const processAdvancedImageGeneration = async (
   }
 
   // Single image generation with full fallback chain
-  const result = await imageGenerationOrchestrator.generateImage({
+  const result = await imageFallbackService.generateImage({
     prompt,
     useHorrorIntensity: true,
   });

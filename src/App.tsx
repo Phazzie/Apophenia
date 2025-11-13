@@ -63,10 +63,11 @@ export function App() {
 
   const worldState = useWorldStateStore(s => s.worldState);
 
-  const segments = useHistoryStore(s => s.segments);
-
-  // Get current segment (latest)
-  const currentSegment = segments[segments.length - 1];
+  // Get current segment (latest) using store method instead of array index
+  const currentSegment = useHistoryStore(s => {
+    const recent = s.getRecent(1);
+    return recent.length > 0 ? recent[0] : undefined;
+  });
 
   /**
    * Handle start game from menu
@@ -126,7 +127,7 @@ export function App() {
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [gameState, worldState, segments]);
+  }, [gameState, worldState, currentSegment]);
 
   /**
    * Render appropriate screen based on game state

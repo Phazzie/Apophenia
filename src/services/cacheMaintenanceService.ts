@@ -1,4 +1,4 @@
-import { useImageCacheStore, CachedImage } from '../stores/imageCacheStore';
+import { useImageCacheStore, CachedImage } from '../core/state/imageCacheStore';
 
 /**
  * Cache maintenance service

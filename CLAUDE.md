@@ -83,7 +83,7 @@
 | **OLD Engines (DELETE)** | `/src/services/ai/engines/` | Deprecated location, ready for removal |
 | **Game State** | `/src/stores/` | `gameStateStore.ts`, `worldStateStore.ts`, `historyStore.ts` |
 | **AI Services** | `/src/services/ai/` | `grokService.ts`, `unifiedAIService.ts`, `genkit.ts` |
-| **Flows** | `/src/flows/` | `ConceptFlow.ts`, `DescentFlow.ts`, `UnravelingFlow.ts` |
+| **Flows** | `/src/flows/` | `DescentFlow.ts`, `UnravelingFlow.ts` (ConceptFlow: future work) |
 | **Commands** | `/src/commands/` | Individual command executors |
 | **Type Definitions** | `/src/core/types/` | `seams.ts` (623 lines), `index.ts` |
 | **Tests** | `/tests/` | `unit/`, `integration/`, `contracts/` |
@@ -188,7 +188,11 @@ segments[segments.length - 1].text = 'new';  // NEVER DO THIS
 2. **Documentation final polish** (update all badges)
 3. **Performance optimization** (bundle splitting, lazy loading)
 4. **Accessibility audit** (WCAG 2.1 AA compliance)
-5. **Version 1.0.0 release** (tag and deploy)
+5. **Implement ConceptFlow** (8-10h, optional)
+   - Create ConceptFlow.ts class following Descent/Unraveling pattern
+   - Currently concept generation uses `generateConceptFlow()` in genkit.ts
+   - Would enable consistent flow orchestration across all game phases
+6. **Version 1.0.0 release** (tag and deploy)
 
 ---
 

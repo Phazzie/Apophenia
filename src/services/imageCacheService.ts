@@ -8,7 +8,7 @@
  * - Cache statistics and management
  */
 
-import { useImageCacheStore } from '../stores/imageCacheStore';
+import { useImageCacheStore } from '../core/state/imageCacheStore';
 import { generateOptimizedImagePrompt } from './imagePromptTemplates';
 import { processAdvancedImageGeneration } from './ai/secureGenkit';
 import { imageGenerationService } from './ai/imageGeneration';

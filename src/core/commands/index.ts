@@ -13,6 +13,8 @@ export { CreateSegmentExecutor } from './createSegment';
 export { DisplayTextExecutor } from './displayText';
 export { DisplayChoicesExecutor } from './displayChoices';
 export { GenerateImageExecutor } from './generateImage';
+export { PregenerateImageExecutor } from './pregenerateImage';
+export { GenerateAmbianceExecutor } from './generateAmbiance';
 export { UpdateWorldStateExecutor } from './updateWorldState';
 export { WaitExecutor } from './wait';
 export { ApplyCorruptionExecutor } from './applyCorruption';
@@ -38,6 +40,8 @@ import { CreateSegmentExecutor } from './createSegment';
 import { DisplayTextExecutor } from './displayText';
 import { DisplayChoicesExecutor } from './displayChoices';
 import { GenerateImageExecutor } from './generateImage';
+import { PregenerateImageExecutor } from './pregenerateImage';
+import { GenerateAmbianceExecutor } from './generateAmbiance';
 import { UpdateWorldStateExecutor } from './updateWorldState';
 import { WaitExecutor } from './wait';
 import { ApplyCorruptionExecutor } from './applyCorruption';
@@ -51,6 +55,8 @@ export const commandExecutors: Record<string, CommandExecutor> = {
   displayText: new DisplayTextExecutor(),
   displayChoices: new DisplayChoicesExecutor(),
   generateImage: new GenerateImageExecutor(),
+  pregenerateImage: new PregenerateImageExecutor(),
+  generateAmbiance: new GenerateAmbianceExecutor(),
   updateWorldState: new UpdateWorldStateExecutor(),
   wait: new WaitExecutor(),
   applyCorruption: new ApplyCorruptionExecutor(),

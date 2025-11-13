@@ -1,7 +1,7 @@
-import { useGameStateStore } from '../stores/gameStateStore';
-import { useImageCacheStore } from '../stores/imageCacheStore';
-import { useStoryHistoryStore } from '../stores/storyHistoryStore';
-import { useWorldStateStore } from '../stores/worldStateStore';
+import { useGameStateStore } from '../core/state/gameStateStore';
+import { useImageCacheStore } from '../core/state/imageCacheStore';
+import { useHistoryStore } from '../core/state/historyStore';
+import { useWorldStateStore } from '../core/state/worldStateStore';
 import { CacheMaintenanceService } from './cacheMaintenanceService';
 
 /**
@@ -18,7 +18,7 @@ export class GameStateManager {
       // Reset all stores in a single operation
       useGameStateStore.getState().reset();
       useWorldStateStore.getState().reset();
-      useStoryHistoryStore.getState().reset();
+      useHistoryStore.getState().reset();
       // Note: Image cache is not reset as it can be shared across games
       console.log('All game stores reset successfully');
     } catch (error) {
@@ -72,7 +72,7 @@ export class GameStateManager {
     return {
       gameState: useGameStateStore.getState().gameState,
       worldState: useWorldStateStore.getState().worldState,
-      storyHistoryLength: useStoryHistoryStore.getState().storyHistory.length,
+      storyHistoryLength: useHistoryStore.getState().segments.length,
       imageCacheSize: useImageCacheStore.getState().getCacheSize(),
       cacheStats: CacheMaintenanceService.getCacheStats(),
     };

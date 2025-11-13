@@ -27,6 +27,8 @@ const CommandSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('displayText'), payload: z.object({ content: z.string(), segmentId: z.string() }) }),
   z.object({ type: z.literal('displayChoices'), payload: z.object({ choices: z.array(ChoiceSchema), intrusiveThought: ChoiceSchema.optional() }) }),
   z.object({ type: z.literal('generateImage'), payload: z.object({ prompt: z.string(), segmentId: z.string(), priority: z.enum(['high', 'low']).optional() }) }),
+  z.object({ type: z.literal('pregenerateImage'), payload: z.object({ prompt: z.string() }) }),
+  z.object({ type: z.literal('generateAmbiance'), payload: z.object({ description: z.string() }) }),
   z.object({ type: z.literal('updateWorldState'), payload: z.record(z.unknown()) }),
   z.object({ type: z.literal('wait'), payload: z.object({ duration: z.number() }) }),
   z.object({ type: z.literal('applyCorruption'), payload: z.object({ level: z.number(), effects: z.array(z.string()) }) }),

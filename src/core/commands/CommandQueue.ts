@@ -16,6 +16,8 @@ import { CreateSegmentExecutor } from './createSegment';
 import { DisplayTextExecutor } from './displayText';
 import { DisplayChoicesExecutor } from './displayChoices';
 import { GenerateImageExecutor } from './generateImage';
+import { PregenerateImageExecutor } from './pregenerateImage';
+import { GenerateAmbianceExecutor } from './generateAmbiance';
 import { UpdateWorldStateExecutor } from './updateWorldState';
 import { WaitExecutor } from './wait';
 import { ApplyCorruptionExecutor } from './applyCorruption';
@@ -46,6 +48,8 @@ export class CommandQueueImpl implements CommandQueue {
     this.registerExecutor('displayText', new DisplayTextExecutor());
     this.registerExecutor('displayChoices', new DisplayChoicesExecutor());
     this.registerExecutor('generateImage', new GenerateImageExecutor());
+    this.registerExecutor('pregenerateImage', new PregenerateImageExecutor());
+    this.registerExecutor('generateAmbiance', new GenerateAmbianceExecutor());
     this.registerExecutor('updateWorldState', new UpdateWorldStateExecutor());
     this.registerExecutor('wait', new WaitExecutor());
     this.registerExecutor('applyCorruption', new ApplyCorruptionExecutor());

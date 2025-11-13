@@ -112,6 +112,11 @@ export function createMockWorldStateStore(initialState?: Partial<WorldStateStore
       set((state) => ({
         worldState: { ...state.worldState, ...partial },
       })),
+    // Backwards compatibility alias for updateWorld
+    updateWorldState: (partial) =>
+      set((state) => ({
+        worldState: { ...state.worldState, ...partial },
+      })),
     increaseHorror: (amount) =>
       set((state) => ({
         worldState: {

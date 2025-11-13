@@ -15,10 +15,26 @@ import { useHistoryStore } from '../state/historyStore';
  * Creates a new empty segment that will be populated by subsequent commands.
  */
 export class CreateSegmentExecutor extends BaseCommandExecutor {
+  /**
+   * Check if this executor can handle the given command
+   *
+   * @param command - The command to check
+   * @returns true if this executor can handle the command
+   */
   canExecute(command: Command): boolean {
     return command.type === 'createSegment';
   }
 
+  /**
+   * Validate the createSegment command before execution
+   *
+   * Checks for:
+   * - Required fields (id)
+   * - Type correctness (id must be string)
+   *
+   * @param command - The command to validate
+   * @returns Validation result with any errors
+   */
   validate(command: Command): ValidationResult {
     if (command.type !== 'createSegment') {
       return { valid: false, errors: ['Wrong command type'] };

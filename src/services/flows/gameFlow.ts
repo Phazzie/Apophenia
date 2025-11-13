@@ -1,4 +1,4 @@
-import { useWorldStateStore } from '../../stores/worldStateStore';
+import { useWorldStateStore } from '../../core/state/worldStateStore';
 import { StorySegment, WorldState } from '../../types';
 import { summarizeHistory } from '../gameService';
 
@@ -18,7 +18,7 @@ export const triggerSummary = () => {
   summarizeHistory()
     .then((summary) => {
       if (summary) {
-        useWorldStateStore.getState().updateWorldState({ summary });
+        useWorldStateStore.getState().updateWorld({ summary });
       }
     })
     .catch((error) => {

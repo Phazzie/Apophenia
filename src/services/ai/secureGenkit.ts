@@ -1,6 +1,6 @@
 import { Command, GenreConfig, StorySegment, WorldState } from '../../types';
 import { apiClient } from '../secureApiClient';
-import { imageGenerationOrchestrator } from './imageGeneration/index';
+import { imageFallbackService } from './imageFallbackService';
 
 /**
  * Secure AI Integration for Apophenia
@@ -69,8 +69,8 @@ export const nextStepFlow = async (input: {
 export const generateImageFlow = async (prompt: string): Promise<string> => {
   console.log('Generating image using secure backend API...');
 
-  // Use the unified orchestrator with strategy pattern
-  const result = await imageGenerationOrchestrator.generateImage({
+  // Use the unified fallback service with strategy pattern
+  const result = await imageFallbackService.generateImage({
     prompt,
     useHorrorIntensity: true,
   });
@@ -81,8 +81,8 @@ export const generateImageFlow = async (prompt: string): Promise<string> => {
 export const processAdvancedImageGeneration = async (prompt: string): Promise<string> => {
   console.log('Advanced AI image generation requested for prompt:', prompt);
 
-  // Use the unified orchestrator with full fallback chain
-  const result = await imageGenerationOrchestrator.generateImage({
+  // Use the unified fallback service with full fallback chain
+  const result = await imageFallbackService.generateImage({
     prompt,
     useHorrorIntensity: true,
   });

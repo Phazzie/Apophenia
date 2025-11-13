@@ -296,7 +296,7 @@ export interface TemporalRevisionEngine extends Engine {
 export interface QuantumNarrativeEngine extends Engine {
   readonly timelines: Map<string, WorldState>;
   shiftTimeline(context: EngineContext): string;
-  mergeTimelines(timeline1: string, timeline2: string): WorldState;
+  mergeTimelines(timeline1: string, timeline2: string): WorldState | null;
 }
 
 export interface RealityCorruptionEngine extends Engine {

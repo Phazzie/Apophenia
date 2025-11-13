@@ -59,6 +59,20 @@ export class QuantumNarrativeEngine extends BaseEngine implements IQuantumNarrat
       const timeline2 = timelineIds[1];
       const mergedState = this.mergeTimelines(timeline1, timeline2);
 
+      // Handle graceful degradation if merge fails
+      if (!mergedState) {
+        return {
+          engineName: this.name,
+          instructions: this.generateInstructions(context),
+          effects: {},
+          metadata: {
+            timelinesMerged: false,
+            mergeAttempted: true,
+            mergeFailed: true
+          }
+        };
+      }
+
       return {
         engineName: this.name,
         instructions: [
@@ -134,12 +148,14 @@ export class QuantumNarrativeEngine extends BaseEngine implements IQuantumNarrat
     return newTimelineId;
   }
 
-  mergeTimelines(timeline1: string, timeline2: string): WorldState {
+  mergeTimelines(timeline1: string, timeline2: string): WorldState | null {
     const state1 = this.timelines.get(timeline1);
     const state2 = this.timelines.get(timeline2);
 
+    // Graceful degradation: return null if timelines not found
     if (!state1 || !state2) {
-      throw new Error(`Cannot merge timelines: ${timeline1} or ${timeline2} not found`);
+      console.warn(`Cannot merge timelines: ${timeline1} or ${timeline2} not found`);
+      return null;
     }
 
     // Create a merged state that combines properties in paradoxical ways

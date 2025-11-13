@@ -14,20 +14,15 @@ import { summarizeHistory } from '../gameService';
  * Trigger a background summary generation for the current world state
  * Updates the world state store when the summary is complete
  */
-export const triggerSummary = (
-  worldState: WorldState,
-  history: StorySegment[]
-) => {
-  if (history.length > 0) {
-    summarizeHistory(worldState, history[history.length - 1])
-      .then((summary) => {
-        if (summary) {
-          useWorldStateStore.getState().updateWorldState({ summary });
-        }
-      })
-      .catch((error) => {
-        console.warn('Background summary generation failed:', error);
-        // Non-critical: summary is a background enhancement, not required for gameplay
-      });
-  }
+export const triggerSummary = () => {
+  summarizeHistory()
+    .then((summary) => {
+      if (summary) {
+        useWorldStateStore.getState().updateWorldState({ summary });
+      }
+    })
+    .catch((error) => {
+      console.warn('Background summary generation failed:', error);
+      // Non-critical: summary is a background enhancement, not required for gameplay
+    });
 };

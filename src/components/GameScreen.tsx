@@ -8,7 +8,7 @@ import { useWorldStateStore } from '../stores/worldStateStore';
 import { GameState } from '../types';
 import ThematicLoading from './ThematicLoading';
 import { analyticsService } from '../services/analyticsService';
-import { retryImageGeneration } from '../commands/generateImage';
+import { retryImageGeneration } from '../core/commands/generateImage';
 import { devMode } from '../utils/devMode';
 
 const GameScreen: React.FC = () => {

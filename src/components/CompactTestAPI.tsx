@@ -3,7 +3,7 @@ import React from 'react';
 import { generateMultipleImages } from '../services/gameService';
 import { generateNextStepWithSelectedModel } from '../services/ai/unifiedAIService';
 import { useAIModelStore } from '../stores/aiModelStore';
-import { WorldState, StorySegment, GenreConfig } from '../types';
+import { WorldState, StorySegment, GenreConfig, PsychologicalStatus } from '../types';
 import { DEFAULT_GENRE } from '../config/genres';
 
 // Create mock data for testing
@@ -14,15 +14,15 @@ const mockWorldState: WorldState = {
   setting: 'A sterile, white room',
   dilemma: 'The walls are starting to melt.',
   summary: 'A test of the AI system.',
-  psychologicalStatus: 'Stable',
+  psychologicalStatus: PsychologicalStatus.STABLE,
   systemHealth: 100,
   horrorIntensity: 1,
-  uiDistortion: { transform: 'none', filter: 'none', transition: '0.5s' },
+  corruptionLevel: 0,
   genreConfig: mockGenreConfig,
 };
 
 const mockStoryHistory: StorySegment[] = [
-    { id: 'seg-1', text: 'The experiment began.', images: {} }
+    { id: 'seg-1', text: 'The experiment began.', images: {}, timestamp: Date.now() }
 ];
 
 
@@ -31,9 +31,12 @@ const CompactTestAPI: React.FC = () => {
 
   const handleTestImageGeneration = async () => {
     console.log("--- Testing Image Generation ---");
-    const prompt = "A desolate, cosmic landscape with swirling nebulae.";
+    const prompts = [
+      "A desolate, cosmic landscape with swirling nebulae.",
+      "A dark, mysterious void with distant stars."
+    ];
     try {
-      const result = await generateMultipleImages(prompt, 2);
+      const result = await generateMultipleImages(prompts);
       console.log("Image generation service call successful:", result);
     } catch (error) {
       console.error("Image generation service call failed:", error);
@@ -41,24 +44,47 @@ const CompactTestAPI: React.FC = () => {
     console.log("--- Test Complete ---");
   };
 
-  const generateHorrorStory = async (model: 'groq' | 'gemini') => {
-    console.log(`--- Generating story with ${model} ---`);
+  const generateHorrorStory = async () => {
+    console.log('--- Generating story with selected AI model ---');
     const prompt = "Write a 100-word short story about someone's descent into insanity, in a cosmic horror style.";
     try {
-      const commands = await generateNextStepWithSelectedModel(
-        prompt, // This acts as the "playerChoice"
-        mockWorldState,
-        mockStoryHistory,
-        mockGenreConfig
-      );
+      // Create mock player profile for testing
+      const mockPlayerProfile = {
+        fearProfile: {
+          cosmicInsignificance: 0.7,
+          madness: 0.6,
+          isolation: 0.5,
+        },
+        choicePatterns: {
+          riskTaking: 0.5,
+          curiosity: 0.8,
+          aggression: 0.2,
+          avoidance: 0.3,
+        },
+        engagementMetrics: {
+          totalChoices: 1,
+          averageResponseTime: 5000,
+          sessionDuration: 60000,
+        },
+      };
 
-      // Extract the text from the returned commands
-      const textCommand = commands.find(c => c.type === 'displayText');
-      const result = textCommand && 'content' in textCommand.payload ? textCommand.payload.content : "No text returned.";
+      const response = await generateNextStepWithSelectedModel({
+        prompt,
+        context: {
+          worldState: mockWorldState,
+          recentHistory: mockStoryHistory,
+          playerProfile: mockPlayerProfile,
+          genrePrompts: [mockGenreConfig.systemPrompt],
+          engineInstructions: [],
+        },
+      });
 
-      console.log(`Story from ${model}:`, result);
+      // Extract the text from the response
+      const result = response.content || "No text returned.";
+
+      console.log('Story generated:', result);
     } catch (error) {
-      console.error(`Story generation with ${model} failed:`, error);
+      console.error('Story generation failed:', error);
     }
     console.log("--- Test Complete ---");
   };
@@ -68,11 +94,8 @@ const CompactTestAPI: React.FC = () => {
       <button onClick={handleTestImageGeneration} style={{ fontSize: '10px', padding: '2px 5px' }}>
         Test Image Gen
       </button>
-      <button onClick={() => generateHorrorStory('groq')} style={{ fontSize: '10px', padding: '2px 5px' }}>
-        Story (Groq)
-      </button>
-      <button onClick={() => generateHorrorStory('gemini')} style={{ fontSize: '10px', padding: '2px 5px' }}>
-        Story (Gemini)
+      <button onClick={generateHorrorStory} style={{ fontSize: '10px', padding: '2px 5px' }}>
+        Test Story Gen
       </button>
     </div>
   );

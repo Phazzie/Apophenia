@@ -21,29 +21,10 @@ export const useGameLoop = (
       if (isGenerating) return;
       setIsGenerating(true);
 
-      // Trigger the summary flow in the background
-      triggerSummary(worldState, storyHistory);
-
       try {
-        // Revolutionary enhanced game processing
-        const result = await getNextStep(
-          choice.text,
-          worldState,
-          storyHistory,
-          worldState.genreConfig,
-        );
-
-        // Handle temporal revisions
-        if (result.revisedHistory) {
-          replaceStoryHistory(result.revisedHistory);
-          console.log('🕰️ TEMPORAL REVISION: Past events have been altered by your choice');
-        }
-
-        // Handle other game effects
-        handleGameEffects(result);
-
-        // Execute the generated commands
-        await executeCommandQueue(result.commands);
+        // Process the player choice through the game flow
+        // This now handles everything internally: AI generation, command execution, and state updates
+        await getNextStep(choice);
       } catch (err) {
         console.error('Failed to process choice:', err);
         setGameState(GameState.PLAYING);
@@ -54,11 +35,7 @@ export const useGameLoop = (
     [
       isGenerating,
       setIsGenerating,
-      worldState,
-      storyHistory,
       setGameState,
-      replaceStoryHistory,
-      handleGameEffects,
     ],
   );
 
@@ -70,7 +47,7 @@ export const useGameLoop = (
       storyHistory[0].text === worldState.setting
     ) {
       autoStartedRef.current = true;
-      void handleChoice({ text: 'Begin the story', isIntrusive: false });
+      void handleChoice({ id: 'auto-start', text: 'Begin the story', isIntrusive: false });
     }
   }, [storyHistory, worldState.setting, handleChoice]);
 

@@ -1,6 +1,5 @@
-import { commandExecutors } from '../commands';
-import { ExecutionContext } from '../commands/command.types';
-import { GameCommand } from '../types';
+import { commandExecutors, ExecutionContext } from '../core/commands';
+import { Command } from '../core/types/seams';
 
 const NON_BLOCKING_COMMANDS = [
   'generateImage',
@@ -8,8 +7,7 @@ const NON_BLOCKING_COMMANDS = [
   'generateAmbiance',
 ];
 
-export const executeCommandQueue = async (commands: GameCommand[]) => {
-  const context: ExecutionContext = {};
+export const executeCommandQueue = async (commands: Command[]) => {
   console.log('Executing command queue with', commands.length, 'commands');
 
   for (const command of commands) {
@@ -19,16 +17,15 @@ export const executeCommandQueue = async (commands: GameCommand[]) => {
       try {
         if (NON_BLOCKING_COMMANDS.includes(command.type)) {
           console.log('Running non-blocking command:', command.type);
-          executor.execute(command, context);
+          executor.execute(command);
         } else {
           console.log('Running blocking command:', command.type);
-          await executor.execute(command, context);
+          await executor.execute(command);
         }
         console.log('Command executed successfully:', command.type);
       } catch (error) {
         console.error(`Error executing command ${command.type}:`, error);
         console.error('Command payload:', command.payload);
-        console.error('Execution context:', context);
         // Continue with other commands rather than failing the entire queue
       }
     } else {
@@ -36,6 +33,6 @@ export const executeCommandQueue = async (commands: GameCommand[]) => {
       console.warn('Available executors:', Object.keys(commandExecutors));
     }
   }
-  
+
   console.log('Command queue execution completed');
 };

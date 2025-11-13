@@ -109,7 +109,7 @@ class DevModeService {
   /**
    * Log debug info (only if enabled)
    */
-  log(category: string, ...args: any[]): void {
+  log(category: string, ...args: unknown[]): void {
     if (this.state.enabled && this.state.logAllEvents) {
       console.log(`[DEV:${category}]`, ...args);
     }
@@ -118,7 +118,7 @@ class DevModeService {
   /**
    * Get performance snapshot
    */
-  getPerformanceSnapshot(): Record<string, any> {
+  getPerformanceSnapshot(): Record<string, unknown> {
     if (!this.state.enabled || !this.state.showPerformanceMetrics) {
       return {};
     }

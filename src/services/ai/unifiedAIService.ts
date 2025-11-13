@@ -1,211 +1,208 @@
 /**
- * Unified AI Service with Model Selection
+ * Unified AI Service - Facade with Automatic Fallback
  *
- * Routes AI requests to the appropriate service (Grok or Gemini) based on user selection
+ * Implements UnifiedAIService interface from seams.ts
+ * Provides automatic fallback chain: Grok → Mock
  */
 
-import { useAIModelStore } from '../../stores/aiModelStore';
-import { xaiClient } from './grokService';
-import { generateConceptFlow, nextStepFlow } from './genkit';
-import { GameCommand, GenreConfig, WorldState, StorySegment } from '../../types';
-import { AI_MODELS } from '../config';
-import { extractJSONArray, extractJSONObject } from '../../utils/jsonExtractor';
 import {
-  COSMIC_HORROR_ENTITY_SYSTEM,
-  buildGrokConceptPrompt,
-  buildGrokNextStepPrompt,
-} from './promptTemplates';
+  UnifiedAIService,
+  AIService,
+  AIProvider,
+  AIRequest,
+  AIResponse,
+  ProviderTestResult,
+} from '../../core/types/seams';
+import { grokService } from './grokService';
+import { mockService } from './mockService';
 
-// Helper to get the full, current game state for fallback operations
-function getFullGameState(playerChoice: string, worldState: WorldState, storyHistory: StorySegment[]) {
-  return {
-    playerChoice,
-    worldState,
-    history: storyHistory,
-    genreConfig: worldState.genreConfig,
-  };
+export class UnifiedAIServiceImpl implements UnifiedAIService {
+  private primaryProvider: AIProvider = AIProvider.GROK;
+  private fallbackChain: AIProvider[] = [
+    AIProvider.GROK,
+    AIProvider.MOCK,
+  ];
+
+  private services: Map<AIProvider, AIService> = new Map<AIProvider, AIService>([
+    [AIProvider.GROK, grokService],
+    [AIProvider.MOCK, mockService],
+  ] as Array<[AIProvider, AIService]>);
+
+  /**
+   * Set the primary provider (first choice)
+   */
+  setPrimaryProvider(provider: AIProvider): void {
+    this.primaryProvider = provider;
+    console.log(`Primary AI provider set to: ${provider}`);
+  }
+
+  /**
+   * Set custom fallback chain
+   */
+  setFallbackChain(providers: AIProvider[]): void {
+    if (providers.length === 0) {
+      throw new Error('Fallback chain cannot be empty');
+    }
+    this.fallbackChain = providers;
+    console.log(`Fallback chain set to: ${providers.join(' → ')}`);
+  }
+
+  /**
+   * Generate with primary provider only (no fallback)
+   */
+  async generate(request: Omit<AIRequest, 'provider'>): Promise<AIResponse> {
+    const service = this.getService(this.primaryProvider);
+    const fullRequest: AIRequest = {
+      ...request,
+      provider: this.primaryProvider,
+    };
+
+    return await service.generateResponse(fullRequest);
+  }
+
+  /**
+   * Generate with automatic fallback through the chain
+   */
+  async generateWithFallback(request: Omit<AIRequest, 'provider'>): Promise<AIResponse> {
+    const errors: Array<{ provider: AIProvider; error: string }> = [];
+
+    for (const provider of this.fallbackChain) {
+      try {
+        const service = this.getService(provider);
+
+        // Check if service is available
+        const isAvailable = await service.isAvailable();
+        if (!isAvailable) {
+          console.warn(`Provider ${provider} is not available, trying next in chain`);
+          errors.push({ provider, error: 'Provider not available' });
+          continue;
+        }
+
+        // Try to generate
+        console.log(`Attempting generation with ${provider}...`);
+        const fullRequest: AIRequest = {
+          ...request,
+          provider,
+        };
+
+        const response = await service.generateResponse(fullRequest);
+
+        // Validate response has commands
+        if (!response.commands || response.commands.length === 0) {
+          console.warn(`Provider ${provider} returned no commands, trying next`);
+          errors.push({ provider, error: 'No commands returned' });
+          continue;
+        }
+
+        console.log(`Successfully generated with ${provider}`);
+        return response;
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        console.error(`Provider ${provider} failed:`, errorMessage);
+        errors.push({ provider, error: errorMessage });
+      }
+    }
+
+    // All providers failed
+    const errorSummary = errors.map(e => `${e.provider}: ${e.error}`).join(', ');
+    throw new Error(`All AI providers failed. Errors: ${errorSummary}`);
+  }
+
+  /**
+   * Test a specific provider
+   */
+  async testProvider(provider: AIProvider): Promise<ProviderTestResult> {
+    const startTime = Date.now();
+    const service = this.getService(provider);
+
+    try {
+      const isAvailable = await service.isAvailable();
+      const latency = Date.now() - startTime;
+
+      if (!isAvailable) {
+        return {
+          provider,
+          available: false,
+          latency,
+          error: 'Provider reported unavailable',
+        };
+      }
+
+      return {
+        provider,
+        available: true,
+        latency,
+      };
+    } catch (error) {
+      const latency = Date.now() - startTime;
+      return {
+        provider,
+        available: false,
+        latency,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+    }
+  }
+
+  /**
+   * Test all providers
+   */
+  async testAllProviders(): Promise<Map<AIProvider, ProviderTestResult>> {
+    const results = new Map<AIProvider, ProviderTestResult>();
+
+    // Test all providers in parallel
+    const tests = Array.from(this.services.keys()).map(async (provider) => {
+      const result = await this.testProvider(provider);
+      results.set(provider, result);
+    });
+
+    await Promise.all(tests);
+
+    return results;
+  }
+
+  /**
+   * Get service instance for a provider
+   */
+  private getService(provider: AIProvider): AIService {
+    const service = this.services.get(provider);
+    if (!service) {
+      throw new Error(`No service found for provider: ${provider}`);
+    }
+    return service;
+  }
 }
 
+// Export singleton instance
+export const unifiedAIService = new UnifiedAIServiceImpl();
+
 /**
- * Unified text generation that routes to the selected AI model
+ * Legacy wrapper functions for backward compatibility
+ */
+
+/**
+ * Generate AI response with selected model (alias for generateWithFallback)
  */
 export async function generateWithSelectedModel(
-  systemInstruction: string,
-  prompt: string,
-  worldState: WorldState,
-  storyHistory: StorySegment[],
-  useCase: 'concept' | 'story' | 'summary' = 'story'
-): Promise<GameCommand[]> {
-  const selectedModel = useAIModelStore.getState().getSelectedModel();
-  const gameState = getFullGameState(prompt, worldState, storyHistory);
-
-  if (!selectedModel) {
-    console.warn('No AI model selected, falling back to Gemini');
-    return generateWithGemini(gameState);
-  }
-
-  try {
-    if (selectedModel.id === 'grok-4-fast') {
-      console.log('Using X.AI/grok-4-fast for text generation');
-      return await generateWithGrok(systemInstruction, prompt, gameState);
-    } else {
-      console.log('Using Gemini for text generation');
-      return await generateWithGemini(gameState);
-    }
-  } catch (error) {
-    console.error(`${selectedModel.name} failed, falling back to Gemini:`, error);
-    return await generateWithGemini(gameState);
-  }
+  request: Omit<AIRequest, 'provider'>
+): Promise<AIResponse> {
+  return unifiedAIService.generateWithFallback(request);
 }
 
 /**
- * Generate with X.AI Grok-4 Fast
- */
-async function generateWithGrok(
-  systemInstruction: string,
-  prompt: string,
-  gameState: any, // Using 'any' to avoid circular dependency issues with full type import
-  useCase: 'concept' | 'story' | 'summary' = 'story'
-): Promise<GameCommand[]> {
-  try {
-    const config = getConfigForUseCase(useCase);
-    
-    console.log('Generating with X.AI grok-4-fast:', { useCase, config });
-    const result = await xaiClient.generateText(systemInstruction, prompt, {
-      temperature: config.temperature,
-      maxTokens: config.maxOutputTokens,
-      topP: config.topP,
-      enableThinking: config.enableThinking,
-    });
-
-    const content = result.content;
-    const commands = extractJSONArray(content, true); // Clean markdown and extract array
-
-    if (!Array.isArray(commands)) {
-      console.error('Invalid command format from X.AI:', commands);
-      throw new Error('Invalid command format from X.AI');
-    }
-
-    console.log('X.AI generated', commands.length, 'commands');
-    return commands;
-  } catch (error) {
-    console.warn('X.AI Grok generation failed, falling back to Gemini:', error);
-    return generateWithGemini(gameState);
-  }
-}
-
-/**
- * Generate with Gemini (fallback)
- */
-async function generateWithGemini(gameState: {
-  playerChoice: string;
-  worldState: WorldState;
-  history: StorySegment[];
-  genreConfig: GenreConfig;
-}): Promise<GameCommand[]> {
-  console.log('Executing Gemini fallback...');
-  return await nextStepFlow(gameState);
-}
-
-/**
- * Get configuration for use case
- */
-function getConfigForUseCase(useCase: 'concept' | 'story' | 'summary') {
-  switch (useCase) {
-    case 'concept':
-      return AI_MODELS.CONCEPT_GENERATION;
-    case 'summary':
-      return AI_MODELS.SUMMARIZATION;
-    case 'story':
-    default:
-      return AI_MODELS.STORY_PROGRESSION;
-  }
-}
-
-/**
- * Enhanced concept generation with selected model
+ * Generate concept with selected model
  */
 export async function generateConceptWithSelectedModel(
-  genreConfig: GenreConfig
-): Promise<{ protagonist: string; setting: string; dilemma: string }> {
-  const selectedModel = useAIModelStore.getState().getSelectedModel();
-  
-  if (selectedModel?.id === 'grok-4-fast') {
-    console.log('Generating concept with X.AI/grok-4-fast');
-    return await generateConceptWithGrok(genreConfig);
-  } else {
-    console.log('Generating concept with Gemini');
-    return await generateConceptFlow(genreConfig);
-  }
+  request: Omit<AIRequest, 'provider'>
+): Promise<AIResponse> {
+  return unifiedAIService.generateWithFallback(request);
 }
 
 /**
- * Concept generation with X.AI Grok-4
- */
-async function generateConceptWithGrok(
-  genreConfig: GenreConfig
-): Promise<{ protagonist: string; setting: string; dilemma: string }> {
-  // Use centralized prompt templates for Grok
-  const systemInstruction = `${COSMIC_HORROR_ENTITY_SYSTEM}\n\nENHANCED REASONING DIRECTIVE: You are now powered by X.AI Grok-4 Fast Reasoning with 2 million token context...`;
-  const prompt = buildGrokConceptPrompt(genreConfig.name, genreConfig.style);
-
-  try {
-    const result = await xaiClient.generateText(systemInstruction, prompt, {
-      temperature: AI_MODELS.CONCEPT_GENERATION.temperature,
-      maxTokens: 4096,
-      topP: AI_MODELS.CONCEPT_GENERATION.topP,
-      enableThinking: true,
-    });
-
-    const content = result.content;
-    const json = extractJSONObject(content, true);
-
-    return {
-      protagonist: json.protagonist || 'A confused individual',
-      setting: json.setting || 'A reality that cannot be trusted',
-      dilemma: json.dilemma || 'Every choice leads to horror',
-    };
-  } catch (error) {
-    console.warn('X.AI concept generation failed, falling back to Gemini:', error);
-    return await generateConceptFlow(genreConfig);
-  }
-}
-
-/**
- * Next step generation with selected model
+ * Generate next step with selected model
  */
 export async function generateNextStepWithSelectedModel(
-  playerChoice: string,
-  worldState: WorldState,
-  storyHistory: StorySegment[],
-  genreConfig: GenreConfig
-): Promise<GameCommand[]> {
-  const selectedModel = useAIModelStore.getState().getSelectedModel();
-  const gameState = getFullGameState(playerChoice, worldState, storyHistory);
-
-  if (selectedModel?.id === 'grok-4-fast') {
-    console.log('Generating next step with X.AI/grok-4-fast');
-    return await generateNextStepWithGrok(playerChoice, worldState, storyHistory, genreConfig);
-  } else {
-    console.log('Generating next step with Gemini');
-    return await generateWithGemini(gameState);
-  }
-}
-
-/**
- * Next step generation with X.AI Grok-4
- */
-async function generateNextStepWithGrok(
-  playerChoice: string,
-  worldState: WorldState,
-  storyHistory: StorySegment[],
-  genreConfig: GenreConfig
-): Promise<GameCommand[]> {
-  // Use centralized prompt templates for Grok
-  const systemInstruction = `${COSMIC_HORROR_ENTITY_SYSTEM}\n\nX.AI GROK-4 ENHANCED REASONING: You have 2 million token context...`;
-  const prompt = buildGrokNextStepPrompt(worldState, storyHistory, playerChoice);
-
-  const gameState = getFullGameState(playerChoice, worldState, storyHistory);
-
-  return await generateWithGrok(systemInstruction, prompt, gameState, 'story');
+  request: Omit<AIRequest, 'provider'>
+): Promise<AIResponse> {
+  return unifiedAIService.generateWithFallback(request);
 }

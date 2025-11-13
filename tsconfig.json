@@ -32,7 +32,10 @@
         "node_modules",
         "**/*.test.ts",
         "**/*.test.tsx",
-        "**/__tests__/**"
+        "**/*.spec.ts",
+        "**/*.spec.tsx",
+        "**/__tests__/**",
+        "**/__mocks__/**"
     ],
     "references": [
         {

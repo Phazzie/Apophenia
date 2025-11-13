@@ -57,6 +57,7 @@ const StartScreen: React.FC = () => {
       id: crypto.randomUUID(),
       text: settingText,
       images: {},
+      timestamp: Date.now(),
     });
 
     setGameState(GameState.PLAYING);
@@ -98,11 +99,13 @@ const StartScreen: React.FC = () => {
       useWorldStateStore.getState().setWorldState(demoWorldState);
       useStoryHistoryStore.getState().replaceStoryHistory(demoStoryHistory);
 
-      // Apply the theme from the genre config
-      if (demoWorldState.genreConfig) {
-        Object.entries(demoWorldState.genreConfig.theme).forEach(([key, value]) => {
-          document.documentElement.style.setProperty(key, value as string);
-        });
+      // Apply the visual style from the genre config
+      if (demoWorldState.genreConfig?.visualStyle) {
+        const { visualStyle } = demoWorldState.genreConfig;
+        document.documentElement.style.setProperty('--background-color', visualStyle.primaryColor);
+        document.documentElement.style.setProperty('--text-color', visualStyle.secondaryColor);
+        document.documentElement.style.setProperty('--accent-color', visualStyle.accentColor);
+        document.documentElement.style.setProperty('--font-family', visualStyle.fontFamily);
       }
 
       // Navigate to the game screen

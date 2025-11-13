@@ -4,7 +4,7 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Create mock client for when auth is disabled
-const createMockClient = (): any => {
+const createMockClient = (): SupabaseClient => {
   console.warn('Supabase credentials not configured. Auth features disabled.');
   return {
     auth: {
@@ -19,7 +19,7 @@ const createMockClient = (): any => {
       signInWithPassword: async () => ({ data: null, error: new Error('Auth disabled') }),
       signOut: async () => ({ data: null, error: null }),
     }
-  };
+  } as unknown as SupabaseClient;
 };
 
 // Export either real or mock client

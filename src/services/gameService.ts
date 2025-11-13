@@ -1,365 +1,275 @@
-import { Command, GenreConfig, StorySegment, WorldState } from '../types';
-import {
-    generateImageFlow,
-    processAdvancedImageGeneration,
-} from './ai/secureGenkit';
-import {
-    generateConceptWithSelectedModel,
-    generateNextStepWithSelectedModel,
-} from './ai/unifiedAIService';
-import { summarizeHistoryFlow } from './flows/summaryFlow';
-import {
-  temporalRevision,
-  metaConsciousness,
-  quantumNarrative,
-  adaptiveHorror,
-  realityCorruption,
-  neuralEchoChambers,
-  semanticArchaeology,
-  narrativeDNA,
-  fifthWallBreaker,
-} from './ai/engines';
-import type { RealityCorruptionResult } from './ai/engines/RealityCorruptionEngine';
-
-type NarrativeEvolution = {
-  generation: number;
-  psychProfile: string;
-  hiddenMotivations: string[];
-};
-
 /**
- * Revolutionary Enhanced Game Service
- * Integrates cutting-edge AI features for unprecedented cosmic horror experience
+ * GAME SERVICE
+ *
+ * High-level game orchestration service that wires together:
+ * - Flow coordination (descent, unraveling)
+ * - Command execution
+ * - State updates
+ * - Engine processing
+ *
+ * This is the main entry point for game logic called by App.tsx.
  */
 
-// Helper function for Neural Echo Chambers
-const _processNeuralEchoes = (playerChoice: string, worldState: WorldState) => {
-  console.log('Processing neural echo chambers...');
-  neuralEchoChambers.initializeFromPersistence();
-  neuralEchoChambers.recordChoice(playerChoice, 'game progression', worldState);
-  return neuralEchoChambers.generateEchoPrompt(playerChoice);
-};
+import {
+  Choice,
+  GameState,
+  GenreConfig,
+  AIProvider,
+  Command,
+  FlowResult,
+} from '../core/types/seams';
+import { flowCoordinator } from '../flows';
+import { CommandQueueImpl } from '../core/commands/CommandQueue';
+import {
+  useGameStateStore,
+  useWorldStateStore,
+  useHistoryStore,
+  usePlayerProfileStore,
+} from '../core/state';
+import { getDefaultGenre } from '../config/genres';
 
-// Helper function for Semantic Archaeology and Adaptive Horror analysis
-const _analyzePlayerChoice = async (
-  playerChoice: string,
-  worldState: WorldState,
-  history: StorySegment[]
-) => {
-  console.log('Performing semantic choice archaeology and adaptive horror analysis...');
-  const allChoices: string[] = [playerChoice];
-  const semanticAnalysis = semanticArchaeology.analyzeChoiceSemantics(playerChoice, allChoices);
-  await adaptiveHorror.analyzePlayerChoice(
-    playerChoice,
-    'game progression',
-    worldState,
-    history
-  );
-  return semanticAnalysis;
-};
+/**
+ * Initialize a new game
+ *
+ * Sets up initial world state, resets stores, and transitions to GENERATING.
+ */
+export async function initializeGame(
+  genre?: GenreConfig,
+  provider: AIProvider = AIProvider.MOCK
+): Promise<void> {
+  console.log('🎮 Initializing new game...', { genre: genre?.id, provider });
 
-// Helper function for Temporal Revision and Quantum Narrative
-const _handleTemporalAndQuantumShifts = async (
-  playerChoice: string,
-  history: StorySegment[],
-  worldState: WorldState
-) => {
-  console.log('Processing temporal revision and quantum narrative shifts...');
-  const revisedHistory = await temporalRevision.reviseHistory(
-    playerChoice,
-    history,
-    worldState
-  );
-  const quantumResult = await quantumNarrative.processQuantumChoice(
-    playerChoice,
-    revisedHistory,
-    worldState
-  );
-  return { revisedHistory, quantumResult };
-};
+  // Reset all stores
+  useGameStateStore.getState().reset();
+  useWorldStateStore.getState().reset();
+  useHistoryStore.getState().reset();
+  usePlayerProfileStore.getState().reset();
 
-// Helper function for Meta-Consciousness and Reality Corruption
-const _processMetaAndCorruption = async (
-  history: StorySegment[],
-  playerChoice: string,
-  worldState: WorldState
-) => {
-  console.log('Checking for meta-consciousness and reality corruption...');
-  const metaMessage = await metaConsciousness.checkForMetaEvent(
-    history,
-    worldState
-  );
-  const corruptionResult = await realityCorruption.processCorruption(
-    playerChoice,
-    worldState,
-    history
-  );
-  return { metaMessage, corruptionResult };
-};
+  // Set genre
+  const selectedGenre = genre || getDefaultGenre();
 
-// Helper function for Breaking the Fifth Wall
-const _handleFifthWall = (corruptionResult: RealityCorruptionResult, worldState: WorldState) => {
-    console.log('Processing fifth wall breaking effects...');
-    const totalCorruption = corruptionResult.corruptionLevel + (worldState.systemHealth ? (100 - worldState.systemHealth) / 100 * 0.5 : 0);
-    if (totalCorruption > 0.3) {
-      fifthWallBreaker.activateBreakage(totalCorruption, worldState);
-    } else {
-      fifthWallBreaker.deactivateBreakage();
-    }
-};
-
-// Helper function for Narrative DNA and prompt generation
-const _preparePersonalizedPrompt = async (
-  playerChoice: string,
-  semanticAnalysis: { semanticInsight: string },
-  echoMessage: string | null,
-  worldState: WorldState,
-  storyHistory: StorySegment[]
-): Promise<string> => {
-  console.log('Generating comprehensive personalized horror prompt...');
-
-  let personalizedPrompt = await adaptiveHorror.generatePersonalizedHorror(
-    `Player chose: ${playerChoice}. Continue the cosmic horror narrative.`,
-    worldState,
-    storyHistory
-  );
-
-  personalizedPrompt += ` ${semanticAnalysis.semanticInsight}`;
-  personalizedPrompt = narrativeDNA.generateAdaptivePrompt(personalizedPrompt);
-
-  if (echoMessage) {
-    personalizedPrompt += ` [ECHO CONTEXT]: ${echoMessage}`;
-  }
-
-  return personalizedPrompt;
-};
-
-// Utility to time an async request
-const _timeAIRequest = async <T>(request: () => Promise<T>): Promise<{ result: T; duration: number }> => {
-  const startTime = Date.now();
-  const result = await request();
-  const endTime = Date.now();
-  return { result, duration: endTime - startTime };
-};
-
-export const getNextStep = async (
-  playerChoice: string,
-  worldState: WorldState,
-  history: StorySegment[],
-  genreConfig: GenreConfig
-): Promise<{
-  commands: Command[];
-  revisedHistory?: StorySegment[];
-  metaMessage?: string;
-  quantumShift?: boolean;
-  corruptionEffects?: RealityCorruptionResult;
-  echoMessage?: string;
-  semanticInsight?: string;
-  narrativeEvolution?: NarrativeEvolution;
-}> => {
-  console.log('Processing next step for player choice:', playerChoice);
-  console.log('World state:', { protagonist: worldState.protagonist, psychologicalStatus: worldState.psychologicalStatus });
-  console.log('Story history length:', history.length);
-
-  // Track player choice in analytics
-  analyticsService.trackChoice(playerChoice, history.length, {
-    horrorIntensity: worldState.horrorIntensity || 0,
-    psychologicalStatus: worldState.psychologicalStatus
+  // Update world state with genre
+  useWorldStateStore.getState().updateWorld({
+    genreConfig: selectedGenre,
+    protagonist: 'Unknown',  // Will be generated
+    setting: 'Unknown',      // Will be generated
+    dilemma: 'Unknown',      // Will be generated
   });
 
+  // Transition to GENERATING state
+  await flowCoordinator.transitionTo(GameState.GENERATING);
+
+  // Set generating flag
+  useGameStateStore.getState().setGenerating(true);
+
+  console.log('✅ Game initialized');
+}
+
+/**
+ * Process a player choice through the game flow
+ *
+ * This is the main game loop function:
+ * 1. Get current flow (descent/unraveling)
+ * 2. Process choice through flow
+ * 3. Execute resulting commands
+ * 4. Handle state transitions
+ */
+export async function processPlayerChoice(choice: Choice): Promise<void> {
+  console.log('🎯 Processing player choice:', choice.text);
+
   try {
-    const echoMessage = _processNeuralEchoes(playerChoice, worldState);
-    const semanticAnalysis = await _analyzePlayerChoice(playerChoice, worldState, history);
-    
-    const { revisedHistory, quantumResult } = await _handleTemporalAndQuantumShifts(
-      playerChoice,
-      history,
-      worldState
-    );
-    
-    const { metaMessage, corruptionResult } = await _processMetaAndCorruption(
-      quantumResult.history,
-      playerChoice,
-      worldState
-    );
+    // Mark as generating
+    useGameStateStore.getState().setGenerating(true);
 
-    _handleFifthWall(corruptionResult, worldState);
+    // Get current flow
+    const flow = flowCoordinator.getCurrentFlow();
+    console.log(`📋 Using flow: ${flow.name}`);
 
-    const personalizedPrompt = await _preparePersonalizedPrompt(
-      playerChoice,
-      semanticAnalysis,
-      echoMessage,
-      worldState,
-      quantumResult.history
-    );
-    
-    console.log('Calling AI service for next step generation...');
-    const { result: commands, duration: responseTimeMs } = await _timeAIRequest(() =>
-      generateNextStepWithSelectedModel(
-        personalizedPrompt,
-        worldState,
-        quantumResult.history,
-        genreConfig
-      )
-    );
+    // Process choice through flow
+    const result: FlowResult = await flow.processChoice(choice);
 
-    console.log(`AI response received in ${responseTimeMs}ms. Evolving narrative DNA...`);
-    narrativeDNA.evolveNarrative(playerChoice, responseTimeMs, worldState);
-
-    // Track horror triggers if identified
-    if (semanticAnalysis.psychProfile) {
-      analyticsService.trackHorrorTrigger(
-        semanticAnalysis.psychProfile,
-        worldState.horrorIntensity || 0
-      );
+    // Execute commands
+    if (result.commands.length > 0) {
+      await executeCommands(result.commands);
     }
 
-    console.log('Generated', commands.length, 'commands for next step');
-    
-    return {
-      commands,
-      revisedHistory: revisedHistory !== history ? revisedHistory : undefined,
-      metaMessage: metaMessage || undefined,
-      quantumShift: quantumResult.quantumShift,
-      corruptionEffects: corruptionResult.corruptionLevel > 0 ? corruptionResult : undefined,
-      echoMessage: echoMessage || undefined,
-      semanticInsight: semanticAnalysis.semanticInsight,
-      narrativeEvolution: {
-        generation: narrativeDNA.getGeneration(),
-        psychProfile: semanticAnalysis.psychProfile,
-        hiddenMotivations: semanticAnalysis.hiddenMotivations,
+    // Apply world updates
+    if (result.worldUpdates && Object.keys(result.worldUpdates).length > 0) {
+      useWorldStateStore.getState().updateWorld(result.worldUpdates);
+    }
+
+    // Handle state transition
+    if (result.nextState) {
+      console.log(`🔄 Transitioning to: ${result.nextState}`);
+      await flowCoordinator.transitionTo(result.nextState);
+    }
+
+    // Check if flow determines we should transition
+    const flowContext = {
+      worldState: useWorldStateStore.getState().worldState,
+      recentHistory: useHistoryStore.getState().getRecent(5),
+      playerProfile: usePlayerProfileStore.getState().profile,
+      currentChoice: choice,
+    };
+
+    const shouldTransition = flow.shouldTransition(flowContext);
+    if (shouldTransition) {
+      console.log(`🔄 Flow-triggered transition to: ${shouldTransition}`);
+      await flowCoordinator.transitionTo(shouldTransition);
+    }
+
+    console.log('✅ Choice processed successfully');
+  } catch (error) {
+    console.error('❌ Error processing choice:', error);
+
+    // Show error to player
+    useGameStateStore.getState().setChoices([
+      {
+        id: 'error-retry',
+        text: 'Something went wrong. Try again?',
+        isIntrusive: false,
       },
-    };
-  } catch (error) {
-    console.error('Error in getNextStep:', error);
-    console.error('Player choice that caused error:', playerChoice);
-    console.error('World state at error:', worldState);
-    
-    // Track error in analytics
-    analyticsService.trackError(
-      'getNextStep_failure',
-      error instanceof Error ? error.message : 'Unknown error',
-      { playerChoice, worldStateSnapshot: JSON.stringify(worldState) }
-    );
-    
-    // Return fallback error commands with revolutionary features structure
-    return {
-      commands: [
-        {
-          type: 'displayText',
-          payload: {
-            content: "The fabric of reality fractures... your choices have consequences beyond comprehension.",
-            segmentId: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `seg-${Date.now()}`
-          }
-        },
-        {
-          type: 'displayChoices',
-          payload: {
-            choices: [
-              { text: "Try to regain focus", isIntrusive: false },
-              { text: "Embrace the chaos", isIntrusive: false },
-              { text: "Something is very wrong here...", isIntrusive: true }
-            ]
-          }
-        }
-      ],
-      revisedHistory: undefined,
-      metaMessage: undefined,
-      quantumShift: undefined,
-      corruptionEffects: undefined,
-    };
+    ]);
+  } finally {
+    // Always clear generating flag
+    useGameStateStore.getState().setGenerating(false);
   }
-};
-
-export const summarizeHistory = async (
-  worldState: WorldState,
-  lastSegment: StorySegment
-): Promise<string> => {
-  return await summarizeHistoryFlow(worldState, lastSegment);
-};
-
-export const generateConcept = async (
-  genreConfig: GenreConfig
-): Promise<{ protagonist: string; setting: string; dilemma: string }> => {
-  console.log('Generating concept for genre:', genreConfig.name);
-  
-  try {
-    const concept = await generateConceptWithSelectedModel(genreConfig);
-    console.log('Concept generated successfully:', concept);
-    return concept;
-  } catch (error) {
-    console.error('Error generating concept:', error);
-    console.error('Genre config:', genreConfig);
-    
-    // Return a more specific fallback concept based on the genre
-    console.warn(`AI concept generation failed for genre "${genreConfig.name}". Using a genre-specific fallback.`);
-    return {
-      protagonist: `A weary soul in a world of ${genreConfig.name.toLowerCase()}`,
-      setting: `A place defined by ${genreConfig.style.toLowerCase()}, where shadows linger longer than they should`,
-      dilemma: 'To seek the truth is to risk unraveling your own sanity.'
-    };
-  }
-};
-
-export const generateImage = async (prompt: string): Promise<string> => {
-  const startTime = Date.now();
-  try {
-    const imageData = await generateImageFlow(prompt);
-    const duration = Date.now() - startTime;
-    
-    // Track successful image generation
-    analyticsService.trackImageGeneration(prompt, duration, false, true);
-    
-    return imageData;
-  } catch (error) {
-    const duration = Date.now() - startTime;
-    
-    // Track failed image generation
-    analyticsService.trackImageGeneration(prompt, duration, false, false);
-    analyticsService.trackError(
-      'image_generation_failure',
-      error instanceof Error ? error.message : 'Unknown error',
-      { prompt }
-    );
-    
-    throw error; // Re-throw for upstream handling
-  }
-};
+}
 
 /**
- * Revolutionary multi-variation image generation
- * Generates multiple horror image variations for enhanced immersion
+ * Execute a queue of commands sequentially
+ *
+ * Uses CommandQueue to execute all commands in order.
  */
-export const generateMultipleImages = async (
-  prompt: string, 
-  variationCount: number = 3
-): Promise<string[]> => {
-  const variations = await Promise.all(
-    Array(variationCount).fill(0).map((_, index) => 
-      processAdvancedImageGeneration(
-        `${prompt}, variation ${index + 1}, cosmic horror aesthetic`
-      )
-    )
-  );
-  
-  return variations;
-};
+async function executeCommands(commands: Command[]): Promise<void> {
+  console.log(`⚙️  Executing ${commands.length} commands...`);
 
-import { generateDirectorAnalysis } from './ai/director';
-import { analyticsService } from './analyticsService';
+  const queue = new CommandQueueImpl();
+  queue.enqueue(commands);
+
+  const results = await queue.executeSequential();
+
+  const failures = results.filter(r => !r.success);
+  if (failures.length > 0) {
+    console.warn(`⚠️  ${failures.length} commands failed:`, failures);
+  }
+
+  console.log(`✅ Executed ${results.filter(r => r.success).length}/${results.length} commands`);
+}
 
 /**
- * Advanced AI Director functionality
- * Uses Gemini 2.5 Pro thinking mode for sophisticated narrative planning
+ * Start the initial game generation
+ *
+ * Called after initializeGame to actually generate the opening.
  */
-export const getAIDirectorAnalysis = async (
-  worldState: WorldState,
-  recentChoices: string[]
-): Promise<{
-  psychologicalProfile: string;
-  narrativeRecommendations: string[];
-  horrorIntensityAnalysis: string;
-  playerEngagementLevel: string;
-}> => {
-  return generateDirectorAnalysis(worldState, recentChoices);
-};
+export async function startGameGeneration(): Promise<void> {
+  console.log('🎬 Starting game generation...');
+
+  try {
+    // Get current flow and initialize it
+    const flow = flowCoordinator.getCurrentFlow();
+    const worldState = useWorldStateStore.getState().worldState;
+
+    await flow.initialize(worldState.genreConfig);
+
+    // Transition to DESCENDING
+    await flowCoordinator.transitionTo(GameState.DESCENDING);
+
+    console.log('✅ Game generation complete');
+  } catch (error) {
+    console.error('❌ Game generation failed:', error);
+
+    // Return to menu on failure
+    await flowCoordinator.transitionTo(GameState.MENU);
+  } finally {
+    useGameStateStore.getState().setGenerating(false);
+  }
+}
+
+/**
+ * Save current game state
+ *
+ * Zustand persist middleware handles this automatically,
+ * but this function can trigger manual saves if needed.
+ */
+export function saveGame(): void {
+  console.log('💾 Saving game...');
+
+  // State is auto-saved via persist middleware
+  // This is a manual trigger for debugging/testing
+
+  console.log('✅ Game saved');
+}
+
+/**
+ * Reset game to menu
+ */
+export async function resetGame(): Promise<void> {
+  console.log('🔄 Resetting game...');
+
+  // Reset all stores
+  useGameStateStore.getState().reset();
+  useWorldStateStore.getState().reset();
+  useHistoryStore.getState().reset();
+  usePlayerProfileStore.getState().reset();
+
+  // Return to menu
+  await flowCoordinator.transitionTo(GameState.MENU);
+
+  console.log('✅ Game reset');
+}
+
+/**
+ * Get current game statistics
+ */
+export function getGameStats() {
+  const worldState = useWorldStateStore.getState().worldState;
+  const segments = useHistoryStore.getState().segments;
+  const profile = usePlayerProfileStore.getState().profile;
+
+  return {
+    corruptionLevel: worldState.corruptionLevel,
+    horrorIntensity: worldState.horrorIntensity,
+    systemHealth: worldState.systemHealth,
+    psychologicalStatus: worldState.psychologicalStatus,
+    totalChoices: profile.engagementMetrics.totalChoices,
+    totalSegments: segments.length,
+  };
+}
+
+/**
+ * Generate image (stub for backward compatibility)
+ */
+export async function generateImage(prompt: string): Promise<string> {
+  const { imageGenerationService } = await import('./ai/imageGeneration');
+  const result = await imageGenerationService.generateImageVariations(prompt, 1);
+  return result.variations[0]?.url || '';
+}
+
+/**
+ * Generate multiple images (stub for backward compatibility)
+ */
+export async function generateMultipleImages(prompts: string[]): Promise<string[]> {
+  return Promise.all(prompts.map(prompt => generateImage(prompt)));
+}
+
+/**
+ * Generate concept (re-export)
+ */
+export { generateConceptFlow as generateConcept } from './ai/genkit';
+
+/**
+ * Get next step (stub for backward compatibility)
+ */
+export async function getNextStep(choice: Choice): Promise<void> {
+  // This is handled by processPlayerChoice now
+  return processPlayerChoice(choice);
+}
+
+/**
+ * Summarize history (stub for backward compatibility)
+ */
+export async function summarizeHistory(): Promise<string> {
+  const segments = useHistoryStore.getState().segments;
+  return segments.map(s => s.text).join('\n\n');
+}

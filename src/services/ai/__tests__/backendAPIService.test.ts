@@ -2,7 +2,7 @@ import { BackendAPIService } from '../backendAPIService';
 
 // Mock fetch for testing
 const mockFetch = jest.fn();
-(global as any).fetch = mockFetch;
+global.fetch = mockFetch as unknown as typeof fetch;
 
 describe('BackendAPIService', () => {
   let service: BackendAPIService;

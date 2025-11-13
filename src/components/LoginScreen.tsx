@@ -16,8 +16,9 @@ const LoginScreen: React.FC = () => {
       await signUp(email, password);
       // User will be logged in automatically after sign up and email confirmation
       // You might want to show a message to check their email
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'An error occurred during sign up';
+      setError(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -29,8 +30,9 @@ const LoginScreen: React.FC = () => {
     setError(null);
     try {
       await signIn(email, password);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'An error occurred during sign in';
+      setError(message);
     } finally {
       setIsSubmitting(false);
     }

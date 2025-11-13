@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import type React from 'react';
 
-// Enums
+// Enums (aligned with seams.ts)
 export enum GameState {
   MENU,
   GENERATING_CONCEPT,
@@ -10,23 +10,33 @@ export enum GameState {
   ENDED,
 }
 
+export enum PsychologicalStatus {
+  STABLE = 'stable',
+  UNEASY = 'uneasy',
+  PARANOID = 'paranoid',
+  FRAGMENTED = 'fragmented',
+  SHATTERED = 'shattered'
+}
+
 // Zod Schemas as the Single Source of Truth
 
-// Core Game Types
+// Core Game Types (aligned with seams.ts canonical definitions)
+export const visualStyleSchema = z.object({
+  primaryColor: z.string(),
+  secondaryColor: z.string(),
+  accentColor: z.string(),
+  fontFamily: z.string(),
+  atmosphere: z.enum(['dark', 'ethereal', 'oppressive', 'fragmented']),
+});
+
 export const genreConfigSchema = z.object({
   id: z.string(),
   name: z.string(),
   description: z.string(),
-  style: z.string(),
-  theme: z.object({
-    '--background-color': z.string(),
-    '--text-color': z.string(),
-    '--accent-color': z.string(),
-    '--font-family': z.string(),
-  }),
-  startScreenImagePrompt: z.string(),
-  conceptPrompt: z.string(),
-  aiSystemInstruction: z.string(),
+  systemPrompt: z.string(),
+  themes: z.array(z.string()),
+  fearCategories: z.array(z.string()),
+  visualStyle: visualStyleSchema,
 });
 
 export const worldStateSchema = z.object({
@@ -34,27 +44,24 @@ export const worldStateSchema = z.object({
   setting: z.string(),
   dilemma: z.string(),
   summary: z.string(),
-  psychologicalStatus: z.enum(['Stable', 'Uneasy', 'Paranoid', 'Fragmented']),
+  psychologicalStatus: z.nativeEnum(PsychologicalStatus),
   systemHealth: z.number(),
   // The horrorIntensity score (0-10) dynamically adjusts the game's difficulty and tone.
   // It is calculated based on player choices and narrative events.
   horrorIntensity: z.number().min(0).max(10).default(0),
-  uiDistortion: z.object({
-    transform: z.string(),
-    filter: z.string(),
-    transition: z.string(),
-  }),
+  corruptionLevel: z.number().min(0).max(100).default(0),
   genreConfig: genreConfigSchema,
 });
 
 export const storySegmentSchema = z.object({
   id: z.string(),
   text: z.string(),
+  timestamp: z.number(),
   images: z.object({
     main: z.string().optional(),
     inset: z.array(z.string()).optional(),
     mainStatus: z.enum(['loading', 'loaded', 'failed', 'retrying']).optional(),
-  }),
+  }).optional(),
   // Revolutionary features
   isRevised: z.boolean().optional(),
   originalText: z.string().optional(),
@@ -64,10 +71,13 @@ export const storySegmentSchema = z.object({
 });
 
 export const choiceSchema = z.object({
+  id: z.string(),
   text: z.string(),
   isIntrusive: z.boolean(),
   // Optional segment identifier for command routing (e.g., retry-last-action)
   segmentId: z.string().optional(),
+  consequence: z.string().optional(),
+  psychologicalWeight: z.number().optional(),
 });
 
 // Command Payloads Schemas
@@ -82,7 +92,7 @@ export const updateWorldStatePayloadSchema = z.object({
   setting: z.string().optional(),
   dilemma: z.string().optional(),
   summary: z.string().optional(),
-  psychologicalStatus: z.enum(['Stable', 'Uneasy', 'Paranoid', 'Fragmented']).optional(),
+  psychologicalStatus: z.nativeEnum(PsychologicalStatus).optional(),
   systemHealth: z.number().optional(),
 });
 export const displayChoicesPayloadSchema = z.object({
@@ -99,10 +109,24 @@ export const aiDirectorAnalysisPayloadSchema = z.object({
   playerEngagementLevel: z.string(),
 });
 
-// Discriminated Union for Commands
+// Discriminated Union for Commands (aligned with seams.ts)
 export const browserEffectPayloadSchema = z.object({
-    effect: z.enum(['changeTitle', 'openTab', 'manipulateHistory']),
+    type: z.enum(['changeTitle', 'openTab', 'manipulateHistory', 'vibrate']),
     value: z.string().optional(),
+});
+
+export const applyCorruptionPayloadSchema = z.object({
+  level: z.number(),
+  effects: z.array(z.string()),
+});
+
+export const reviseHistoryPayloadSchema = z.object({
+  segmentId: z.string(),
+  newText: z.string(),
+});
+
+export const quantumShiftPayloadSchema = z.object({
+  timeline: z.string(),
 });
 
 export const commandSchema = z.discriminatedUnion('type', [
@@ -118,6 +142,9 @@ export const commandSchema = z.discriminatedUnion('type', [
     payload: pregenerateImagePayloadSchema,
   }),
   z.object({ type: z.literal('browserEffect'), payload: browserEffectPayloadSchema }),
+  z.object({ type: z.literal('applyCorruption'), payload: applyCorruptionPayloadSchema }),
+  z.object({ type: z.literal('reviseHistory'), payload: reviseHistoryPayloadSchema }),
+  z.object({ type: z.literal('quantumShift'), payload: quantumShiftPayloadSchema }),
 ]);
 
 export const commandArraySchema = z.array(commandSchema);
@@ -145,10 +172,12 @@ export const modelTestResultSchema = z.object({
 // Inferred TypeScript Types from Zod Schemas
 export type WorldState = z.infer<typeof worldStateSchema>;
 export type StorySegment = z.infer<typeof storySegmentSchema>;
+export type VisualStyle = z.infer<typeof visualStyleSchema>;
 export type GenreConfig = z.infer<typeof genreConfigSchema>;
 export type Choice = z.infer<typeof choiceSchema>;
 export type Command = z.infer<typeof commandSchema>;
 export type GameCommand = Command; // Alias for backward compatibility
+export type BrowserEffect = z.infer<typeof browserEffectPayloadSchema>;
 export type AIModel = z.infer<typeof aiModelSchema>;
 export type ModelTestResult = z.infer<typeof modelTestResultSchema>;
 export type AIDirectorAnalysisPayload = z.infer<typeof aiDirectorAnalysisPayloadSchema>;

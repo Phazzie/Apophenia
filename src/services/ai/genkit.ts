@@ -1,3 +1,10 @@
+/**
+ * DEPRECATED: This file is no longer used in the Grok-only deployment.
+ * Retained for reference only. See INTEGRATION_PLAN.md for current architecture.
+ *
+ * All Gemini functionality has been removed in favor of Grok-4-fast-reasoning.
+ */
+
 import {
   GoogleGenerativeAI,
   HarmBlockThreshold,
@@ -65,7 +72,7 @@ async function runAIFlowWithFallback(
                  useCase === 'summary' ? AI_MODELS.SUMMARIZATION :
                  AI_MODELS.STORY_PROGRESSION;
 
-  // Try primary model first (Gemini 2.5 Pro)
+  // Try primary model first (DEPRECATED - Gemini removed)
   try {
     const model = genAI.getGenerativeModel({
       model: config.model,
@@ -90,10 +97,10 @@ async function runAIFlowWithFallback(
   } catch (primaryError) {
     console.warn('Primary model failed, trying fallback:', primaryError);
     
-    // Fallback to Gemini 2.5 Flash
+    // Fallback (DEPRECATED - Gemini removed, using PRIMARY_TEXT as fallback)
     try {
       const fallbackModel = genAI.getGenerativeModel({
-        model: AI_MODELS.FALLBACK_TEXT,
+        model: AI_MODELS.PRIMARY_TEXT,
         systemInstruction,
         generationConfig: {
           temperature: 1,
@@ -142,8 +149,8 @@ function getThematicErrorFallback(): GameCommand[] {
       type: 'displayChoices',
       payload: {
         choices: [
-          { text: 'Attempt to reestablish connection', isIntrusive: false, segmentId: 'retry-connection' },
-          { text: 'Embrace the digital void', isIntrusive: true, segmentId: 'accept-failure' },
+          { id: 'retry-connection', text: 'Attempt to reestablish connection', isIntrusive: false, segmentId: 'retry-connection' },
+          { id: 'accept-failure', text: 'Embrace the digital void', isIntrusive: true, segmentId: 'accept-failure' },
         ],
       },
     },
@@ -184,7 +191,7 @@ export const generateConceptFlow = async (
 
   // Enhanced concept generation using centralized prompt templates
   const systemInstruction = COSMIC_HORROR_ENTITY_SYSTEM;
-  const prompt = buildConceptGenerationPrompt(genreConfig.name, genreConfig.style);
+  const prompt = buildConceptGenerationPrompt(genreConfig.name, genreConfig.themes.join(', '));
 
   try {
     const model = genAI.getGenerativeModel({
@@ -197,7 +204,7 @@ export const generateConceptFlow = async (
     const result = await model.generateContent(prompt);
     const response = result.response;
     const text = response.text();
-    const json = extractJSONObject(text, true);
+    const json = extractJSONObject<{ protagonist?: string; setting?: string; dilemma?: string }>(text, true);
 
     // Enhanced fallbacks with more sophisticated concepts
     const enhancedFallbacks = {

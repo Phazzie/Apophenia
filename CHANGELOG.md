@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Updated genkit dependencies to 1.23.0 (@genkit-ai/googleai and genkit)
+- Migrated Gemini model references from 1.5 to 2.5 in server.js (gemini-2.5-flash, gemini-2.5-pro)
+- Updated AI model endpoints to use latest Gemini 2.5 Flash and Pro models
+
 ### In Progress
 - Component test suite fixes (26 remaining tests)
 - Performance optimization (code splitting, lazy loading)

@@ -134,7 +134,7 @@ app.post('/api/generate-concept', async (req, res) => {
       playerProfileData = playerProfileDoc.data();
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     let prompt = `The collective consciousness of all players has shaped the world. The current global state is:
 - Total Corruption Events: ${globalNarrativeData.totalCorruptionEvents}
@@ -228,7 +228,7 @@ app.post('/api/next-step', async (req, res) => {
       }
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
     let prompt = `Based on the following context, generate the next step in the story.
 Player Choice: ${playerChoice}
 World State: ${JSON.stringify(worldState)}
@@ -579,7 +579,7 @@ app.post('/api/end-game-analysis', async (req, res) => {
 
     const { userId, worldState, storyHistory } = sessionDoc.data();
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
     const prompt = `Analyze the following completed game session and generate a concise psychological profile of the player.
 Final World State: ${JSON.stringify(worldState)}
 Full Story History: ${JSON.stringify(storyHistory)}

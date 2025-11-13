@@ -113,7 +113,7 @@ export class FlowContextBuilder {
       horrorIntensity: worldState.horrorIntensity,
       corruptionLevel: this.calculateCorruptionLevel(worldState),
       genreConfig: worldState.genreConfig, // GenreConfig is now canonical, pass through directly
-      summary: worldState.summary,
+      summary: worldState.summary ?? '',
     };
   }
 

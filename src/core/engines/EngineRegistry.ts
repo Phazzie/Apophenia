@@ -161,20 +161,6 @@ export class EngineRegistry implements IEngineRegistry {
 
     console.error(`Engine error in ${engineName}.${method}:`, errorDetails);
   }
-}
-
-/**
- * Custom error class for engine execution failures
- */
-export class EngineExecutionError extends Error {
-  constructor(
-    message: string,
-    public readonly failures: Array<{ engineName: string; error: unknown }>
-  ) {
-    super(message);
-    this.name = 'EngineExecutionError';
-  }
-}
 
   /**
    * Clear all registered engines
@@ -224,6 +210,19 @@ export class EngineExecutionError extends Error {
         description: e.description
       }))
     };
+  }
+}
+
+/**
+ * Custom error class for engine execution failures
+ */
+export class EngineExecutionError extends Error {
+  constructor(
+    message: string,
+    public readonly failures: Array<{ engineName: string; error: unknown }>
+  ) {
+    super(message);
+    this.name = 'EngineExecutionError';
   }
 }
 

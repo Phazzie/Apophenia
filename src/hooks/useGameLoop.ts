@@ -5,7 +5,8 @@ import { getNextStep } from '../services/gameService';
 import { useGameStateStore } from '../core/state/gameStateStore';
 import { useHistoryStore } from '../core/state/historyStore';
 import { useWorldStateStore } from '../core/state/worldStateStore';
-import { Choice, GameStepResult, GameState } from '../types';
+import { GameState } from '../core/types/seams';
+import { Choice, GameStepResult } from '../types';
 
 export const useGameLoop = (
   handleGameEffects: (result: Partial<GameStepResult>) => void,
@@ -27,7 +28,7 @@ export const useGameLoop = (
         await getNextStep(choice);
       } catch (err) {
         console.error('Failed to process choice:', err);
-        setGameState(GameState.PLAYING);
+        setGameState(GameState.DESCENDING);
       } finally {
         setGenerating(false);
       }

@@ -50,7 +50,7 @@ export class UnravelingFlowImpl implements IUnravelingFlow {
     const gameStateStore = useGameStateStore.getState();
 
     // Dramatically increase horror and corruption
-    worldStateStore.updateWorldState({
+    worldStateStore.updateWorld({
       horrorIntensity: Math.min(
         10,
         (worldStateStore.worldState.horrorIntensity || 0) + FLOW_INIT_CONSTANTS.UNRAVELING_HORROR_BOOST
@@ -63,7 +63,7 @@ export class UnravelingFlowImpl implements IUnravelingFlow {
     });
 
     // Update game state
-    gameStateStore.setGameState(3); // GameState.PLAYING (will transition to ENDED)
+    gameStateStore.setGameState(GameState.UNRAVELING);
     gameStateStore.setGenerating(true);
 
     logger.flow('UnravelingFlow', 'Unraveling phase initialized - reality is collapsing');
@@ -353,7 +353,7 @@ export class UnravelingFlowImpl implements IUnravelingFlow {
     const worldStateStore = useWorldStateStore.getState();
 
     if (effects.worldUpdates && Object.keys(effects.worldUpdates).length > 0) {
-      worldStateStore.updateWorldState(effects.worldUpdates);
+      worldStateStore.updateWorld(effects.worldUpdates);
     }
 
     if (effects.corruptionChanges !== undefined && effects.corruptionChanges !== 0) {
@@ -361,7 +361,7 @@ export class UnravelingFlowImpl implements IUnravelingFlow {
       const newCorruption = Math.max(0, Math.min(100, currentCorruption + effects.corruptionChanges));
 
       // Update corruption level in world state (UI distortion is handled by UI layer)
-      worldStateStore.updateWorldState({
+      worldStateStore.updateWorld({
         corruptionLevel: newCorruption,
       });
     }
@@ -371,7 +371,7 @@ export class UnravelingFlowImpl implements IUnravelingFlow {
       0,
       worldStateStore.worldState.systemHealth - UNRAVELING_CONSTANTS.SYSTEM_HEALTH_DECAY
     );
-    worldStateStore.updateWorldState({ systemHealth: newHealth });
+    worldStateStore.updateWorld({ systemHealth: newHealth });
   }
 
   /**

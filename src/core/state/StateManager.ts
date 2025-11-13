@@ -90,10 +90,7 @@ export class StateManagerImpl implements StateManager {
           ...currentProfile.engagementMetrics,
           ...(effects.profileUpdates.engagementMetrics || {}),
         },
-        crossSessionData: {
-          ...currentProfile.crossSessionData,
-          ...(effects.profileUpdates.crossSessionData || {}),
-        },
+        crossSessionData: effects.profileUpdates.crossSessionData ?? currentProfile.crossSessionData,
       };
 
       // Replace entire profile (since we can't partially update via store actions)

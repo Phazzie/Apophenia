@@ -42,11 +42,8 @@ export class FlowCoordinatorImpl implements IFlowCoordinator {
   getCurrentFlow(): GameFlow {
     const gameState = useGameStateStore.getState().gameState;
 
-    // Map current GameState enum (MENU, GENERATING_CONCEPT, LOADING, PLAYING, ENDED)
-    // to seams GameState (MENU, GENERATING, DESCENDING, UNRAVELING, COLLAPSED)
-    const mappedState = this.mapGameStateToSeamsState(gameState);
-
-    switch (mappedState) {
+    // gameState is already the seams GameState enum (MENU, GENERATING, DESCENDING, UNRAVELING, COLLAPSED)
+    switch (gameState) {
       case GameState.DESCENDING:
       case GameState.GENERATING:
         return descentFlow;
@@ -68,11 +65,8 @@ export class FlowCoordinatorImpl implements IFlowCoordinator {
   async transitionTo(state: GameState): Promise<void> {
     const gameStateStore = useGameStateStore.getState();
 
-    // Map seams GameState to current GameState enum
-    const currentGameState = this.mapSeamsStateToGameState(state);
-
-    // Update game state
-    gameStateStore.setGameState(currentGameState);
+    // Update game state with the seams GameState enum value directly
+    gameStateStore.setGameState(state);
 
     // Get the new flow
     this.currentFlow = this.getCurrentFlow();

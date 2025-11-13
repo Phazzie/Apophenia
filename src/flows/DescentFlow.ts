@@ -44,14 +44,14 @@ export class DescentFlowImpl implements IDescentFlow {
     const gameStateStore = useGameStateStore.getState();
 
     // Initialize world state with genre
-    worldStateStore.updateWorldState({
+    worldStateStore.updateWorld({
       genreConfig: genre, // Use the canonical GenreConfig directly
       horrorIntensity: 1,
       systemHealth: 100,
     });
 
-    // Set game state to playing (descent)
-    gameStateStore.setGameState(1); // GameState.GENERATING_CONCEPT - will transition to PLAYING
+    // Set game state to generating (initial phase)
+    gameStateStore.setGameState(GameState.GENERATING);
   }
 
   /**
@@ -260,7 +260,7 @@ export class DescentFlowImpl implements IDescentFlow {
 
     // Apply world updates
     if (effects.worldUpdates && Object.keys(effects.worldUpdates).length > 0) {
-      worldStateStore.updateWorldState(effects.worldUpdates);
+      worldStateStore.updateWorld(effects.worldUpdates);
     }
 
     // Apply corruption changes
@@ -269,7 +269,7 @@ export class DescentFlowImpl implements IDescentFlow {
       const newCorruption = Math.max(0, Math.min(100, currentCorruption + effects.corruptionChanges));
 
       // Update corruption level in world state (UI distortion is handled by UI layer)
-      worldStateStore.updateWorldState({
+      worldStateStore.updateWorld({
         corruptionLevel: newCorruption,
       });
     }

@@ -1,4 +1,4 @@
-import { imageGenerationOrchestrator } from './imageGeneration/index';
+import { imageFallbackService } from './imageFallbackService';
 
 interface ImageVariation {
   url: string;
@@ -12,26 +12,26 @@ interface ImageGenerationResult {
 }
 
 /**
- * Image Generation Service - now uses strategy pattern orchestrator
+ * Image Generation Service - now uses fallback service
  * Maintains backward compatibility with existing interface
  */
 class ImageGenerationService {
   constructor() {
     // Enhanced Google Imagen integration with production-ready fallbacks
-    // Now delegates to unified imageGenerationOrchestrator with strategy pattern
+    // Now delegates to unified imageFallbackService with strategy pattern
   }
 
   async generateImageVariations(prompt: string, count: number = 3): Promise<ImageGenerationResult> {
     try {
-      // Use the unified orchestrator for variations
-      const result = await imageGenerationOrchestrator.generateImageVariations({
+      // Use the unified fallback service for variations
+      const result = await imageFallbackService.generateImageVariations({
         prompt,
         useHorrorIntensity: true,
         variationCount: count,
       });
 
       // Convert to legacy format for backward compatibility
-      const variations: ImageVariation[] = result.variations.map(variation => ({
+      const variations: ImageVariation[] = result.variations.map((variation) => ({
         url: variation.url,
         prompt: variation.prompt,
         quality: (variation.source === 'unsplash' ? 'unsplash' : 'imagen') as 'imagen' | 'unsplash',
@@ -46,13 +46,13 @@ class ImageGenerationService {
       console.error('Image generation failed:', error);
 
       // Emergency fallback
-      const fallback = imageGenerationOrchestrator.generateImage({
+      const fallback = imageFallbackService.generateImage({
         prompt,
         useHorrorIntensity: true,
       });
 
       return fallback
-        .then(result => ({
+        .then((result) => ({
           variations: [{
             url: result.url,
             prompt,
@@ -60,7 +60,7 @@ class ImageGenerationService {
           }],
           selectedIndex: 0,
         }))
-        .catch(fallbackError => {
+        .catch((fallbackError: Error) => {
           console.error('Emergency fallback also failed:', fallbackError);
           // Final fallback: return a placeholder
           return {

@@ -4,8 +4,8 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { FlowCoordinatorImpl } from '../../../src/flows/FlowCoordinator';
-import { useGameStateStore } from '../../../src/stores/gameStateStore';
-import { useWorldStateStore } from '../../../src/stores/worldStateStore';
+import { useGameStateStore } from '../../../src/core/state/gameStateStore';
+import { useWorldStateStore } from '../../../src/core/state/worldStateStore';
 import { GameState as SeamsGameState } from '../../../src/core/types/seams';
 import { GameState } from '../../../src/types';
 

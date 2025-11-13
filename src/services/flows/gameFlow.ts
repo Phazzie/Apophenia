@@ -18,7 +18,7 @@ export const triggerSummary = () => {
   summarizeHistory()
     .then((summary) => {
       if (summary) {
-        useWorldStateStore.getState().updateWorldState({ summary });
+        useWorldStateStore.getState().updateWorld({ summary });
       }
     })
     .catch((error) => {

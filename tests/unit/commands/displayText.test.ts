@@ -35,6 +35,14 @@ describe('DisplayTextExecutor', () => {
 
   describe('validate', () => {
     it('should validate valid command', () => {
+      // Create segment first (required for validation)
+      const segment: StorySegment = {
+        id: 'test-segment',
+        text: '',
+        timestamp: Date.now(),
+      };
+      useHistoryStore.getState().addSegment(segment);
+
       const command: Command = {
         type: 'displayText',
         payload: { content: 'Test text', segmentId: 'test-segment' },
@@ -72,6 +80,16 @@ describe('DisplayTextExecutor', () => {
       const result = executor.validate(command);
       expect(result.valid).toBe(false);
       expect(result.errors).toContain('Content must be a string');
+    });
+
+    it('should reject command when segment does not exist', () => {
+      const command: Command = {
+        type: 'displayText',
+        payload: { content: 'Test text', segmentId: 'non-existent-segment' },
+      };
+      const result = executor.validate(command);
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain('Segment not found: non-existent-segment');
     });
   });
 

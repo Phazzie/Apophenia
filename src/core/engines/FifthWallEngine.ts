@@ -66,11 +66,39 @@ export class FifthWallEngine extends BaseEngine implements IFifthWallEngine {
   }
 
   canManipulateBrowser(context: EngineContext): boolean {
-    // Only allow browser manipulation when horror and corruption are sufficiently high
+    // Check if user has consented to browser manipulation
+    // This should be stored in WorldState or a user preferences object
+    const userConsent = this.hasUserConsent(context);
+
+    // Only allow browser manipulation when:
+    // 1. User has given consent (or hasn't explicitly declined)
+    // 2. Horror and corruption are sufficiently high
     return (
+      userConsent &&
       context.worldState.horrorIntensity >= 7 &&
       context.worldState.corruptionLevel >= 50
     );
+  }
+
+  /**
+   * Check if user has consented to browser manipulation effects
+   * In production, this should check a user preferences store
+   * For now, we assume consent unless explicitly disabled
+   */
+  private hasUserConsent(context: EngineContext): boolean {
+    // Check for explicit consent flag in WorldState
+    const worldState = context.worldState as WorldState & {
+      browserEffectsConsent?: boolean;
+    };
+
+    // If consent is explicitly set, respect it
+    if (worldState.browserEffectsConsent !== undefined) {
+      return worldState.browserEffectsConsent;
+    }
+
+    // Default: assume consent for horror game players
+    // In production, this should be an opt-in during game start
+    return true;
   }
 
   generateBrowserEffect(context: EngineContext): BrowserEffect {

@@ -37,6 +37,13 @@ export class DisplayTextExecutor extends BaseCommandExecutor implements TextDisp
       return { valid: false, errors: ['Content must be a string'] };
     }
 
+    // Verify segment exists
+    const segments = useHistoryStore.getState().segments;
+    const segment = segments.find(s => s.id === command.payload.segmentId);
+    if (!segment) {
+      return { valid: false, errors: [`Segment not found: ${command.payload.segmentId}`] };
+    }
+
     return { valid: true, errors: [] };
   }
 

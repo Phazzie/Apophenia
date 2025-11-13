@@ -70,10 +70,12 @@ describe('CommandQueue', () => {
     });
 
     it('should handle unknown command types', async () => {
-      const command: any = {
+      // Type assertion for intentionally invalid command
+      // This is testing error handling for malformed commands
+      const command = {
         type: 'unknownCommand',
         payload: {},
-      };
+      } as Command;
 
       queue.enqueue([command]);
       const result = await queue.executeNext();

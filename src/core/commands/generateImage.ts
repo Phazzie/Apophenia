@@ -43,6 +43,13 @@ export class GenerateImageExecutor extends BaseCommandExecutor implements ImageG
       return { valid: false, errors: ['Prompt must be a string'] };
     }
 
+    // Verify segment exists
+    const segments = useHistoryStore.getState().segments;
+    const segment = segments.find(s => s.id === command.payload.segmentId);
+    if (!segment) {
+      return { valid: false, errors: [`Segment not found: ${command.payload.segmentId}`] };
+    }
+
     return { valid: true, errors: [] };
   }
 

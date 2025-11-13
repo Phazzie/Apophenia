@@ -37,7 +37,7 @@
     "start:prod": "node server.js"
   },
   "dependencies": {
-    "@genkit-ai/googleai": "^1.16.1",
+    "@genkit-ai/googleai": "^1.23.0",
     "@google-ai/generativelanguage": "^3.4.0",
     "@google/generative-ai": "^0.24.1",
     "@supabase/supabase-js": "^2.81.1",

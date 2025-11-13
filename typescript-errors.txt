@@ -1,8 +1,0 @@
-src/components/CompactTestAPI.tsx(7,10): error TS2305: Module '"../services/config"' has no exported member 'DEFAULT_GENRE'.
-src/components/__tests__/Button.test.tsx(4,20): error TS2307: Cannot find module '../Button' or its corresponding type declarations.
-src/components/__tests__/CompactTestAPI.test.tsx(6,10): error TS2305: Module '"../../services/ai/unifiedAIService"' has no exported member 'unifiedAIService'.
-src/components/__tests__/StartScreen.test.tsx(44,9): error TS2322: Type '{ name: string; description: string; personality: string; }' is not assignable to type 'string'.
-src/services/ai/engines/__tests__/revolutionaryFeatures.test.ts(3,30): error TS2307: Cannot find module '../../../types' or its corresponding type declarations.
-src/services/ai/engines/__tests__/revolutionaryFeatures.test.ts(4,36): error TS2307: Cannot find module '../../../stores/worldStateStore' or its corresponding type declarations.
-src/services/ai/engines/__tests__/revolutionaryFeatures.test.ts(5,38): error TS2307: Cannot find module '../../../stores/storyHistoryStore' or its corresponding type declarations.
-src/stores/__tests__/gameStateStore.test.ts(78,59): error TS2339: Property 'GAME_OVER' does not exist on type 'typeof GameState'.

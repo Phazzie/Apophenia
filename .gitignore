@@ -13,6 +13,18 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+firebase-debug.log
+dev_server.log
+dev-server-test.log
+
+# Test artifacts (Wave 2 & 3)
+test-*.log
+test-*.txt
+*.log
+type-escapes.log
+typescript-errors*.log
+build-errors.log
+current-errors.log
 
 # Misc
 .DS_Store

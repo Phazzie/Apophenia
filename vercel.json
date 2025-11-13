@@ -6,14 +6,6 @@
   "outputDirectory": "dist",
   "installCommand": "npm install",
   "devCommand": "npm run dev",
-  "env": {
-    "VITE_XAI_API_KEY": "@vite-xai-api-key"
-  },
-  "build": {
-    "env": {
-      "VITE_XAI_API_KEY": "@vite-xai-api-key"
-    }
-  },
   "routes": [
     {
       "src": "/(.*)",

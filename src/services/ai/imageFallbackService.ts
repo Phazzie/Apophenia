@@ -12,7 +12,7 @@
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { AI_MODELS } from '../config';
-import { useWorldStateStore } from '../../stores/worldStateStore';
+import { useWorldStateStore } from '../../core/state/worldStateStore';
 
 export interface ImageGenerationOptions {
   prompt: string;

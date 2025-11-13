@@ -19,7 +19,7 @@ import {
   WorldState,
   commandArraySchema,
 } from '../../types';
-import { useWorldStateStore } from '../../stores/worldStateStore';
+import { useWorldStateStore } from '../../core/state/worldStateStore';
 import { AI_MODELS } from '../config';
 import { extractJSONArray, extractJSONObject } from '../../utils/jsonExtractor';
 import { imageGenerationOrchestrator } from './imageGeneration/index';

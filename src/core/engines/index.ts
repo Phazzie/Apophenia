@@ -52,3 +52,9 @@ export function initializeEngineRegistry(): EngineRegistry {
 
   return registry;
 }
+
+/**
+ * Singleton engine registry instance
+ * Shared across all flows to avoid creating duplicate engine instances
+ */
+export const globalEngineRegistry = initializeEngineRegistry();

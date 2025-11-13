@@ -19,63 +19,63 @@ vi.mock('../../../src/services/commandExecutor', () => ({
   executeCommandQueue: vi.fn().mockResolvedValue([]),
 }));
 
-// Mock the engine classes
-vi.mock('../../../src/core/engines', () => ({
-  TemporalRevisionEngine: class {
-    name = 'TemporalRevision';
-    isActive() { return false; }
-    generateInstructions() { return []; }
-    process() { return Promise.resolve({ engineName: 'TemporalRevision', instructions: [], effects: {}, metadata: {} }); }
-  },
-  MetaConsciousnessEngine: class {
-    name = 'MetaConsciousness';
-    isActive() { return false; }
-    generateInstructions() { return []; }
-    process() { return Promise.resolve({ engineName: 'MetaConsciousness', instructions: [], effects: {}, metadata: {} }); }
-  },
-  QuantumNarrativeEngine: class {
-    name = 'QuantumNarrative';
-    isActive() { return false; }
-    generateInstructions() { return []; }
-    process() { return Promise.resolve({ engineName: 'QuantumNarrative', instructions: [], effects: {}, metadata: {} }); }
-  },
-  AdaptiveHorrorEngine: class {
+// Mock the engine classes and registry
+vi.mock('../../../src/core/engines', () => {
+  class MockAdaptiveHorrorEngine {
     name = 'AdaptiveHorror';
     isActive() { return true; }
     generateInstructions() { return ['Test instruction']; }
     process() { return Promise.resolve({ engineName: 'AdaptiveHorror', instructions: ['Test instruction'], effects: {}, metadata: {} }); }
-  },
-  RealityCorruptionEngine: class {
+  }
+
+  class MockRealityCorruptionEngine {
     name = 'RealityCorruption';
     isActive() { return true; }
     generateInstructions() { return ['Test instruction']; }
     process() { return Promise.resolve({ engineName: 'RealityCorruption', instructions: ['Test instruction'], effects: {}, metadata: {} }); }
-  },
-  NeuralEchoChamberEngine: class {
-    name = 'NeuralEcho';
+  }
+
+  class MockInactiveEngine {
+    name = 'Inactive';
     isActive() { return false; }
     generateInstructions() { return []; }
-    process() { return Promise.resolve({ engineName: 'NeuralEcho', instructions: [], effects: {}, metadata: {} }); }
-  },
-  SemanticChoiceArchaeologyEngine: class {
-    name = 'SemanticArchaeology';
-    isActive() { return false; }
-    generateInstructions() { return []; }
-    process() { return Promise.resolve({ engineName: 'SemanticArchaeology', instructions: [], effects: {}, metadata: {} }); }
-  },
-  AdaptiveNarrativeDNAEngine: class {
-    name = 'NarrativeDNA';
-    isActive() { return false; }
-    generateInstructions() { return []; }
-    process() { return Promise.resolve({ engineName: 'NarrativeDNA', instructions: [], effects: {}, metadata: {} }); }
-  },
-  FifthWallEngine: class {
-    name = 'FifthWall';
-    isActive() { return false; }
-    generateInstructions() { return []; }
-    process() { return Promise.resolve({ engineName: 'FifthWall', instructions: [], effects: {}, metadata: {} }); }
-  },
-}));
+    process() { return Promise.resolve({ engineName: 'Inactive', instructions: [], effects: {}, metadata: {} }); }
+  }
+
+  const mockRegistry = {
+    engines: new Map(),
+    register(engine: any) {
+      this.engines.set(engine.name, engine);
+    },
+    async executeAll(context: any) {
+      const outputs = [];
+      for (const engine of this.engines.values()) {
+        if (engine.isActive(context)) {
+          outputs.push(await engine.process(context));
+        }
+      }
+      return outputs;
+    }
+  };
+
+  // Pre-register mock engines
+  mockRegistry.register(new MockAdaptiveHorrorEngine());
+  mockRegistry.register(new MockRealityCorruptionEngine());
+  mockRegistry.register(new MockInactiveEngine());
+
+  return {
+    TemporalRevisionEngine: MockInactiveEngine,
+    MetaConsciousnessEngine: MockInactiveEngine,
+    QuantumNarrativeEngine: MockInactiveEngine,
+    AdaptiveHorrorEngine: MockAdaptiveHorrorEngine,
+    RealityCorruptionEngine: MockRealityCorruptionEngine,
+    NeuralEchoChamberEngine: MockInactiveEngine,
+    SemanticChoiceArchaeologyEngine: MockInactiveEngine,
+    AdaptiveNarrativeDNAEngine: MockInactiveEngine,
+    FifthWallEngine: MockInactiveEngine,
+    globalEngineRegistry: mockRegistry,
+  };
+});
 
 describe('FlowCoordinator', () => {
   let coordinator: FlowCoordinatorImpl;

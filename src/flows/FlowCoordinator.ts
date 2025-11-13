@@ -20,35 +20,15 @@ import {
   EngineOutput,
   ExecutionResult,
   Command,
-  Engine,
 } from '../core/types/seams';
-import { useGameStateStore } from '../stores/gameStateStore';
+import { useGameStateStore } from '../core/state/gameStateStore';
 import { descentFlow } from './DescentFlow';
 import { unravelingFlow } from './UnravelingFlow';
 import { flowContextBuilder } from './FlowContextBuilder';
 import { executeCommandQueue } from '../services/commandExecutor';
-import {
-  TemporalRevisionEngine,
-  MetaConsciousnessEngine,
-  QuantumNarrativeEngine,
-  AdaptiveHorrorEngine,
-  RealityCorruptionEngine,
-  NeuralEchoChamberEngine,
-  SemanticChoiceArchaeologyEngine,
-  AdaptiveNarrativeDNAEngine,
-  FifthWallEngine,
-} from '../core/engines';
-
-// Instantiate engine singletons
-const temporalRevision = new TemporalRevisionEngine();
-const metaConsciousness = new MetaConsciousnessEngine();
-const quantumNarrative = new QuantumNarrativeEngine();
-const adaptiveHorror = new AdaptiveHorrorEngine();
-const realityCorruption = new RealityCorruptionEngine();
-const neuralEchoChambers = new NeuralEchoChamberEngine();
-const semanticArchaeology = new SemanticChoiceArchaeologyEngine();
-const narrativeDNA = new AdaptiveNarrativeDNAEngine();
-const fifthWallBreaker = new FifthWallEngine();
+import { globalEngineRegistry } from '../core/engines';
+import { logger } from '../services/logger';
+import { DESCENT_CONSTANTS } from './flowConstants';
 
 /**
  * FlowCoordinator Implementation
@@ -97,59 +77,20 @@ export class FlowCoordinatorImpl implements IFlowCoordinator {
     // Get the new flow
     this.currentFlow = this.getCurrentFlow();
 
-    console.log(`🔄 Flow transition: ${this.currentFlow.name} (state: ${state})`);
+    logger.flow('FlowCoordinator', `Transition to ${this.currentFlow.name} (state: ${state})`);
   }
 
   /**
    * Execute all active engines for a given context
+   * Uses the global engine registry to avoid duplicate instances
    */
   async executeEngines(context: FlowContext): Promise<EngineOutput[]> {
-    // All engines implement the Engine interface from core/engines
-    // They are sorted by priority (highest first) for deterministic execution
-    const engines: Engine[] = [
-      temporalRevision,
-      metaConsciousness,
-      quantumNarrative,
-      adaptiveHorror,
-      realityCorruption,
-      neuralEchoChambers,
-      semanticArchaeology,
-      narrativeDNA,
-      fifthWallBreaker,
-    ];
-
-    const outputs: EngineOutput[] = [];
     const engineContext = flowContextBuilder.buildEngineContext(context.currentChoice);
 
-    // Execute engines in priority order
-    for (const engine of engines) {
-      try {
-        // Check if engine is active
-        if (typeof engine.isActive === 'function' && !engine.isActive(engineContext)) {
-          continue;
-        }
+    // Use the global engine registry's executeAll method
+    const outputs = await globalEngineRegistry.executeAll(engineContext);
 
-        // Process engine
-        if (typeof engine.process === 'function') {
-          const output = await engine.process(engineContext);
-          outputs.push(output);
-        } else if (typeof engine.generateInstructions === 'function') {
-          // Fallback for engines that only provide instructions
-          const instructions = engine.generateInstructions(engineContext);
-          outputs.push({
-            engineName: engine.name || 'Unknown',
-            instructions,
-            effects: {},
-            metadata: {},
-          });
-        }
-      } catch (error) {
-        console.error(`Engine ${engine.name || 'Unknown'} failed:`, error);
-        // Continue with other engines
-      }
-    }
-
-    console.log(`⚙️  Executed ${outputs.length} engines`);
+    logger.info(`Executed ${outputs.length} engines`);
     return outputs;
   }
 
@@ -157,7 +98,7 @@ export class FlowCoordinatorImpl implements IFlowCoordinator {
    * Execute a queue of commands
    */
   async executeCommands(commands: Command[]): Promise<ExecutionResult[]> {
-    console.log(`🎯 Executing ${commands.length} commands`);
+    logger.info(`Executing ${commands.length} commands`);
 
     try {
       // Use existing command executor
@@ -170,7 +111,7 @@ export class FlowCoordinatorImpl implements IFlowCoordinator {
         command,
       }));
     } catch (error) {
-      console.error('Command execution failed:', error);
+      logger.error('Command execution failed', error);
 
       return commands.map((command) => ({
         success: false,
@@ -197,7 +138,9 @@ export class FlowCoordinatorImpl implements IFlowCoordinator {
       case 3: // PLAYING
         // Check if we should be in unraveling based on horror level
         const descentLevel = descentFlow.calculateDescentLevel();
-        return descentLevel > 70 ? GameState.UNRAVELING : GameState.DESCENDING;
+        return descentLevel > DESCENT_CONSTANTS.UNRAVELING_THRESHOLD
+          ? GameState.UNRAVELING
+          : GameState.DESCENDING;
       case 4: // ENDED
         return GameState.COLLAPSED;
       default:

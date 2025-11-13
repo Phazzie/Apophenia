@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useWorldStateStore } from '../stores/worldStateStore';
+import { useWorldStateStore } from '../core/state/worldStateStore';
 import { GameStepResult } from '../types';
 import { devMode } from '../utils/devMode';
 

@@ -1,4 +1,4 @@
-import { useWorldStateStore } from '../../stores/worldStateStore';
+import { useWorldStateStore } from '../../core/state/worldStateStore';
 import { StorySegment, WorldState } from '../../types';
 import { summarizeHistory } from '../gameService';
 

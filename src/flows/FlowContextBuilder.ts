@@ -5,10 +5,10 @@
  * This is the bridge between stateful stores and stateless flow processing.
  */
 
-import { useGameStateStore } from '../stores/gameStateStore';
-import { useWorldStateStore } from '../stores/worldStateStore';
-import { useStoryHistoryStore } from '../stores/storyHistoryStore';
-import { useUserStore } from '../stores/userStore';
+import { useGameStateStore } from '../core/state/gameStateStore';
+import { useWorldStateStore } from '../core/state/worldStateStore';
+import { useHistoryStore } from '../core/state/historyStore';
+import { useUserStore } from '../core/state/userStore';
 import { Choice, StorySegment, WorldState } from '../types';
 import { FlowContext, EngineContext, PlayerProfile, PsychologicalStatus } from '../core/types/seams';
 
@@ -21,12 +21,12 @@ export class FlowContextBuilder {
    */
   buildFlowContext(currentChoice: Choice): FlowContext {
     const worldState = useWorldStateStore.getState().worldState;
-    const storyHistory = useStoryHistoryStore.getState().storyHistory;
+    const segments = useHistoryStore.getState().segments;
     const playerProfile = this.buildPlayerProfile();
 
     return {
       worldState: this.mapWorldState(worldState),
-      recentHistory: this.getRecentHistory(storyHistory, 10),
+      recentHistory: this.getRecentHistory(segments, 10),
       playerProfile,
       currentChoice,
     };
@@ -37,12 +37,12 @@ export class FlowContextBuilder {
    */
   buildEngineContext(currentChoice?: Choice): EngineContext {
     const worldState = useWorldStateStore.getState().worldState;
-    const storyHistory = useStoryHistoryStore.getState().storyHistory;
+    const segments = useHistoryStore.getState().segments;
     const playerProfile = this.buildPlayerProfile();
 
     return {
       worldState: this.mapWorldState(worldState),
-      recentHistory: this.getRecentHistory(storyHistory, 10),
+      recentHistory: this.getRecentHistory(segments, 10),
       playerProfile,
       currentChoice,
     };
@@ -64,14 +64,14 @@ export class FlowContextBuilder {
   private buildPlayerProfile(): PlayerProfile {
     // Note: UserStore doesn't have a profile property yet - using default values
     // TODO: Create PlayerProfileStore as per SEAMS architecture
-    const storyHistory = useStoryHistoryStore.getState().storyHistory;
+    const segments = useHistoryStore.getState().segments;
     const gameState = useGameStateStore.getState();
 
     // Extract choice count and basic metrics
-    const choiceCount = storyHistory.filter(seg => seg.text.includes('>')).length;
+    const choiceCount = segments.filter(seg => seg.text.includes('>')).length;
 
     // Get first segment timestamp (with fallback for legacy segments without timestamp)
-    const firstSegment = storyHistory[0];
+    const firstSegment = segments[0];
     const firstSegmentTime = firstSegment && 'timestamp' in firstSegment && typeof firstSegment.timestamp === 'number'
       ? firstSegment.timestamp
       : Date.now();

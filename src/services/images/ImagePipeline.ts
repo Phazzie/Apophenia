@@ -18,7 +18,7 @@ import { lruTTLCache } from '../cache/LRUTTLCache';
  * Image Pipeline Implementation
  *
  * Orchestrates image generation across multiple providers with caching.
- * Fallback chain: Gemini/Imagen (1) → Grok (2) → Unsplash (3)
+ * Fallback chain: Gemini 2.5 Flash Image (1) → Grok (2) → Unsplash (3)
  * Provides best-effort generation - null return doesn't block game flow.
  */
 export class ImagePipelineImpl implements ImagePipeline {

@@ -1,6 +1,6 @@
 /**
  * Integration tests for Image Pipeline fallback chain
- * Validates: Gemini (1) → Grok (2) → Unsplash (3)
+ * Validates: Gemini 2.5 Flash Image (1) → Grok (2) → Unsplash (3)
  */
 
 import { describe, it, expect } from 'vitest';
@@ -13,7 +13,7 @@ describe('Image Pipeline Fallback Chain', () => {
     expect(providers.length).toBeGreaterThanOrEqual(3);
 
     // Verify priority order (lower number = higher priority)
-    expect(providers[0].provider).toBe('gemini-imagen');
+    expect(providers[0].provider).toBe('gemini-flash-image');
     expect(providers[0].priority).toBe(1);
 
     expect(providers[1].provider).toBe('grok');
@@ -51,7 +51,7 @@ describe('Image Pipeline Fallback Chain', () => {
     const results = await imagePipeline.testProviders();
 
     expect(results).toBeInstanceOf(Map);
-    expect(results.has('gemini-imagen')).toBe(true);
+    expect(results.has('gemini-flash-image')).toBe(true);
     expect(results.has('grok')).toBe(true);
     expect(results.has('unsplash')).toBe(true);
   }, 10000); // 10s timeout for API checks

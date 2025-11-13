@@ -1,11 +1,11 @@
 /**
- * Gemini Image Generation Service (Imagen 3.0)
+ * Gemini 2.5 Flash Image Generation Service
  *
- * Integrates with Google's Imagen 3.0 via Generative AI SDK.
+ * Integrates with Google's Gemini 2.5 Flash Image (native image generation).
  * Priority: 1 (highest priority - primary image generation)
  *
- * Note: "Gemini Flash" is a text model. For image generation,
- * we use Imagen 3.0, Google's image generation model.
+ * Uses gemini-2.5-flash-image model for conversational image generation
+ * with unparalleled flexibility and contextual understanding.
  */
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
@@ -13,18 +13,17 @@ import { ImageResult } from '../../core/types/seams';
 import { BaseImageService } from './base/ImageService';
 
 /**
- * Gemini/Imagen Image Service - Google AI image generation
- * Uses Imagen 3.0 model for high-quality image generation
+ * Gemini Image Service - Google AI native image generation
+ * Uses Gemini 2.5 Flash Image for flexible, conversational image generation
  */
 export class GeminiImageService extends BaseImageService {
-  readonly provider = 'gemini-imagen';
+  readonly provider = 'gemini-flash-image';
   readonly priority = 1; // Highest priority (primary)
 
   private apiKey: string | undefined;
   private genAI: GoogleGenerativeAI | null = null;
-  private model = 'imagen-3.0-generate-001';
-  private fallbackModel = 'imagen-3.0-fast-generate-001';
-  private requestTimeout = 45000; // 45 seconds (image gen is slower)
+  private model = 'gemini-2.5-flash-image';
+  private requestTimeout = 30000; // 30 seconds (optimized for fast generation)
 
   constructor() {
     super();
@@ -36,11 +35,11 @@ export class GeminiImageService extends BaseImageService {
   }
 
   /**
-   * Check if Gemini/Imagen API is available
+   * Check if Gemini Flash Image API is available
    */
   async isAvailable(): Promise<boolean> {
     if (!this.apiKey || !this.genAI) {
-      console.debug('[Gemini/Imagen] No API key configured (VITE_GEMINI_API_KEY)');
+      console.debug('[Gemini Flash Image] No API key configured (VITE_GEMINI_API_KEY)');
       return false;
     }
 
@@ -50,103 +49,72 @@ export class GeminiImageService extends BaseImageService {
   }
 
   /**
-   * Generate an image using Google Imagen 3.0
+   * Generate an image using Gemini 2.5 Flash Image
    */
   async generate(prompt: string): Promise<ImageResult> {
     if (!this.genAI || !this.apiKey) {
       return this.failure('Gemini API key not configured');
     }
 
-    // Try primary model first
-    let result = await this.tryImagenModel(prompt, this.model);
-    if (result.url) {
-      return result;
-    }
-
-    // Try fallback model (fast variant)
-    console.debug('[Gemini/Imagen] Primary model failed, trying fast model...');
-    result = await this.tryImagenModel(prompt, this.fallbackModel);
-
-    return result;
-  }
-
-  /**
-   * Try generating with a specific Imagen model
-   */
-  private async tryImagenModel(prompt: string, modelName: string): Promise<ImageResult> {
-    if (!this.genAI) {
-      return this.failure('Gemini API not initialized');
-    }
-
     try {
-      console.debug(`[Gemini/Imagen] Attempting generation with ${modelName}...`);
+      console.debug(`[Gemini Flash Image] Generating with ${this.model}...`);
 
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), this.requestTimeout);
 
-      const imageModel = this.genAI.getGenerativeModel({ model: modelName });
+      const imageModel = this.genAI.getGenerativeModel({ model: this.model });
 
-      // Generate the image - Imagen models accept simple text prompt
+      // Generate the image - Gemini Flash Image accepts simple text prompt
       const result = await imageModel.generateContent(prompt);
 
       clearTimeout(timeoutId);
 
       const response = result.response;
 
-      // Extract image from response
+      // Extract image from response parts (Gemini native format)
       if (response.candidates && response.candidates[0]) {
         const candidate = response.candidates[0];
 
-        // Check for inline data (base64 encoded image)
+        // Iterate through parts to find inline image data
         if (candidate.content && candidate.content.parts) {
           for (const part of candidate.content.parts) {
-            // Base64 encoded image
+            // Base64 encoded image (primary format for Gemini Flash Image)
             if (part.inlineData && part.inlineData.data) {
               const mimeType = part.inlineData.mimeType || 'image/png';
               const base64Data = part.inlineData.data;
               const dataUrl = `data:${mimeType};base64,${base64Data}`;
 
-              console.log(`[Gemini/Imagen] ✓ Generated with ${modelName}`);
+              console.log(`[Gemini Flash Image] ✓ Generated successfully`);
               return this.success(dataUrl);
             }
 
-            // Image URL
+            // File URI (alternative format)
             if (part.fileData && part.fileData.fileUri) {
-              console.log(`[Gemini/Imagen] ✓ Generated with ${modelName}`);
+              console.log(`[Gemini Flash Image] ✓ Generated successfully (file URI)`);
               return this.success(part.fileData.fileUri);
             }
           }
         }
-
-        // Check text response for URL
-        const text = response.text();
-        if (text && (text.includes('http://') || text.includes('https://') || text.includes('data:'))) {
-          const urlMatch = text.match(/(https?:\/\/[^\s]+|data:[^,]+,[^\s]+)/);
-          if (urlMatch) {
-            console.log(`[Gemini/Imagen] ✓ Generated with ${modelName}`);
-            return this.success(urlMatch[0].trim());
-          }
-        }
       }
 
-      console.warn(`[Gemini/Imagen] ${modelName} response did not contain image data`);
-      return this.failure(`No image data in ${modelName} response`);
+      console.warn(`[Gemini Flash Image] Response did not contain image data`);
+      return this.failure('No image data in response');
 
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
 
       // Check for specific error types
       if (message.includes('aborted')) {
-        console.warn(`[Gemini/Imagen] ${modelName} timeout after ${this.requestTimeout}ms`);
+        console.warn(`[Gemini Flash Image] Timeout after ${this.requestTimeout}ms`);
         return this.failure('Image generation timeout');
       }
 
       if (message.includes('quota') || message.includes('rate limit')) {
-        console.warn(`[Gemini/Imagen] ${modelName} quota/rate limit exceeded`);
+        console.warn(`[Gemini Flash Image] Quota/rate limit exceeded`);
         return this.failure('API quota exceeded');
       }
 
-      console.warn(`[Gemini/Imagen] ${modelName} generation failed:`, message);
+      console.warn(`[Gemini Flash Image] Generation failed:`, message);
       return this.failure(message);
     }
   }

@@ -2,7 +2,7 @@
  * Image Services Module
  *
  * Exports all image generation services and the pipeline.
- * Fallback chain: Gemini/Imagen (1) → Grok (2) → Unsplash (3)
+ * Fallback chain: Gemini 2.5 Flash Image (1) → Grok (2) → Unsplash (3)
  */
 
 // Base classes

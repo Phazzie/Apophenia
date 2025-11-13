@@ -1,6 +1,6 @@
 /**
  * Unit tests for GeminiImageService
- * Validates Gemini/Imagen integration for image generation
+ * Validates Gemini 2.5 Flash Image integration for image generation
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
@@ -43,7 +43,7 @@ describe('GeminiImageService', () => {
   });
 
   it('should have correct provider and priority', () => {
-    expect(service.provider).toBe('gemini-imagen');
+    expect(service.provider).toBe('gemini-flash-image');
     expect(service.priority).toBe(1); // Highest priority
   });
 
@@ -64,7 +64,7 @@ describe('GeminiImageService', () => {
 
     expect(result.url).toBeDefined();
     expect(result.url).toContain('data:image/png;base64,');
-    expect(result.provider).toBe('gemini-imagen');
+    expect(result.provider).toBe('gemini-flash-image');
     expect(result.cached).toBe(false);
     expect(result.error).toBeUndefined();
   });

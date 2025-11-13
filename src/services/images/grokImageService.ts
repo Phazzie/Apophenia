@@ -11,10 +11,11 @@ import { BaseImageService } from './base/ImageService';
 /**
  * Grok Image Service - X.AI image generation
  * Uses Grok-2 vision model for image generation
+ * Priority: 2 (fallback to Gemini/Imagen)
  */
 export class GrokImageService extends BaseImageService {
   readonly provider = 'grok';
-  readonly priority = 1;
+  readonly priority = 2;
 
   private apiKey: string | undefined;
   private apiBase = 'https://api.x.ai/v1';

@@ -1,4 +1,4 @@
-// Jest setup file for testing environment
+// Vitest setup file for testing environment
 import '@testing-library/jest-dom';
 import { vi, beforeEach } from 'vitest';
 

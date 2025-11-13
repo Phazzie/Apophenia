@@ -13,10 +13,67 @@ import {
 } from '../../core/types/seams';
 import { promptBuilder } from './promptBuilder';
 import { responseParser } from './responseParser';
+import { responseCache } from './responseCache';
 
 // X.AI API Configuration
 const GROK_API_URL = 'https://api.x.ai/v1/chat/completions';
 const GROK_MODEL = 'grok-4-fast-reasoning';
+
+// Retriable HTTP status codes (transient errors)
+const RETRIABLE_STATUS_CODES = [429, 500, 502, 503, 504];
+
+/**
+ * Fetch with exponential backoff retry logic
+ * Retries on transient errors: 429, 500, 502, 503, 504
+ * Exponential backoff: 2s, 4s, 8s, 16s (max 4 retries)
+ */
+async function fetchWithRetry(
+  url: string,
+  options: RequestInit,
+  maxRetries = 4
+): Promise<Response> {
+  let lastError: Error | null = null;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await fetch(url, options);
+
+      // Success or non-retriable error - return immediately
+      if (response.ok || !RETRIABLE_STATUS_CODES.includes(response.status)) {
+        return response;
+      }
+
+      // Retriable error - wait before retry (unless this was the last attempt)
+      if (attempt < maxRetries) {
+        const delay = Math.pow(2, attempt) * 1000; // 1s, 2s, 4s, 8s, 16s
+        console.warn(
+          `Request failed with status ${response.status}, retrying in ${delay}ms (attempt ${attempt + 1}/${maxRetries})`
+        );
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      } else {
+        // Last attempt failed - return the error response
+        return response;
+      }
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+
+      // If this was the last attempt, throw the error
+      if (attempt === maxRetries) {
+        throw lastError;
+      }
+
+      // Wait before retry
+      const delay = Math.pow(2, attempt) * 1000;
+      console.warn(
+        `Request failed with error: ${lastError.message}, retrying in ${delay}ms (attempt ${attempt + 1}/${maxRetries})`
+      );
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+
+  // This should never be reached, but TypeScript needs it
+  throw lastError || new Error('Max retries exceeded');
+}
 
 export class GrokService implements AIService {
   readonly provider = AIProvider.GROK;
@@ -35,24 +92,40 @@ export class GrokService implements AIService {
       return false;
     }
 
-    try {
-      // Test the API with a minimal request
-      const response = await fetch(GROK_API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.apiKey}`,
-        },
-        body: JSON.stringify({
-          model: GROK_MODEL,
-          messages: [{ role: 'user', content: 'test' }],
-          max_tokens: 10,
-        }),
-      });
+    // Set up timeout controller
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000); // 10s timeout for availability check
 
+    try {
+      // Test the API with a minimal request (with retry)
+      const response = await fetchWithRetry(
+        GROK_API_URL,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.apiKey}`,
+          },
+          body: JSON.stringify({
+            model: GROK_MODEL,
+            messages: [{ role: 'user', content: 'test' }],
+            max_tokens: 10,
+          }),
+          signal: controller.signal,
+        },
+        2 // Only 2 retries for availability check
+      );
+
+      clearTimeout(timeout);
       return response.ok;
     } catch (error) {
-      console.error('Grok availability check failed:', error);
+      clearTimeout(timeout);
+
+      if (error && typeof error === 'object' && 'name' in error && error.name === 'AbortError') {
+        console.error('Grok availability check timed out after 10s');
+      } else {
+        console.error('Grok availability check failed:', error);
+      }
       return false;
     }
   }
@@ -62,40 +135,66 @@ export class GrokService implements AIService {
       throw new Error('VITE_XAI_API_KEY not configured');
     }
 
+    // Build the full prompt first (needed for cache key)
+    const systemPrompt = promptBuilder.buildSystemPrompt(
+      request.context.worldState.genreConfig,
+      request.context.engineInstructions.map((_, i) => `Engine ${i + 1}`)
+    );
+
+    const contextPrompt = promptBuilder.buildContextPrompt(request.context);
+
+    const fullPrompt = promptBuilder.injectEngineInstructions(
+      `${contextPrompt}\n\n${request.prompt}`,
+      request.context.engineInstructions
+    );
+
+    // Generate cache key from prompt and key context parameters
+    const cacheKey = responseCache.generateKey(fullPrompt, {
+      temperature: request.temperature,
+      maxTokens: request.maxTokens,
+      horrorIntensity: request.context.worldState.horrorIntensity,
+    });
+
+    // Check cache first
+    const cachedResponse = responseCache.get(cacheKey);
+    if (cachedResponse) {
+      console.log('Cache hit - returning cached response');
+      return cachedResponse;
+    }
+
     const startTime = Date.now();
 
+    // Set up timeout controller (30s timeout for generation)
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
+
     try {
-      // Build the full prompt
-      const systemPrompt = promptBuilder.buildSystemPrompt(
-        request.context.worldState.genreConfig,
-        request.context.engineInstructions.map((_, i) => `Engine ${i + 1}`)
-      );
 
-      const contextPrompt = promptBuilder.buildContextPrompt(request.context);
-
-      const fullPrompt = promptBuilder.injectEngineInstructions(
-        `${contextPrompt}\n\n${request.prompt}`,
-        request.context.engineInstructions
-      );
-
-      // Call X.AI API
-      const response = await fetch(GROK_API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.apiKey}`,
+      // Call X.AI API with retry and timeout
+      const response = await fetchWithRetry(
+        GROK_API_URL,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.apiKey}`,
+          },
+          body: JSON.stringify({
+            model: GROK_MODEL,
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { role: 'user', content: fullPrompt },
+            ],
+            temperature: request.temperature || 0.8,
+            max_tokens: request.maxTokens || 4096,
+            thinking: true, // Enable thinking mode for better reasoning
+          }),
+          signal: controller.signal,
         },
-        body: JSON.stringify({
-          model: GROK_MODEL,
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: fullPrompt },
-          ],
-          temperature: request.temperature || 0.8,
-          max_tokens: request.maxTokens || 4096,
-          thinking: true, // Enable thinking mode for better reasoning
-        }),
-      });
+        4 // Max 4 retries
+      );
+
+      clearTimeout(timeout);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -110,7 +209,7 @@ export class GrokService implements AIService {
 
       const latency = Date.now() - startTime;
 
-      return {
+      const aiResponse: AIResponse = {
         provider: this.provider,
         content,
         commands,
@@ -120,7 +219,19 @@ export class GrokService implements AIService {
           model: GROK_MODEL,
         },
       };
+
+      // Store in cache before returning
+      responseCache.set(cacheKey, aiResponse);
+
+      return aiResponse;
     } catch (error) {
+      clearTimeout(timeout);
+
+      // Handle timeout errors specifically
+      if (error && typeof error === 'object' && 'name' in error && error.name === 'AbortError') {
+        throw new Error('Request timeout after 30s');
+      }
+
       console.error('Grok generation failed:', error);
       throw error;
     }

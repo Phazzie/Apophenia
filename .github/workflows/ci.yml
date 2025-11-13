@@ -39,7 +39,7 @@ jobs:
         echo "Checking for required configuration files..."
         if [ ! -f "package.json" ]; then echo "❌ package.json missing"; exit 1; fi
         if [ ! -f "tsconfig.json" ]; then echo "❌ tsconfig.json missing"; exit 1; fi
-        if [ ! -f "jest.config.js" ]; then echo "❌ jest.config.js missing"; exit 1; fi
+        if [ ! -f "vitest.config.ts" ]; then echo "❌ vitest.config.ts missing"; exit 1; fi
         if [ ! -f "eslint.config.js" ]; then echo "❌ eslint.config.js missing"; exit 1; fi
         echo "✅ All configuration files present"
 
@@ -48,12 +48,12 @@ jobs:
       continue-on-error: false
 
     - name: TypeScript type checking
-      run: npm run typecheck
+      run: npx tsc --noEmit
       continue-on-error: false
 
     - name: Run tests with coverage
       id: tests
-      run: npm test -- --coverage --watchAll=false
+      run: npm test -- --coverage --run
       env:
         CI: true
 

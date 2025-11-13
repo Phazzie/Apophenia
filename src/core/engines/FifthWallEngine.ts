@@ -87,7 +87,7 @@ export class FifthWallEngine extends BaseEngine implements IFifthWallEngine {
    */
   private hasUserConsent(context: EngineContext): boolean {
     // Check for explicit consent flag in WorldState
-    const worldState = context.worldState as WorldState & {
+    const worldState = context.worldState as typeof context.worldState & {
       browserEffectsConsent?: boolean;
     };
 

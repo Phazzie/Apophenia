@@ -30,10 +30,10 @@ export const AI_MODELS = {
   PRIMARY_TEXT: 'grok-4-fast-reasoning', // Latest Grok model with 2M token context
   // Fallback removed - Grok-only deployment per INTEGRATION_PLAN.md
   
-  // Image generation pipeline - Attempt Grok first, fallback to Imagen
-  PRIMARY_IMAGE: 'grok-4-fast-reasoning', // Primary attempt with Grok-4 (will fallback)
-  FALLBACK_IMAGE: 'imagen-3.0-generate-001', // Primary Imagen model
-  SECONDARY_FALLBACK_IMAGE: 'imagen-2.0-generate-001', // Secondary Imagen fallback
+  // Image generation pipeline - Gemini 2.5 Flash Image primary, Grok fallback
+  PRIMARY_IMAGE: 'gemini-2.5-flash-image', // Primary: Gemini 2.5 Flash (native image gen)
+  FALLBACK_IMAGE: 'grok-2-image-1212', // Fallback: XAI Grok-2-image
+  SECONDARY_FALLBACK_IMAGE: 'unsplash', // Tertiary: Unsplash stock photos
   
   // Configuration for different use cases with 2M token context optimization
   CONCEPT_GENERATION: {

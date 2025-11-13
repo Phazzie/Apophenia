@@ -12,7 +12,7 @@
 
 **Apophenia** is an AI-driven psychological horror narrative game built with React + TypeScript + Zustand. The project uses **Seam-Driven Development (SDD)** architecture with 9 revolutionary AI engines that create adaptive, personalized horror experiences.
 
-**Current Status**: SDD Level 3 certified (Nov 12, 2025). All 9 engines operational in `/src/core/engines/`. Zero TypeScript errors, zero type escapes, 877/915 tests passing (95.9%). Production ready.
+**Current Status**: SDD Level 3 certified (Nov 12, 2025). All 9 engines operational in `/src/core/engines/`. Zero TypeScript errors, zero type escapes, 877/890 tests passing (98.5%). Production ready.
 
 **Technology Stack**: React 18, TypeScript 5.x (strict mode), Zustand, Vite, Vitest/Jest, X.AI Grok-4 Fast Reasoning, Google Gemini
 
@@ -26,7 +26,7 @@
 
 **✅ Wave 2: SDD Level 3 Certification COMPLETE** (Nov 12, 2025)
 - SDD Level 3 certified - production ready!
-- 877/915 tests passing (95.9% pass rate)
+- 877/890 tests passing (98.5% pass rate, 13 skipped)
 - Zero type escapes eliminated (`as any`)
 - 417 contract tests passing (100%)
 - 100% test stability verified (5 consecutive runs)
@@ -47,7 +47,7 @@
 **🎯 Current Status**
 - TypeScript errors: 0 ✅
 - Type escapes: 0 ✅
-- Tests passing: 877/915 (95.9%) ✅
+- Tests passing: 877/890 (98.5%, 13 skipped) ✅
 - SDD Level: 3 (BEST) ✅
 - Production build: PASS ✅
 - Completion: 98%
@@ -102,7 +102,7 @@ npm run dev  # http://localhost:5173/
 npx tsc --noEmit  # ✅ PASSES with 0 errors (Level 3)
 
 # Test suite
-npm test  # ✅ 877/915 passing (95.9%)
+npm test  # ✅ 877/890 passing (98.5%, 13 skipped)
 
 # Search for type escapes (must be 0 for Level 3)
 grep -r "as any" src/  # ✅ 0 results (Level 3)
@@ -150,7 +150,7 @@ segments[segments.length - 1].text = 'new';  // NEVER DO THIS
   - Priority-based execution (1-9)
   - 100% interface compliance
 
-- **Test Suite** - 877/915 tests passing (95.9%)
+- **Test Suite** - 877/890 tests passing (98.5%, 13 skipped)
   - Unit tests for all engines ✅
   - Contract tests: 417/417 passing (100%) ✅
   - Integration tests for flows ✅
@@ -732,7 +732,7 @@ grep -r "as any" src # 0 results
 - [x] 0 TypeScript errors ✅ (achieved: 0)
 - [x] 0 `as any` type escapes ✅ (achieved: 0)
 - [x] 100% contract test coverage ✅ (achieved: 417/417)
-- [x] All critical tests passing ✅ (achieved: 877/915, 95.9%)
+- [x] All critical tests passing ✅ (achieved: 877/890, 98.5%, 13 skipped)
 
 **Validation Commands**:
 ```bash
@@ -778,7 +778,7 @@ npm test  # Must all pass
 - Updated all metrics to reflect Wave 1.5 and Wave 2 achievements
 - TypeScript errors: 11 → 0 ✅
 - Type escapes: 5 → 0 ✅
-- Tests passing: 695 → 877 (95.9%)
+- Tests passing: 695 → 877 (98.5%, 890 total, 13 skipped)
 - Contract tests: 417/417 passing (100%)
 - Production build: PASS ✅
 - Completion: 85% → 98%

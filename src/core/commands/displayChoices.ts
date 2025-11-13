@@ -16,10 +16,28 @@ import { useGameStateStore } from '../state/gameStateStore';
  * Optionally includes an intrusive thought (disturbing choice).
  */
 export class DisplayChoicesExecutor extends BaseCommandExecutor {
+  /**
+   * Check if this executor can handle the given command
+   *
+   * @param command - The command to check
+   * @returns true if this executor can handle the command
+   */
   canExecute(command: Command): boolean {
     return command.type === 'displayChoices';
   }
 
+  /**
+   * Validate the displayChoices command before execution
+   *
+   * Checks for:
+   * - Required fields (choices array)
+   * - Array has at least one choice
+   * - Each choice has id and text
+   * - Intrusive thought structure (if present)
+   *
+   * @param command - The command to validate
+   * @returns Validation result with any errors
+   */
   validate(command: Command): ValidationResult {
     if (command.type !== 'displayChoices') {
       return { valid: false, errors: ['Wrong command type'] };

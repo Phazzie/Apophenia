@@ -15,10 +15,28 @@ import { Command, ExecutionResult, ValidationResult, BrowserEffect, BrowserEffec
  * All effects are safe and reversible.
  */
 export class BrowserEffectCommandExecutor extends BaseCommandExecutor implements BrowserEffectExecutor {
+  /**
+   * Check if this executor can handle the given command
+   *
+   * @param command - The command to check
+   * @returns true if this executor can handle the command
+   */
   canExecute(command: Command): boolean {
     return command.type === 'browserEffect';
   }
 
+  /**
+   * Validate the browserEffect command before execution
+   *
+   * Checks for:
+   * - Required fields (effect type)
+   * - Valid effect type (changeTitle, openTab, manipulateHistory, vibrate)
+   * - URL validation for openTab effects
+   * - Browser API availability
+   *
+   * @param command - The command to validate
+   * @returns Validation result with any errors
+   */
   validate(command: Command): ValidationResult {
     if (command.type !== 'browserEffect') {
       return { valid: false, errors: ['Wrong command type'] };

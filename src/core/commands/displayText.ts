@@ -16,10 +16,28 @@ import { useHistoryStore } from '../state/historyStore';
  * Can apply visual effects like typewriter, glitch, or fade.
  */
 export class DisplayTextExecutor extends BaseCommandExecutor implements TextDisplayExecutor {
+  /**
+   * Check if this executor can handle the given command
+   *
+   * @param command - The command to check
+   * @returns true if this executor can handle the command
+   */
   canExecute(command: Command): boolean {
     return command.type === 'displayText';
   }
 
+  /**
+   * Validate the displayText command before execution
+   *
+   * Checks for:
+   * - Required fields (content, segmentId)
+   * - Type correctness (content must be string)
+   * - Content length limits (max 10,000 characters)
+   * - Segment existence
+   *
+   * @param command - The command to validate
+   * @returns Validation result with any errors
+   */
   validate(command: Command): ValidationResult {
     if (command.type !== 'displayText') {
       return { valid: false, errors: ['Wrong command type'] };

@@ -13,7 +13,7 @@ export class AdaptiveNarrativeDNAEngine extends BaseEngine implements IAdaptiveN
   readonly description = 'Evolves story through genetic-style mutations';
   readonly priority = 2; // Low-medium priority - long-term evolution
 
-  genome: NarrativeGenome;
+  readonly genome: NarrativeGenome; // Immutable - only for interface compliance
 
   constructor(initialGenome?: NarrativeGenome) {
     super();
@@ -26,59 +26,47 @@ export class AdaptiveNarrativeDNAEngine extends BaseEngine implements IAdaptiveN
   }
 
   async process(context: EngineContext): Promise<EngineOutput> {
-    // Mutate genome based on context
-    const mutatedGenome = this.mutate(context);
+    // Get current genome from context (stateless approach)
+    const currentGenome = this.getCurrentGenome(context);
 
-    // Store the mutated genome
-    this.genome = mutatedGenome;
+    // Mutate genome based on context (pure function - doesn't mutate state)
+    const mutatedGenome = this.mutateGenome(currentGenome, context);
 
     return {
       engineName: this.name,
-      instructions: this.generateInstructions(context),
+      instructions: this.generateInstructionsForGenome(mutatedGenome, context),
       effects: {},
       metadata: {
-        genome: mutatedGenome,
+        genome: mutatedGenome, // Store for next execution
         mutationRate: this.calculateMutationRate(context)
       }
     };
   }
 
-  generateInstructions(context: EngineContext): string[] {
-    const instructions: string[] = [
-      `Emphasize these evolving narrative themes: ${this.genome.themes.join(', ')}`
-    ];
-
-    if (this.genome.mutations > 5) {
-      instructions.push(
-        'The story has mutated significantly from its origin',
-        'Introduce elements that feel alien to the original premise'
-      );
+  /**
+   * Get current genome from context (stateless)
+   */
+  private getCurrentGenome(context: EngineContext): NarrativeGenome {
+    // Try to get from previous engine output metadata
+    const previousOutput = context.previousOutput;
+    if (previousOutput?.metadata?.genome) {
+      return previousOutput.metadata.genome as NarrativeGenome;
     }
 
-    if (this.genome.mutations > 10) {
-      instructions.push(
-        'The narrative DNA is barely recognizable',
-        'Embrace the strange evolution - the story has become something new'
-      );
-    }
-
-    if (this.genome.generation > 3) {
-      instructions.push(
-        `This is generation ${this.genome.generation} of the narrative`,
-        'Each generation becomes more refined and targeted'
-      );
-    }
-
-    return instructions;
+    // Fallback to initial genome
+    return this.genome;
   }
 
-  mutate(context: EngineContext): NarrativeGenome {
+  /**
+   * Pure function that mutates genome without side effects
+   */
+  private mutateGenome(genome: NarrativeGenome, context: EngineContext): NarrativeGenome {
     const mutationRate = this.calculateMutationRate(context);
 
     const newGenome: NarrativeGenome = {
-      themes: [...this.genome.themes],
-      mutations: this.genome.mutations,
-      generation: this.genome.generation
+      themes: [...genome.themes],
+      mutations: genome.mutations,
+      generation: genome.generation
     };
 
     // Mutate themes based on mutation rate
@@ -93,6 +81,50 @@ export class AdaptiveNarrativeDNAEngine extends BaseEngine implements IAdaptiveN
     }
 
     return newGenome;
+  }
+
+  /**
+   * Generate instructions based on a specific genome
+   */
+  private generateInstructionsForGenome(genome: NarrativeGenome, context: EngineContext): string[] {
+    const instructions: string[] = [
+      `Emphasize these evolving narrative themes: ${genome.themes.join(', ')}`
+    ];
+
+    if (genome.mutations > 5) {
+      instructions.push(
+        'The story has mutated significantly from its origin',
+        'Introduce elements that feel alien to the original premise'
+      );
+    }
+
+    if (genome.mutations > 10) {
+      instructions.push(
+        'The narrative DNA is barely recognizable',
+        'Embrace the strange evolution - the story has become something new'
+      );
+    }
+
+    if (genome.generation > 3) {
+      instructions.push(
+        `This is generation ${genome.generation} of the narrative`,
+        'Each generation becomes more refined and targeted'
+      );
+    }
+
+    return instructions;
+  }
+
+  generateInstructions(context: EngineContext): string[] {
+    // Get current genome from context (stateless)
+    const currentGenome = this.getCurrentGenome(context);
+    return this.generateInstructionsForGenome(currentGenome, context);
+  }
+
+  mutate(context: EngineContext): NarrativeGenome {
+    // Delegate to stateless implementation
+    const currentGenome = this.getCurrentGenome(context);
+    return this.mutateGenome(currentGenome, context);
   }
 
   crossover(genome1: NarrativeGenome, genome2: NarrativeGenome): NarrativeGenome {

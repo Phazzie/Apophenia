@@ -39,6 +39,13 @@ export class BrowserEffectCommandExecutor extends BaseCommandExecutor implements
       return { valid: false, errors: [`Invalid effect type: ${effect.type}`] };
     }
 
+    // Validate URL for openTab effect
+    if (effect.type === 'openTab' && effect.value) {
+      if (!this.isValidURL(effect.value)) {
+        return { valid: false, errors: ['Invalid URL for openTab effect'] };
+      }
+    }
+
     // Check if the effect can be executed
     if (!this.canExecuteEffect(effect)) {
       return { valid: false, errors: [`Effect ${effect.type} cannot be executed in current environment`] };
@@ -96,8 +103,12 @@ export class BrowserEffectCommandExecutor extends BaseCommandExecutor implements
       case 'vibrate':
         return typeof navigator !== 'undefined' && 'vibrate' in navigator;
 
-      default:
+      default: {
+        // Exhaustive type check - ensures all BrowserEffect types are handled
+        const _exhaustive: never = effect.type;
+        console.error(`Unhandled effect type: ${_exhaustive}`);
         return false;
+      }
     }
   }
 
@@ -139,8 +150,27 @@ export class BrowserEffectCommandExecutor extends BaseCommandExecutor implements
         }
         break;
 
-      default:
-        throw new Error(`Unknown effect type: ${effect.type}`);
+      default: {
+        // Exhaustive type check - ensures all BrowserEffect types are handled
+        const _exhaustive: never = effect.type;
+        throw new Error(`Unknown effect type: ${_exhaustive}`);
+      }
+    }
+  }
+
+  /**
+   * Validate URL format
+   *
+   * @param url - The URL to validate
+   * @returns true if URL is valid
+   */
+  private isValidURL(url: string): boolean {
+    try {
+      const parsed = new URL(url);
+      // Only allow http and https protocols for security
+      return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+    } catch {
+      return false;
     }
   }
 }

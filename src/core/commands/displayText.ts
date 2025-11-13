@@ -37,6 +37,12 @@ export class DisplayTextExecutor extends BaseCommandExecutor implements TextDisp
       return { valid: false, errors: ['Content must be a string'] };
     }
 
+    // Content length validation (max 10,000 characters)
+    const MAX_CONTENT_LENGTH = 10000;
+    if (command.payload.content.length > MAX_CONTENT_LENGTH) {
+      return { valid: false, errors: [`Content exceeds maximum length of ${MAX_CONTENT_LENGTH} characters`] };
+    }
+
     // Verify segment exists
     const segments = useHistoryStore.getState().segments;
     const segment = segments.find(s => s.id === command.payload.segmentId);

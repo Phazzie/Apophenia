@@ -1,13 +1,17 @@
 /**
- * Unified Image Generation Fallback Service
- * Consolidates all image generation fallback strategies into a single, reusable implementation
+ * DEPRECATED: Unified Image Generation Fallback Service
  *
- * Fallback Chain:
+ * This service is DEPRECATED in favor of the new ImagePipeline architecture.
+ * Use src/services/images/ImagePipeline.ts instead.
+ *
+ * Legacy Fallback Chain:
  * 1. Backend API (Grok-first with Imagen fallback on backend)
  * 2. Direct Imagen API (primary model)
  * 3. Direct Imagen API (secondary fallback model)
  * 4. Unsplash with horror keywords
  * 5. SVG fallback (emergency)
+ *
+ * @deprecated Use ImagePipeline instead (src/services/images/ImagePipeline.ts)
  */
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
@@ -222,6 +226,10 @@ class ImageFallbackService {
 
   /**
    * Try direct Imagen API generation
+   *
+   * NOTE: Hardcoded Imagen model names because AI_MODELS.FALLBACK_IMAGE
+   * now contains 'grok-2-image-1212' which is invalid for Imagen API.
+   * This service is deprecated - use ImagePipeline instead.
    */
   private async tryImagenGeneration(
     prompt: string,
@@ -233,9 +241,10 @@ class ImageFallbackService {
     }
 
     try {
+      // Hardcoded Imagen models (don't use AI_MODELS constants here)
       const modelName = tier === 'primary'
-        ? (AI_MODELS.FALLBACK_IMAGE || 'imagen-3.0-generate-001')
-        : AI_MODELS.SECONDARY_FALLBACK_IMAGE;
+        ? 'imagen-3.0-generate-001'  // Hardcoded - AI_MODELS.FALLBACK_IMAGE is now for Grok
+        : 'imagen-2.0-generate-001';  // Hardcoded - AI_MODELS.SECONDARY_FALLBACK_IMAGE is now 'unsplash'
 
       console.log(`Generating image with Google Imagen API (${tier} model: ${modelName})...`);
 

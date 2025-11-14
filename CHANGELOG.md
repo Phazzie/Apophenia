@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **CRITICAL**: Removed 44,621 accidentally committed node_modules files from git tracking
+  - Restores build reproducibility via package-lock.json
+  - Eliminates supply chain security risks from exposed dependencies
+  - Removes platform-specific binaries (Linux-only)
+  - Reduces repository bloat by hundreds of MB
+- Updated comprehensive code review documentation
+- Added detailed fix summaries for all resolved errors
+
 ### In Progress
 - Component test suite fixes (26 remaining tests)
 - Performance optimization (code splitting, lazy loading)

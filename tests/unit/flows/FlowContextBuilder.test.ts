@@ -4,11 +4,11 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { FlowContextBuilder } from '../../../src/flows/FlowContextBuilder';
-import { useGameStateStore } from '../../../src/core/state/gameStateStore';
-import { useWorldStateStore } from '../../../src/core/state/worldStateStore';
-import { useHistoryStore } from '../../../src/core/state/historyStore';
-import { useProfileStore } from '../../../src/core/state/profileStore';
-import { GameState } from '../../../src/core/types/seams';
+import { useGameStateStore } from '../../../src/stores/gameStateStore';
+import { useWorldStateStore } from '../../../src/stores/worldStateStore';
+import { useStoryHistoryStore } from '../../../src/stores/storyHistoryStore';
+import { useUserStore } from '../../../src/stores/userStore';
+import { GameState } from '../../../src/types';
 
 describe('FlowContextBuilder', () => {
   let builder: FlowContextBuilder;
@@ -19,7 +19,7 @@ describe('FlowContextBuilder', () => {
     // Reset all stores
     useGameStateStore.getState().reset();
     useWorldStateStore.getState().reset();
-    useHistoryStore.getState().reset();
+    useStoryHistoryStore.getState().reset();
   });
 
   describe('buildFlowContext', () => {
@@ -40,11 +40,12 @@ describe('FlowContextBuilder', () => {
 
     it('should include recent history segments', () => {
       // Add some segments to history
-      const historyStore = useHistoryStore.getState();
+      const historyStore = useStoryHistoryStore.getState();
       for (let i = 0; i < 15; i++) {
-        historyStore.addSegment({
+        historyStore.addStorySegment({
           id: `seg-${i}`,
           text: `Segment ${i}`,
+          images: {},
         });
       }
 

@@ -20,7 +20,7 @@ export const useGameLoop = (
     async (choice: Choice) => {
       // Prevent duplicate actions while generating
       if (isGenerating) return;
-      setGenerating(true);
+      setIsGenerating(true);
 
       try {
         // Process the player choice through the game flow
@@ -35,7 +35,7 @@ export const useGameLoop = (
     },
     [
       isGenerating,
-      setGenerating,
+      setIsGenerating,
       setGameState,
     ],
   );

@@ -75,7 +75,7 @@ describe('MockService', () => {
       expect(response.content).toBeDefined();
       expect(response.commands).toBeInstanceOf(Array);
       expect(response.metadata).toBeDefined();
-      expect(response.metadata.model).toBe('mock-v1-production');
+      expect(response.metadata.model).toBe('mock-v1');
     });
 
     it('should generate valid commands', async () => {
@@ -175,7 +175,7 @@ describe('MockService', () => {
 
       expect(response.metadata.tokensUsed).toBeDefined();
       expect(response.metadata.latency).toBeDefined();
-      expect(response.metadata.model).toBe('mock-v1-production');
+      expect(response.metadata.model).toBe('mock-v1');
     });
   });
 

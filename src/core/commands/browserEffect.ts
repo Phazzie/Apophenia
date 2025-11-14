@@ -15,28 +15,10 @@ import { Command, ExecutionResult, ValidationResult, BrowserEffect, BrowserEffec
  * All effects are safe and reversible.
  */
 export class BrowserEffectCommandExecutor extends BaseCommandExecutor implements BrowserEffectExecutor {
-  /**
-   * Check if this executor can handle the given command
-   *
-   * @param command - The command to check
-   * @returns true if this executor can handle the command
-   */
   canExecute(command: Command): boolean {
     return command.type === 'browserEffect';
   }
 
-  /**
-   * Validate the browserEffect command before execution
-   *
-   * Checks for:
-   * - Required fields (effect type)
-   * - Valid effect type (changeTitle, openTab, manipulateHistory, vibrate)
-   * - URL validation for openTab effects
-   * - Browser API availability
-   *
-   * @param command - The command to validate
-   * @returns Validation result with any errors
-   */
   validate(command: Command): ValidationResult {
     if (command.type !== 'browserEffect') {
       return { valid: false, errors: ['Wrong command type'] };
@@ -55,13 +37,6 @@ export class BrowserEffectCommandExecutor extends BaseCommandExecutor implements
     const validTypes = ['changeTitle', 'openTab', 'manipulateHistory', 'vibrate'];
     if (!validTypes.includes(effect.type)) {
       return { valid: false, errors: [`Invalid effect type: ${effect.type}`] };
-    }
-
-    // Validate URL for openTab effect
-    if (effect.type === 'openTab' && effect.value) {
-      if (!this.isValidURL(effect.value)) {
-        return { valid: false, errors: ['Invalid URL for openTab effect'] };
-      }
     }
 
     // Check if the effect can be executed
@@ -121,12 +96,8 @@ export class BrowserEffectCommandExecutor extends BaseCommandExecutor implements
       case 'vibrate':
         return typeof navigator !== 'undefined' && 'vibrate' in navigator;
 
-      default: {
-        // Exhaustive type check - ensures all BrowserEffect types are handled
-        const _exhaustive: never = effect.type;
-        console.error(`Unhandled effect type: ${_exhaustive}`);
+      default:
         return false;
-      }
     }
   }
 
@@ -168,27 +139,8 @@ export class BrowserEffectCommandExecutor extends BaseCommandExecutor implements
         }
         break;
 
-      default: {
-        // Exhaustive type check - ensures all BrowserEffect types are handled
-        const _exhaustive: never = effect.type;
-        throw new Error(`Unknown effect type: ${_exhaustive}`);
-      }
-    }
-  }
-
-  /**
-   * Validate URL format
-   *
-   * @param url - The URL to validate
-   * @returns true if URL is valid
-   */
-  private isValidURL(url: string): boolean {
-    try {
-      const parsed = new URL(url);
-      // Only allow http and https protocols for security
-      return parsed.protocol === 'http:' || parsed.protocol === 'https:';
-    } catch {
-      return false;
+      default:
+        throw new Error(`Unknown effect type: ${effect.type}`);
     }
   }
 }

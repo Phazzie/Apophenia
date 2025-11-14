@@ -4,9 +4,9 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { DescentFlowImpl } from '../../../src/flows/DescentFlow';
-import { useGameStateStore } from '../../../src/core/state/gameStateStore';
-import { useWorldStateStore } from '../../../src/core/state/worldStateStore';
-import { useHistoryStore } from '../../../src/core/state/historyStore';
+import { useGameStateStore } from '../../../src/stores/gameStateStore';
+import { useWorldStateStore } from '../../../src/stores/worldStateStore';
+import { useStoryHistoryStore } from '../../../src/stores/storyHistoryStore';
 import { GameState } from '../../../src/core/types/seams';
 
 // Mock the AI service
@@ -25,41 +25,62 @@ vi.mock('../../../src/services/commandExecutor', () => ({
 }));
 
 // Mock the engine classes
-vi.mock('../../../src/core/engines', () => {
-  class MockEngine {
-    name = 'Mock';
+vi.mock('../../../src/core/engines', () => ({
+  TemporalRevisionEngine: class {
+    name = 'TemporalRevision';
+    isActive() { return false; }
+    generateInstructions() { return ['Revise past events']; }
+    process() { return Promise.resolve({ engineName: 'TemporalRevision', instructions: ['Revise past events'], effects: {}, metadata: {} }); }
+  },
+  MetaConsciousnessEngine: class {
+    name = 'MetaConsciousness';
     isActive() { return false; }
     generateInstructions() { return []; }
-    process() { return Promise.resolve({ engineName: this.name, instructions: [], effects: {}, metadata: {} }); }
-  }
-
-  const mockRegistry = {
-    engines: new Map(),
-    register(engine: any) { this.engines.set(engine.name, engine); },
-    async executeAll(context: any) {
-      const outputs = [];
-      for (const engine of this.engines.values()) {
-        if (engine.isActive(context)) {
-          outputs.push(await engine.process(context));
-        }
-      }
-      return outputs;
-    }
-  };
-
-  return {
-    TemporalRevisionEngine: class extends MockEngine { name = 'TemporalRevision'; generateInstructions() { return ['Revise past events']; } },
-    MetaConsciousnessEngine: class extends MockEngine { name = 'MetaConsciousness'; },
-    QuantumNarrativeEngine: class extends MockEngine { name = 'QuantumNarrative'; },
-    AdaptiveHorrorEngine: class extends MockEngine { name = 'AdaptiveHorror'; isActive() { return true; } generateInstructions() { return ['Increase horror based on fears']; } },
-    RealityCorruptionEngine: class extends MockEngine { name = 'RealityCorruption'; isActive() { return true; } generateInstructions() { return ['Apply visual corruption']; } },
-    NeuralEchoChamberEngine: class extends MockEngine { name = 'NeuralEcho'; },
-    SemanticChoiceArchaeologyEngine: class extends MockEngine { name = 'SemanticArchaeology'; },
-    AdaptiveNarrativeDNAEngine: class extends MockEngine { name = 'NarrativeDNA'; },
-    FifthWallEngine: class extends MockEngine { name = 'FifthWall'; },
-    globalEngineRegistry: mockRegistry,
-  };
-});
+    process() { return Promise.resolve({ engineName: 'MetaConsciousness', instructions: [], effects: {}, metadata: {} }); }
+  },
+  QuantumNarrativeEngine: class {
+    name = 'QuantumNarrative';
+    isActive() { return false; }
+    generateInstructions() { return []; }
+    process() { return Promise.resolve({ engineName: 'QuantumNarrative', instructions: [], effects: {}, metadata: {} }); }
+  },
+  AdaptiveHorrorEngine: class {
+    name = 'AdaptiveHorror';
+    isActive() { return true; }
+    generateInstructions() { return ['Increase horror based on fears']; }
+    process() { return Promise.resolve({ engineName: 'AdaptiveHorror', instructions: ['Increase horror based on fears'], effects: {}, metadata: {} }); }
+  },
+  RealityCorruptionEngine: class {
+    name = 'RealityCorruption';
+    isActive() { return true; }
+    generateInstructions() { return ['Apply visual corruption']; }
+    process() { return Promise.resolve({ engineName: 'RealityCorruption', instructions: ['Apply visual corruption'], effects: {}, metadata: {} }); }
+  },
+  NeuralEchoChamberEngine: class {
+    name = 'NeuralEcho';
+    isActive() { return false; }
+    generateInstructions() { return []; }
+    process() { return Promise.resolve({ engineName: 'NeuralEcho', instructions: [], effects: {}, metadata: {} }); }
+  },
+  SemanticChoiceArchaeologyEngine: class {
+    name = 'SemanticArchaeology';
+    isActive() { return false; }
+    generateInstructions() { return []; }
+    process() { return Promise.resolve({ engineName: 'SemanticArchaeology', instructions: [], effects: {}, metadata: {} }); }
+  },
+  AdaptiveNarrativeDNAEngine: class {
+    name = 'NarrativeDNA';
+    isActive() { return false; }
+    generateInstructions() { return []; }
+    process() { return Promise.resolve({ engineName: 'NarrativeDNA', instructions: [], effects: {}, metadata: {} }); }
+  },
+  FifthWallEngine: class {
+    name = 'FifthWall';
+    isActive() { return false; }
+    generateInstructions() { return []; }
+    process() { return Promise.resolve({ engineName: 'FifthWall', instructions: [], effects: {}, metadata: {} }); }
+  },
+}));
 
 describe('DescentFlow', () => {
   let flow: DescentFlowImpl;
@@ -70,7 +91,7 @@ describe('DescentFlow', () => {
     // Reset stores
     useGameStateStore.getState().reset();
     useWorldStateStore.getState().reset();
-    useHistoryStore.getState().reset();
+    useStoryHistoryStore.getState().reset();
   });
 
   describe('initialize', () => {

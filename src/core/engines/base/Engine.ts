@@ -28,66 +28,37 @@ export abstract class BaseEngine implements IEngine {
   abstract generateInstructions(context: EngineContext): string[];
 
   /**
-   * Validate that context has required properties
-   * Throws if context is invalid
-   */
-  protected validateContext(context: EngineContext): void {
-    if (!context) {
-      throw new Error(`${this.name}: Context is null or undefined`);
-    }
-
-    if (!context.worldState) {
-      throw new Error(`${this.name}: Context.worldState is required`);
-    }
-
-    if (!context.playerProfile) {
-      throw new Error(`${this.name}: Context.playerProfile is required`);
-    }
-
-    if (!context.recentHistory) {
-      throw new Error(`${this.name}: Context.recentHistory is required`);
-    }
-  }
-
-  /**
-   * Safely get a value with a default fallback
-   */
-  protected safeGet<T>(value: T | undefined | null, defaultValue: T): T {
-    return value ?? defaultValue;
-  }
-
-  /**
    * Utility: Check if horror intensity is above threshold
    */
   protected isHorrorIntenseEnough(context: EngineContext, threshold: number): boolean {
-    return (context?.worldState?.horrorIntensity ?? 0) >= threshold;
+    return context.worldState.horrorIntensity >= threshold;
   }
 
   /**
    * Utility: Check if corruption is above threshold
    */
   protected isCorruptionHighEnough(context: EngineContext, threshold: number): boolean {
-    return (context?.worldState?.corruptionLevel ?? 0) >= threshold;
+    return context.worldState.corruptionLevel >= threshold;
   }
 
   /**
    * Utility: Check if system health is below threshold
    */
   protected isSystemHealthLowEnough(context: EngineContext, threshold: number): boolean {
-    return (context?.worldState?.systemHealth ?? 100) <= threshold;
+    return context.worldState.systemHealth <= threshold;
   }
 
   /**
    * Utility: Get the number of choices made
    */
   protected getChoiceCount(context: EngineContext): number {
-    return context?.playerProfile?.engagementMetrics?.totalChoices ?? 0;
+    return context.playerProfile.engagementMetrics.totalChoices;
   }
 
   /**
    * Utility: Check if enough history exists
    */
   protected hasEnoughHistory(context: EngineContext, minSegments: number): boolean {
-    return (context?.recentHistory?.length ?? 0) >= minSegments;
+    return context.recentHistory.length >= minSegments;
   }
 }

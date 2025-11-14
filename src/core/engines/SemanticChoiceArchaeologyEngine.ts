@@ -13,17 +13,20 @@ export class SemanticChoiceArchaeologyEngine extends BaseEngine implements ISema
   readonly description = 'Analyzes choice patterns and reflects subconscious motivations';
   readonly priority = 3; // Medium-low priority - analytical enhancement
 
+  private choiceHistory: Choice[] = [];
+
   isActive(context: EngineContext): boolean {
     // Activate when we have enough choices to analyze
     return this.getChoiceCount(context) >= 5 && this.getChoiceCount(context) % 4 === 0;
   }
 
   async process(context: EngineContext): Promise<EngineOutput> {
-    // Reconstruct choice history from previous outputs and current choice (pure functional)
-    const previousChoices = this.getChoiceHistoryFromContext(context);
-    const currentChoices = context.currentChoice ? [...previousChoices, context.currentChoice] : previousChoices;
+    // Reconstruct choice history from player profile and current choice
+    if (context.currentChoice) {
+      this.choiceHistory.push(context.currentChoice);
+    }
 
-    const analysis = this.analyzeChoiceSequence(currentChoices);
+    const analysis = this.analyzeChoiceSequence(this.choiceHistory);
     const reflection = this.generateReflection(analysis);
 
     return {
@@ -35,24 +38,9 @@ export class SemanticChoiceArchaeologyEngine extends BaseEngine implements ISema
       effects: {},
       metadata: {
         analysis,
-        choicesAnalyzed: currentChoices.length,
-        choiceHistory: currentChoices // Store for next execution
+        choicesAnalyzed: this.choiceHistory.length
       }
     };
-  }
-
-  /**
-   * Reconstructs choice history from context (stateless)
-   */
-  private getChoiceHistoryFromContext(context: EngineContext): Choice[] {
-    // Try to get from previous engine output metadata
-    const previousOutput = context.previousOutput;
-    if (previousOutput?.metadata?.choiceHistory && Array.isArray(previousOutput.metadata.choiceHistory)) {
-      return previousOutput.metadata.choiceHistory as Choice[];
-    }
-
-    // Fallback: empty history (first run)
-    return [];
   }
 
   generateInstructions(context: EngineContext): string[] {

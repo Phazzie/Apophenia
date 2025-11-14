@@ -41,41 +41,17 @@ vi.mock('../../src/services/commandExecutor', () => ({
 }));
 
 // Mock engine classes
-vi.mock('../../src/core/engines', () => {
-  class MockEngine {
-    name = 'Mock';
-    isActive() { return false; }
-    generateInstructions() { return []; }
-    process() { return Promise.resolve({ engineName: this.name, instructions: [], effects: {}, metadata: {} }); }
-  }
-
-  const mockRegistry = {
-    engines: new Map(),
-    register(engine: any) { this.engines.set(engine.name, engine); },
-    async executeAll(context: any) {
-      const outputs = [];
-      for (const engine of this.engines.values()) {
-        if (engine.isActive(context)) {
-          outputs.push(await engine.process(context));
-        }
-      }
-      return outputs;
-    }
-  };
-
-  return {
-    TemporalRevisionEngine: class extends MockEngine { name = 'TemporalRevision'; },
-    MetaConsciousnessEngine: class extends MockEngine { name = 'MetaConsciousness'; },
-    QuantumNarrativeEngine: class extends MockEngine { name = 'QuantumNarrative'; },
-    AdaptiveHorrorEngine: class extends MockEngine { name = 'AdaptiveHorror'; isActive() { return true; } generateInstructions() { return ['Test']; } },
-    RealityCorruptionEngine: class extends MockEngine { name = 'RealityCorruption'; isActive() { return true; } generateInstructions() { return ['Test']; } },
-    NeuralEchoChamberEngine: class extends MockEngine { name = 'NeuralEcho'; },
-    SemanticChoiceArchaeologyEngine: class extends MockEngine { name = 'SemanticArchaeology'; },
-    AdaptiveNarrativeDNAEngine: class extends MockEngine { name = 'NarrativeDNA'; },
-    FifthWallEngine: class extends MockEngine { name = 'FifthWall'; },
-    globalEngineRegistry: mockRegistry,
-  };
-});
+vi.mock('../../src/core/engines', () => ({
+  TemporalRevisionEngine: class { name = 'TemporalRevision'; isActive() { return false; } generateInstructions() { return []; } process() { return Promise.resolve({ engineName: 'TemporalRevision', instructions: [], effects: {}, metadata: {} }); } },
+  MetaConsciousnessEngine: class { name = 'MetaConsciousness'; isActive() { return false; } generateInstructions() { return []; } process() { return Promise.resolve({ engineName: 'MetaConsciousness', instructions: [], effects: {}, metadata: {} }); } },
+  QuantumNarrativeEngine: class { name = 'QuantumNarrative'; isActive() { return false; } generateInstructions() { return []; } process() { return Promise.resolve({ engineName: 'QuantumNarrative', instructions: [], effects: {}, metadata: {} }); } },
+  AdaptiveHorrorEngine: class { name = 'AdaptiveHorror'; isActive() { return true; } generateInstructions() { return ['Test']; } process() { return Promise.resolve({ engineName: 'AdaptiveHorror', instructions: ['Test'], effects: {}, metadata: {} }); } },
+  RealityCorruptionEngine: class { name = 'RealityCorruption'; isActive() { return true; } generateInstructions() { return ['Test']; } process() { return Promise.resolve({ engineName: 'RealityCorruption', instructions: ['Test'], effects: {}, metadata: {} }); } },
+  NeuralEchoChamberEngine: class { name = 'NeuralEcho'; isActive() { return false; } generateInstructions() { return []; } process() { return Promise.resolve({ engineName: 'NeuralEcho', instructions: [], effects: {}, metadata: {} }); } },
+  SemanticChoiceArchaeologyEngine: class { name = 'SemanticArchaeology'; isActive() { return false; } generateInstructions() { return []; } process() { return Promise.resolve({ engineName: 'SemanticArchaeology', instructions: [], effects: {}, metadata: {} }); } },
+  AdaptiveNarrativeDNAEngine: class { name = 'NarrativeDNA'; isActive() { return false; } generateInstructions() { return []; } process() { return Promise.resolve({ engineName: 'NarrativeDNA', instructions: [], effects: {}, metadata: {} }); } },
+  FifthWallEngine: class { name = 'FifthWall'; isActive() { return false; } generateInstructions() { return []; } process() { return Promise.resolve({ engineName: 'FifthWall', instructions: [], effects: {}, metadata: {} }); } },
+}));
 
 // Helper: Create mock genre
 function createMockGenre(): GenreConfig {

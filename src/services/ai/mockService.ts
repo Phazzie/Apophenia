@@ -21,33 +21,15 @@ export class MockService implements AIService {
   readonly supportsImages = false;
 
   private narrativeCounter = 0;
-  private usageCount = 0;
-  private lastUsed: number | null = null;
 
   async isAvailable(): Promise<boolean> {
-    // Mock service is always available (production-ready fallback)
+    // Mock service is always available
     return true;
   }
 
   async generateResponse(request: AIRequest): Promise<AIResponse> {
-    // Track usage for monitoring
-    this.usageCount++;
-    this.lastUsed = Date.now();
-
-    // Log when mock service is used (important for production monitoring)
-    if (this.usageCount === 1) {
-      console.warn(
-        '⚠️ MockService activated as fallback - Primary AI service unavailable'
-      );
-    }
-
-    console.log(
-      `MockService: Generating response (usage count: ${this.usageCount})`
-    );
-
-    // Simulate realistic network latency
-    const simulatedLatency = 500 + Math.random() * 1000;
-    await this.delay(simulatedLatency);
+    // Simulate network latency
+    await this.delay(500 + Math.random() * 1000);
 
     const commands = this.generateMockCommands(request);
 
@@ -57,28 +39,10 @@ export class MockService implements AIService {
       commands,
       metadata: {
         tokensUsed: Math.floor(Math.random() * 1000) + 500,
-        latency: Math.floor(simulatedLatency),
-        model: 'mock-v1-production',
+        latency: 800,
+        model: 'mock-v1',
       },
     };
-  }
-
-  /**
-   * Get usage statistics for monitoring
-   */
-  getUsageStats(): { count: number; lastUsed: number | null } {
-    return {
-      count: this.usageCount,
-      lastUsed: this.lastUsed,
-    };
-  }
-
-  /**
-   * Reset usage statistics
-   */
-  resetStats(): void {
-    this.usageCount = 0;
-    this.lastUsed = null;
   }
 
   estimateTokens(text: string): number {

@@ -4,8 +4,8 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { FlowCoordinatorImpl } from '../../../src/flows/FlowCoordinator';
-import { useGameStateStore } from '../../../src/core/state/gameStateStore';
-import { useWorldStateStore } from '../../../src/core/state/worldStateStore';
+import { useGameStateStore } from '../../../src/stores/gameStateStore';
+import { useWorldStateStore } from '../../../src/stores/worldStateStore';
 import { GameState as SeamsGameState } from '../../../src/core/types/seams';
 import { GameState } from '../../../src/types';
 
@@ -19,63 +19,63 @@ vi.mock('../../../src/services/commandExecutor', () => ({
   executeCommandQueue: vi.fn().mockResolvedValue([]),
 }));
 
-// Mock the engine classes and registry
-vi.mock('../../../src/core/engines', () => {
-  class MockAdaptiveHorrorEngine {
+// Mock the engine classes
+vi.mock('../../../src/core/engines', () => ({
+  TemporalRevisionEngine: class {
+    name = 'TemporalRevision';
+    isActive() { return false; }
+    generateInstructions() { return []; }
+    process() { return Promise.resolve({ engineName: 'TemporalRevision', instructions: [], effects: {}, metadata: {} }); }
+  },
+  MetaConsciousnessEngine: class {
+    name = 'MetaConsciousness';
+    isActive() { return false; }
+    generateInstructions() { return []; }
+    process() { return Promise.resolve({ engineName: 'MetaConsciousness', instructions: [], effects: {}, metadata: {} }); }
+  },
+  QuantumNarrativeEngine: class {
+    name = 'QuantumNarrative';
+    isActive() { return false; }
+    generateInstructions() { return []; }
+    process() { return Promise.resolve({ engineName: 'QuantumNarrative', instructions: [], effects: {}, metadata: {} }); }
+  },
+  AdaptiveHorrorEngine: class {
     name = 'AdaptiveHorror';
     isActive() { return true; }
     generateInstructions() { return ['Test instruction']; }
     process() { return Promise.resolve({ engineName: 'AdaptiveHorror', instructions: ['Test instruction'], effects: {}, metadata: {} }); }
-  }
-
-  class MockRealityCorruptionEngine {
+  },
+  RealityCorruptionEngine: class {
     name = 'RealityCorruption';
     isActive() { return true; }
     generateInstructions() { return ['Test instruction']; }
     process() { return Promise.resolve({ engineName: 'RealityCorruption', instructions: ['Test instruction'], effects: {}, metadata: {} }); }
-  }
-
-  class MockInactiveEngine {
-    name = 'Inactive';
+  },
+  NeuralEchoChamberEngine: class {
+    name = 'NeuralEcho';
     isActive() { return false; }
     generateInstructions() { return []; }
-    process() { return Promise.resolve({ engineName: 'Inactive', instructions: [], effects: {}, metadata: {} }); }
-  }
-
-  const mockRegistry = {
-    engines: new Map(),
-    register(engine: any) {
-      this.engines.set(engine.name, engine);
-    },
-    async executeAll(context: any) {
-      const outputs = [];
-      for (const engine of this.engines.values()) {
-        if (engine.isActive(context)) {
-          outputs.push(await engine.process(context));
-        }
-      }
-      return outputs;
-    }
-  };
-
-  // Pre-register mock engines
-  mockRegistry.register(new MockAdaptiveHorrorEngine());
-  mockRegistry.register(new MockRealityCorruptionEngine());
-  mockRegistry.register(new MockInactiveEngine());
-
-  return {
-    TemporalRevisionEngine: MockInactiveEngine,
-    MetaConsciousnessEngine: MockInactiveEngine,
-    QuantumNarrativeEngine: MockInactiveEngine,
-    AdaptiveHorrorEngine: MockAdaptiveHorrorEngine,
-    RealityCorruptionEngine: MockRealityCorruptionEngine,
-    NeuralEchoChamberEngine: MockInactiveEngine,
-    SemanticChoiceArchaeologyEngine: MockInactiveEngine,
-    AdaptiveNarrativeDNAEngine: MockInactiveEngine,
-    FifthWallEngine: MockInactiveEngine,
-    globalEngineRegistry: mockRegistry,
-  };
-});
+    process() { return Promise.resolve({ engineName: 'NeuralEcho', instructions: [], effects: {}, metadata: {} }); }
+  },
+  SemanticChoiceArchaeologyEngine: class {
+    name = 'SemanticArchaeology';
+    isActive() { return false; }
+    generateInstructions() { return []; }
+    process() { return Promise.resolve({ engineName: 'SemanticArchaeology', instructions: [], effects: {}, metadata: {} }); }
+  },
+  AdaptiveNarrativeDNAEngine: class {
+    name = 'NarrativeDNA';
+    isActive() { return false; }
+    generateInstructions() { return []; }
+    process() { return Promise.resolve({ engineName: 'NarrativeDNA', instructions: [], effects: {}, metadata: {} }); }
+  },
+  FifthWallEngine: class {
+    name = 'FifthWall';
+    isActive() { return false; }
+    generateInstructions() { return []; }
+    process() { return Promise.resolve({ engineName: 'FifthWall', instructions: [], effects: {}, metadata: {} }); }
+  },
+}));
 
 describe('FlowCoordinator', () => {
   let coordinator: FlowCoordinatorImpl;
@@ -89,9 +89,9 @@ describe('FlowCoordinator', () => {
   });
 
   describe('getCurrentFlow', () => {
-    it('should return descent flow for DESCENDING state', () => {
+    it('should return descent flow for PLAYING state', () => {
       const gameStateStore = useGameStateStore.getState();
-      gameStateStore.setGameState(SeamsGameState.DESCENDING);
+      gameStateStore.setGameState(GameState.PLAYING);
 
       const flow = coordinator.getCurrentFlow();
 
@@ -100,7 +100,7 @@ describe('FlowCoordinator', () => {
 
     it('should return descent flow for MENU state', () => {
       const gameStateStore = useGameStateStore.getState();
-      gameStateStore.setGameState(SeamsGameState.MENU);
+      gameStateStore.setGameState(GameState.MENU);
 
       const flow = coordinator.getCurrentFlow();
 
@@ -111,8 +111,8 @@ describe('FlowCoordinator', () => {
       const gameStateStore = useGameStateStore.getState();
       const worldStateStore = useWorldStateStore.getState();
 
-      // Set to DESCENDING
-      gameStateStore.setGameState(SeamsGameState.DESCENDING);
+      // Set to PLAYING
+      gameStateStore.setGameState(GameState.PLAYING);
 
       // Set high horror and corruption to trigger unraveling
       worldStateStore.updateWorldState({
@@ -133,7 +133,7 @@ describe('FlowCoordinator', () => {
 
       const gameState = useGameStateStore.getState().gameState;
 
-      expect(gameState).toBe(SeamsGameState.DESCENDING);
+      expect(gameState).toBe(GameState.PLAYING);
     });
 
     it('should update current flow after transition', async () => {

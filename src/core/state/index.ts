@@ -10,9 +10,6 @@ export { useGameStateStore } from './gameStateStore';
 export { useWorldStateStore } from './worldStateStore';
 export { useHistoryStore } from './historyStore';
 export { usePlayerProfileStore } from './playerProfileStore';
-export { useImageCacheStore } from './imageCacheStore';
-export { useAIModelStore, AVAILABLE_MODELS } from './aiModelStore';
-export { useUserStore, initializeUserAuth } from './userStore';
 
 // State Manager
 export { StateManagerImpl, stateManager } from './StateManager';

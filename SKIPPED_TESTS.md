@@ -54,27 +54,27 @@ All skip when `grokAvailable = false`:
 All skip when `mockAvailable = false` (should not happen normally):
 
 7. **generateResponse returns Promise<AIResponse>**
-   - File: Similar to GrokService test
+   - File: `tests/contracts/ai-services.contract.test.ts:166`
    - Validates MockService contract
 
 8. **generateResponse returns exactly 4 fields (no extras)**
-   - File: Similar to GrokService test
+   - File: `tests/contracts/ai-services.contract.test.ts:182`
    - Contract field count validation
 
 9. **generateResponse metadata matches contract shape**
-   - File: Similar to GrokService test
+   - File: `tests/contracts/ai-services.contract.test.ts:193`
    - Metadata structure validation
 
 10. **generateResponse commands array contains valid Command objects**
-    - File: Similar to GrokService test
+    - File: `tests/contracts/ai-services.contract.test.ts:218`
     - Command validation
 
 11. **generateResponse provider matches service provider**
-    - File: Similar to GrokService test
+    - File: `tests/contracts/ai-services.contract.test.ts:233`
     - Provider field check
 
 12. **generateResponse content is non-empty string**
-    - File: Similar to GrokService test
+    - File: `tests/contracts/ai-services.contract.test.ts:240`
     - Content validation
 
 ### Service Parity (1 test)

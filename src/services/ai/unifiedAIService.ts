@@ -65,25 +65,21 @@ export class UnifiedAIServiceImpl implements UnifiedAIService {
    */
   async generateWithFallback(request: Omit<AIRequest, 'provider'>): Promise<AIResponse> {
     const errors: Array<{ provider: AIProvider; error: string }> = [];
-    let attemptCount = 0;
 
     for (const provider of this.fallbackChain) {
-      attemptCount++;
-
       try {
         const service = this.getService(provider);
 
         // Check if service is available
         const isAvailable = await service.isAvailable();
         if (!isAvailable) {
-          const message = `Provider ${provider} is not available (attempt ${attemptCount}/${this.fallbackChain.length})`;
-          console.warn(message);
+          console.warn(`Provider ${provider} is not available, trying next in chain`);
           errors.push({ provider, error: 'Provider not available' });
           continue;
         }
 
         // Try to generate
-        console.log(`Attempting generation with ${provider} (attempt ${attemptCount}/${this.fallbackChain.length})...`);
+        console.log(`Attempting generation with ${provider}...`);
         const fullRequest: AIRequest = {
           ...request,
           provider,
@@ -98,26 +94,17 @@ export class UnifiedAIServiceImpl implements UnifiedAIService {
           continue;
         }
 
-        // Log success with provider info
-        if (provider !== this.primaryProvider) {
-          console.warn(
-            `⚠️ FALLBACK ACTIVATED: Using ${provider} instead of primary provider (${this.primaryProvider})`
-          );
-        } else {
-          console.log(`✓ Successfully generated with primary provider: ${provider}`);
-        }
-
+        console.log(`Successfully generated with ${provider}`);
         return response;
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        console.error(`Provider ${provider} failed (attempt ${attemptCount}/${this.fallbackChain.length}):`, errorMessage);
+        console.error(`Provider ${provider} failed:`, errorMessage);
         errors.push({ provider, error: errorMessage });
       }
     }
 
-    // All providers failed - critical error
+    // All providers failed
     const errorSummary = errors.map(e => `${e.provider}: ${e.error}`).join(', ');
-    console.error('🚨 CRITICAL: All AI providers failed in fallback chain');
     throw new Error(`All AI providers failed. Errors: ${errorSummary}`);
   }
 

@@ -28,29 +28,3 @@ Object.defineProperty(globalThis, 'import', {
 process.env.NODE_ENV = 'test';
 process.env.VITE_XAI_API_KEY = 'test-key';
 process.env.VITE_UNSPLASH_ACCESS_KEY = 'test-key';
-
-// Setup localStorage mock
-const localStorageMock = (() => {
-  let store: Record<string, string> = {};
-  return {
-    getItem: (key: string) => store[key] || null,
-    setItem: (key: string, value: string) => {
-      store[key] = value;
-    },
-    removeItem: (key: string) => {
-      delete store[key];
-    },
-    clear: () => {
-      store = {};
-    },
-  };
-})();
-
-Object.defineProperty(global, 'localStorage', {
-  value: localStorageMock,
-});
-
-// Clear localStorage before each test
-beforeEach(() => {
-  localStorageMock.clear();
-});

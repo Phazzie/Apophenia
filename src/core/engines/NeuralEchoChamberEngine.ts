@@ -125,43 +125,7 @@ export class NeuralEchoChamberEngine extends BaseEngine implements INeuralEchoCh
 
       localStorage.setItem(ECHO_STORAGE_KEY, encrypted);
     } catch (error) {
-      // Handle QuotaExceededError specifically
-      if (error instanceof DOMException && error.name === 'QuotaExceededError') {
-        console.warn('localStorage quota exceeded. Attempting to clear old data and retry...');
-        this.handleQuotaExceeded(profile);
-      } else {
-        console.warn('Failed to save cross-session memory:', error);
-      }
-    }
-  }
-
-  /**
-   * Handle localStorage quota exceeded by clearing old data and retrying
-   */
-  private handleQuotaExceeded(profile: PlayerProfile): void {
-    try {
-      // Try to clear the old echo data first
-      localStorage.removeItem(ECHO_STORAGE_KEY);
-
-      // Attempt to save again with just essential data
-      const minimalProfile: Partial<PlayerProfile> = {
-        fearProfile: profile.fearProfile,
-        choicePatterns: profile.choicePatterns,
-        engagementMetrics: {
-          totalChoices: profile.engagementMetrics.totalChoices,
-          averageResponseTime: 0, // Omit to save space
-          sessionDuration: 0 // Omit to save space
-        }
-      };
-
-      const serialized = JSON.stringify(minimalProfile);
-      const encrypted = btoa(serialized);
-      localStorage.setItem(ECHO_STORAGE_KEY, encrypted);
-
-      console.info('Successfully saved minimal cross-session memory after quota exceeded');
-    } catch (retryError) {
-      console.error('Failed to save even minimal cross-session memory:', retryError);
-      // Silently fail - cross-session memory is not critical
+      console.warn('Failed to save cross-session memory:', error);
     }
   }
 

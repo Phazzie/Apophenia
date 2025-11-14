@@ -44,7 +44,7 @@ export class EngineRegistry implements IEngineRegistry {
       try {
         return engine.isActive(context);
       } catch (error) {
-        this.logEngineError(engine.name, 'isActive', error);
+        console.error(`Error checking if engine ${engine.name} is active:`, error);
         return false;
       }
     });
@@ -62,7 +62,6 @@ export class EngineRegistry implements IEngineRegistry {
     }
 
     const outputs: EngineOutput[] = [];
-    const errors: Array<{ engineName: string; error: unknown }> = [];
 
     // Execute engines sequentially in priority order
     // Each engine can see the output of higher-priority engines via previousOutput
@@ -78,37 +77,9 @@ export class EngineRegistry implements IEngineRegistry {
         const output = await engine.process(contextWithPreviousOutput);
         outputs.push(output);
       } catch (error) {
-        // Log error with full context
-        this.logEngineError(engine.name, 'process', error, context);
-
-        // Store error for potential propagation
-        errors.push({
-          engineName: engine.name,
-          error
-        });
-
-        // Add error metadata to outputs for debugging
-        outputs.push({
-          engineName: engine.name,
-          instructions: [],
-          effects: {},
-          metadata: {
-            error: true,
-            errorMessage: error instanceof Error ? error.message : String(error),
-            errorType: error instanceof Error ? error.constructor.name : typeof error
-          }
-        });
-
+        console.error(`Error executing engine ${engine.name}:`, error);
         // Continue with other engines even if one fails
       }
-    }
-
-    // If all engines failed, throw to propagate error
-    if (errors.length > 0 && outputs.every(o => o.metadata?.error)) {
-      throw new EngineExecutionError(
-        `All ${errors.length} engines failed to execute`,
-        errors
-      );
     }
 
     return outputs;
@@ -126,40 +97,11 @@ export class EngineRegistry implements IEngineRegistry {
         const instructions = engine.generateInstructions(context);
         allInstructions.push(...instructions);
       } catch (error) {
-        this.logEngineError(engine.name, 'generateInstructions', error, context);
-        // Don't add failed instructions
+        console.error(`Error generating instructions from engine ${engine.name}:`, error);
       }
     }
 
     return allInstructions;
-  }
-
-  /**
-   * Log engine errors with full context
-   */
-  private logEngineError(
-    engineName: string,
-    method: string,
-    error: unknown,
-    context?: EngineContext
-  ): void {
-    const errorDetails = {
-      engine: engineName,
-      method,
-      error: error instanceof Error ? {
-        name: error.name,
-        message: error.message,
-        stack: error.stack
-      } : String(error),
-      context: context ? {
-        horrorIntensity: context.worldState?.horrorIntensity,
-        corruptionLevel: context.worldState?.corruptionLevel,
-        choiceCount: context.playerProfile?.engagementMetrics?.totalChoices,
-        historyLength: context.recentHistory?.length
-      } : undefined
-    };
-
-    console.error(`Engine error in ${engineName}.${method}:`, errorDetails);
   }
 
   /**
@@ -210,19 +152,6 @@ export class EngineRegistry implements IEngineRegistry {
         description: e.description
       }))
     };
-  }
-}
-
-/**
- * Custom error class for engine execution failures
- */
-export class EngineExecutionError extends Error {
-  constructor(
-    message: string,
-    public readonly failures: Array<{ engineName: string; error: unknown }>
-  ) {
-    super(message);
-    this.name = 'EngineExecutionError';
   }
 }
 

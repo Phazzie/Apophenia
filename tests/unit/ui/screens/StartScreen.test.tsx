@@ -43,6 +43,7 @@ describe('StartScreen', () => {
 
   const mockProviders: AIProvider[] = [
     AIProvider.GROK,
+    AIProvider.GEMINI_PRO,
     AIProvider.MOCK
   ];
 
@@ -102,6 +103,7 @@ describe('StartScreen', () => {
     );
 
     expect(screen.getByText('Grok-4 (X.AI)')).toBeInTheDocument();
+    expect(screen.getByText('Gemini 2.5 Pro')).toBeInTheDocument();
     expect(screen.getByText('Demo Mode')).toBeInTheDocument();
   });
 
@@ -147,10 +149,10 @@ describe('StartScreen', () => {
       />
     );
 
-    const demoModeRadio = screen.getByLabelText('Demo Mode');
-    fireEvent.click(demoModeRadio);
+    const geminiProRadio = screen.getByLabelText('Gemini 2.5 Pro');
+    fireEvent.click(geminiProRadio);
 
-    expect(demoModeRadio).toBeChecked();
+    expect(geminiProRadio).toBeChecked();
   });
 
   it('calls onStartGame with selected genre and provider', () => {
@@ -168,9 +170,9 @@ describe('StartScreen', () => {
     const psychologicalHorrorCard = screen.getByText('Psychological Horror').closest('button');
     fireEvent.click(psychologicalHorrorCard!);
 
-    // Select Demo Mode
-    const demoModeRadio = screen.getByLabelText('Demo Mode');
-    fireEvent.click(demoModeRadio);
+    // Select Gemini Pro
+    const geminiProRadio = screen.getByLabelText('Gemini 2.5 Pro');
+    fireEvent.click(geminiProRadio);
 
     // Click Begin Descent
     const startButton = screen.getByText('Begin Descent');
@@ -178,7 +180,7 @@ describe('StartScreen', () => {
 
     expect(onStartGameMock).toHaveBeenCalledWith(
       mockGenres[1],
-      AIProvider.MOCK
+      AIProvider.GEMINI_PRO
     );
   });
 

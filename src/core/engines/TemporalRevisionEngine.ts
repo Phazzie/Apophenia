@@ -124,113 +124,74 @@ export class TemporalRevisionEngine extends BaseEngine implements ITemporalRevis
     if (!protagonist) return original;
 
     // Add subtle inconsistencies to character descriptions
-    // Using word boundaries to avoid false matches (e.g., "his" in "whisper")
     const inconsistencies = [
-      { from: /\bhis\b/gi, to: 'her', maxReplacements: 1 },
-      { from: /\bher\b/gi, to: 'his', maxReplacements: 1 },
-      { from: /\bleft hand\b/gi, to: 'right hand', maxReplacements: 1 },
-      { from: /\bright hand\b/gi, to: 'left hand', maxReplacements: 1 },
-      { from: /\bhe\b/gi, to: 'she', maxReplacements: 1 },
-      { from: /\bshe\b/gi, to: 'he', maxReplacements: 1 }
+      { from: /\bhis\b/gi, to: 'her' },
+      { from: /\bher\b/gi, to: 'his' },
+      { from: /\bleft hand\b/gi, to: 'right hand' },
+      { from: /\bright hand\b/gi, to: 'left hand' }
     ];
 
     // Pick one inconsistency at random
     if (Math.random() < 0.3) {
       const inc = inconsistencies[Math.floor(Math.random() * inconsistencies.length)];
-      // Only replace first occurrence to avoid over-modification
-      let replaced = false;
-      return original.replace(inc.from, (match) => {
-        if (!replaced) {
-          replaced = true;
-          return inc.to;
-        }
-        return match;
-      });
+      return original.replace(inc.from, inc.to);
     }
 
     return original;
   }
 
   private alterLocationDetail(original: string, context: EngineContext): string {
-    // Change environmental details with specific word boundaries
+    // Change environmental details
     const alterations = [
-      { from: /\b(a |the |this |that )?door\b/gi, to: '$1window' },
-      { from: /\b(a |the |this |that )?window\b/gi, to: '$1door' },
-      { from: /\b(the |these |those )?stairs\b/gi, to: '$1ladder' },
-      { from: /\b(a |the |this )?ladder\b/gi, to: '$1stairs' },
-      { from: /\b(to the |on the )?right\b/gi, to: '$1left' },
-      { from: /\b(to the |on the )?left\b/gi, to: '$1right' }
+      { from: /\bdoor\b/gi, to: 'window' },
+      { from: /\bwindow\b/gi, to: 'door' },
+      { from: /\bstairs\b/gi, to: 'ladder' },
+      { from: /\bladder\b/gi, to: 'stairs' },
+      { from: /\bright\b/gi, to: 'left' },
+      { from: /\bleft\b/gi, to: 'right' }
     ];
 
     if (Math.random() < 0.3) {
       const alt = alterations[Math.floor(Math.random() * alterations.length)];
-      // Only replace first occurrence
-      let replaced = false;
-      return original.replace(alt.from, (match, prefix) => {
-        if (!replaced) {
-          replaced = true;
-          return alt.to.replace('$1', prefix || '');
-        }
-        return match;
-      });
+      return original.replace(alt.from, alt.to);
     }
 
     return original;
   }
 
   private modifyAction(original: string, context: EngineContext): string {
-    // Change verbs to create different actions with specific word boundaries
+    // Change verbs to create different actions
     const modifications = [
       { from: /\bwalked\b/gi, to: 'ran' },
       { from: /\bran\b/gi, to: 'walked' },
       { from: /\bopened\b/gi, to: 'closed' },
       { from: /\bclosed\b/gi, to: 'opened' },
       { from: /\bwhispered\b/gi, to: 'shouted' },
-      { from: /\bshouted\b/gi, to: 'whispered' },
-      { from: /\bentered\b/gi, to: 'exited' },
-      { from: /\bexited\b/gi, to: 'entered' }
+      { from: /\bshouted\b/gi, to: 'whispered' }
     ];
 
     if (Math.random() < 0.3) {
       const mod = modifications[Math.floor(Math.random() * modifications.length)];
-      // Only replace first occurrence
-      let replaced = false;
-      return original.replace(mod.from, (match) => {
-        if (!replaced) {
-          replaced = true;
-          return mod.to;
-        }
-        return match;
-      });
+      return original.replace(mod.from, mod.to);
     }
 
     return original;
   }
 
   private changeObjectDescription(original: string, context: EngineContext): string {
-    // Modify object attributes with specific word boundaries
+    // Modify object attributes
     const changes = [
       { from: /\bred\b/gi, to: 'blue' },
       { from: /\bblue\b/gi, to: 'red' },
       { from: /\bold\b/gi, to: 'new' },
       { from: /\bnew\b/gi, to: 'old' },
       { from: /\blarge\b/gi, to: 'small' },
-      { from: /\bsmall\b/gi, to: 'large' },
-      { from: /\bbright\b/gi, to: 'dim' },
-      { from: /\bdim\b/gi, to: 'bright' }
+      { from: /\bsmall\b/gi, to: 'large' }
     ];
 
     if (Math.random() < 0.3) {
       const change = changes[Math.floor(Math.random() * changes.length)];
-      // Only replace first occurrence
-      let replaced = false;
-      return original.replace(change.from, (match) => {
-        if (!replaced) {
-          replaced = true;
-          return change.to;
-        }
-        return match;
-      });
+      return original.replace(change.from, change.to);
     }
 
     return original;

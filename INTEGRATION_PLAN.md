@@ -159,7 +159,7 @@ git log --oneline  # Note commit hash
   - Test with simple prompt
 
 - **Rewrite grok-2-image-1212 service** (image generation)
-  - Use correct endpoint: `https://api.x.ai/v1/images/generations`
+  - Use correct endpoint: `https://api.x.ai/v1/images/generations` ✅ Verified against X.AI API docs (2024-06-01)
   - Model name: `grok-2-image-1212`
   - Response format: `url` or `b64_json`
   - Handle JPG format

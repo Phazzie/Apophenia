@@ -9,7 +9,6 @@
  */
 
 import { ImagePipeline, ImageResult, ImageService } from '../../core/types/seams';
-import { geminiImageService } from './geminiImageService';
 import { grokImageService } from './grokImageService';
 import { unsplashService } from './unsplashService';
 import { lruTTLCache } from '../cache/LRUTTLCache';
@@ -18,7 +17,6 @@ import { lruTTLCache } from '../cache/LRUTTLCache';
  * Image Pipeline Implementation
  *
  * Orchestrates image generation across multiple providers with caching.
- * Fallback chain: Gemini 2.5 Flash Image (1) → Grok (2) → Unsplash (3)
  * Provides best-effort generation - null return doesn't block game flow.
  */
 export class ImagePipelineImpl implements ImagePipeline {
@@ -27,7 +25,7 @@ export class ImagePipelineImpl implements ImagePipeline {
 
   constructor(services: ImageService[] = []) {
     // Use provided services or default to all available
-    this.services = services.length > 0 ? services : [geminiImageService, grokImageService, unsplashService];
+    this.services = services.length > 0 ? services : [grokImageService, unsplashService];
 
     // Sort by priority (lower number = higher priority)
     this.services.sort((a, b) => a.priority - b.priority);

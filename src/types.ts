@@ -43,7 +43,7 @@ export const worldStateSchema = z.object({
   protagonist: z.string(),
   setting: z.string(),
   dilemma: z.string(),
-  summary: z.string().optional(),
+  summary: z.string(),
   psychologicalStatus: z.nativeEnum(PsychologicalStatus),
   systemHealth: z.number(),
   // The horrorIntensity score (0-10) dynamically adjusts the game's difficulty and tone.

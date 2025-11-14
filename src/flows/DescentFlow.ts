@@ -15,18 +15,38 @@ import {
   Choice,
   Command,
   EngineOutput,
+  Engine,
   EngineEffects,
   WorldState,
 } from '../core/types/seams';
-import { useWorldStateStore } from '../core/state/worldStateStore';
-import { useGameStateStore } from '../core/state/gameStateStore';
-import { useHistoryStore } from '../core/state/historyStore';
+import { useWorldStateStore } from '../stores/worldStateStore';
+import { useGameStateStore } from '../stores/gameStateStore';
+import { useStoryHistoryStore } from '../stores/storyHistoryStore';
 import { flowContextBuilder } from './FlowContextBuilder';
 import { generateWithSelectedModel } from '../services/ai/unifiedAIService';
 import { executeCommandQueue } from '../services/commandExecutor';
-import { globalEngineRegistry } from '../core/engines';
-import { logger } from '../services/logger';
-import { DESCENT_CONSTANTS, PLAYER_PROFILE_DEFAULTS } from './flowConstants';
+import {
+  TemporalRevisionEngine,
+  MetaConsciousnessEngine,
+  QuantumNarrativeEngine,
+  AdaptiveHorrorEngine,
+  RealityCorruptionEngine,
+  NeuralEchoChamberEngine,
+  SemanticChoiceArchaeologyEngine,
+  AdaptiveNarrativeDNAEngine,
+  FifthWallEngine,
+} from '../core/engines';
+
+// Instantiate engine singletons
+const temporalRevision = new TemporalRevisionEngine();
+const metaConsciousness = new MetaConsciousnessEngine();
+const quantumNarrative = new QuantumNarrativeEngine();
+const adaptiveHorror = new AdaptiveHorrorEngine();
+const realityCorruption = new RealityCorruptionEngine();
+const neuralEchoChambers = new NeuralEchoChamberEngine();
+const semanticArchaeology = new SemanticChoiceArchaeologyEngine();
+const narrativeDNA = new AdaptiveNarrativeDNAEngine();
+const fifthWallBreaker = new FifthWallEngine();
 
 /**
  * DescentFlow Implementation
@@ -44,14 +64,14 @@ export class DescentFlowImpl implements IDescentFlow {
     const gameStateStore = useGameStateStore.getState();
 
     // Initialize world state with genre
-    worldStateStore.updateWorld({
+    worldStateStore.updateWorldState({
       genreConfig: genre, // Use the canonical GenreConfig directly
       horrorIntensity: 1,
       systemHealth: 100,
     });
 
-    // Set game state to generating (initial phase)
-    gameStateStore.setGameState(GameState.GENERATING);
+    // Set game state to playing (descent)
+    gameStateStore.setGameState(1); // GameState.GENERATING_CONCEPT - will transition to PLAYING
   }
 
   /**
@@ -90,7 +110,7 @@ export class DescentFlowImpl implements IDescentFlow {
         nextState: nextState || undefined,
       };
     } catch (error) {
-      logger.error('DescentFlow.processChoice failed', error);
+      console.error('DescentFlow.processChoice error:', error);
       return {
         commands: [],
         worldUpdates: {},
@@ -109,18 +129,18 @@ export class DescentFlowImpl implements IDescentFlow {
     const corruptionLevel = this.getCorruptionLevel(worldState);
 
     // Combine horror (0-10) and corruption (0-100) for descent level
-    const descentFromHorror = (horrorIntensity / 10) * DESCENT_CONSTANTS.HORROR_WEIGHT * 100;
-    const descentFromCorruption = corruptionLevel * DESCENT_CONSTANTS.CORRUPTION_WEIGHT;
+    const descentFromHorror = (horrorIntensity / 10) * 60; // Max 60% from horror
+    const descentFromCorruption = corruptionLevel * 0.4; // Max 40% from corruption
 
     return Math.min(100, descentFromHorror + descentFromCorruption);
   }
 
   /**
    * Determine if we should transition to unraveling phase
-   * Triggers when descent level exceeds threshold
+   * Triggers when descent level exceeds 70%
    */
   shouldBeginUnraveling(): boolean {
-    return this.calculateDescentLevel() > DESCENT_CONSTANTS.UNRAVELING_THRESHOLD;
+    return this.calculateDescentLevel() > 70;
   }
 
   /**
@@ -128,7 +148,7 @@ export class DescentFlowImpl implements IDescentFlow {
    */
   shouldTransition(context: FlowContext): GameState | null {
     if (this.shouldBeginUnraveling()) {
-      logger.flow('DescentFlow', 'Descent level critical - beginning unraveling phase');
+      console.log('🌀 Descent level critical - beginning unraveling phase');
       return GameState.UNRAVELING;
     }
     return null;
@@ -136,13 +156,53 @@ export class DescentFlowImpl implements IDescentFlow {
 
   /**
    * Execute all active engines in priority order
-   * Uses the global engine registry to avoid duplicate instances
    */
   private async executeEngines(context: FlowContext): Promise<EngineOutput[]> {
+    // All engines implement the Engine interface from core/engines
+    // They are sorted by priority (highest first) for deterministic execution
+    const engines: Engine[] = [
+      temporalRevision,
+      metaConsciousness,
+      quantumNarrative,
+      adaptiveHorror,
+      realityCorruption,
+      neuralEchoChambers,
+      semanticArchaeology,
+      narrativeDNA,
+      fifthWallBreaker,
+    ];
+
+    const outputs: EngineOutput[] = [];
     const engineContext = flowContextBuilder.buildEngineContext(context.currentChoice);
 
-    // Use the global engine registry's executeAll method
-    return await globalEngineRegistry.executeAll(engineContext);
+    for (const engine of engines) {
+      try {
+        // Check if engine is active for this context
+        if (typeof engine.isActive === 'function' && !engine.isActive(engineContext)) {
+          continue;
+        }
+
+        // Process engine if it has the process method
+        if (typeof engine.process === 'function') {
+          const output = await engine.process(engineContext);
+          outputs.push(output);
+        } else if (typeof engine.generateInstructions === 'function') {
+          // Fallback for engines that only provide instructions
+          const instructions = engine.generateInstructions(engineContext);
+          outputs.push({
+            engineName: engine.name || 'Unknown',
+            instructions,
+            effects: {},
+            metadata: {},
+          });
+        }
+      } catch (error) {
+        console.error(`Engine ${engine.name || 'Unknown'} failed:`, error);
+        // Continue with other engines
+      }
+    }
+
+    return outputs;
   }
 
   /**
@@ -201,18 +261,27 @@ export class DescentFlowImpl implements IDescentFlow {
     prompt: string;
   }): Promise<Command[]> {
     const worldState = useWorldStateStore.getState().worldState;
-    const segments = useHistoryStore.getState().segments;
+    const storyHistory = useStoryHistoryStore.getState().storyHistory;
 
     // Call unified AI service with proper AIRequest format
     const response = await generateWithSelectedModel({
       prompt: request.prompt,
       context: {
         worldState,
-        recentHistory: segments.slice(-DESCENT_CONSTANTS.RECENT_HISTORY_COUNT),
+        recentHistory: storyHistory.slice(-10), // Last 10 segments
         playerProfile: {
           fearProfile: {},
-          choicePatterns: PLAYER_PROFILE_DEFAULTS.choicePatterns,
-          engagementMetrics: PLAYER_PROFILE_DEFAULTS.engagementMetrics,
+          choicePatterns: {
+            riskTaking: 0.5,
+            curiosity: 0.5,
+            aggression: 0.3,
+            avoidance: 0.4,
+          },
+          engagementMetrics: {
+            totalChoices: 0,
+            averageResponseTime: 0,
+            sessionDuration: 0,
+          },
         },
         genrePrompts: [worldState.genreConfig.systemPrompt],
         engineInstructions: [], // Engines already processed, instructions in prompt
@@ -260,7 +329,7 @@ export class DescentFlowImpl implements IDescentFlow {
 
     // Apply world updates
     if (effects.worldUpdates && Object.keys(effects.worldUpdates).length > 0) {
-      worldStateStore.updateWorld(effects.worldUpdates);
+      worldStateStore.updateWorldState(effects.worldUpdates);
     }
 
     // Apply corruption changes
@@ -268,10 +337,8 @@ export class DescentFlowImpl implements IDescentFlow {
       const currentCorruption = this.getCorruptionLevel(worldStateStore.worldState);
       const newCorruption = Math.max(0, Math.min(100, currentCorruption + effects.corruptionChanges));
 
-      // Update corruption level in world state (UI distortion is handled by UI layer)
-      worldStateStore.updateWorld({
-        corruptionLevel: newCorruption,
-      });
+      // Update UI distortion based on corruption
+      this.updateUIDistortion(newCorruption);
     }
 
     // History revisions and profile updates would be applied here
@@ -284,6 +351,16 @@ export class DescentFlowImpl implements IDescentFlow {
   private getCorruptionLevel(worldState: WorldState): number {
     // Return corruption level directly from world state
     return worldState.corruptionLevel;
+  }
+
+  /**
+   * Update UI distortion based on corruption level
+   */
+  private updateUIDistortion(corruptionLevel: number): void {
+    const worldStateStore = useWorldStateStore.getState();
+
+    worldStateStore.updateWorldState({
+    });
   }
 }
 

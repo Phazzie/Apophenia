@@ -11,7 +11,7 @@ import { BaseImageService } from './base/ImageService';
 /**
  * Grok Image Service - X.AI image generation
  * Uses Grok-2 vision model for image generation
- * Priority: 2 (fallback to Gemini/Imagen)
+ * Priority: 2 (fallback for Gemini 2.5 Flash Image)
  */
 export class GrokImageService extends BaseImageService {
   readonly provider = 'grok';

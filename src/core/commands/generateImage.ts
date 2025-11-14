@@ -149,17 +149,34 @@ export class GenerateImageExecutor extends BaseCommandExecutor implements ImageG
   /**
    * Generate image with fallback support
    *
-   * Tries multiple image providers in order.
-   * Returns null if all providers fail.
+   * Tries multiple image providers in order:
+   * 1. Gemini 2.5 Flash Image (primary)
+   * 2. XAI Grok-2-image (fallback)
+   * 3. Unsplash stock photos (emergency)
    *
-   * This is a placeholder implementation. The actual image pipeline
-   * will be implemented by Agent 7 (Image & Cache Engineer).
+   * Returns null if all providers fail.
    */
   async generateWithFallback(prompt: string): Promise<string | null> {
-    // TODO: Integrate with ImagePipeline from Agent 7
-    // For now, return null (no image)
-    console.log('Image generation requested for prompt:', prompt);
-    return null;
+    try {
+      console.log('[GenerateImageExecutor] Image generation requested for prompt:', prompt);
+
+      // Import the ImagePipeline dynamically to avoid circular dependencies
+      const { imagePipeline } = await import('../../services/images/ImagePipeline');
+
+      // Generate image using the full fallback chain
+      const imageUrl = await imagePipeline.generate(prompt, 'command-generated');
+
+      if (imageUrl) {
+        console.log('[GenerateImageExecutor] ✓ Image generated successfully');
+      } else {
+        console.warn('[GenerateImageExecutor] All image generation providers failed');
+      }
+
+      return imageUrl;
+    } catch (error) {
+      console.error('[GenerateImageExecutor] Image generation error:', error);
+      return null;
+    }
   }
 
   /**

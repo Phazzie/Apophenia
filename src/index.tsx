@@ -10,6 +10,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { App } from './App';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 // Import global styles
 import './styles/game.css';
@@ -33,8 +34,8 @@ try {
 // Render app
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <GameErrorBoundary>
+    <ErrorBoundary>
       <App />
-    </GameErrorBoundary>
+    </ErrorBoundary>
   </React.StrictMode>,
 );

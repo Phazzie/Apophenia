@@ -161,6 +161,8 @@ export class GenerateImageExecutor extends BaseCommandExecutor implements ImageG
       console.log('[GenerateImageExecutor] Image generation requested for prompt:', prompt);
 
       // Import the ImagePipeline dynamically to avoid circular dependencies
+      // Circular dependency path: generateImage.ts → ImagePipeline.ts → commandQueue.ts → generateImage.ts
+      // Dynamic import breaks this cycle by deferring ImagePipeline loading until runtime
       const { imagePipeline } = await import('../../services/images/ImagePipeline');
 
       // Generate image using the full fallback chain

@@ -160,7 +160,12 @@ export class GenerateImageExecutor extends BaseCommandExecutor implements ImageG
     try {
       console.log('[GenerateImageExecutor] Image generation requested for prompt:', prompt);
 
-      // Import the ImagePipeline dynamically to avoid circular dependencies
+      // Import the ImagePipeline dynamically to avoid circular dependencies.
+      // Circular dependency exists because:
+      // - ImagePipeline imports image services (geminiImageService, grokImageService)
+      // - Image services extend BaseImageService which may log errors to command queue
+      // - Command queue imports GenerateImageExecutor
+      // Using dynamic import breaks this cycle at runtime.
       const { imagePipeline } = await import('../../services/images/ImagePipeline');
 
       // Generate image using the full fallback chain

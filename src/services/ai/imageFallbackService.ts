@@ -227,9 +227,10 @@ class ImageFallbackService {
   /**
    * Try direct Imagen API generation
    *
-   * NOTE: Hardcoded Imagen model names because AI_MODELS.FALLBACK_IMAGE
+   * NOTE: Hardcoded Imagen model names because AI_MODELS.SECONDARY_IMAGE_PROVIDER
    * now contains 'grok-2-image-1212' which is invalid for Imagen API.
    * This service is deprecated - use ImagePipeline instead.
+   * TODO: Remove after all consumers are migrated to ImagePipeline (target: v2.0.0)
    */
   private async tryImagenGeneration(
     prompt: string,
@@ -243,8 +244,8 @@ class ImageFallbackService {
     try {
       // Hardcoded Imagen models (don't use AI_MODELS constants here)
       const modelName = tier === 'primary'
-        ? 'imagen-3.0-generate-001'  // Hardcoded - AI_MODELS.FALLBACK_IMAGE is now for Grok
-        : 'imagen-2.0-generate-001';  // Hardcoded - AI_MODELS.SECONDARY_FALLBACK_IMAGE is now 'unsplash'
+        ? 'imagen-3.0-generate-001'  // Hardcoded - AI_MODELS.SECONDARY_IMAGE_PROVIDER is now for Grok
+        : 'imagen-2.0-generate-001';  // Hardcoded - AI_MODELS.TERTIARY_IMAGE_PROVIDER is now 'unsplash'
 
       console.log(`Generating image with Google Imagen API (${tier} model: ${modelName})...`);
 

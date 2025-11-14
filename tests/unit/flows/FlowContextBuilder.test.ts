@@ -7,8 +7,6 @@ import { FlowContextBuilder } from '../../../src/flows/FlowContextBuilder';
 import { useGameStateStore } from '../../../src/stores/gameStateStore';
 import { useWorldStateStore } from '../../../src/stores/worldStateStore';
 import { useStoryHistoryStore } from '../../../src/stores/storyHistoryStore';
-import { useUserStore } from '../../../src/stores/userStore';
-import { GameState } from '../../../src/types';
 
 describe('FlowContextBuilder', () => {
   let builder: FlowContextBuilder;

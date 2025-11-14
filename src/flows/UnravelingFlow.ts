@@ -133,7 +133,6 @@ export class UnravelingFlowImpl implements IUnravelingFlow {
    */
   calculateUnravelingLevel(): number {
     const worldState = useWorldStateStore.getState().worldState;
-    const storyHistory = useStoryHistoryStore.getState().storyHistory;
 
     const horrorIntensity = worldState.horrorIntensity || 0;
     const systemHealth = worldState.systemHealth || 100;

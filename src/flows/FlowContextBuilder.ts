@@ -8,7 +8,6 @@
 import { useGameStateStore } from '../stores/gameStateStore';
 import { useWorldStateStore } from '../stores/worldStateStore';
 import { useStoryHistoryStore } from '../stores/storyHistoryStore';
-import { useUserStore } from '../stores/userStore';
 import { Choice, StorySegment, WorldState } from '../types';
 import { FlowContext, EngineContext, PlayerProfile, PsychologicalStatus } from '../core/types/seams';
 

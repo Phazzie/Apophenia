@@ -12,7 +12,7 @@
 
 **Apophenia** is an AI-driven psychological horror narrative game built with React + TypeScript + Zustand. The project uses **Seam-Driven Development (SDD)** architecture with 9 revolutionary AI engines that create adaptive, personalized horror experiences.
 
-**Current Status**: SDD Level 3 certified (Nov 12, 2025). All 9 engines operational in `/src/core/engines/`. Zero TypeScript errors, zero type escapes, 877/890 tests passing (98.5%). Production ready.
+**Current Status**: SDD Level 3 certified (Nov 12, 2025). All 9 engines operational in `/src/core/engines/`. Zero TypeScript errors, zero type escapes, 877/890 tests passing (98.5%, 13 skipped). Production ready.
 
 **Technology Stack**: React 18, TypeScript 5.x (strict mode), Zustand, Vite, Vitest/Jest, X.AI Grok-4 Fast Reasoning, Google Gemini
 

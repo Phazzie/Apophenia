@@ -50,6 +50,9 @@ export class GeminiImageService extends BaseImageService {
 
   /**
    * Generate an image using Gemini 2.5 Flash Image
+   *
+   * Uses Promise.race() for reliable timeout handling since Gemini SDK
+   * doesn't support AbortController signals.
    */
   async generate(prompt: string): Promise<ImageResult> {
     if (!this.genAI || !this.apiKey) {
@@ -59,62 +62,88 @@ export class GeminiImageService extends BaseImageService {
     try {
       console.debug(`[Gemini Flash Image] Generating with ${this.model}...`);
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), this.requestTimeout);
+      const imageModel = this.genAI.getGenerativeModel({
+        model: this.model,
+        generationConfig: {
+          // Configure for image output (critical for image generation)
+          responseMimeType: 'image/png',
+        }
+      });
 
-      const imageModel = this.genAI.getGenerativeModel({ model: this.model });
+      // Create timeout promise that rejects after specified duration
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(
+          () => reject(new Error('Image generation timeout')),
+          this.requestTimeout
+        )
+      );
 
-      // Generate the image - Gemini Flash Image accepts simple text prompt
-      const result = await imageModel.generateContent(prompt);
-
-      clearTimeout(timeoutId);
+      // Race between image generation and timeout
+      const result = await Promise.race([
+        imageModel.generateContent(prompt),
+        timeoutPromise,
+      ]);
 
       const response = result.response;
 
-      // Extract image from response parts (Gemini native format)
-      if (response.candidates && response.candidates[0]) {
-        const candidate = response.candidates[0];
+      // Validate response structure before accessing
+      if (!Array.isArray(response.candidates) || response.candidates.length === 0) {
+        console.warn('[Gemini Flash Image] No candidates in response');
+        return this.failure('No candidates in response');
+      }
 
-        // Iterate through parts to find inline image data
-        if (candidate.content && candidate.content.parts) {
-          for (const part of candidate.content.parts) {
-            // Base64 encoded image (primary format for Gemini Flash Image)
-            if (part.inlineData && part.inlineData.data) {
-              const mimeType = part.inlineData.mimeType || 'image/png';
-              const base64Data = part.inlineData.data;
-              const dataUrl = `data:${mimeType};base64,${base64Data}`;
+      const candidate = response.candidates[0];
 
-              console.log(`[Gemini Flash Image] ✓ Generated successfully`);
-              return this.success(dataUrl);
-            }
+      // Validate candidate content structure
+      if (!candidate.content || !Array.isArray(candidate.content.parts) || candidate.content.parts.length === 0) {
+        console.warn('[Gemini Flash Image] No content parts in candidate');
+        return this.failure('No content parts in response');
+      }
 
-            // File URI (alternative format)
-            if (part.fileData && part.fileData.fileUri) {
-              console.log(`[Gemini Flash Image] ✓ Generated successfully (file URI)`);
-              return this.success(part.fileData.fileUri);
-            }
+      // Iterate through parts to find inline image data
+      for (const part of candidate.content.parts) {
+        // Base64 encoded image (primary format for Gemini Flash Image)
+        if (part.inlineData && part.inlineData.data) {
+          const mimeType = part.inlineData.mimeType;
+
+          // Validate mimeType - warn if missing but provide fallback
+          if (!mimeType) {
+            console.warn('[Gemini Flash Image] Missing mimeType, defaulting to image/png');
           }
+
+          const base64Data = part.inlineData.data;
+          const dataUrl = `data:${mimeType || 'image/png'};base64,${base64Data}`;
+
+          console.debug('[Gemini Flash Image] ✓ Generated successfully');
+          return this.success(dataUrl);
+        }
+
+        // File URI (alternative format)
+        if (part.fileData && part.fileData.fileUri) {
+          console.debug('[Gemini Flash Image] ✓ Generated successfully (file URI)');
+          return this.success(part.fileData.fileUri);
         }
       }
 
-      console.warn(`[Gemini Flash Image] Response did not contain image data`);
+      // No image data found in any part
+      console.warn('[Gemini Flash Image] No image data found in response parts');
       return this.failure('No image data in response');
 
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
 
       // Check for specific error types
-      if (message.includes('aborted')) {
+      if (message.includes('Image generation timeout')) {
         console.warn(`[Gemini Flash Image] Timeout after ${this.requestTimeout}ms`);
         return this.failure('Image generation timeout');
       }
 
       if (message.includes('quota') || message.includes('rate limit')) {
-        console.warn(`[Gemini Flash Image] Quota/rate limit exceeded`);
+        console.warn('[Gemini Flash Image] Quota/rate limit exceeded');
         return this.failure('API quota exceeded');
       }
 
-      console.warn(`[Gemini Flash Image] Generation failed:`, message);
+      console.warn('[Gemini Flash Image] Generation failed:', message);
       return this.failure(message);
     }
   }

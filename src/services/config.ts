@@ -32,8 +32,9 @@ export const AI_MODELS = {
   
   // Image generation pipeline - Gemini 2.5 Flash Image primary, Grok fallback
   PRIMARY_IMAGE: 'gemini-2.5-flash-image', // Primary: Gemini 2.5 Flash (native image gen)
-  FALLBACK_IMAGE: 'grok-2-image-1212', // Fallback: XAI Grok-2-image
-  SECONDARY_FALLBACK_IMAGE: 'unsplash', // Tertiary: Unsplash stock photos
+  FALLBACK_IMAGE: 'grok-2-image-1212', // Secondary provider: XAI Grok-2-image
+  SECONDARY_FALLBACK_IMAGE: 'unsplash', // Tertiary provider: Unsplash stock photos
+  // Note: These are provider identifiers, not model names. Fallback logic is implemented in ImagePipeline.ts.
   
   // Configuration for different use cases with 2M token context optimization
   CONCEPT_GENERATION: {

@@ -230,6 +230,7 @@ class ImageFallbackService {
    * NOTE: Hardcoded Imagen model names because AI_MODELS.FALLBACK_IMAGE
    * now contains 'grok-2-image-1212' which is invalid for Imagen API.
    * This service is deprecated - use ImagePipeline instead.
+   * TODO: Remove after all consumers are migrated to ImagePipeline (target: v2.0.0)
    */
   private async tryImagenGeneration(
     prompt: string,

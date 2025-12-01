@@ -794,3 +794,167 @@ body {
   background: #30363d;
   border-color: #58a6ff;
 }
+
+/* --- Apophenia dripping purple visual upgrade --- */
+:root {
+  --ink-purple-deep: #0d0416;
+  --ink-purple: #3a0b5c;
+  --ink-purple-light: #7b2cbf;
+  --ink-neon: #d25eff;
+  --ink-mist: rgba(122, 67, 156, 0.2);
+  --panel-bg: rgba(19, 10, 30, 0.7);
+  --panel-border: rgba(215, 94, 255, 0.35);
+  --text-primary: #f6e9ff;
+  --text-muted: #c6b3d9;
+  --glow-strong: 0 0 24px rgba(210, 94, 255, 0.45);
+}
+
+body {
+  color: var(--text-primary);
+  background: radial-gradient(circle at 20% 20%, var(--ink-mist), transparent 35%),
+    radial-gradient(circle at 80% 0%, rgba(210, 94, 255, 0.15), transparent 40%),
+    linear-gradient(180deg, #07000b 0%, #0f061d 60%, #0a0714 100%);
+  overflow-x: hidden;
+}
+
+#root {
+  align-items: stretch;
+}
+
+#app-container {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+#app-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(122, 44, 191, 0.35) 0%, rgba(13, 4, 22, 0.8) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+#app-container::after {
+  content: '';
+  position: absolute;
+  top: -120px;
+  left: 0;
+  right: 0;
+  height: 200px;
+  background: radial-gradient(circle at 10% 40%, rgba(210, 94, 255, 0.5) 0 16px, transparent 18px),
+    radial-gradient(circle at 30% 50%, rgba(122, 44, 191, 0.55) 0 12px, transparent 15px),
+    radial-gradient(circle at 55% 35%, rgba(210, 94, 255, 0.45) 0 18px, transparent 21px),
+    radial-gradient(circle at 70% 55%, rgba(170, 88, 220, 0.4) 0 14px, transparent 17px),
+    radial-gradient(circle at 90% 45%, rgba(122, 44, 191, 0.5) 0 10px, transparent 13px);
+  filter: drop-shadow(0 12px 18px rgba(122, 44, 191, 0.45));
+  animation: dripPulse 6s ease-in-out infinite;
+  opacity: 0.75;
+  z-index: 1;
+}
+
+.screen-container {
+  position: relative;
+  z-index: 2;
+}
+
+.card {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 14px;
+  box-shadow: var(--glow-strong);
+  padding: 1.25rem;
+  backdrop-filter: blur(8px);
+}
+
+.button {
+  background: linear-gradient(135deg, var(--ink-purple) 0%, var(--ink-neon) 100%);
+  border: 1px solid var(--panel-border);
+  color: #0d0416;
+  padding: 0.85rem 1.3rem;
+  border-radius: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+  text-transform: uppercase;
+  text-shadow: none;
+  box-shadow: 0 12px 30px rgba(210, 94, 255, 0.25);
+}
+
+.button:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.01);
+  filter: drop-shadow(0 0 12px rgba(210, 94, 255, 0.6));
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.drip-panel {
+  position: relative;
+  overflow: hidden;
+}
+
+.drip-panel::after {
+  content: '';
+  position: absolute;
+  bottom: -40px;
+  left: 0;
+  right: 0;
+  height: 120px;
+  background: radial-gradient(circle at 15% 0, rgba(122, 44, 191, 0.8) 0 14px, transparent 16px),
+    radial-gradient(circle at 40% 0, rgba(210, 94, 255, 0.75) 0 18px, transparent 20px),
+    radial-gradient(circle at 65% 0, rgba(122, 44, 191, 0.85) 0 16px, transparent 18px),
+    radial-gradient(circle at 85% 0, rgba(210, 94, 255, 0.7) 0 12px, transparent 15px);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.genre-card,
+.provider-option,
+.choice-panel button {
+  color: var(--text-primary);
+}
+
+.choice-panel button {
+  background: rgba(28, 14, 40, 0.7);
+  border: 1px solid var(--panel-border);
+}
+
+.choice-panel button:hover {
+  background: rgba(58, 11, 92, 0.65);
+}
+
+.intrusive-thought {
+  border-color: #ff4971 !important;
+  color: #ffb6cd;
+  box-shadow: 0 0 18px rgba(255, 73, 113, 0.4);
+}
+
+.loading-container,
+.image-loading-overlay {
+  background: rgba(13, 7, 20, 0.92);
+}
+
+.loading-spinner {
+  border: 4px solid rgba(210, 94, 255, 0.2);
+  border-top: 4px solid var(--ink-neon);
+}
+
+@keyframes dripPulse {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(4px);
+  }
+}

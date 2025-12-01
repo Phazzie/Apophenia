@@ -37,7 +37,7 @@ export const StartScreen: React.FC<StartScreenProps> = ({
   };
 
   return (
-    <div className="start-screen screen-container">
+    <div className="start-screen screen-container drip-panel">
       <div className="start-screen-content">
         <header className="start-header">
           <h1 className="game-title">

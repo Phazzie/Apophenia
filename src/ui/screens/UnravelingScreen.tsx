@@ -28,7 +28,7 @@ export const UnravelingScreen: React.FC<UnravelingScreenProps> = ({
   const unravelingLevel = worldState.corruptionLevel;
 
   return (
-    <div className={`unraveling-screen screen-container ${isCollapsed ? 'collapsed' : ''}`}>
+    <div className={`unraveling-screen screen-container drip-panel ${isCollapsed ? 'collapsed' : ''}`}>
       <CorruptionEffect level={unravelingLevel}>
         <div className="unraveling-container">
           <header className="unraveling-header">

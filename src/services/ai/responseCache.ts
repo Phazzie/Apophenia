@@ -19,15 +19,28 @@ class ResponseCache {
   constructor() {
     // Start automatic cleanup every 2 minutes
     this.startCleanup();
+
+    // Register cleanup on window unload to prevent memory leaks
+    if (typeof window !== 'undefined') {
+      window.addEventListener('beforeunload', () => {
+        this.stopCleanup();
+      });
+    }
   }
 
   /**
    * Generate a cache key from prompt and context
-   * Uses simple hash for performance
+   * Uses SHA-256 for collision-resistant hashing
    */
-  generateKey(prompt: string, context?: Record<string, unknown>): string {
+  async generateKey(prompt: string, context?: Record<string, unknown>): Promise<string> {
     const data = context ? `${prompt}::${JSON.stringify(context)}` : prompt;
-    return this.simpleHash(data);
+
+    // Use crypto.subtle for SHA-256 hashing
+    const encoder = new TextEncoder();
+    const dataBuffer = encoder.encode(data);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', dataBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   }
 
   /**
@@ -124,20 +137,15 @@ class ResponseCache {
     }
   }
 
-  /**
-   * Simple hash function for cache keys
-   * Not cryptographically secure, but fast and good enough for caching
-   */
-  private simpleHash(str: string): string {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i);
-      hash = (hash << 5) - hash + char;
-      hash = hash & hash; // Convert to 32-bit integer
-    }
-    return hash.toString(36);
-  }
 }
 
 // Export singleton instance
 export const responseCache = new ResponseCache();
+
+/**
+ * Destroy the response cache and stop cleanup interval
+ * Call this when unmounting or cleaning up to prevent memory leaks
+ */
+export function destroyResponseCache(): void {
+  responseCache.stopCleanup();
+}

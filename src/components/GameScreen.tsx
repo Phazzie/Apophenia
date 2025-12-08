@@ -2,10 +2,10 @@ import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useGameEffects } from '../hooks/useGameEffects';
 import { useGameLoop } from '../hooks/useGameLoop';
 import { GameStateManager } from '../services/gameStateManager';
-import { useGameStateStore } from '../stores/gameStateStore';
-import { useStoryHistoryStore } from '../stores/storyHistoryStore';
-import { useWorldStateStore } from '../stores/worldStateStore';
-import { GameState } from '../types';
+import { useGameStateStore } from '../core/state/gameStateStore';
+import { useHistoryStore } from '../core/state/historyStore';
+import { useWorldStateStore } from '../core/state/worldStateStore';
+import { GameState } from '../core/types/seams';
 import ThematicLoading from './ThematicLoading';
 import { analyticsService } from '../services/analyticsService';
 import { retryImageGeneration } from '../core/commands/generateImage';
@@ -13,7 +13,7 @@ import { devMode } from '../utils/devMode';
 
 const GameScreen: React.FC = () => {
   const { choices, intrusiveThought, gameState, isGenerating } = useGameStateStore();
-  const { storyHistory } = useStoryHistoryStore();
+  const { segments: storyHistory } = useHistoryStore();
   const { worldState } = useWorldStateStore();
   const [saveMessageVisible, setSaveMessageVisible] = useState(false);
 
@@ -122,7 +122,7 @@ const GameScreen: React.FC = () => {
               </span>
             )}
           </p>
-          {gameState === GameState.GENERATING_CONCEPT && (
+          {gameState === GameState.GENERATING && (
             <ThematicLoading />
           )}
         </div>

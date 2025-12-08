@@ -22,10 +22,15 @@
 }
 
 /* Button focus states */
-button:focus-visible {
+button:focus-visible,
+button:focus {
   outline: 3px solid #00ff00;
   outline-offset: 2px;
   box-shadow: 0 0 0 4px rgba(0, 255, 0, 0.3);
+}
+
+button:focus:not(:focus-visible) {
+  outline: none;
 }
 
 /* Link focus states */
@@ -51,14 +56,26 @@ select:focus-visible {
   left: 0;
   background: #000;
   color: #00ff00;
-  padding: 8px;
+  padding: 12px 16px;
   text-decoration: none;
   z-index: 10000;
   border: 2px solid #00ff00;
+  font-weight: bold;
+  font-size: 1rem;
+  line-height: 1.5;
 }
 
 .skip-link:focus {
   top: 0;
+  outline: 3px solid #00ff00;
+  outline-offset: 2px;
+}
+
+.skip-link:focus-visible {
+  top: 0;
+  outline: 3px solid #00ff00;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(0, 255, 0, 0.3);
 }
 
 /* ===== SCREEN READER ONLY TEXT ===== */
@@ -120,16 +137,44 @@ select:focus-visible {
 
 /* ===== COLOR CONTRAST ENHANCEMENTS ===== */
 /* Ensure minimum 4.5:1 contrast ratio for normal text */
+
+/* Primary text: white (#ffffff) on dark backgrounds - 21:1 contrast ratio */
 .text-primary {
-  color: #ffffff; /* White on dark backgrounds */
+  color: #ffffff;
+  background: transparent;
 }
 
+/* Secondary text: light gray (#e0e0e0) on dark backgrounds - 11.9:1 contrast ratio */
 .text-secondary {
-  color: #e0e0e0; /* Light gray for secondary text */
+  color: #e0e0e0;
+  background: transparent;
 }
 
+/* Accent text: bright green (#00ff00) on dark backgrounds - 15.3:1 contrast ratio */
 .text-accent {
-  color: #00ff00; /* High contrast accent */
+  color: #00ff00;
+  background: transparent;
+}
+
+/* Ensure all buttons have sufficient contrast */
+button {
+  background-color: var(--bg-secondary, #0f0f15);
+  color: var(--text-primary, #e0e0ff);
+}
+
+button:hover,
+button:focus {
+  background-color: var(--bg-tertiary, #1a1a23);
+}
+
+/* Links need sufficient contrast */
+a {
+  color: #00ff00; /* High contrast green */
+  text-decoration: underline; /* Ensure underline for clarity */
+}
+
+a:visited {
+  color: #00dd88; /* Slightly darker green for visited links */
 }
 
 /* ===== LOADING STATES ===== */
@@ -167,6 +212,16 @@ select:focus-visible {
 
 .choice-button:active {
   transform: translateX(8px);
+}
+
+.choice-button:focus-visible {
+  outline: 3px solid #00ff00;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(0, 255, 0, 0.3), 0 0 10px rgba(0, 255, 0, 0.5);
+}
+
+.choice-button:focus:not(:focus-visible) {
+  outline: none;
 }
 
 /* Disabled state */

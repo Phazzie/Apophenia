@@ -19,21 +19,40 @@ export class RealityCorruptionEngine extends BaseEngine implements IRealityCorru
   }
 
   async process(context: EngineContext): Promise<EngineOutput> {
-    const newCorruptionLevel = this.calculateCorruptionLevel(context);
-    const corruptionEffects = this.generateCorruptionEffects(newCorruptionLevel);
+    try {
+      // Validate context first
+      this.validateContext(context);
 
-    return {
-      engineName: this.name,
-      instructions: this.generateInstructions(context),
-      effects: {
-        corruptionChanges: newCorruptionLevel
-      },
-      metadata: {
-        previousCorruption: context.worldState.corruptionLevel,
-        newCorruption: newCorruptionLevel,
-        effects: corruptionEffects
-      }
-    };
+      const newCorruptionLevel = this.calculateCorruptionLevel(context);
+      const corruptionEffects = this.generateCorruptionEffects(newCorruptionLevel);
+
+      return {
+        engineName: this.name,
+        instructions: this.generateInstructions(context),
+        effects: {
+          corruptionChanges: newCorruptionLevel
+        },
+        metadata: {
+          previousCorruption: context.worldState.corruptionLevel,
+          newCorruption: newCorruptionLevel,
+          effects: corruptionEffects
+        }
+      };
+    } catch (error) {
+      console.error(`[${this.name}] Processing failed:`, error);
+
+      // Return safe fallback instead of crashing
+      return {
+        engineName: this.name,
+        instructions: [],
+        effects: {},
+        metadata: {
+          error: true,
+          errorMessage: error instanceof Error ? error.message : String(error),
+          timestamp: Date.now(),
+        },
+      };
+    }
   }
 
   generateInstructions(context: EngineContext): string[] {

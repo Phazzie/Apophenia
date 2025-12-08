@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { useAIModelStore } from '../stores/aiModelStore';
+import { useAIModelStore } from '../core/state/aiModelStore';
 
 const CompactModelSelector: React.FC = () => {
   const {

@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { generateConcept } from '../services/gameService';
 import { GameStateManager } from '../services/gameStateManager';
-import { useGameStateStore } from '../stores/gameStateStore';
-import { useStoryHistoryStore } from '../stores/storyHistoryStore';
-import { useWorldStateStore } from '../stores/worldStateStore';
-import { useAIModelStore } from '../stores/aiModelStore';
-import { GameState, GenreConfig, StorySegment, WorldState } from '../types';
+import { useGameStateStore } from '../core/state/gameStateStore';
+import { useHistoryStore } from '../core/state/historyStore';
+import { useWorldStateStore } from '../core/state/worldStateStore';
+import { useAIModelStore } from '../core/state/aiModelStore';
+import { GameState, GenreConfig, StorySegment, WorldState } from '../core/types/seams';
 import { genres, defaultGenre } from '../config/genres';
 import GlitchedText from './GlitchedText';
 import CompactTestAPI from './CompactTestAPI';
@@ -15,8 +15,8 @@ import { devMode } from '../utils/devMode';
 
 const StartScreen: React.FC = () => {
   const { setGameState } = useGameStateStore();
-  const { worldState, setGenreConfig } = useWorldStateStore();
-  const { storyHistory } = useStoryHistoryStore();
+  const { worldState } = useWorldStateStore();
+  const { segments: storyHistory } = useHistoryStore();
   const { getSelectedModel } = useAIModelStore();
   const [hasSavedGame, setHasSavedGame] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
@@ -40,10 +40,10 @@ const StartScreen: React.FC = () => {
     const sessionId = analyticsService.startSession();
     devMode.log('StartScreen', 'Started analytics session:', sessionId);
 
-    setGameState(GameState.GENERATING_CONCEPT);
+    setGameState(GameState.GENERATING);
 
     // Set the genre for the new game
-    setGenreConfig(selectedGenre);
+    useWorldStateStore.getState().updateWorld({ genreConfig: selectedGenre });
 
     const concept = await generateConcept(selectedGenre);
     const settingText =
@@ -51,16 +51,16 @@ const StartScreen: React.FC = () => {
         ? concept.setting
         : 'The world is a bleak and unforgiving place.';
 
-    useWorldStateStore.getState().updateWorldState({ ...concept, setting: settingText, genreConfig: selectedGenre });
+    useWorldStateStore.getState().updateWorld({ ...concept, setting: settingText, genreConfig: selectedGenre });
 
-    useStoryHistoryStore.getState().addStorySegment({
+    useHistoryStore.getState().addSegment({
       id: crypto.randomUUID(),
       text: settingText,
       images: {},
       timestamp: Date.now(),
     });
 
-    setGameState(GameState.PLAYING);
+    setGameState(GameState.DESCENDING);
     setIsStarting(false);
   };
 
@@ -72,7 +72,7 @@ const StartScreen: React.FC = () => {
     const sessionId = analyticsService.startSession();
     devMode.log('StartScreen', 'Started analytics session for continued game:', sessionId);
     
-    setGameState(GameState.PLAYING);
+    setGameState(GameState.DESCENDING);
   };
 
   const handleLoadDemo = async () => {
@@ -96,8 +96,9 @@ const StartScreen: React.FC = () => {
         storyHistory: StorySegment[];
       };
 
-      useWorldStateStore.getState().setWorldState(demoWorldState);
-      useStoryHistoryStore.getState().replaceStoryHistory(demoStoryHistory);
+      useWorldStateStore.getState().reset();
+      useWorldStateStore.getState().updateWorld(demoWorldState);
+      useHistoryStore.getState().replaceSegments(demoStoryHistory);
 
       // Apply the visual style from the genre config
       if (demoWorldState.genreConfig?.visualStyle) {
@@ -109,7 +110,7 @@ const StartScreen: React.FC = () => {
       }
 
       // Navigate to the game screen
-      setGameState(GameState.PLAYING);
+      setGameState(GameState.DESCENDING);
     } catch (error) {
       console.error('Failed to load demo:', error);
       // Optionally, show an error message to the user

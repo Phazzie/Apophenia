@@ -22,7 +22,7 @@ const BrowserEffectSchema = z.object({
   value: z.string().optional(),
 });
 
-const CommandSchema = z.discriminatedUnion('type', [
+export const CommandSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('createSegment'), payload: z.object({ id: z.string() }) }),
   z.object({ type: z.literal('displayText'), payload: z.object({ content: z.string(), segmentId: z.string() }) }),
   z.object({ type: z.literal('displayChoices'), payload: z.object({ choices: z.array(ChoiceSchema), intrusiveThought: ChoiceSchema.optional() }) }),

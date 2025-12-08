@@ -324,11 +324,10 @@ export class StorageManager<T> {
 
 /**
  * Generate a unique session ID (useful for multi-session tracking)
+ * Uses crypto.randomUUID() for cryptographically secure random IDs
  */
 export function generateSessionId(): string {
-  const timestamp = Date.now();
-  const randomPart = Math.random().toString(36).slice(2, 11);
-  return `session-${timestamp}-${randomPart}`;
+  return `session-${crypto.randomUUID()}`;
 }
 
 /**

@@ -23,29 +23,48 @@ export class MetaConsciousnessEngine extends BaseEngine implements IMetaConsciou
   }
 
   async process(context: EngineContext): Promise<EngineOutput> {
-    if (!this.shouldBreakFourthWall(context)) {
+    try {
+      // Validate context first
+      this.validateContext(context);
+
+      if (!this.shouldBreakFourthWall(context)) {
+        return {
+          engineName: this.name,
+          instructions: [],
+          effects: {},
+          metadata: { fourthWallBroken: false }
+        };
+      }
+
+      const metaContent = this.generateMetaContent(context);
+
+      return {
+        engineName: this.name,
+        instructions: [
+          ...this.generateInstructions(context),
+          metaContent
+        ],
+        effects: {},
+        metadata: {
+          fourthWallBroken: true,
+          metaLevel: this.calculateMetaLevel(context)
+        }
+      };
+    } catch (error) {
+      console.error(`[${this.name}] Processing failed:`, error);
+
+      // Return safe fallback instead of crashing
       return {
         engineName: this.name,
         instructions: [],
         effects: {},
-        metadata: { fourthWallBroken: false }
+        metadata: {
+          error: true,
+          errorMessage: error instanceof Error ? error.message : String(error),
+          timestamp: Date.now(),
+        },
       };
     }
-
-    const metaContent = this.generateMetaContent(context);
-
-    return {
-      engineName: this.name,
-      instructions: [
-        ...this.generateInstructions(context),
-        metaContent
-      ],
-      effects: {},
-      metadata: {
-        fourthWallBroken: true,
-        metaLevel: this.calculateMetaLevel(context)
-      }
-    };
   }
 
   generateInstructions(context: EngineContext): string[] {

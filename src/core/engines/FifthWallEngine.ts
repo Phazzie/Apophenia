@@ -24,26 +24,45 @@ export class FifthWallEngine extends BaseEngine implements IFifthWallEngine {
   }
 
   async process(context: EngineContext): Promise<EngineOutput> {
-    if (!this.canManipulateBrowser(context)) {
+    try {
+      // Validate context first
+      this.validateContext(context);
+
+      if (!this.canManipulateBrowser(context)) {
+        return {
+          engineName: this.name,
+          instructions: [],
+          effects: {},
+          metadata: { browserManipulationAllowed: false }
+        };
+      }
+
+      const effect = this.generateBrowserEffect(context);
+
+      return {
+        engineName: this.name,
+        instructions: this.generateInstructions(context),
+        effects: {},
+        metadata: {
+          browserManipulationAllowed: true,
+          effect
+        }
+      };
+    } catch (error) {
+      console.error(`[${this.name}] Processing failed:`, error);
+
+      // Return safe fallback instead of crashing
       return {
         engineName: this.name,
         instructions: [],
         effects: {},
-        metadata: { browserManipulationAllowed: false }
+        metadata: {
+          error: true,
+          errorMessage: error instanceof Error ? error.message : String(error),
+          timestamp: Date.now(),
+        },
       };
     }
-
-    const effect = this.generateBrowserEffect(context);
-
-    return {
-      engineName: this.name,
-      instructions: this.generateInstructions(context),
-      effects: {},
-      metadata: {
-        browserManipulationAllowed: true,
-        effect
-      }
-    };
   }
 
   generateInstructions(context: EngineContext): string[] {

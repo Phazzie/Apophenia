@@ -45,7 +45,7 @@ async function fetchWithRetry(
 
       // Retriable error - wait before retry (unless this was the last attempt)
       if (attempt < maxRetries) {
-        const delay = Math.pow(2, attempt) * 1000; // 1s, 2s, 4s, 8s, 16s
+        const delay = Math.pow(2, attempt + 1) * 1000; // 2s, 4s, 8s, 16s
         console.warn(
           `Request failed with status ${response.status}, retrying in ${delay}ms (attempt ${attempt + 1}/${maxRetries})`
         );
@@ -63,7 +63,7 @@ async function fetchWithRetry(
       }
 
       // Wait before retry
-      const delay = Math.pow(2, attempt) * 1000;
+      const delay = Math.pow(2, attempt + 1) * 1000; // 2s, 4s, 8s, 16s
       console.warn(
         `Request failed with error: ${lastError.message}, retrying in ${delay}ms (attempt ${attempt + 1}/${maxRetries})`
       );
@@ -149,7 +149,7 @@ export class GrokService implements AIService {
     );
 
     // Generate cache key from prompt and key context parameters
-    const cacheKey = responseCache.generateKey(fullPrompt, {
+    const cacheKey = await responseCache.generateKey(fullPrompt, {
       temperature: request.temperature,
       maxTokens: request.maxTokens,
       horrorIntensity: request.context.worldState.horrorIntensity,

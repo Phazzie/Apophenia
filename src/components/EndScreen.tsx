@@ -1,7 +1,7 @@
 import React from 'react';
-import { useGameStateStore } from '../stores/gameStateStore';
+import { useGameStateStore } from '../core/state/gameStateStore';
 import { GameStateManager } from '../services/gameStateManager';
-import { GameState } from '../types';
+import { GameState } from '../core/types/seams';
 
 const EndScreen: React.FC = () => {
   const { setGameState } = useGameStateStore();

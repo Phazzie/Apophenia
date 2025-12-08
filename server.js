@@ -4,6 +4,7 @@
 
 import express from 'express';
 import cors from 'cors';
+import crypto from 'crypto';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import 'dotenv/config';
 import path from 'path';
@@ -52,8 +53,34 @@ process.on('unhandledRejection', (reason) => {
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Middleware
-app.use(cors());
+// Middleware - CORS with strict origin whitelist
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://localhost:5174',
+  process.env.FRONTEND_URL,
+  process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
+].filter(Boolean);
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, curl, Postman)
+    if (!origin) {
+      callback(null, true);
+      return;
+    }
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.warn(`CORS: Blocked request from unauthorized origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 app.use(express.json());
 
 // --- Static file serving for production ---\n// This block must be placed before any API routes to ensure the frontend is served correctly.
@@ -218,7 +245,9 @@ app.post('/api/next-step', async (req, res) => {
 
     // --- Narrative Echoes: Read ---
     let narrativeEcho = null;
-    if (Math.random() < 0.25) { // 25% chance to encounter an echo
+    // Use crypto for random number generation (more secure than Math.random)
+    const randomValue = crypto.getRandomValues(new Uint32Array(1))[0] / (0xFFFFFFFF + 1);
+    if (randomValue < 0.25) { // 25% chance to encounter an echo
       const echoesSnapshot = await db.collection('narrative_echoes')
         .where('userId', '!=', userId)
         .limit(1)
@@ -630,9 +659,10 @@ app.get('/', (_req, res) => {
 });
 
 // MCP server routes
-
-// Mount MCP control routes under /mcp
-app.use('/mcp', mcpRoutes);
+// DISABLED: Security vulnerability - command injection risk
+// Re-enable only after thorough security audit and input sanitization
+// TODO: Fix command injection vulnerability in server/mcpServer.js before re-enabling
+// app.use('/mcp', mcpRoutes);
 
 // Start server
 app.listen(PORT, () => {

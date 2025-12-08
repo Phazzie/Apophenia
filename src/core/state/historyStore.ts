@@ -81,6 +81,9 @@ export const useHistoryStore = create<HistoryStore>()(
         return segments.slice(-count);
       },
 
+      replaceSegments: (newSegments: StorySegment[]) =>
+        set({ segments: newSegments }),
+
       reset: () =>
         set({ segments: [] }),
     }),

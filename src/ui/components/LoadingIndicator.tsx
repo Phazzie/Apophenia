@@ -17,7 +17,7 @@ export interface LoadingIndicatorProps {
  * Loading Indicator Component
  * Shows cosmic horror themed loading state
  */
-export const LoadingIndicator: React.FC<LoadingIndicatorProps> = ({
+const LoadingIndicatorComponent: React.FC<LoadingIndicatorProps> = ({
   text = 'LOADING',
   size = 'medium',
   variant = 'spinner',
@@ -86,7 +86,13 @@ export const LoadingIndicator: React.FC<LoadingIndicatorProps> = ({
   };
 
   return (
-    <div className={`loading-indicator ${className}`}>
+    <div
+      className={`loading-indicator ${className}`}
+      role="status"
+      aria-live="polite"
+      aria-label={text || 'Loading'}
+    >
+      {text && <span className="sr-only">{text}</span>}
       {renderVariant()}
       <style>{`
         .loading-container {
@@ -165,10 +171,10 @@ export const LoadingIndicator: React.FC<LoadingIndicatorProps> = ({
 /**
  * Inline Loading Text Component
  */
-export const LoadingText: React.FC<{ text?: string }> = ({ text = 'Loading' }) => (
-  <span className="loading-text-inline">
+const LoadingTextComponent: React.FC<{ text?: string }> = ({ text = 'Loading' }) => (
+  <span className="loading-text-inline" aria-label={`${text}...`}>
     <GlitchText text={text} intensity={2} />
-    <span className="loading-dots-inline">
+    <span className="loading-dots-inline" aria-hidden="true">
       <span>.</span>
       <span>.</span>
       <span>.</span>
@@ -207,5 +213,9 @@ export const LoadingText: React.FC<{ text?: string }> = ({ text = 'Loading' }) =
     `}</style>
   </span>
 );
+
+// Memoize to prevent unnecessary re-renders
+export const LoadingText = React.memo(LoadingTextComponent);
+export const LoadingIndicator = React.memo(LoadingIndicatorComponent);
 
 export default LoadingIndicator;

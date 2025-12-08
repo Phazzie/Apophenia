@@ -216,6 +216,7 @@ export interface HistoryStore {
   updateSegment: (id: string, updates: Partial<StorySegment>) => void;
   reviseSegment: (id: string, newText: string) => void;
   getRecent: (count: number) => StorySegment[];
+  replaceSegments: (newSegments: StorySegment[]) => void;
   reset: () => void;
 }
 
@@ -294,9 +295,7 @@ export interface TemporalRevisionEngine extends Engine {
 }
 
 export interface QuantumNarrativeEngine extends Engine {
-  readonly timelines: Map<string, WorldState>;
-  shiftTimeline(context: EngineContext): string;
-  mergeTimelines(timeline1: string, timeline2: string): WorldState | null;
+  // Stateless engine - timelines stored in metadata, not instance variables
 }
 
 export interface RealityCorruptionEngine extends Engine {

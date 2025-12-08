@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useUserStore } from '../stores/userStore';
+import { useUserStore } from '../core/state/userStore';
 
 const LoginScreen: React.FC = () => {
   const [email, setEmail] = useState('');

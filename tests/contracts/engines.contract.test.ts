@@ -310,11 +310,13 @@ describe('Contract Tests: Engines (Seam #3)', () => {
     it('QuantumNarrativeEngine should implement extended interface', () => {
       const engine = new QuantumNarrativeEngine() as any;
 
-      // Check for extended properties/methods
-      expect(engine).toHaveProperty('timelines');
-      expect(engine.timelines instanceof Map).toBe(true);
-      expect(typeof engine.shiftTimeline).toBe('function');
-      expect(typeof engine.mergeTimelines).toBe('function');
+      // Stateless engine - timelines stored in metadata, not instance variables
+      // No public methods beyond Engine interface
+      expect(engine.name).toBe('QuantumNarrative');
+      expect(engine.priority).toBe(7);
+      expect(typeof engine.process).toBe('function');
+      expect(typeof engine.isActive).toBe('function');
+      expect(typeof engine.generateInstructions).toBe('function');
     });
 
     it('RealityCorruptionEngine should implement extended interface', () => {

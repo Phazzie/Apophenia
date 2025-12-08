@@ -60,17 +60,86 @@ const rateLimiter = rateLimit({
   }
 });
 
-// Middleware
+// Middleware - CORS with strict origin whitelist
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://localhost:5174',
+  process.env.FRONTEND_URL,
+  process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
+].filter(Boolean);
+
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || '*',
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, curl, Postman)
+    if (!origin) {
+      callback(null, true);
+      return;
+    }
+
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      logger.warn('CORS: Blocked request from unauthorized origin', { origin });
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
   methods: ['GET', 'POST'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key']
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Apply rate limiting to API routes
 app.use('/api', rateLimiter);
+
+// API Key Authentication Middleware
+const VALID_API_KEYS = process.env.API_KEYS?.split(',').map(key => key.trim()).filter(Boolean) || [];
+
+function authenticateAPIKey(req, res, next) {
+  // Skip authentication for health check endpoints
+  if (req.path === '/health') {
+    return next();
+  }
+
+  const apiKey = req.headers['x-api-key'] ||
+                 req.headers['authorization']?.replace('Bearer ', '');
+
+  if (!apiKey) {
+    logger.warn('API request without API key', {
+      ip: req.ip,
+      url: req.url,
+      userAgent: req.get('User-Agent')
+    });
+    return res.status(401).json({
+      error: 'Authentication required',
+      message: 'API key is required. Include X-API-Key header or Authorization: Bearer <key>'
+    });
+  }
+
+  if (VALID_API_KEYS.length > 0 && !VALID_API_KEYS.includes(apiKey)) {
+    logger.warn('API request with invalid API key', {
+      ip: req.ip,
+      url: req.url,
+      providedKey: apiKey.substring(0, 8) + '...' // Log partial key for debugging
+    });
+    return res.status(403).json({
+      error: 'Authentication failed',
+      message: 'Invalid API key'
+    });
+  }
+
+  // If API_KEYS not set, log warning but allow (for development)
+  if (VALID_API_KEYS.length === 0) {
+    logger.warn('API_KEYS environment variable not set - authentication bypassed');
+  }
+
+  next();
+}
+
+// Apply API key authentication to all API routes
+app.use('/api', authenticateAPIKey);
 
 // Request logging middleware
 app.use((req, res, next) => {

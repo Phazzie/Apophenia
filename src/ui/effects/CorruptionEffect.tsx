@@ -15,7 +15,7 @@ export interface CorruptionEffectProps {
  * Corruption Effect Component
  * Wraps children with corruption-based visual effects
  */
-export const CorruptionEffect: React.FC<CorruptionEffectProps> = ({
+const CorruptionEffectComponent: React.FC<CorruptionEffectProps> = ({
   level,
   children,
   className = ''
@@ -112,5 +112,8 @@ export const useCorruptionEffect = (level: number) => {
 
   return { applyTo, remove, level };
 };
+
+// Memoize to prevent unnecessary re-renders
+export const CorruptionEffect = React.memo(CorruptionEffectComponent);
 
 export default CorruptionEffect;

@@ -99,29 +99,44 @@ describe('Engine Implementation Tests', () => {
     it('implements Engine interface correctly', () => {
       expect(engine.name).toBe('QuantumNarrative');
       expect(engine.priority).toBe(7);
-      expect(engine.timelines).toBeInstanceOf(Map);
+      // Stateless engine - no instance variables
     });
 
-    it('manages timelines correctly', () => {
+    it('manages timelines correctly via metadata', async () => {
       const context = createHighHorrorContext();
-      const timelineId = engine.shiftTimeline(context);
 
-      expect(typeof timelineId).toBe('string');
-      expect(engine.timelines.has(timelineId)).toBe(true);
+      // First process call creates alpha timeline
+      const output1 = await engine.process(context);
+      expect(output1.metadata?.timelines).toBeDefined();
+      expect(Object.keys(output1.metadata?.timelines || {}).length).toBeGreaterThanOrEqual(1);
+
+      // Second process call with timeline shift
+      const contextWithPrevious = {
+        ...context,
+        previousOutput: output1
+      };
+      const output2 = await engine.process(contextWithPrevious);
+      expect(output2.metadata?.timelines).toBeDefined();
     });
 
-    it('merges timelines', () => {
+    it('stores timelines in metadata (stateless pattern)', async () => {
       const context = createHighHorrorContext();
 
-      // Create two timelines
-      const timeline1 = engine.shiftTimeline(context);
-      const timeline2 = engine.shiftTimeline(context);
+      // Process multiple times to potentially create timelines
+      let currentOutput = await engine.process(context);
 
-      // Merge them
-      const mergedState = engine.mergeTimelines(timeline1, timeline2);
+      for (let i = 0; i < 5; i++) {
+        const nextContext = {
+          ...context,
+          previousOutput: currentOutput
+        };
+        currentOutput = await engine.process(nextContext);
+      }
 
-      expect(mergedState).toBeDefined();
-      expect(mergedState.summary).toContain('MERGED');
+      // Check that timelines are stored in metadata
+      expect(currentOutput.metadata?.timelines).toBeDefined();
+      const timelines = currentOutput.metadata?.timelines as Record<string, unknown>;
+      expect(typeof timelines).toBe('object');
     });
   });
 

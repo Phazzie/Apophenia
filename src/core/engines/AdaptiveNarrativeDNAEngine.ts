@@ -26,21 +26,40 @@ export class AdaptiveNarrativeDNAEngine extends BaseEngine implements IAdaptiveN
   }
 
   async process(context: EngineContext): Promise<EngineOutput> {
-    // Get current genome from context (stateless approach)
-    const currentGenome = this.getCurrentGenome(context);
+    try {
+      // Validate context first
+      this.validateContext(context);
 
-    // Mutate genome based on context (pure function - doesn't mutate state)
-    const mutatedGenome = this.mutateGenome(currentGenome, context);
+      // Get current genome from context (stateless approach)
+      const currentGenome = this.getCurrentGenome(context);
 
-    return {
-      engineName: this.name,
-      instructions: this.generateInstructionsForGenome(mutatedGenome, context),
-      effects: {},
-      metadata: {
-        genome: mutatedGenome, // Store for next execution
-        mutationRate: this.calculateMutationRate(context)
-      }
-    };
+      // Mutate genome based on context (pure function - doesn't mutate state)
+      const mutatedGenome = this.mutateGenome(currentGenome, context);
+
+      return {
+        engineName: this.name,
+        instructions: this.generateInstructionsForGenome(mutatedGenome, context),
+        effects: {},
+        metadata: {
+          genome: mutatedGenome, // Store for next execution
+          mutationRate: this.calculateMutationRate(context)
+        }
+      };
+    } catch (error) {
+      console.error(`[${this.name}] Processing failed:`, error);
+
+      // Return safe fallback instead of crashing
+      return {
+        engineName: this.name,
+        instructions: [],
+        effects: {},
+        metadata: {
+          error: true,
+          errorMessage: error instanceof Error ? error.message : String(error),
+          timestamp: Date.now(),
+        },
+      };
+    }
   }
 
   /**

@@ -284,7 +284,8 @@ class AnalyticsService {
   }
 
   private generateSessionId(): string {
-    return `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    // Use crypto.randomUUID() for cryptographically secure random IDs
+    return `session-${crypto.randomUUID()}`;
   }
 
   private getSessionDuration(): number {

@@ -23,44 +23,63 @@ export class TemporalRevisionEngine extends BaseEngine implements ITemporalRevis
   }
 
   async process(context: EngineContext): Promise<EngineOutput> {
-    const targetSegmentId = this.identifyRevisionTarget(context.recentHistory);
+    try {
+      // Validate context first
+      this.validateContext(context);
 
-    if (!targetSegmentId) {
-      return {
-        engineName: this.name,
-        instructions: this.generateInstructions(context),
-        effects: {},
-        metadata: { targetFound: false }
-      };
-    }
+      const targetSegmentId = this.identifyRevisionTarget(context.recentHistory);
 
-    const targetSegment = context.recentHistory.find(s => s.id === targetSegmentId);
-    if (!targetSegment) {
-      return {
-        engineName: this.name,
-        instructions: this.generateInstructions(context),
-        effects: {},
-        metadata: { targetFound: false }
-      };
-    }
-
-    const revisedText = await this.generateRevision(targetSegment.text, context);
-
-    return {
-      engineName: this.name,
-      instructions: this.generateInstructions(context),
-      effects: {
-        historyRevisions: [{
-          id: targetSegmentId,
-          newText: revisedText
-        }]
-      },
-      metadata: {
-        targetFound: true,
-        originalLength: targetSegment.text.length,
-        revisedLength: revisedText.length
+      if (!targetSegmentId) {
+        return {
+          engineName: this.name,
+          instructions: this.generateInstructions(context),
+          effects: {},
+          metadata: { targetFound: false }
+        };
       }
-    };
+
+      const targetSegment = context.recentHistory.find(s => s.id === targetSegmentId);
+      if (!targetSegment) {
+        return {
+          engineName: this.name,
+          instructions: this.generateInstructions(context),
+          effects: {},
+          metadata: { targetFound: false }
+        };
+      }
+
+      const revisedText = await this.generateRevision(targetSegment.text, context);
+
+      return {
+        engineName: this.name,
+        instructions: this.generateInstructions(context),
+        effects: {
+          historyRevisions: [{
+            id: targetSegmentId,
+            newText: revisedText
+          }]
+        },
+        metadata: {
+          targetFound: true,
+          originalLength: targetSegment.text.length,
+          revisedLength: revisedText.length
+        }
+      };
+    } catch (error) {
+      console.error(`[${this.name}] Processing failed:`, error);
+
+      // Return safe fallback instead of crashing
+      return {
+        engineName: this.name,
+        instructions: [],
+        effects: {},
+        metadata: {
+          error: true,
+          errorMessage: error instanceof Error ? error.message : String(error),
+          timestamp: Date.now(),
+        },
+      };
+    }
   }
 
   generateInstructions(context: EngineContext): string[] {

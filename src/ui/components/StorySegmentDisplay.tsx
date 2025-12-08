@@ -20,7 +20,7 @@ export interface StorySegmentDisplayProps {
  * Story Segment Display Component
  * Renders a single story segment with all metadata and effects
  */
-export const StorySegmentDisplay: React.FC<StorySegmentDisplayProps> = ({
+const StorySegmentDisplayComponent: React.FC<StorySegmentDisplayProps> = ({
   segment,
   showImage = true,
   showMetadata = true,
@@ -57,7 +57,7 @@ export const StorySegmentDisplay: React.FC<StorySegmentDisplayProps> = ({
         <CorruptionEffect level={corruptionLevel}>
           <img
             src={main}
-            alt="Story illustration"
+            alt={`Illustration for: ${segment.text.substring(0, 100)}${segment.text.length > 100 ? '...' : ''}`}
             className="segment-image"
             loading="lazy"
           />
@@ -68,7 +68,7 @@ export const StorySegmentDisplay: React.FC<StorySegmentDisplayProps> = ({
               <img
                 key={idx}
                 src={url}
-                alt={`Inset ${idx + 1}`}
+                alt={`Detail image ${idx + 1} related to story`}
                 className="segment-inset-image"
                 loading="lazy"
               />
@@ -317,7 +317,7 @@ export interface StoryHistoryDisplayProps {
   className?: string;
 }
 
-export const StoryHistoryDisplay: React.FC<StoryHistoryDisplayProps> = ({
+const StoryHistoryDisplayComponent: React.FC<StoryHistoryDisplayProps> = ({
   segments,
   showImages = true,
   showMetadata = true,
@@ -341,5 +341,9 @@ export const StoryHistoryDisplay: React.FC<StoryHistoryDisplayProps> = ({
     </div>
   );
 };
+
+// Memoize to prevent unnecessary re-renders
+export const StorySegmentDisplay = React.memo(StorySegmentDisplayComponent);
+export const StoryHistoryDisplay = React.memo(StoryHistoryDisplayComponent);
 
 export default StorySegmentDisplay;

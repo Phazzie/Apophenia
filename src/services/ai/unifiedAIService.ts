@@ -15,6 +15,13 @@ import {
 } from '../../core/types/seams';
 import { grokService } from './grokService';
 import { mockService } from './mockService';
+import { CommandSchema } from './responseParser';
+
+interface CircuitBreaker {
+  failures: number;
+  lastFailure: number;
+  state: 'closed' | 'open' | 'half-open';
+}
 
 export class UnifiedAIServiceImpl implements UnifiedAIService {
   private primaryProvider: AIProvider = AIProvider.GROK;
@@ -27,6 +34,11 @@ export class UnifiedAIServiceImpl implements UnifiedAIService {
     [AIProvider.GROK, grokService],
     [AIProvider.MOCK, mockService],
   ] as Array<[AIProvider, AIService]>);
+
+  // Circuit breaker state
+  private circuitBreakers = new Map<AIProvider, CircuitBreaker>();
+  private readonly CIRCUIT_THRESHOLD = 5;  // Open after 5 failures
+  private readonly CIRCUIT_TIMEOUT = 60000; // 1 minute
 
   /**
    * Set the primary provider (first choice)
@@ -70,6 +82,14 @@ export class UnifiedAIServiceImpl implements UnifiedAIService {
     for (const provider of this.fallbackChain) {
       attemptCount++;
 
+      // Check circuit breaker before attempting
+      if (this.isCircuitOpen(provider)) {
+        const message = `Circuit open for ${provider}, skipping (attempt ${attemptCount}/${this.fallbackChain.length})`;
+        console.warn(message);
+        errors.push({ provider, error: 'Circuit breaker open' });
+        continue;
+      }
+
       try {
         const service = this.getService(provider);
 
@@ -79,6 +99,7 @@ export class UnifiedAIServiceImpl implements UnifiedAIService {
           const message = `Provider ${provider} is not available (attempt ${attemptCount}/${this.fallbackChain.length})`;
           console.warn(message);
           errors.push({ provider, error: 'Provider not available' });
+          this.recordFailure(provider);
           continue;
         }
 
@@ -95,8 +116,33 @@ export class UnifiedAIServiceImpl implements UnifiedAIService {
         if (!response.commands || response.commands.length === 0) {
           console.warn(`Provider ${provider} returned no commands, trying next`);
           errors.push({ provider, error: 'No commands returned' });
+          this.recordFailure(provider);
           continue;
         }
+
+        // Validate commands with Zod schema
+        const validCommands = response.commands.filter((cmd) => {
+          try {
+            CommandSchema.parse(cmd);
+            return true;
+          } catch (error) {
+            console.warn(`Invalid command from ${provider} skipped:`, cmd, error);
+            return false;
+          }
+        });
+
+        if (validCommands.length === 0) {
+          console.warn(`Provider ${provider} returned no valid commands, trying next`);
+          errors.push({ provider, error: 'No valid commands in response' });
+          this.recordFailure(provider);
+          continue;
+        }
+
+        // Update response with only valid commands
+        response.commands = validCommands;
+
+        // Success - record it and reset circuit breaker
+        this.recordSuccess(provider);
 
         // Log success with provider info
         if (provider !== this.primaryProvider) {
@@ -112,6 +158,7 @@ export class UnifiedAIServiceImpl implements UnifiedAIService {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         console.error(`Provider ${provider} failed (attempt ${attemptCount}/${this.fallbackChain.length}):`, errorMessage);
         errors.push({ provider, error: errorMessage });
+        this.recordFailure(provider);
       }
     }
 
@@ -183,6 +230,63 @@ export class UnifiedAIServiceImpl implements UnifiedAIService {
       throw new Error(`No service found for provider: ${provider}`);
     }
     return service;
+  }
+
+  /**
+   * Check if circuit breaker is open for a provider
+   */
+  private isCircuitOpen(provider: AIProvider): boolean {
+    const breaker = this.circuitBreakers.get(provider);
+    if (!breaker || breaker.state === 'closed') {
+      return false;
+    }
+
+    // Check if timeout elapsed - move to half-open state
+    if (Date.now() - breaker.lastFailure > this.CIRCUIT_TIMEOUT) {
+      breaker.state = 'half-open';
+      console.log(`Circuit HALF-OPEN for ${provider}, allowing test request`);
+      return false;
+    }
+
+    return breaker.state === 'open';
+  }
+
+  /**
+   * Record a failure for a provider
+   */
+  private recordFailure(provider: AIProvider): void {
+    const breaker = this.circuitBreakers.get(provider) || {
+      failures: 0,
+      lastFailure: 0,
+      state: 'closed' as const,
+    };
+
+    breaker.failures++;
+    breaker.lastFailure = Date.now();
+
+    if (breaker.failures >= this.CIRCUIT_THRESHOLD) {
+      breaker.state = 'open';
+      console.warn(
+        `🔴 Circuit OPEN for ${provider} after ${breaker.failures} failures. Will retry in ${this.CIRCUIT_TIMEOUT / 1000}s`
+      );
+    }
+
+    this.circuitBreakers.set(provider, breaker);
+  }
+
+  /**
+   * Record a success for a provider - resets circuit breaker
+   */
+  private recordSuccess(provider: AIProvider): void {
+    const breaker = this.circuitBreakers.get(provider);
+    if (breaker) {
+      if (breaker.state !== 'closed') {
+        console.log(`✅ Circuit CLOSED for ${provider} - provider recovered`);
+      }
+      breaker.failures = 0;
+      breaker.state = 'closed';
+      this.circuitBreakers.set(provider, breaker);
+    }
   }
 }
 

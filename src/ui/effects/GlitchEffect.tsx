@@ -17,7 +17,7 @@ export interface GlitchEffectProps {
  * Glitch Effect Component
  * Applies glitch animation to text content
  */
-export const GlitchEffect: React.FC<GlitchEffectProps> = ({
+const GlitchEffectComponent: React.FC<GlitchEffectProps> = ({
   intensity,
   children,
   trigger = false,
@@ -57,12 +57,25 @@ export const GlitchEffect: React.FC<GlitchEffectProps> = ({
       element.style.textShadow = shadows.join(', ');
     };
 
-    // Create flickering effect
-    const interval = setInterval(createGlitchShadow, 50);
+    // Create flickering effect using requestAnimationFrame for better performance
+    let frameId: number;
+    let lastUpdateTime = 0;
+    const frameInterval = 50; // Target 50ms update frequency
+
+    const animate = () => {
+      const now = Date.now();
+      if (now - lastUpdateTime >= frameInterval) {
+        createGlitchShadow();
+        lastUpdateTime = now;
+      }
+      frameId = requestAnimationFrame(animate);
+    };
+
+    frameId = requestAnimationFrame(animate);
 
     // Cleanup
     return () => {
-      clearInterval(interval);
+      cancelAnimationFrame(frameId);
       element.classList.remove('glitching');
       element.style.textShadow = '';
     };
@@ -107,7 +120,7 @@ export interface GlitchTextProps {
   className?: string;
 }
 
-export const GlitchText: React.FC<GlitchTextProps> = ({
+const GlitchTextComponent: React.FC<GlitchTextProps> = ({
   text,
   intensity = 5,
   className = ''
@@ -130,10 +143,24 @@ export const GlitchText: React.FC<GlitchTextProps> = ({
       setDisplayText(result);
     };
 
-    const interval = setInterval(corruptText, 100);
+    // Use requestAnimationFrame for better performance
+    let frameId: number;
+    let lastUpdateTime = 0;
+    const frameInterval = 100; // Target 100ms update frequency
+
+    const animate = () => {
+      const now = Date.now();
+      if (now - lastUpdateTime >= frameInterval) {
+        corruptText();
+        lastUpdateTime = now;
+      }
+      frameId = requestAnimationFrame(animate);
+    };
+
+    frameId = requestAnimationFrame(animate);
 
     return () => {
-      clearInterval(interval);
+      cancelAnimationFrame(frameId);
       setDisplayText(text);
     };
   }, [text, intensity]);
@@ -144,5 +171,9 @@ export const GlitchText: React.FC<GlitchTextProps> = ({
     </GlitchEffect>
   );
 };
+
+// Memoize components to prevent unnecessary re-renders
+export const GlitchEffect = React.memo(GlitchEffectComponent);
+export const GlitchText = React.memo(GlitchTextComponent);
 
 export default GlitchEffect;

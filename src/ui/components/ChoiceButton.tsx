@@ -18,7 +18,7 @@ export interface ChoiceButtonProps {
  * Choice Button Component
  * Displays a clickable choice with appropriate styling
  */
-export const ChoiceButton: React.FC<ChoiceButtonProps> = ({
+const ChoiceButtonComponent: React.FC<ChoiceButtonProps> = ({
   choice,
   disabled = false,
   onClick,
@@ -33,7 +33,7 @@ export const ChoiceButton: React.FC<ChoiceButtonProps> = ({
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       handleClick();
@@ -54,11 +54,14 @@ export const ChoiceButton: React.FC<ChoiceButtonProps> = ({
       type="button"
       className={buttonClass}
       onClick={handleClick}
-      onKeyPress={handleKeyPress}
+      onKeyDown={handleKeyDown}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       disabled={disabled}
       aria-disabled={disabled}
+      aria-label={`Choice: ${choice.text}`}
+      aria-describedby={choice.consequence ? `consequence-${choice.id}` : undefined}
+      tabIndex={disabled ? -1 : 0}
       data-choice-id={choice.id}
       data-intrusive={intrusive || choice.isIntrusive}
     >
@@ -66,7 +69,10 @@ export const ChoiceButton: React.FC<ChoiceButtonProps> = ({
         {choice.text}
       </span>
       {choice.consequence && (
-        <span className="choice-consequence">
+        <span
+          className="choice-consequence"
+          id={`consequence-${choice.id}`}
+        >
           {choice.consequence}
         </span>
       )}
@@ -207,5 +213,8 @@ export const ChoiceList: React.FC<ChoiceListProps> = ({
     </div>
   );
 };
+
+// Memoize to prevent unnecessary re-renders
+export const ChoiceButton = React.memo(ChoiceButtonComponent);
 
 export default ChoiceButton;

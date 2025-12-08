@@ -19,26 +19,45 @@ export class SemanticChoiceArchaeologyEngine extends BaseEngine implements ISema
   }
 
   async process(context: EngineContext): Promise<EngineOutput> {
-    // Reconstruct choice history from previous outputs and current choice (pure functional)
-    const previousChoices = this.getChoiceHistoryFromContext(context);
-    const currentChoices = context.currentChoice ? [...previousChoices, context.currentChoice] : previousChoices;
+    try {
+      // Validate context first
+      this.validateContext(context);
 
-    const analysis = this.analyzeChoiceSequence(currentChoices);
-    const reflection = this.generateReflection(analysis);
+      // Reconstruct choice history from previous outputs and current choice (pure functional)
+      const previousChoices = this.getChoiceHistoryFromContext(context);
+      const currentChoices = context.currentChoice ? [...previousChoices, context.currentChoice] : previousChoices;
 
-    return {
-      engineName: this.name,
-      instructions: [
-        ...this.generateInstructions(context),
-        reflection
-      ],
-      effects: {},
-      metadata: {
-        analysis,
-        choicesAnalyzed: currentChoices.length,
-        choiceHistory: currentChoices // Store for next execution
-      }
-    };
+      const analysis = this.analyzeChoiceSequence(currentChoices);
+      const reflection = this.generateReflection(analysis);
+
+      return {
+        engineName: this.name,
+        instructions: [
+          ...this.generateInstructions(context),
+          reflection
+        ],
+        effects: {},
+        metadata: {
+          analysis,
+          choicesAnalyzed: currentChoices.length,
+          choiceHistory: currentChoices // Store for next execution
+        }
+      };
+    } catch (error) {
+      console.error(`[${this.name}] Processing failed:`, error);
+
+      // Return safe fallback instead of crashing
+      return {
+        engineName: this.name,
+        instructions: [],
+        effects: {},
+        metadata: {
+          error: true,
+          errorMessage: error instanceof Error ? error.message : String(error),
+          timestamp: Date.now(),
+        },
+      };
+    }
   }
 
   /**

@@ -15,8 +15,6 @@ export class NeuralEchoChamberEngine extends BaseEngine implements INeuralEchoCh
   readonly description = 'Manages cross-session memory and psychological persistence';
   readonly priority = 4; // Medium priority - enhances long-term engagement
 
-  private memoryLoaded = false;
-
   isActive(context: EngineContext): boolean {
     // Active on first few choices (to load memories) or when horror is high
     return (
@@ -26,63 +24,88 @@ export class NeuralEchoChamberEngine extends BaseEngine implements INeuralEchoCh
   }
 
   async process(context: EngineContext): Promise<EngineOutput> {
-    // On early choices, try to load previous session memories
-    if (!this.memoryLoaded && this.getChoiceCount(context) <= 2) {
-      const previousProfile = this.loadCrossSessionMemory();
+    try {
+      // Validate context first
+      this.validateContext(context);
 
-      if (previousProfile) {
-        this.memoryLoaded = true;
-        const echoContent = this.generateEchoContent(previousProfile);
+      // Check if memory already loaded (from metadata - stateless pattern)
+      const memoryLoaded = this.getMemoryLoadedFromContext(context);
+
+      // On early choices, try to load previous session memories
+      if (!memoryLoaded && this.getChoiceCount(context) <= 2) {
+        const previousProfile = this.loadCrossSessionMemory();
+
+        if (previousProfile) {
+          const echoContent = this.generateEchoContent(previousProfile);
+
+          return {
+            engineName: this.name,
+            instructions: [
+              ...this.generateInstructions(context),
+              ...echoContent
+            ],
+            effects: {
+              profileUpdates: {
+                // Merge previous fear profile with current
+                fearProfile: this.mergeFearProfiles(
+                  previousProfile.fearProfile,
+                  context.playerProfile.fearProfile
+                )
+              }
+            },
+            metadata: {
+              memoryLoaded: true,
+              previousSessionData: this.summarizeProfile(previousProfile)
+            }
+          };
+        }
+      }
+
+      // On later choices, save current profile for next session
+      if (this.getChoiceCount(context) > 10 && this.getChoiceCount(context) % 5 === 0) {
+        this.saveCrossSessionMemory(context.playerProfile);
 
         return {
           engineName: this.name,
-          instructions: [
-            ...this.generateInstructions(context),
-            ...echoContent
-          ],
-          effects: {
-            profileUpdates: {
-              // Merge previous fear profile with current
-              fearProfile: this.mergeFearProfiles(
-                previousProfile.fearProfile,
-                context.playerProfile.fearProfile
-              )
-            }
-          },
+          instructions: this.generateInstructions(context),
+          effects: {},
           metadata: {
-            memoryLoaded: true,
-            previousSessionData: this.summarizeProfile(previousProfile)
+            memoryLoaded: memoryLoaded,
+            memorySaved: true
           }
         };
       }
-    }
-
-    // On later choices, save current profile for next session
-    if (this.getChoiceCount(context) > 10 && this.getChoiceCount(context) % 5 === 0) {
-      this.saveCrossSessionMemory(context.playerProfile);
 
       return {
         engineName: this.name,
-        instructions: this.generateInstructions(context),
+        instructions: [],
         effects: {},
         metadata: {
-          memorySaved: true
+          memoryLoaded: memoryLoaded
         }
       };
-    }
+    } catch (error) {
+      console.error(`[${this.name}] Processing failed:`, error);
 
-    return {
-      engineName: this.name,
-      instructions: [],
-      effects: {},
-      metadata: {}
-    };
+      // Return safe fallback instead of crashing
+      return {
+        engineName: this.name,
+        instructions: [],
+        effects: {},
+        metadata: {
+          error: true,
+          errorMessage: error instanceof Error ? error.message : String(error),
+          timestamp: Date.now(),
+        },
+      };
+    }
   }
 
   generateInstructions(context: EngineContext): string[] {
     const instructions: string[] = [];
+    const memoryLoaded = this.getMemoryLoadedFromContext(context);
 
-    if (!this.memoryLoaded && this.getChoiceCount(context) <= 2) {
+    if (!memoryLoaded && this.getChoiceCount(context) <= 2) {
       instructions.push(
         'Hint at memories or experiences from beyond this session',
         'Create a sense of déjà vu or persistent dread'
@@ -97,6 +120,17 @@ export class NeuralEchoChamberEngine extends BaseEngine implements INeuralEchoCh
     }
 
     return instructions;
+  }
+
+  /**
+   * Get memory loaded state from context metadata (stateless pattern)
+   */
+  private getMemoryLoadedFromContext(context: EngineContext): boolean {
+    const previousOutput = context.previousOutput;
+    if (previousOutput?.metadata?.memoryLoaded === true) {
+      return true;
+    }
+    return false;
   }
 
   loadCrossSessionMemory(): PlayerProfile | null {

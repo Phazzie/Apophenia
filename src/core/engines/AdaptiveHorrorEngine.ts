@@ -22,31 +22,50 @@ export class AdaptiveHorrorEngine extends BaseEngine implements IAdaptiveHorrorE
   }
 
   async process(context: EngineContext): Promise<EngineOutput> {
-    const fears = this.analyzeFears(context.playerProfile);
-    const horrorInstructions = this.generatePersonalizedHorror(fears);
+    try {
+      // Validate context first
+      this.validateContext(context);
 
-    // Update fear profile based on current context
-    const profileUpdates: Partial<PlayerProfile> = {
-      fearProfile: this.updateFearProfile(context)
-    };
+      const fears = this.analyzeFears(context.playerProfile);
+      const horrorInstructions = this.generatePersonalizedHorror(fears);
 
-    return {
-      engineName: this.name,
-      instructions: [
-        ...this.generateInstructions(context),
-        ...horrorInstructions
-      ],
-      effects: {
-        profileUpdates
-      },
-      metadata: {
-        dominantFears: Array.from(fears.entries())
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 3)
-          .map(([fear]) => fear),
-        fearScores: Object.fromEntries(fears)
-      }
-    };
+      // Update fear profile based on current context
+      const profileUpdates: Partial<PlayerProfile> = {
+        fearProfile: this.updateFearProfile(context)
+      };
+
+      return {
+        engineName: this.name,
+        instructions: [
+          ...this.generateInstructions(context),
+          ...horrorInstructions
+        ],
+        effects: {
+          profileUpdates
+        },
+        metadata: {
+          dominantFears: Array.from(fears.entries())
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 3)
+            .map(([fear]) => fear),
+          fearScores: Object.fromEntries(fears)
+        }
+      };
+    } catch (error) {
+      console.error(`[${this.name}] Processing failed:`, error);
+
+      // Return safe fallback instead of crashing
+      return {
+        engineName: this.name,
+        instructions: [],
+        effects: {},
+        metadata: {
+          error: true,
+          errorMessage: error instanceof Error ? error.message : String(error),
+          timestamp: Date.now(),
+        },
+      };
+    }
   }
 
   generateInstructions(context: EngineContext): string[] {

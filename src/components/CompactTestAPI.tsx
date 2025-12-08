@@ -2,7 +2,7 @@
 import React from 'react';
 import { generateMultipleImages } from '../services/gameService';
 import { generateNextStepWithSelectedModel } from '../services/ai/unifiedAIService';
-import { useAIModelStore } from '../stores/aiModelStore';
+import { useAIModelStore } from '../core/state/aiModelStore';
 import { WorldState, StorySegment, GenreConfig, PsychologicalStatus } from '../types';
 import { DEFAULT_GENRE } from '../config/genres';
 

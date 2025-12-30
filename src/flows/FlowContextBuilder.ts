@@ -113,6 +113,8 @@ export class FlowContextBuilder {
       horrorIntensity: worldState.horrorIntensity,
       corruptionLevel: this.calculateCorruptionLevel(worldState),
       genreConfig: worldState.genreConfig, // GenreConfig is now canonical, pass through directly
+      // #TODO: Type Safety - 'summary' can be undefined, verify if default empty string is appropriate.
+      // Reference: #TODO.md - Task 4
       summary: worldState.summary ?? '',
     };
   }

@@ -50,6 +50,8 @@ export class UnravelingFlowImpl implements IUnravelingFlow {
     const gameStateStore = useGameStateStore.getState();
 
     // Dramatically increase horror and corruption
+    // #TODO: API Consistency - Ensure 'updateWorld' is the correct method name (not 'updateWorldState').
+    // Reference: #TODO.md - Task 2
     worldStateStore.updateWorld({
       horrorIntensity: Math.min(
         10,
@@ -185,6 +187,8 @@ export class UnravelingFlowImpl implements IUnravelingFlow {
   shouldTransition(context: FlowContext): GameState | null {
     if (this.shouldCollapse()) {
       logger.flow('UnravelingFlow', 'Reality has completely collapsed - game ending');
+      // #TODO: Enum Usage - Ensure 'GameState.COLLAPSED' matches strict type definitions.
+      // Reference: #TODO.md - Task 3
       return GameState.COLLAPSED;
     }
     return null;
@@ -353,6 +357,8 @@ export class UnravelingFlowImpl implements IUnravelingFlow {
     const worldStateStore = useWorldStateStore.getState();
 
     if (effects.worldUpdates && Object.keys(effects.worldUpdates).length > 0) {
+      // #TODO: API Consistency - Ensure 'updateWorld' is the correct method name (not 'updateWorldState').
+      // Reference: #TODO.md - Task 2
       worldStateStore.updateWorld(effects.worldUpdates);
     }
 
@@ -371,6 +377,8 @@ export class UnravelingFlowImpl implements IUnravelingFlow {
       0,
       worldStateStore.worldState.systemHealth - UNRAVELING_CONSTANTS.SYSTEM_HEALTH_DECAY
     );
+    // #TODO: API Consistency - Ensure 'updateWorld' is the correct method name (not 'updateWorldState').
+    // Reference: #TODO.md - Task 2
     worldStateStore.updateWorld({ systemHealth: newHealth });
   }
 

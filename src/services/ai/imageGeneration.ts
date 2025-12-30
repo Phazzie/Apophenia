@@ -1,3 +1,5 @@
+// #TODO: Missing Module - 'imageFallbackService' is imported but might be missing or relocated.
+// Reference: #TODO.md - Task 5
 import { imageFallbackService } from './imageFallbackService';
 
 interface ImageVariation {
@@ -31,6 +33,8 @@ class ImageGenerationService {
       });
 
       // Convert to legacy format for backward compatibility
+      // #TODO: Type Safety - 'variation' implicitly has 'any' type.
+      // Reference: #TODO.md - Task 5
       const variations: ImageVariation[] = result.variations.map((variation) => ({
         url: variation.url,
         prompt: variation.prompt,

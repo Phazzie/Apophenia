@@ -129,6 +129,8 @@ export class DescentFlowImpl implements IDescentFlow {
   shouldTransition(context: FlowContext): GameState | null {
     if (this.shouldBeginUnraveling()) {
       logger.flow('DescentFlow', 'Descent level critical - beginning unraveling phase');
+      // #TODO: Enum Usage - Ensure 'GameState.UNRAVELING' matches strict type definitions.
+      // Reference: #TODO.md - Task 3
       return GameState.UNRAVELING;
     }
     return null;

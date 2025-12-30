@@ -131,6 +131,8 @@ export class FlowCoordinatorImpl implements IFlowCoordinator {
 
     switch (gameState) {
       case 0: // MENU
+        // #TODO: Magic Number / Enum Mismatch - Replace magic numbers with GameState enum members.
+        // Reference: #TODO.md - Task 3
         return GameState.MENU;
       case 1: // GENERATING_CONCEPT
         return GameState.GENERATING;

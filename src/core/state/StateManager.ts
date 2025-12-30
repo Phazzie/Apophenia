@@ -75,6 +75,9 @@ export class StateManagerImpl implements StateManager {
       const currentProfile = usePlayerProfileStore.getState().profile;
 
       // Deep merge profile updates
+      // #TODO: Type Safety - Spread types may only be created from object types.
+      // Ensure generic state objects are checked before spreading.
+      // Reference: #TODO.md - Task 7
       const updatedProfile = {
         ...currentProfile,
         ...effects.profileUpdates,

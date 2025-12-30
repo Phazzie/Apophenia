@@ -15,6 +15,10 @@ import { BaseImageService } from './base/ImageService';
  */
 export class GrokImageService extends BaseImageService {
   readonly provider = 'grok';
+  // #TODO: Critical Priority Mismatch - Tests expect priority 1 but this was set to 2.
+  // This causes 'tests/contracts/image-services.contract.test.ts' and 'tests/unit/images/imageServices.test.ts' to fail.
+  // Verify if 1 or 2 is the intended priority and align code and tests.
+  // Reference: #TODO.md - Task 1
   readonly priority = 2;
 
   private apiKey: string | undefined;

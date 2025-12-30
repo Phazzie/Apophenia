@@ -22,6 +22,8 @@ import {
 import { useWorldStateStore } from '../../core/state/worldStateStore';
 import { AI_MODELS } from '../config';
 import { extractJSONArray, extractJSONObject } from '../../utils/jsonExtractor';
+// #TODO: Missing Module - 'imageFallbackService' is imported but might be missing or relocated.
+// Reference: #TODO.md - Task 5
 import { imageFallbackService } from './imageFallbackService';
 import {
   COSMIC_HORROR_ENTITY_SYSTEM,

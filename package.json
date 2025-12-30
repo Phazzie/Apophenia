@@ -55,6 +55,7 @@
   },
   "devDependencies": {
     "@eslint/compat": "^1.4.0",
+    "whatwg-url": "^14.0.0",
     "@testing-library/jest-dom": "^6.4.0",
     "@testing-library/react": "^16.0.0",
     "@types/jest": "^30.0.0",

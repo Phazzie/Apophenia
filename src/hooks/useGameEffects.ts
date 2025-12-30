@@ -63,6 +63,8 @@ export const useGameEffects = () => {
     // Handle reality corruption
     if (result.corruptionEffect) {
       setCorruptionEffects(result.corruptionEffect.visualEffect);
+      // #TODO: API Consistency - Ensure 'updateWorld' is the correct method name.
+      // Reference: #TODO.md - Task 2
       updateWorld({
         systemHealth: Math.max(
           0,

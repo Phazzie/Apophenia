@@ -30,6 +30,12 @@ export class AdaptiveHorrorEngine extends BaseEngine implements IAdaptiveHorrorE
       fearProfile: this.updateFearProfile(context)
     };
 
+    // #TODO: Implement telemetry logging for fear analysis
+    // console.log('[AdaptiveHorror] Analyzed fears:', Object.fromEntries(fears));
+
+    // #TODO: Add validation for fear profile updates to prevent runaway values
+    // if (profileUpdates.fearProfile.someValue > 1.0) clamp(value, 0, 1)
+
     return {
       engineName: this.name,
       instructions: [

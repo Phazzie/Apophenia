@@ -20,7 +20,7 @@
   "type": "module",
   "scripts": {
     "dev": "npx vite",
-    "build": "npx tsc && npx vite build",
+    "build": "npx tsc --noEmit --project tsconfig.build.json && npx vite build",
     "preview": "npx vite preview",
     "test": "npx vitest",
     "test:watch": "npx vitest --watch",

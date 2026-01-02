@@ -115,6 +115,7 @@ export class RealityCorruptionEngine extends BaseEngine implements IRealityCorru
   generateCorruptionEffects(level: number): string[] {
     const effects: string[] = [];
 
+    // #TODO: Move corruption thresholds to a config file for easier tuning
     if (level >= 10) {
       effects.push('subtle-color-shift');
     }

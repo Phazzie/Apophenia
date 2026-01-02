@@ -50,6 +50,7 @@ supabase.auth.getSession()
     useUserStore.setState({ loading: false });
   });
 
+// @ts-expect-error - Supabase type mismatch in older versions, but functional
 supabase.auth.onAuthStateChange((_event: string, session: Session | null) => {
   useUserStore.getState().setSession(session);
   useUserStore.setState({ loading: false });

@@ -15,6 +15,7 @@ import React, { useEffect, useCallback } from 'react';
 import { ThemeProvider } from './ui/theme/ThemeProvider';
 import { StartScreen, DescentScreen, UnravelingScreen } from './ui';
 import { LoadingIndicator } from './ui/components/LoadingIndicator';
+import { useUserStore } from './stores/userStore';
 import {
   useGameStateStore,
   useWorldStateStore,
@@ -56,6 +57,7 @@ function getAvailableProviders(): AIProvider[] {
  */
 export function App() {
   // Subscribe to stores
+  const session = useUserStore(s => s.session);
   const gameState = useGameStateStore(s => s.gameState);
   const choices = useGameStateStore(s => s.choices);
   const intrusiveThought = useGameStateStore(s => s.intrusiveThought);
@@ -248,6 +250,20 @@ export function App() {
         );
     }
   };
+
+  // Only require auth if explicitly enabled
+  const authEnabled = import.meta.env.VITE_ENABLE_AUTH === 'true';
+
+  if (authEnabled && !session) {
+    // Note: LoginScreen needs to be exported from ui/index.ts or ui/screens/LoginScreen
+    // For now, if no auth, we just show a simple message or redirect
+    // Since LoginScreen isn't in the standard exports yet, we'll placeholder it
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#000', color: '#fff' }}>
+        <p>Please log in (Authentication Enabled)</p>
+      </div>
+    );
+  }
 
   return (
     <ThemeProvider initialCorruption={worldState.corruptionLevel}>

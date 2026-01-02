@@ -37,6 +37,7 @@ export async function initializeGame(
   genre?: GenreConfig,
   provider: AIProvider = AIProvider.MOCK
 ): Promise<void> {
+  // #TODO: Add more detailed analytics tracking for game start
   console.log('🎮 Initializing new game...', { genre: genre?.id, provider });
 
   // Reset all stores
@@ -111,6 +112,9 @@ export async function processPlayerChoice(choice: Choice): Promise<void> {
       playerProfile: usePlayerProfileStore.getState().profile,
       currentChoice: choice,
     };
+
+    // #TODO: Log flow context to debug stream or analytics
+    // console.debug('Flow Context:', flowContext);
 
     const shouldTransition = flow.shouldTransition(flowContext);
     if (shouldTransition) {

@@ -33,6 +33,9 @@ export class QuantumNarrativeEngine extends BaseEngine implements IQuantumNarrat
     // Determine if we should shift timelines
     const shouldShift = Math.random() < (context.worldState.horrorIntensity / 15);
 
+    // #TODO: Add more sophisticated logic for shifting timelines (e.g., based on specific player choices or keywords)
+    // #TODO: Persist timelines to localStorage so they survive page refreshes (currently in-memory only)
+
     if (shouldShift && this.timelines.size < 3) {
       const newTimelineId = this.shiftTimeline(context);
 

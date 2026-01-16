@@ -15,6 +15,11 @@ export class QuantumNarrativeEngine extends BaseEngine implements IQuantumNarrat
 
   readonly timelines: Map<string, WorldState> = new Map();
 
+  // #TODO: Implement persistence for quantum timelines.
+  // Currently, `timelines` is an in-memory Map and will be lost on page reload.
+  // We need to serialize this into the WorldState or a dedicated localStorage key.
+  // Reference: #TODO.md Section 3 - Persist Quantum State
+
   isActive(context: EngineContext): boolean {
     // Activate when horror intensity is high and system health is degrading
     return (

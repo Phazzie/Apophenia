@@ -14,6 +14,12 @@ export class FifthWallEngine extends BaseEngine implements IFifthWallEngine {
   readonly description = 'Safely manipulates browser to create horror outside game space';
   readonly priority = 1; // Lowest priority - cosmetic enhancement
 
+  // #TODO: Implement CSP (Content Security Policy) verification.
+  // Ensure that browser manipulation effects (like opening tabs) do not violate
+  // security policies or trigger ad-blockers/malware detectors.
+  // We need a safety check layer before executing `window` operations.
+  // Reference: #TODO.md Section 3 - Browser Effect Safety
+
   isActive(context: EngineContext): boolean {
     // Only activate when horror and corruption are very high
     return (

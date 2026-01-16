@@ -17,6 +17,15 @@ import { grokService } from './grokService';
 import { mockService } from './mockService';
 
 export class UnifiedAIServiceImpl implements UnifiedAIService {
+
+  // #TODO: Implement Circuit Breaker pattern.
+  // If a provider fails repeatedly (e.g., 3 times in 1 minute), it should be temporarily disabled.
+  // This prevents cascading failures and slow responses.
+  // Reference: #TODO.md Section 3 - Enhance UnifiedAIService
+
+  // #TODO: Implement explicit retry logic with exponential backoff.
+  // Currently, we just fail over to the next provider. We should try the same provider
+  // at least once more before giving up, especially for network glitches.
   private primaryProvider: AIProvider = AIProvider.GROK;
   private fallbackChain: AIProvider[] = [
     AIProvider.GROK,

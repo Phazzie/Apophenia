@@ -26,7 +26,7 @@ describe('Image Services', () => {
 
     it('should implement ImageService interface', () => {
       expect(service.provider).toBe('grok');
-      expect(service.priority).toBe(1);
+      expect(service.priority).toBe(2);
       expect(typeof service.generate).toBe('function');
       expect(typeof service.isAvailable).toBe('function');
     });
@@ -216,9 +216,9 @@ describe('Image Services', () => {
   });
 
   describe('Service Priority Order', () => {
-    it('Grok should have highest priority', () => {
+    it('Grok should have priority 2', () => {
       const grok = new GrokImageService();
-      expect(grok.priority).toBe(1);
+      expect(grok.priority).toBe(2);
     });
 
     it('Unsplash should have lower priority than Grok', () => {

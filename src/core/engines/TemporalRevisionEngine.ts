@@ -106,6 +106,7 @@ export class TemporalRevisionEngine extends BaseEngine implements ITemporalRevis
   }
 
   async generateRevision(original: string, context: EngineContext): Promise<string> {
+    // #TODO: Upgrade to LLM-based rewriting using UnifiedAIService for more context-aware revisions
     // Simple revision algorithm: introduce subtle contradictions
     const revisionTypes = [
       this.changeCharacterDetail,

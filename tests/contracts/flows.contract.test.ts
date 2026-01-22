@@ -52,6 +52,7 @@ vi.mock('../../src/core/engines', () => {
   const mockRegistry = {
     engines: new Map(),
     register(engine: any) { this.engines.set(engine.name, engine); },
+    getAll() { return Array.from(this.engines.values()); },
     async executeAll(context: any) {
       const outputs = [];
       for (const engine of this.engines.values()) {

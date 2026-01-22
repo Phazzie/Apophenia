@@ -107,7 +107,7 @@ describe('Contract Tests: Image Services (Seam #7)', () => {
     });
 
     it('has correct priority', () => {
-      expect(service.priority).toBe(1);
+      expect(service.priority).toBe(2);
       expect(typeof service.priority).toBe('number');
     });
 

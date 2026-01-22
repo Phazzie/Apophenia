@@ -147,6 +147,7 @@ export class UnravelingFlowImpl implements IUnravelingFlow {
 
   /**
    * Generate browser manipulation effects for reality collapse
+   * #TODO: Expand browser effects (favicon glitching, scroll manipulation, cursor hiding)
    */
   generateCollapseEffect(): BrowserEffect[] {
     const unravelingLevel = this.calculateUnravelingLevel();

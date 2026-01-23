@@ -133,6 +133,11 @@ export function App() {
    * Render appropriate screen based on game state
    */
   const renderScreen = () => {
+    // #TODO: E2E_TESTING_HOOKS - Add data-testid attributes.
+    // Use data-testid="screen-menu", "screen-generating", etc.
+    // This allows the Narrative Simulator (scripts/narrative-simulator.ts)
+    // to verify which screen is active without relying on fragile CSS selectors.
+
     switch (gameState) {
       case GameState.MENU:
         return (

@@ -2,6 +2,10 @@ import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 
+// #TODO: FIX_TEST_ENVIRONMENT - This config is failing with module resolution errors.
+// Error: [ERR_MODULE_NOT_FOUND]: Cannot find module 'vite/dist/node/chunks/logger.js'
+// See #TODO.md for details.
+
 export default defineConfig({
   plugins: [react()],
   test: {

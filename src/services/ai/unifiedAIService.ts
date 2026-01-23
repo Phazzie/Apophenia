@@ -64,6 +64,16 @@ export class UnifiedAIServiceImpl implements UnifiedAIService {
    * Generate with automatic fallback through the chain
    */
   async generateWithFallback(request: Omit<AIRequest, 'provider'>): Promise<AIResponse> {
+    // #TODO: IMPLEMENT_CIRCUIT_BREAKER - Prevent repeated calls to dead services.
+    //
+    // Current Issue: If Grok is down (500/timeout), we still wait for it to fail
+    // on every single request before falling back. This ruins the user experience.
+    //
+    // Implementation Plan:
+    // 1. Create a `CircuitBreaker` class (see #TODO.md).
+    // 2. Wrap the `service.generateResponse` call below with the breaker.
+    // 3. If breaker is OPEN, skip the provider immediately and log "Skipped due to Open Circuit".
+
     const errors: Array<{ provider: AIProvider; error: string }> = [];
     let attemptCount = 0;
 

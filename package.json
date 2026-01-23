@@ -23,6 +23,7 @@
     "build": "npx tsc && npx vite build",
     "preview": "npx vite preview",
     "test": "npx vitest",
+    "_comment_test": "#TODO: FIX_TEST_ENVIRONMENT - see vitest.config.ts",
     "test:watch": "npx vitest --watch",
     "lint": "npx eslint . --ext .ts,.tsx --report-unused-disable-directives --max-warnings 0",
     "format": "npx prettier --write .",

@@ -106,6 +106,17 @@ export class TemporalRevisionEngine extends BaseEngine implements ITemporalRevis
   }
 
   async generateRevision(original: string, context: EngineContext): Promise<string> {
+    // #TODO: UPGRADE_TO_LLM - Use unifiedAIService to rewrite this segment.
+    // The current implementation uses simple regex replacement which creates
+    // nonsensical contradictions (e.g., swapping "red" for "blue").
+    //
+    // Implementation Plan:
+    // 1. Construct a prompt that includes the original text and the desired effect (subtle contradiction).
+    // 2. Call unifiedAIService.generate() with the prompt.
+    // 3. Return the LLM's rewritten version.
+    //
+    // Reference: See #TODO.md for "Autonomous Coding System" details.
+
     // Simple revision algorithm: introduce subtle contradictions
     const revisionTypes = [
       this.changeCharacterDetail,

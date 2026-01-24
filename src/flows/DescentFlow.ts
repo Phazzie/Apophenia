@@ -232,6 +232,7 @@ export class DescentFlowImpl implements IDescentFlow {
       historyRevisions: [],
       profileUpdates: {},
       corruptionChanges: 0,
+      browserEffects: [],
     };
 
     for (const output of engineOutputs) {
@@ -246,6 +247,9 @@ export class DescentFlowImpl implements IDescentFlow {
       }
       if (output.effects.corruptionChanges !== undefined && aggregated.corruptionChanges !== undefined) {
         aggregated.corruptionChanges += output.effects.corruptionChanges;
+      }
+      if (output.effects.browserEffects && aggregated.browserEffects) {
+        aggregated.browserEffects.push(...output.effects.browserEffects);
       }
     }
 
@@ -276,6 +280,19 @@ export class DescentFlowImpl implements IDescentFlow {
 
     // History revisions and profile updates would be applied here
     // when those stores are fully implemented
+
+    // Apply browser effects via command queue
+    if (effects.browserEffects && effects.browserEffects.length > 0) {
+      const browserCommands: Command[] = effects.browserEffects.map(effect => ({
+        type: 'browserEffect',
+        payload: effect
+      }));
+
+      // Fire and forget, but log errors
+      executeCommandQueue(browserCommands).catch(err => {
+        logger.error('Failed to execute browser effects', err);
+      });
+    }
   }
 
   /**

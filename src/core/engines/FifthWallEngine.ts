@@ -38,7 +38,9 @@ export class FifthWallEngine extends BaseEngine implements IFifthWallEngine {
     return {
       engineName: this.name,
       instructions: this.generateInstructions(context),
-      effects: {},
+      effects: {
+        browserEffects: [effect]
+      },
       metadata: {
         browserManipulationAllowed: true,
         effect

@@ -8,6 +8,12 @@
 import type { QuantumNarrativeEngine as IQuantumNarrativeEngine, EngineContext, EngineOutput, WorldState } from '../types/seams';
 import { BaseEngine } from './base/Engine';
 
+/**
+ * #TODO: Implement Persistence
+ * Timelines are currently stored in-memory and will be lost on reload.
+ * Needs to integrate with a persistence layer (localStorage or backend).
+ * Reference: #TODO.md - Engine Improvements
+ */
 export class QuantumNarrativeEngine extends BaseEngine implements IQuantumNarrativeEngine {
   readonly name = 'QuantumNarrative';
   readonly description = 'Manages parallel timelines and quantum narrative superposition';

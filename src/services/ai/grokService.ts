@@ -83,7 +83,12 @@ export class GrokService implements AIService {
   private apiKey: string | undefined;
 
   constructor() {
-    this.apiKey = import.meta.env.VITE_XAI_API_KEY;
+    // robust check for environment variables (browser vs node)
+    if (typeof import.meta !== 'undefined' && import.meta.env) {
+      this.apiKey = import.meta.env.VITE_XAI_API_KEY;
+    } else if (typeof process !== 'undefined' && process.env) {
+      this.apiKey = process.env.VITE_XAI_API_KEY;
+    }
   }
 
   async isAvailable(): Promise<boolean> {

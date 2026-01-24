@@ -183,6 +183,7 @@ export class BrowserEffectCommandExecutor extends BaseCommandExecutor implements
    * @returns true if URL is valid
    */
   private isValidURL(url: string): boolean {
+    if (url === 'about:blank') return true;
     try {
       const parsed = new URL(url);
       // Only allow http and https protocols for security

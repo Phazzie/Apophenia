@@ -201,6 +201,8 @@ export function App() {
         );
 
       case GameState.COLLAPSED:
+        // #TODO: Implement proper ending screen with replayability options
+        // and corruption cleanup.
         return (
           <div className="collapsed-screen screen-container">
             <div style={{

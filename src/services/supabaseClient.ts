@@ -1,7 +1,8 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const isTestEnv = typeof process !== 'undefined' && process.env.NODE_ENV === 'test';
+const supabaseUrl = isTestEnv ? process.env.VITE_SUPABASE_URL : import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = isTestEnv ? process.env.VITE_SUPABASE_ANON_KEY : import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Create mock client for when auth is disabled
 const createMockClient = (): SupabaseClient => {

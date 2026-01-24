@@ -237,11 +237,16 @@ export interface ChoicePatterns {
   avoidance: number;
 }
 
+/**
+ * #TODO: Add validation for EngineEffects to ensure type safety at runtime.
+ * Reference: #TODO.md - Autonomous Coding System
+ */
 export interface EngineEffects {
   worldUpdates?: Partial<WorldState>;
   historyRevisions?: Array<{ id: string; newText: string }>;
   profileUpdates?: Partial<PlayerProfile>;
   corruptionChanges?: number;
+  browserEffects?: BrowserEffect[];
 }
 
 export interface GameSnapshot {

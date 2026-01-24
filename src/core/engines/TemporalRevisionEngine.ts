@@ -8,6 +8,12 @@
 import type { TemporalRevisionEngine as ITemporalRevisionEngine, EngineContext, EngineOutput, StorySegment } from '../types/seams';
 import { BaseEngine } from './base/Engine';
 
+/**
+ * #TODO: Upgrade to LLM-Based Rewriting
+ * Currently uses regex replacement (see generateRevision).
+ * Needs to use UnifiedAIService to generate context-aware revisions.
+ * Reference: #TODO.md - Engine Improvements
+ */
 export class TemporalRevisionEngine extends BaseEngine implements ITemporalRevisionEngine {
   readonly name = 'TemporalRevision';
   readonly description = 'Rewrites past story segments to create false memory effects';

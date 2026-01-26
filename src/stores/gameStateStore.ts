@@ -1,3 +1,11 @@
+/**
+ * #TODO: DEPRECATED
+ * This file is part of the legacy architecture and should be removed after verifying all functionality
+ * is migrated to src/core/state.
+ *
+ * See #TODO.md for details.
+ */
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Choice, GameState } from '../types';

@@ -64,6 +64,9 @@ export class UnifiedAIServiceImpl implements UnifiedAIService {
    * Generate with automatic fallback through the chain
    */
   async generateWithFallback(request: Omit<AIRequest, 'provider'>): Promise<AIResponse> {
+    // #TODO: Implement Circuit Breaker pattern and explicit retry logic for API calls.
+    // See #TODO.md for details.
+
     const errors: Array<{ provider: AIProvider; error: string }> = [];
     let attemptCount = 0;
 

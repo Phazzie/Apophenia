@@ -1,3 +1,4 @@
+// #TODO DEPRECATED: This file is legacy and should be removed. Use src/ui or src/core instead.
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 
 interface Props {

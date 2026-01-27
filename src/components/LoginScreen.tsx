@@ -1,3 +1,4 @@
+// #TODO DEPRECATED: This file is legacy and should be removed. Use src/ui or src/core instead.
 import React, { useState } from 'react';
 import { useUserStore } from '../stores/userStore';
 

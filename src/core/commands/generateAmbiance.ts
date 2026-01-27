@@ -94,15 +94,20 @@ export class GenerateAmbianceExecutor extends BaseCommandExecutor {
    * or an audio generation service.
    */
   private async generateAndPlay(description: string): Promise<void> {
-    // TODO: Integrate with audio generation service or Web Audio API
-    // For now, we just log the request
+    /*
+     * #TODO [MISSING INTEGRATION] Audio Generation System
+     *
+     * Requirements:
+     * 1. Create a `AudioManager` singleton wrapping the Web Audio API.
+     * 2. This manager should support:
+     *    - Procedural drone generation (oscillators) for horror ambience.
+     *    - Loading/Playing generated audio buffers if external AI is used.
+     *    - Gain nodes for volume control and crossfading.
+     * 3. `generateAndPlay` should delegate to `AudioManager.playAmbience(description)`.
+     *
+     * Note: Ensure `AudioContext` is only resumed after user interaction.
+     */
     console.log('Ambiance generation requested:', description);
-
-    // Placeholder: In production, this would:
-    // 1. Generate audio based on description (AI audio generation or procedural)
-    // 2. Create Web Audio API nodes
-    // 3. Start playback with crossfade
-    // 4. Handle looping and volume control
   }
 
   /**
@@ -111,7 +116,7 @@ export class GenerateAmbianceExecutor extends BaseCommandExecutor {
   private stopAmbiance(): void {
     console.log('Stopping current ambiance');
     GenerateAmbianceExecutor.isPlaying = false;
-    // TODO: Fade out and stop Web Audio API nodes
+    // #TODO: Call AudioManager.fadeOut() and stop nodes
   }
 
   /**
@@ -141,6 +146,6 @@ export class GenerateAmbianceExecutor extends BaseCommandExecutor {
     GenerateAmbianceExecutor.currentAmbiance = null;
     GenerateAmbianceExecutor.isPlaying = false;
     console.log('All ambiance stopped');
-    // TODO: Clean up Web Audio API resources
+    // #TODO: Call AudioManager.stopAll() and close AudioContext if needed
   }
 }

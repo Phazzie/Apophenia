@@ -97,14 +97,19 @@ export class PregenerateImageExecutor extends BaseCommandExecutor {
    * The actual image pipeline will be implemented by Agent 7.
    */
   private async generateAndCache(prompt: string): Promise<void> {
-    // TODO: Integrate with ImagePipeline from Agent 7
-    // For now, we just log the request
+    /*
+     * #TODO [MISSING INTEGRATION] Image Pipeline Integration
+     *
+     * Requirements:
+     * 1. Import `ImagePipeline` from `src/services/images/ImagePipeline`.
+     * 2. Call `imagePipeline.generate(prompt)` to start generation.
+     * 3. The pipeline handles caching internally (LRU Cache), so this class
+     *    should leverage that instead of maintaining its own static `imageCache`.
+     * 4. Update `getCachedImage` to query the pipeline's cache.
+     *
+     * Reference: See SEAMS.md "Seam #7: Image Service Interface"
+     */
     console.log('Pregenerate image requested for prompt:', prompt);
-
-    // Placeholder: In production, this would call the image pipeline
-    // and cache the result
-    // const imageUrl = await imagePipeline.generate(prompt);
-    // PregenerateImageExecutor.imageCache.set(prompt, imageUrl);
   }
 
   /**

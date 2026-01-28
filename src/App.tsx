@@ -55,6 +55,9 @@ function getAvailableProviders(): AIProvider[] {
  * Main App Component
  */
 export function App() {
+  // #TODO: See #TODO.md - Critical Recovery Plan
+  // Add auth bypass check here. If VITE_ENABLE_AUTH is false, skip any login screens.
+
   // Subscribe to stores
   const gameState = useGameStateStore(s => s.gameState);
   const choices = useGameStateStore(s => s.choices);

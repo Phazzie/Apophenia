@@ -1,3 +1,4 @@
+// #TODO DEPRECATED: Use src/core/state instead.
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Choice, GameState } from '../types';

@@ -1,3 +1,4 @@
+// #TODO DEPRECATED: Migrate to src/ui and use src/core/state.
 import React, { useEffect, useState } from 'react';
 import { generateConcept } from '../services/gameService';
 import { GameStateManager } from '../services/gameStateManager';

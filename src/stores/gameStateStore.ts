@@ -1,3 +1,4 @@
+// #TODO DEPRECATED: This file is part of the Legacy System. Migrate logic to src/core/state/ and delete.
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Choice, GameState } from '../types';

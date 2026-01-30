@@ -1,3 +1,4 @@
+// #TODO DEPRECATED: This file is part of the Legacy System. Migrate logic to src/ui/ and delete.
 import React from 'react';
 import { useGameStateStore } from '../stores/gameStateStore';
 import { GameStateManager } from '../services/gameStateManager';

@@ -1,3 +1,4 @@
+// #TODO FIX: Version Mismatch. The project requires vite@^5.4.11 but is running ^7.1.5. Downgrade package.json and verify this config works with v5.
 /// <reference types="vitest" />
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';

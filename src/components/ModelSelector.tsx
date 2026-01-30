@@ -1,3 +1,4 @@
+// #TODO DEPRECATED: This file is part of the Legacy System. Migrate logic to src/ui/ and delete.
 /**
  * AI Model Selector Component
  *

@@ -1,3 +1,4 @@
+// #TODO FIX: Version Mismatch. The project requires vitest@^2.1.8 but is running ^3.2.4. Downgrade package.json and verify this config works with v2.
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import path from 'path';

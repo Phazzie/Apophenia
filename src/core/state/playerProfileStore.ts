@@ -1,3 +1,4 @@
+// #TODO MAINTAIN: This is the Source of Truth for state. Do not modify without updating Seams contracts.
 /**
  * PLAYER PROFILE STORE
  *

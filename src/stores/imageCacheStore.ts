@@ -1,3 +1,4 @@
+// #TODO DEPRECATED: This file is part of the Legacy System. Migrate logic to src/core/state/ and delete.
 import { create } from 'zustand';
 import { CACHE_CONFIG } from '../services/config';
 

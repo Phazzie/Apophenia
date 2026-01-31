@@ -17,6 +17,7 @@ import { grokService } from './grokService';
 import { mockService } from './mockService';
 
 export class UnifiedAIServiceImpl implements UnifiedAIService {
+  // #TODO: Implement Circuit Breaker pattern with explicit retry logic.
   private primaryProvider: AIProvider = AIProvider.GROK;
   private fallbackChain: AIProvider[] = [
     AIProvider.GROK,

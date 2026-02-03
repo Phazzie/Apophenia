@@ -1,3 +1,4 @@
+// #TODO DEPRECATED: Use src/core/state/gameStateStore.ts instead. See #TODO.md
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Choice, GameState } from '../types';

@@ -1,3 +1,4 @@
+// #TODO DEPRECATED: This store is legacy. Use src/core/state/gameStateStore.ts instead. See #TODO.md Item 2.
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Choice, GameState } from '../types';

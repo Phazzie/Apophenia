@@ -94,7 +94,13 @@ export class GenerateAmbianceExecutor extends BaseCommandExecutor {
    * or an audio generation service.
    */
   private async generateAndPlay(description: string): Promise<void> {
-    // TODO: Integrate with audio generation service or Web Audio API
+    // #TODO IMPLEMENTATION: Integrate with Audio Service.
+    // See #TODO.md Item 4.
+    // Requirements:
+    // 1. Connect to Web Audio API or external generation service
+    // 2. Manage audio context and nodes
+    // 3. Implement smooth crossfading between tracks
+
     // For now, we just log the request
     console.log('Ambiance generation requested:', description);
 

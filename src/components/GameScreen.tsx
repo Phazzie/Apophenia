@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
+// #TODO DEPRECATED: This component uses legacy stores. Migrate to src/ui/screens/DescentScreen.tsx using src/core/state. See #TODO.md Item 2.
 import { useGameEffects } from '../hooks/useGameEffects';
 import { useGameLoop } from '../hooks/useGameLoop';
 import { GameStateManager } from '../services/gameStateManager';

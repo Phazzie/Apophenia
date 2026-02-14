@@ -20,6 +20,7 @@ import {
   useWorldStateStore,
   useHistoryStore,
 } from './core/state';
+// #TODO APP_STATE: Mismatch - App uses string GameState from seams.ts, but store provides numeric GameState
 import { GameState, GenreConfig, AIProvider, Choice } from './core/types/seams';
 import {
   initializeGame,
@@ -57,6 +58,9 @@ function getAvailableProviders(): AIProvider[] {
  * Main App Component
  */
 export function App() {
+  // #TODO AUTH: Add optional auth check here using VITE_ENABLE_AUTH
+  // See #TODO.md for reliability plan.
+
   // Subscribe to stores
   const gameState = useGameStateStore(s => s.gameState);
   const choices = useGameStateStore(s => s.choices);

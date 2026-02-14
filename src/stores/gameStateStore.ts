@@ -3,6 +3,10 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Choice, GameState } from '../types';
 
+// #TODO STATE_CONFLICT: This store uses legacy numeric GameState from src/types.ts
+// It MUST be migrated to use string-based GameState from src/core/types/seams.ts
+// See #TODO.md for details.
+
 interface GameStateStore {
   gameState: GameState;
   choices: Choice[];

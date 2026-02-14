@@ -1,4 +1,4 @@
-// #TODO DEPRECATED: Migrate to src/ui and use src/core/state.
+// #TODO DEPRECATED: Use src/ui/screens/DescentScreen.tsx instead. See #TODO.md
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useGameEffects } from '../hooks/useGameEffects';
 import { useGameLoop } from '../hooks/useGameLoop';

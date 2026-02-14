@@ -1,4 +1,4 @@
-// #TODO DEPRECATED: Migrate to src/ui and use src/core/state.
+// #TODO DEPRECATED: Use src/ui/screens/StartScreen.tsx instead. See #TODO.md
 import React, { useEffect, useState } from 'react';
 import { generateConcept } from '../services/gameService';
 import { GameStateManager } from '../services/gameStateManager';

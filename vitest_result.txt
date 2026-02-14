@@ -1,0 +1,783 @@
+
+ RUN  v2.1.9 /app
+
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 48 unhandled errors during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: Cannot find module '/app/node_modules/whatwg-url/index.js'. Please verify that the package.json has a valid "main" entry
+ ❯ tryPackage node:internal/modules/cjs/loader:502:19
+ ❯ Function._findPath node:internal/modules/cjs/loader:764:18
+ ❯ Function._resolveFilename node:internal/modules/cjs/loader:1369:27
+ ❯ defaultResolveImpl node:internal/modules/cjs/loader:1025:19
+ ❯ resolveForCJSWithHooks node:internal/modules/cjs/loader:1030:22
+ ❯ Function._load node:internal/modules/cjs/loader:1192:37
+ ❯ TracingChannel.traceSync node:diagnostics_channel:328:14
+ ❯ wrapModuleLoad node:internal/modules/cjs/loader:237:24
+ ❯ Module.require node:internal/modules/cjs/loader:1463:12
+ ❯ require node:internal/modules/helpers:147:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 'MODULE_NOT_FOUND', path: '/app/node_modules/whatwg-url/package.json', requestPath: 'whatwg-url' }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+ Test Files  no tests
+      Tests  no tests
+     Errors  48 errors
+   Start at  03:33:32
+   Duration  6.03s (transform 39ms, setup 0ms, collect 0ms, tests 0ms, environment 0ms, prepare 0ms)

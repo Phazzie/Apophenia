@@ -1,86 +1,78 @@
-# 🔴 Apophenia Project Status: CRITICAL FAILURE
+# 📋 Project Status & Recovery Plan
 
-**Date:** 2025-11-12
-**Status:** CRITICAL FAILURE (Split-Brain State, Broken Build)
+**Last Updated:** 2026-02-04
+**Status:** ⚠️ Recovery Mode
+**Deployment Readiness:** 20% (Code exists but architecture is split)
 
-## 🚨 Critical Issues (Immediate Attention Required)
+## 🚨 Critical Issues: "Split-Brain" Architecture
 
-### 1. Build Environment Failure
-- **Issue:** `npm test` and `npm run build` fail with `ERR_MODULE_NOT_FOUND` in `vite` and `vitest`.
-- **Cause:** Corrupted `node_modules` or incompatible package versions (Node v22.22.0 vs strict 20/22 requirement).
-- **Action:**
-  - [ ] Wipe `node_modules` and `package-lock.json`.
-  - [ ] Reinstall dependencies.
-  - [ ] Verify `npm test` and `npm run build` pass.
+The application currently suffers from a fundamental state management conflict known as the "Split-Brain" issue.
 
-### 2. "Split-Brain" State Architecture
-- **Issue:** The project has two conflicting state management systems.
-  - **Legacy:** `src/stores/*.ts` (Used by UI `src/components`)
-  - **Core (Target):** `src/core/state/*.ts` (Used by Engines)
-- **Impact:** The UI does not reflect the Core Engine state. The game is effectively broken logically.
-- **Action:**
-  - [ ] **Phase 1:** Migrate `src/components` to use `src/core/state`.
-  - [ ] **Phase 2:** Move `src/components` to `src/ui` (or merge/refactor).
-  - [ ] **Phase 3:** Delete `src/stores` entirely.
+1.  **Type Mismatch:**
+    *   `src/types.ts` defines `GameState` as a numeric `enum`.
+    *   `src/core/types/seams.ts` defines `GameState` as a string `enum`.
+    *   Legacy stores (`src/stores/*.ts`) use the numeric enum.
+    *   The UI (`App.tsx`) and Engines (`src/core/engines/*.ts`) expect the string enum.
+    *   Result: `App.tsx` crashes or misbehaves when reading state from legacy stores via `src/core/state` bridge.
 
-### 3. Missing Components
-- **Issue:** Several files referenced in documentation or concept are missing.
-  - `src/services/monitoring/SeamValidator.ts` (Stub needed)
-  - `scripts/validate-seams.ts` (Script needed)
-- **Action:** Create stubs and implement logic.
+2.  **Auth Bypass:**
+    *   Authentication is largely bypassed/mocked (`src/services/supabaseClient.ts`), but `App.tsx` logic for checking session state is inconsistent or missing.
+
+3.  **Missing Implementations:**
+    *   Several engines and commands are stubs or require persistence logic (`QuantumNarrativeEngine`).
 
 ---
 
-## 🤖 Apophenia Autonomous Development System (AADS)
+## 🛡️ Reliability System Design
 
-To enable reliable autonomous coding, the following system is designed:
+To solve the "Split-Brain" issue and ensure a reliable deployment, we will implement the following system:
 
-### 1. The Source of Truth: `#TODO.md`
-This file serves as the master coordination log. It must be:
-- **Machine-Readable:** strictly structured.
-- **Updated First:** Before code is touched, the task is claimed here.
-- **Updated Last:** After verification, the task is marked `[x]`.
+### 1. Single Source of Truth (SSOT)
+*   **Canon:** `src/core/types/seams.ts` is the **only** valid source for core types (`GameState`, `WorldState`, etc.).
+*   **Deprecation:** `src/types.ts` must be deprecated. All imports must be migrated to `seams.ts`.
 
-### 2. Seam Validator (`scripts/validate-seams.ts`)
-A script to enforce the architectural boundaries (SDD).
-- **Rules:**
-  - `src/ui` MUST NOT import from `src/stores` (Legacy).
-  - `src/core` MUST NOT import from `src/ui`.
-  - `src/core/engines` MUST NOT contain React hooks.
-- **Usage:** Run before every commit.
+### 2. State Unification
+*   **Migration:** Rewrite `src/stores/gameStateStore.ts` (and others) to strictly use `seams.ts` types.
+*   **Persistence:** Ensure Zustand stores persist correctly using the string-based enums.
 
-### 3. Health Check (`scripts/health-check.sh`)
-A unified command to verify system integrity.
-- **Steps:**
-  1. `npm run typecheck` (detects broken types)
-  2. `npm run lint` (detects bad patterns)
-  3. `npm test -- --run` (verifies logic)
-  4. `ts-node scripts/validate-seams.ts` (verifies architecture)
-- **Output:** A single "PASS/FAIL" score.
+### 3. Automated Guardrails
+*   **Validation Script (`scripts/validate-seams.ts`):** A script to statically analyze imports. It will fail the build if any "New" code (`src/core`, `src/ui`) imports from "Legacy" code (`src/components`, `src/stores`) without going through the sanctioned `src/core/state` bridge.
+*   **Health Check (`scripts/health-check.ts`):** A unified script to run type checks, linting, and seam validation before deployment.
 
-### 4. Agent Protocol (Update to `AGENTS.md`)
-- **Rule:** If `Health Check` fails, the ONLY allowed task is "Fix Health Check".
-- **Rule:** If "Split-Brain" is detected (Legacy stores usage), the ONLY allowed feature work is "Migration".
+### 4. Runtime Verification
+*   **Zod Schemas:** Update Zod schemas to align 1:1 with `seams.ts` interfaces. Use these schemas to validate:
+    *   AI Engine outputs.
+    *   State transitions (in `StateManager`).
+    *   External inputs (if any).
 
 ---
 
-## 📋 Comprehensive Task List
+## 📝 TODO List
 
-### Infrastructure
-- [ ] **FIX-ENV:** Repair `node_modules` and get `npm test` passing.
-- [ ] **FIX-BUILD:** Repair `vite.config.mjs` and module resolution.
-- [ ] **SETUP:** Create `scripts/validate-seams.ts`.
+### High Priority (System Recovery)
+- [ ] **Fix GameState Enum:** Update `src/stores/gameStateStore.ts` to use `GameState` from `src/core/types/seams.ts`. (#TODO_STATE_CONFLICT)
+- [ ] **Deprecate Legacy Types:** Mark `src/types.ts` as deprecated and plan migration to `seams.ts`. (#TODO_DEPRECATION)
+- [ ] **Fix App.tsx:** Align `App.tsx` state consumption with the fixed store types. (#TODO_APP_STATE)
+- [ ] **Auth Configuration:** Formalize the optional auth logic in `App.tsx` using `VITE_ENABLE_AUTH`. (#TODO_AUTH)
 
-### Architecture (The Great Migration)
-- [ ] **DEPRECATE:** Add `#TODO DEPRECATED` to `src/stores/*.ts` (DONE via Agent).
-- [ ] **DEPRECATE:** Add `#TODO DEPRECATED` to `src/components/*.ts` (DONE via Agent).
-- [ ] **MIGRATE:** Update `src/components/GameScreen.tsx` to use `src/core/state`.
-- [ ] **MIGRATE:** Update `src/components/StartScreen.tsx` to use `src/core/state`.
-- [ ] **CLEANUP:** Delete `src/stores/` once empty.
+### Engine Implementation
+- [ ] **Quantum Narrative Persistence:** Implement `save/load` logic for `QuantumNarrativeEngine` (currently in-memory only). (#TODO_QUANTUM_PERSISTENCE)
+- [ ] **Temporal Revision Upgrade:** Replace regex-based `TemporalRevisionEngine` with proper LLM-based rewriting. (#TODO_TEMPORAL_LLM)
+- [ ] **Image Generation:** Implement `PregenerateImageExecutor` to use `ImagePipeline` (Agent 7). (#TODO_IMAGE_GEN)
+- [ ] **Audio Generation:** Implement `GenerateAmbianceExecutor` to use Web Audio API / Service. (#TODO_AUDIO_GEN)
 
-### Features (Blocked by Migration)
-- [ ] **FEAT:** Implement `SeamValidator` logic.
-- [ ] **FEAT:** Connect `FifthWallEngine` to `GameScreen` (via new state).
+### Infrastructure & Tooling
+- [ ] **Seam Validator:** Implement `scripts/validate-seams.ts`. (#TODO_TOOLING)
+- [ ] **Health Check:** Implement `scripts/health-check.ts`. (#TODO_TOOLING)
 
-### Documentation
-- [ ] **DOCS:** Update `AGENTS.md` to reflect the current broken state (remove "Level 3 SDD" claims until true).
+### Deployment
+- [ ] **Environment Check:** Ensure `vite.config.mjs` and `vitest.config.ts` align with Node/Vite versions.
+- [ ] **Production Build:** Verify `npm run build` passes with strict type checking (once types are fixed).
+
+---
+
+## 🔍 How to Work on This Repo
+1.  **Check this file first.**
+2.  **Pick a task.**
+3.  **Verify the Seams.** Do not import from `src/stores` directly in new code; use `src/core/state`.
+4.  **Run `npm run build`** (or `scripts/health-check.ts` once ready) to verify no regressions.

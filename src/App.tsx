@@ -20,6 +20,7 @@ import {
   useWorldStateStore,
   useHistoryStore,
 } from './core/state';
+// #TODO APP_STATE: Mismatch - App uses string GameState from seams.ts, but store provides numeric GameState
 import { GameState, GenreConfig, AIProvider, Choice } from './core/types/seams';
 import {
   initializeGame,
@@ -36,6 +37,8 @@ import { getConfig } from './config/defaults';
  */
 function getAvailableProviders(): AIProvider[] {
   const config = getConfig();
+  // #TODO ENV: Ensure these variables are validated in a config service. See #TODO.md
+  // #TODO SECURITY: This bypasses strict auth. Re-implement VITE_ENABLE_AUTH check if needed. See #TODO.md
   const hasGrokKey = !!import.meta.env.VITE_XAI_API_KEY;
 
   const providers: AIProvider[] = [];
@@ -55,8 +58,8 @@ function getAvailableProviders(): AIProvider[] {
  * Main App Component
  */
 export function App() {
-  // #TODO: See #TODO.md - Critical Recovery Plan
-  // Add auth bypass check here. If VITE_ENABLE_AUTH is false, skip any login screens.
+  // #TODO AUTH: Add optional auth check here using VITE_ENABLE_AUTH
+  // See #TODO.md for reliability plan.
 
   // Subscribe to stores
   const gameState = useGameStateStore(s => s.gameState);

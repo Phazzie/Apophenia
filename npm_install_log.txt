@@ -1,0 +1,21 @@
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'apophenia-cosmic-narrative@1.0.0',
+npm warn EBADENGINE   required: { node: '20.19.0 || 22.12.0' },
+npm warn EBADENGINE   current: { node: 'v22.22.0', npm: '11.7.0' }
+npm warn EBADENGINE }
+npm warn deprecated path-match@1.2.4: This package is archived and no longer maintained. For support, visit https://github.com/expressjs/express/discussions
+
+added 313 packages, changed 1 package, and audited 1352 packages in 14s
+
+228 packages are looking for funding
+  run `npm fund` for details
+
+31 vulnerabilities (1 low, 10 moderate, 20 high)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.

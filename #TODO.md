@@ -1,90 +1,78 @@
-# 📝 Project Status & TODOs
+# 📋 Project Status & Recovery Plan
 
-**Last Updated:** 2025-11-12
-**Status:** 🔴 CRITICAL FAILURE (Recovery Required)
+**Last Updated:** 2026-02-04
+**Status:** ⚠️ Recovery Mode
+**Deployment Readiness:** 20% (Code exists but architecture is split)
 
-## 🚨 Current State Analysis
+## 🚨 Critical Issues: "Split-Brain" Architecture
 
-The project is currently in a **broken state**, contradicting the "Production Ready" claims in `README.md` and `AGENTS.md`.
+The application currently suffers from a fundamental state management conflict known as the "Split-Brain" issue.
 
-*   **Deployment**: ❌ Fails to build and test.
-*   **Dependencies**: ❌ `node_modules` and `package-lock.json` are corrupted or inconsistent. `vitest` and `vite` have installation issues.
-*   **Authentication**: ❌ Supabase configuration is blocking application startup (`userStore.ts` and `supabaseClient.ts`).
-*   **Tests**: ❌ 91/91 tests are claimed to pass, but the test runner (`vitest`) cannot even be found/executed.
-*   **Features**: ⚠️ 9 AI Engines exist in code (`src/core/engines/`) but are unverified in the current broken environment.
+1.  **Type Mismatch:**
+    *   `src/types.ts` defines `GameState` as a numeric `enum`.
+    *   `src/core/types/seams.ts` defines `GameState` as a string `enum`.
+    *   Legacy stores (`src/stores/*.ts`) use the numeric enum.
+    *   The UI (`App.tsx`) and Engines (`src/core/engines/*.ts`) expect the string enum.
+    *   Result: `App.tsx` crashes or misbehaves when reading state from legacy stores via `src/core/state` bridge.
 
-## 🛠️ Critical Recovery Plan (Priority 1)
+2.  **Auth Bypass:**
+    *   Authentication is largely bypassed/mocked (`src/services/supabaseClient.ts`), but `App.tsx` logic for checking session state is inconsistent or missing.
 
-**Reference**: `RECOVERY_PLAN_DETAILED.md` (Nuclear Reset Approach)
+3.  **Missing Implementations:**
+    *   Several engines and commands are stubs or require persistence logic (`QuantumNarrativeEngine`).
 
-1.  **Dependency Reset** (See `package.json` section below)
-    *   [ ] Move `@supabase/supabase-js` from `devDependencies` to `dependencies`.
-    *   [ ] Delete `node_modules` and `package-lock.json`.
-    *   [ ] Run `npm install` (clean install).
+---
 
-2.  **Authentication Fix** (See `src/services/supabaseClient.ts` and `src/App.tsx`)
-    *   [ ] Make authentication OPTIONAL. The game should run without Supabase credentials.
-    *   [ ] Implement a mock Supabase client in `src/services/supabaseClient.ts` that activates when keys are missing.
-    *   [ ] Update `src/App.tsx` to bypass the login screen if auth is disabled/missing.
+## 🛡️ Reliability System Design
 
-3.  **Build & Type Safety** (See `src/core/state/userStore.ts` and `tsconfig.json`)
-    *   [ ] Fix implicit `any` errors in `userStore.ts`.
-    *   [ ] Update `tsconfig.json` to exclude test files from the build process (or use `tsconfig.build.json`).
-    *   [ ] Fix `vitest.config.ts` module resolution errors.
+To solve the "Split-Brain" issue and ensure a reliable deployment, we will implement the following system:
 
-## 🧪 Validation Tasks (Priority 2)
+### 1. Single Source of Truth (SSOT)
+*   **Canon:** `src/core/types/seams.ts` is the **only** valid source for core types (`GameState`, `WorldState`, etc.).
+*   **Deprecation:** `src/types.ts` must be deprecated. All imports must be migrated to `seams.ts`.
 
-Once the environment is stable:
+### 2. State Unification
+*   **Migration:** Rewrite `src/stores/gameStateStore.ts` (and others) to strictly use `seams.ts` types.
+*   **Persistence:** Ensure Zustand stores persist correctly using the string-based enums.
 
-1.  **Engine Verification**
-    *   [ ] Verify `TemporalRevisionEngine` logic (check for "false memory" logs).
-    *   [ ] Verify `RealityCorruptionEngine` (check for visual distortion props).
-    *   [ ] Verify `AdaptiveHorrorEngine` (check for localStorage profile updates).
-    *   [ ] Run `src/core/engines/EngineRegistry.ts` integration tests.
+### 3. Automated Guardrails
+*   **Validation Script (`scripts/validate-seams.ts`):** A script to statically analyze imports. It will fail the build if any "New" code (`src/core`, `src/ui`) imports from "Legacy" code (`src/components`, `src/stores`) without going through the sanctioned `src/core/state` bridge.
+*   **Health Check (`scripts/health-check.ts`):** A unified script to run type checks, linting, and seam validation before deployment.
 
-2.  **Game Loop Verification**
-    *   [ ] Ensure `App.tsx` transitions from `MENU` to `GENERATING` to `DESCENDING`.
-    *   [ ] Verify "Mock AI" provider works for gameplay without API keys.
+### 4. Runtime Verification
+*   **Zod Schemas:** Update Zod schemas to align 1:1 with `seams.ts` interfaces. Use these schemas to validate:
+    *   AI Engine outputs.
+    *   State transitions (in `StateManager`).
+    *   External inputs (if any).
 
-## 🤖 Apophenia Autonomous Dev System (AADS)
+---
 
-To prevent future regression and "hallucinated" success states:
+## 📝 TODO List
 
-### Core Principles
-1.  **Trust but Verify**: No agent shall mark a task as "Complete" without a successful test log generated *in the current session*.
-2.  **State Grounding**: Agents must read `CURRENT_STATE.md` (machine-generated) before acting, not just `README.md` (human-marketing).
+### High Priority (System Recovery)
+- [ ] **Fix GameState Enum:** Update `src/stores/gameStateStore.ts` to use `GameState` from `src/core/types/seams.ts`. (#TODO_STATE_CONFLICT)
+- [ ] **Deprecate Legacy Types:** Mark `src/types.ts` as deprecated and plan migration to `seams.ts`. (#TODO_DEPRECATION)
+- [ ] **Fix App.tsx:** Align `App.tsx` state consumption with the fixed store types. (#TODO_APP_STATE)
+- [ ] **Auth Configuration:** Formalize the optional auth logic in `App.tsx` using `VITE_ENABLE_AUTH`. (#TODO_AUTH)
 
-### Components
+### Engine Implementation
+- [ ] **Quantum Narrative Persistence:** Implement `save/load` logic for `QuantumNarrativeEngine` (currently in-memory only). (#TODO_QUANTUM_PERSISTENCE)
+- [ ] **Temporal Revision Upgrade:** Replace regex-based `TemporalRevisionEngine` with proper LLM-based rewriting. (#TODO_TEMPORAL_LLM)
+- [ ] **Image Generation:** Implement `PregenerateImageExecutor` to use `ImagePipeline` (Agent 7). (#TODO_IMAGE_GEN)
+- [ ] **Audio Generation:** Implement `GenerateAmbianceExecutor` to use Web Audio API / Service. (#TODO_AUDIO_GEN)
 
-#### 1. `HealthCheck` Script
-A script (`scripts/health-check.ts`) that runs:
-*   `npm run type-check` (tsc --noEmit)
-*   `npm test` (vitest)
-*   `npm run build` (dry run)
-*   Outputs a JSON report: `{ "status": "green" | "red", "failing": [...] }`
+### Infrastructure & Tooling
+- [ ] **Seam Validator:** Implement `scripts/validate-seams.ts`. (#TODO_TOOLING)
+- [ ] **Health Check:** Implement `scripts/health-check.ts`. (#TODO_TOOLING)
 
-#### 2. `StateGuard`
-A pre-commit hook or CI step that:
-*   Runs `HealthCheck`.
-*   Updates `CURRENT_STATE.md` with the *actual* failing tests and build status.
-*   Rejects commits that claim "Fixed" but fail the check.
+### Deployment
+- [ ] **Environment Check:** Ensure `vite.config.mjs` and `vitest.config.ts` align with Node/Vite versions.
+- [ ] **Production Build:** Verify `npm run build` passes with strict type checking (once types are fixed).
 
-#### 3. Agent Protocol
-*   **Step 1**: Read `#TODO.md` and `CURRENT_STATE.md`.
-*   **Step 2**: Implement change.
-*   **Step 3**: Run `npm test`.
-*   **Step 4**: If fail, rollback or document failure. NEVER commit broken code claiming success.
+---
 
-## 📂 File-Specific TODOs
-
-### `package.json`
-*   **Action**: Move `@supabase/supabase-js` to `dependencies`.
-*   **Action**: Ensure `vite` and `vitest` versions are compatible (v5.x/v2.x recommended vs v7.x).
-
-### `tsconfig.json`
-*   **Action**: Add `"skipLibCheck": true` if missing.
-*   **Action**: Exclude `**/*.test.ts` from default build context if causing errors.
-
-### `vitest.config.ts`
-*   **Action**: Fix module resolution for `vite` imports.
-*   **Action**: Ensure test environment matches production build settings.
+## 🔍 How to Work on This Repo
+1.  **Check this file first.**
+2.  **Pick a task.**
+3.  **Verify the Seams.** Do not import from `src/stores` directly in new code; use `src/core/state`.
+4.  **Run `npm run build`** (or `scripts/health-check.ts` once ready) to verify no regressions.

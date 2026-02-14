@@ -1,6 +1,11 @@
 import { z } from 'zod';
 import type React from 'react';
 
+// #TODO DEPRECATION: This file is DEPRECATED and conflicts with src/core/types/seams.ts
+// Specifically, GameState enum here is numeric, while seams.ts is string-based.
+// All code should eventually migrate to using src/core/types/seams.ts.
+// See #TODO.md.
+
 // Enums (aligned with seams.ts)
 export enum GameState {
   MENU,

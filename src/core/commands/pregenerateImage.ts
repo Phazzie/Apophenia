@@ -97,12 +97,9 @@ export class PregenerateImageExecutor extends BaseCommandExecutor {
    * The actual image pipeline will be implemented by Agent 7.
    */
   private async generateAndCache(prompt: string): Promise<void> {
-    // #TODO IMPLEMENTATION: Integrate with ImagePipeline (Agent 7).
-    // See #TODO.md Item 3.
-    // Requirements:
-    // 1. Call ImagePipeline.generate(prompt)
-    // 2. Cache result in persistent store or optimized LRU cache (not just in-memory map)
-    // 3. Handle failures gracefully
+    // #TODO IMAGE_GEN: Integrate with ImagePipeline (Agent 7).
+    // We need to call the actual image generation service here and store the result in cache.
+    // See #TODO.md.
 
     // For now, we just log the request
     console.log('Pregenerate image requested for prompt:', prompt);

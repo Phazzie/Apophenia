@@ -1,3 +1,7 @@
+// #TODO: See #TODO.md - Critical Recovery Plan
+// Fix module resolution errors (Cannot find package 'vitest').
+// Ensure this config matches the project's dependency versions (vite 5.x vs 7.x).
+
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import path from 'path';

@@ -23,6 +23,9 @@ const createMockClient = (): SupabaseClient => {
 };
 
 // Export either real or mock client
+// #TODO: See #TODO.md - Critical Recovery Plan
+// Implement optional authentication to prevent application blocking.
+// If keys are missing, ensure mock client is used gracefully without error.
 export const supabase: SupabaseClient = (!supabaseUrl || !supabaseAnonKey)
   ? createMockClient()
   : createClient(supabaseUrl, supabaseAnonKey);

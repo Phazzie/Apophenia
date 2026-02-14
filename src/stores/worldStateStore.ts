@@ -1,3 +1,4 @@
+// #TODO DEPRECATED: Use src/core/state instead.
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { cosmicHorrorGenre } from '../config/gameConfig';

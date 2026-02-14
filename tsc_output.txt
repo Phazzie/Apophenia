@@ -1,0 +1,4 @@
+src/core/state/userStore.ts(18,31): error TS2307: Cannot find module '@supabase/supabase-js' or its corresponding type declarations.
+src/services/supabaseClient.ts(1,46): error TS2307: Cannot find module '@supabase/supabase-js' or its corresponding type declarations.
+src/stores/userStore.ts(3,31): error TS2307: Cannot find module '@supabase/supabase-js' or its corresponding type declarations.
+TSC FAILED

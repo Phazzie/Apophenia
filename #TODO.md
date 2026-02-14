@@ -1,79 +1,78 @@
-# 📝 Project Status & Roadmap (#TODO.md)
+# 📋 Project Status & Recovery Plan
 
-**Last Updated:** 2025-11-13
-**Status:** ⚠️ CRITICAL - Build System Failure
-**Deployment Readiness:** 10% (Code exists, but cannot be built or verified)
+**Last Updated:** 2026-02-04
+**Status:** ⚠️ Recovery Mode
+**Deployment Readiness:** 20% (Code exists but architecture is split)
 
----
+## 🚨 Critical Issues: "Split-Brain" Architecture
 
-## 🚨 Critical Issues (Priority 0)
+The application currently suffers from a fundamental state management conflict known as the "Split-Brain" issue.
 
-The project is currently in a **Split-Brain State**: documentation claims "91/91 tests passing" and "Production Ready", but the actual environment is broken.
+1.  **Type Mismatch:**
+    *   `src/types.ts` defines `GameState` as a numeric `enum`.
+    *   `src/core/types/seams.ts` defines `GameState` as a string `enum`.
+    *   Legacy stores (`src/stores/*.ts`) use the numeric enum.
+    *   The UI (`App.tsx`) and Engines (`src/core/engines/*.ts`) expect the string enum.
+    *   Result: `App.tsx` crashes or misbehaves when reading state from legacy stores via `src/core/state` bridge.
 
-1.  **Build System Failure** `[infrastructure]`
-    - **Issue:** `package.json` uses `vite@^7.1.5` and `vitest@^3.2.4`, but the project codebase strictly requires `vite@^5.4.11` and `vitest@^2.1.8`.
-    - **Impact:** `npm test` fails with `ERR_MODULE_NOT_FOUND`. App cannot start.
-    - **Fix:** Downgrade dependencies to known stable versions.
+2.  **Auth Bypass:**
+    *   Authentication is largely bypassed/mocked (`src/services/supabaseClient.ts`), but `App.tsx` logic for checking session state is inconsistent or missing.
 
-2.  **Missing Infrastructure Scripts** `[dev-ops]`
-    - **Issue:** `scripts/health-check.ts` is missing. This script is critical for the "Apophenia Autonomous Guardrails" (AAG) system.
-    - **Impact:** No automated verification of seams or architecture.
-
-3.  **Missing Services** `[code]`
-    - **Issue:** `src/services/monitoring/NarrativeMonitor.ts` is missing.
-    - **Impact:** No runtime monitoring of narrative consistency.
+3.  **Missing Implementations:**
+    *   Several engines and commands are stubs or require persistence logic (`QuantumNarrativeEngine`).
 
 ---
 
-## 🛠️ Proposed System Design: Apophenia Autonomous Guardrails (AAG)
+## 🛡️ Reliability System Design
 
-To address the reliability and accuracy issues, we will implement the **AAG System**. This system shifts validation from manual checks to automated, code-enforced guardrails.
+To solve the "Split-Brain" issue and ensure a reliable deployment, we will implement the following system:
 
-### 1. The Health Check Orchestrator (`scripts/health-check.ts`)
-A unified script that runs before every commit and deploy. It performs:
-*   **Dependency Audit:** Verifies `vite` and `vitest` are on pinned, compatible versions.
-*   **Type Safety Scan:** Runs `tsc --noEmit` to catch all type errors.
-*   **Seam Verification:** statically analyzes `src/core/engines/*.ts` to ensure they implement `seams.ts` interfaces correctly.
-*   **Test Suite:** Runs the full test suite.
+### 1. Single Source of Truth (SSOT)
+*   **Canon:** `src/core/types/seams.ts` is the **only** valid source for core types (`GameState`, `WorldState`, etc.).
+*   **Deprecation:** `src/types.ts` must be deprecated. All imports must be migrated to `seams.ts`.
 
-### 2. Strict Seam Enforcement
-*   **Principle:** "If it's not in `seams.ts`, it doesn't exist."
-*   **Implementation:** A linter rule or script check that bans imports from `src/components` (legacy) in any `src/core` file.
-*   **Goal:** Prevent "Split-Brain" where UI uses old stores and Engines use new state.
+### 2. State Unification
+*   **Migration:** Rewrite `src/stores/gameStateStore.ts` (and others) to strictly use `seams.ts` types.
+*   **Persistence:** Ensure Zustand stores persist correctly using the string-based enums.
 
-### 3. Resilience Layers
-*   **Fallback Strategies:** `UnifiedAIService` must implement explicit retry logic with exponential backoff (currently implicitly handled or missing).
-*   **Circuit Breakers:** If an engine fails (throws error), the `EngineRegistry` must catch it, disable the engine for that turn, and log the failure without crashing the game.
+### 3. Automated Guardrails
+*   **Validation Script (`scripts/validate-seams.ts`):** A script to statically analyze imports. It will fail the build if any "New" code (`src/core`, `src/ui`) imports from "Legacy" code (`src/components`, `src/stores`) without going through the sanctioned `src/core/state` bridge.
+*   **Health Check (`scripts/health-check.ts`):** A unified script to run type checks, linting, and seam validation before deployment.
+
+### 4. Runtime Verification
+*   **Zod Schemas:** Update Zod schemas to align 1:1 with `seams.ts` interfaces. Use these schemas to validate:
+    *   AI Engine outputs.
+    *   State transitions (in `StateManager`).
+    *   External inputs (if any).
 
 ---
 
-## 📋 Comprehensive TODO List
+## 📝 TODO List
 
-### Infrastructure & Setup
-- [ ] **[CRITICAL] Downgrade Vite/Vitest** `[#TODO-INFRA-1]`
-    - Action: Update `package.json` to `vite: ^5.4.11`, `vitest: ^2.1.8`.
-    - Verification: `npm test` runs (even if tests fail).
-- [ ] **Create Health Check Script** `[#TODO-INFRA-2]`
-    - Action: Create `scripts/health-check.ts`.
-    - Features: Check Node version, deps, run type check.
+### High Priority (System Recovery)
+- [ ] **Fix GameState Enum:** Update `src/stores/gameStateStore.ts` to use `GameState` from `src/core/types/seams.ts`. (#TODO_STATE_CONFLICT)
+- [ ] **Deprecate Legacy Types:** Mark `src/types.ts` as deprecated and plan migration to `seams.ts`. (#TODO_DEPRECATION)
+- [ ] **Fix App.tsx:** Align `App.tsx` state consumption with the fixed store types. (#TODO_APP_STATE)
+- [ ] **Auth Configuration:** Formalize the optional auth logic in `App.tsx` using `VITE_ENABLE_AUTH`. (#TODO_AUTH)
 
-### Core Architecture (Seams)
-- [ ] **Verify Engine Seams** `[#TODO-CORE-1]`
-    - Action: Audit all files in `src/core/engines/` to ensure strict `seams.ts` compliance.
-    - Note: `TemporalRevisionEngine` looks good, check others.
+### Engine Implementation
+- [ ] **Quantum Narrative Persistence:** Implement `save/load` logic for `QuantumNarrativeEngine` (currently in-memory only). (#TODO_QUANTUM_PERSISTENCE)
+- [ ] **Temporal Revision Upgrade:** Replace regex-based `TemporalRevisionEngine` with proper LLM-based rewriting. (#TODO_TEMPORAL_LLM)
+- [ ] **Image Generation:** Implement `PregenerateImageExecutor` to use `ImagePipeline` (Agent 7). (#TODO_IMAGE_GEN)
+- [ ] **Audio Generation:** Implement `GenerateAmbianceExecutor` to use Web Audio API / Service. (#TODO_AUDIO_GEN)
 
-### Missing Implementation
-- [ ] **Implement NarrativeMonitor** `[#TODO-FEAT-1]`
-    - Action: Create `src/services/monitoring/NarrativeMonitor.ts`.
-    - Purpose: Watch for narrative inconsistencies.
-- [ ] **Complete PregenerateImageExecutor** `[#TODO-FEAT-2]`
-    - Action: Connect `src/core/commands/pregenerateImage.ts` to `ImagePipeline` (Agent 7).
+### Infrastructure & Tooling
+- [ ] **Seam Validator:** Implement `scripts/validate-seams.ts`. (#TODO_TOOLING)
+- [ ] **Health Check:** Implement `scripts/health-check.ts`. (#TODO_TOOLING)
 
-### Legacy Cleanup
-- [ ] **Deprecate Legacy Components** `[#TODO-CLEAN-1]`
-    - Action: Add `#TODO DEPRECATED` to all files in `src/components/`.
-    - Action: Verify no `src/core` files import from `src/components`.
+### Deployment
+- [ ] **Environment Check:** Ensure `vite.config.mjs` and `vitest.config.ts` align with Node/Vite versions.
+- [ ] **Production Build:** Verify `npm run build` passes with strict type checking (once types are fixed).
 
-### Documentation
-- [ ] **Update AGENTS.md** `[#TODO-DOC-1]`
-    - Action: Reflect the actual state (infra broken) vs the idealized state.
+---
+
+## 🔍 How to Work on This Repo
+1.  **Check this file first.**
+2.  **Pick a task.**
+3.  **Verify the Seams.** Do not import from `src/stores` directly in new code; use `src/core/state`.
+4.  **Run `npm run build`** (or `scripts/health-check.ts` once ready) to verify no regressions.

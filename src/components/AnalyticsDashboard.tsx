@@ -1,3 +1,4 @@
+// #TODO DEPRECATED: Migrate to src/ui and use src/core/state.
 import React, { useEffect, useState } from 'react';
 import { analyticsService, EngagementMetrics, SessionMetrics } from '../services/analyticsService';
 import './AnalyticsDashboard.css';

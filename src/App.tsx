@@ -37,6 +37,8 @@ import { getConfig } from './config/defaults';
  */
 function getAvailableProviders(): AIProvider[] {
   const config = getConfig();
+  // #TODO ENV: Ensure these variables are validated in a config service. See #TODO.md
+  // #TODO SECURITY: This bypasses strict auth. Re-implement VITE_ENABLE_AUTH check if needed. See #TODO.md
   const hasGrokKey = !!import.meta.env.VITE_XAI_API_KEY;
 
   const providers: AIProvider[] = [];

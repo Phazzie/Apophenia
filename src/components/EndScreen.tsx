@@ -1,3 +1,4 @@
+// #TODO DEPRECATED: Migrate to src/ui and use src/core/state.
 import React from 'react';
 import { useGameStateStore } from '../stores/gameStateStore';
 import { GameStateManager } from '../services/gameStateManager';

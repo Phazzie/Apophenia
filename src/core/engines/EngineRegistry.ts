@@ -8,6 +8,10 @@
 import type { EngineRegistry as IEngineRegistry, Engine, EngineContext, EngineOutput } from '../types/seams';
 
 export class EngineRegistry implements IEngineRegistry {
+  // #TODO: See #TODO.md - Validation Tasks
+  // Add runtime verification logging here. We need to verify that engines
+  // are actually executing and producing outputs in the production environment.
+
   private engines: Engine[] = [];
 
   /**

@@ -13,7 +13,9 @@ export class QuantumNarrativeEngine extends BaseEngine implements IQuantumNarrat
   readonly description = 'Manages parallel timelines and quantum narrative superposition';
   readonly priority = 7; // High priority - can dramatically alter narrative
 
-  // #TODO: Implement persistence for timelines (currently in-memory only).
+  // #TODO QUANTUM_PERSISTENCE: Timelines are currently in-memory only.
+  // We need to implement save/load logic to persist these across sessions.
+  // See #TODO.md.
   readonly timelines: Map<string, WorldState> = new Map();
 
   isActive(context: EngineContext): boolean {

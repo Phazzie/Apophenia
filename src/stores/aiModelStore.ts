@@ -1,3 +1,4 @@
+// #TODO DEPRECATED: Use src/core/state instead.
 /**
  * AI Model Selector Store
  * 

@@ -1,4 +1,8 @@
+<<<<<<< audit-todo-system-13448203675236679220
+// #TODO DEPRECATED: This file is part of the Legacy System. Migrate logic to src/ui/ and delete.
+=======
 // #TODO DEPRECATED: Use src/ui/screens/StartScreen.tsx instead. See #TODO.md
+>>>>>>> feature/main
 import React, { useEffect, useState } from 'react';
 import { generateConcept } from '../services/gameService';
 import { GameStateManager } from '../services/gameStateManager';
@@ -26,7 +30,8 @@ const StartScreen: React.FC = () => {
   const selectedModel = getSelectedModel();
 
   useEffect(() => {
-    // Check for a saved game. If story has more than the initial empty state, a game exists.\n    // We also check for a protagonist, as another indicator.
+    // Check for a saved game. If story has more than the initial empty state, a game exists.
+    // We also check for a protagonist, as another indicator.
     setHasSavedGame(storyHistory.length > 0 && Boolean(worldState.protagonist));
   }, [storyHistory, worldState.protagonist]);
 

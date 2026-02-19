@@ -1,7 +1,11 @@
+<<<<<<< audit-todo-system-13448203675236679220
+// #TODO FIX: Version Mismatch. The project requires vitest@^2.1.8 but is running ^3.2.4. Downgrade package.json and verify this config works with v2.
+=======
 // #TODO: See #TODO.md - Critical Recovery Plan
 // Fix module resolution errors (Cannot find package 'vitest').
 // Ensure this config matches the project's dependency versions (vite 5.x vs 7.x).
 
+>>>>>>> feature/main
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import path from 'path';

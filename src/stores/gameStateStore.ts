@@ -1,7 +1,15 @@
+<<<<<<< audit-todo-system-13448203675236679220
 // #TODO DEPRECATED: This file is part of the Legacy System. Migrate logic to src/core/state/ and delete.
+=======
+// #TODO DEPRECATED: Use src/core/state/gameStateStore.ts instead. See #TODO.md
+>>>>>>> feature/main
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Choice, GameState } from '../types';
+
+// #TODO STATE_CONFLICT: This store uses legacy numeric GameState from src/types.ts
+// It MUST be migrated to use string-based GameState from src/core/types/seams.ts
+// See #TODO.md for details.
 
 interface GameStateStore {
   gameState: GameState;

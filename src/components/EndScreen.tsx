@@ -1,4 +1,8 @@
+<<<<<<< audit-todo-system-13448203675236679220
 // #TODO DEPRECATED: This file is part of the Legacy System. Migrate logic to src/ui/ and delete.
+=======
+// #TODO DEPRECATED: Migrate to src/ui and use src/core/state.
+>>>>>>> feature/main
 import React from 'react';
 import { useGameStateStore } from '../stores/gameStateStore';
 import { GameStateManager } from '../services/gameStateManager';

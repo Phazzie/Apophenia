@@ -6,6 +6,11 @@
  * Other parts of the application should import from this file.
  */
 
+// #TODO BRIDGE_REPAIR: This file bridges new code to legacy stores.
+// Currently it re-exports legacy stores that use wrong types (numeric GameState).
+// We need to either update the stores or add an adapter layer here.
+// See #TODO.md.
+
 // Stores
 export { useGameStateStore } from './gameStateStore';
 export { useWorldStateStore } from './worldStateStore';

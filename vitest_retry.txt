@@ -1,0 +1,109 @@
+
+ RUN  v2.1.9 /app
+
+ ❯ tests/contracts/engines.contract.test.ts (0 test)
+ ❯ tests/contracts/state-stores.contract.test.ts (0 test)
+ ❯ tests/contracts/ai-services.contract.test.ts (0 test)
+ ❯ tests/contracts/command-executors.contract.test.ts (0 test)
+ ❯ tests/contracts/config.contract.test.ts (0 test)
+ ❯ tests/contracts/flows.contract.test.ts (0 test)
+ ❯ tests/contracts/ui-components.contract.test.ts (0 test)
+ ❯ tests/unit/engines/AllEngines.test.ts (0 test)
+ ❯ tests/contracts/image-services.contract.test.ts (0 test)
+ ❯ tests/unit/state/StateManager.test.ts (0 test)
+ ❯ tests/unit/state/playerProfileStore.test.ts (0 test)
+ ❯ tests/unit/images/ImagePipeline.test.ts (0 test)
+ ❯ tests/unit/flows/FlowCoordinator.test.ts (0 test)
+ ❯ tests/unit/state/historyStore.test.ts (0 test)
+ ❯ tests/unit/engines/TemporalRevisionEngine.test.ts (0 test)
+ ❯ tests/unit/ai/promptBuilder.test.ts (0 test)
+ ❯ tests/unit/ui/screens/DescentScreen.test.tsx (0 test)
+ ❯ tests/unit/commands/CommandQueue.test.ts (0 test)
+ ❯ tests/unit/flows/DescentFlow.test.ts (0 test)
+ ❯ tests/unit/state/worldStateStore.test.ts (0 test)
+ ❯ tests/unit/images/imageServices.test.ts (0 test)
+ ❯ tests/integration/engine-state-integration.test.ts (0 test)
+ ❯ tests/unit/ai/mockService.test.ts (0 test)
+ ❯ tests/unit/ui/components/StorySegmentDisplay.test.tsx (0 test)
+ ❯ tests/unit/images/LRUTTLCache.test.ts (0 test)
+ ❯ tests/unit/ai/unifiedAIService.test.ts (0 test)
+ ❯ tests/unit/ui/screens/StartScreen.test.tsx (0 test)
+ ❯ tests/unit/commands/generateAmbiance.test.ts (0 test)
+ ❯ tests/unit/commands/displayText.test.ts (0 test)
+ ❯ tests/unit/ui/screens/UnravelingScreen.test.tsx (0 test)
+ ❯ tests/unit/ui/components/ChoiceButton.test.tsx (0 test)
+ ❯ tests/unit/commands/pregenerateImage.test.ts (0 test)
+ ❯ tests/unit/ai/responseParser.test.ts (0 test)
+ ❯ tests/unit/commands/updateWorldState.test.ts (0 test)
+ ❯ tests/integration/ai-command-integration.test.ts (0 test)
+ ❯ tests/unit/commands/createSegment.test.ts (0 test)
+ ❯ tests/unit/flows/FlowContextBuilder.test.ts (0 test)
+ ❯ tests/unit/commands/applyCorruption.test.ts (0 test)
+ ❯ tests/unit/state/gameStateStore.test.ts (0 test)
+ ❯ tests/unit/commands/wait.test.ts (0 test)
+ ❯ tests/unit/ui/components/LoadingIndicator.test.tsx (0 test)
+ ❯ tests/unit/engines/AdaptiveHorrorEngine.test.ts (0 test)
+ ❯ tests/unit/ui/effects/CorruptionEffect.test.tsx (0 test)
+ ❯ tests/unit/services/geminiImageService.test.ts (0 test)
+ ❯ tests/unit/ui/effects/GlitchEffect.test.tsx (0 test)
+ ❯ tests/unit/engines/RealityCorruptionEngine.test.ts (0 test)
+ ❯ tests/unit/ui/theme/ThemeProvider.test.tsx (0 test)
+ ❯ tests/integration/imagePipeline.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 48 ⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/contracts/ai-services.contract.test.ts [ tests/contracts/ai-services.contract.test.ts ]
+ FAIL  tests/contracts/command-executors.contract.test.ts [ tests/contracts/command-executors.contract.test.ts ]
+ FAIL  tests/contracts/config.contract.test.ts [ tests/contracts/config.contract.test.ts ]
+ FAIL  tests/contracts/engines.contract.test.ts [ tests/contracts/engines.contract.test.ts ]
+ FAIL  tests/contracts/flows.contract.test.ts [ tests/contracts/flows.contract.test.ts ]
+ FAIL  tests/contracts/image-services.contract.test.ts [ tests/contracts/image-services.contract.test.ts ]
+ FAIL  tests/contracts/state-stores.contract.test.ts [ tests/contracts/state-stores.contract.test.ts ]
+ FAIL  tests/contracts/ui-components.contract.test.ts [ tests/contracts/ui-components.contract.test.ts ]
+ FAIL  tests/integration/ai-command-integration.test.ts [ tests/integration/ai-command-integration.test.ts ]
+ FAIL  tests/integration/engine-state-integration.test.ts [ tests/integration/engine-state-integration.test.ts ]
+ FAIL  tests/integration/imagePipeline.test.ts [ tests/integration/imagePipeline.test.ts ]
+ FAIL  tests/unit/ai/mockService.test.ts [ tests/unit/ai/mockService.test.ts ]
+ FAIL  tests/unit/ai/promptBuilder.test.ts [ tests/unit/ai/promptBuilder.test.ts ]
+ FAIL  tests/unit/ai/responseParser.test.ts [ tests/unit/ai/responseParser.test.ts ]
+ FAIL  tests/unit/ai/unifiedAIService.test.ts [ tests/unit/ai/unifiedAIService.test.ts ]
+ FAIL  tests/unit/commands/CommandQueue.test.ts [ tests/unit/commands/CommandQueue.test.ts ]
+ FAIL  tests/unit/commands/applyCorruption.test.ts [ tests/unit/commands/applyCorruption.test.ts ]
+ FAIL  tests/unit/commands/createSegment.test.ts [ tests/unit/commands/createSegment.test.ts ]
+ FAIL  tests/unit/commands/displayText.test.ts [ tests/unit/commands/displayText.test.ts ]
+ FAIL  tests/unit/commands/generateAmbiance.test.ts [ tests/unit/commands/generateAmbiance.test.ts ]
+ FAIL  tests/unit/commands/pregenerateImage.test.ts [ tests/unit/commands/pregenerateImage.test.ts ]
+ FAIL  tests/unit/commands/updateWorldState.test.ts [ tests/unit/commands/updateWorldState.test.ts ]
+ FAIL  tests/unit/commands/wait.test.ts [ tests/unit/commands/wait.test.ts ]
+ FAIL  tests/unit/engines/AdaptiveHorrorEngine.test.ts [ tests/unit/engines/AdaptiveHorrorEngine.test.ts ]
+ FAIL  tests/unit/engines/AllEngines.test.ts [ tests/unit/engines/AllEngines.test.ts ]
+ FAIL  tests/unit/engines/RealityCorruptionEngine.test.ts [ tests/unit/engines/RealityCorruptionEngine.test.ts ]
+ FAIL  tests/unit/engines/TemporalRevisionEngine.test.ts [ tests/unit/engines/TemporalRevisionEngine.test.ts ]
+ FAIL  tests/unit/flows/DescentFlow.test.ts [ tests/unit/flows/DescentFlow.test.ts ]
+ FAIL  tests/unit/flows/FlowContextBuilder.test.ts [ tests/unit/flows/FlowContextBuilder.test.ts ]
+ FAIL  tests/unit/flows/FlowCoordinator.test.ts [ tests/unit/flows/FlowCoordinator.test.ts ]
+ FAIL  tests/unit/images/ImagePipeline.test.ts [ tests/unit/images/ImagePipeline.test.ts ]
+ FAIL  tests/unit/images/LRUTTLCache.test.ts [ tests/unit/images/LRUTTLCache.test.ts ]
+ FAIL  tests/unit/images/imageServices.test.ts [ tests/unit/images/imageServices.test.ts ]
+ FAIL  tests/unit/services/geminiImageService.test.ts [ tests/unit/services/geminiImageService.test.ts ]
+ FAIL  tests/unit/state/StateManager.test.ts [ tests/unit/state/StateManager.test.ts ]
+ FAIL  tests/unit/state/gameStateStore.test.ts [ tests/unit/state/gameStateStore.test.ts ]
+ FAIL  tests/unit/state/historyStore.test.ts [ tests/unit/state/historyStore.test.ts ]
+ FAIL  tests/unit/state/playerProfileStore.test.ts [ tests/unit/state/playerProfileStore.test.ts ]
+ FAIL  tests/unit/state/worldStateStore.test.ts [ tests/unit/state/worldStateStore.test.ts ]
+ FAIL  tests/unit/ui/components/ChoiceButton.test.tsx [ tests/unit/ui/components/ChoiceButton.test.tsx ]
+ FAIL  tests/unit/ui/components/LoadingIndicator.test.tsx [ tests/unit/ui/components/LoadingIndicator.test.tsx ]
+ FAIL  tests/unit/ui/components/StorySegmentDisplay.test.tsx [ tests/unit/ui/components/StorySegmentDisplay.test.tsx ]
+ FAIL  tests/unit/ui/effects/CorruptionEffect.test.tsx [ tests/unit/ui/effects/CorruptionEffect.test.tsx ]
+ FAIL  tests/unit/ui/effects/GlitchEffect.test.tsx [ tests/unit/ui/effects/GlitchEffect.test.tsx ]
+ FAIL  tests/unit/ui/theme/ThemeProvider.test.tsx [ tests/unit/ui/theme/ThemeProvider.test.tsx ]
+ FAIL  tests/unit/ui/screens/DescentScreen.test.tsx [ tests/unit/ui/screens/DescentScreen.test.tsx ]
+ FAIL  tests/unit/ui/screens/StartScreen.test.tsx [ tests/unit/ui/screens/StartScreen.test.tsx ]
+ FAIL  tests/unit/ui/screens/UnravelingScreen.test.tsx [ tests/unit/ui/screens/UnravelingScreen.test.tsx ]
+Error: Cannot find module '/app/node_modules/@testing-library/jest-dom/dist/matchers-35e4d3bd.mjs' imported from /app/node_modules/@testing-library/jest-dom/dist/index.mjs
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/48]⎯
+
+ Test Files  48 failed (48)
+      Tests  no tests
+   Start at  03:36:12
+   Duration  18.94s (transform 100ms, setup 0ms, collect 0ms, tests 0ms, environment 40.20s, prepare 4.73s)

@@ -1,4 +1,8 @@
+<<<<<<< audit-todo-system-13448203675236679220
 // #TODO DEPRECATED: This file is part of the Legacy System. Migrate logic to src/core/state/ and delete.
+=======
+// #TODO DEPRECATED: Use src/core/state instead.
+>>>>>>> feature/main
 import { create } from 'zustand';
 import { CACHE_CONFIG } from '../services/config';
 

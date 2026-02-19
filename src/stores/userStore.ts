@@ -1,4 +1,4 @@
-// #TODO DEPRECATED: This file is part of the Legacy System. Migrate logic to src/core/state/ and delete.
+// #TODO DEPRECATED: Use src/core/state instead.
 import { create } from 'zustand';
 import { supabase } from '../services/supabaseClient';
 import { Session, User } from '@supabase/supabase-js';

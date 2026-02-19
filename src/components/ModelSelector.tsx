@@ -1,4 +1,4 @@
-// #TODO DEPRECATED: This file is part of the Legacy System. Migrate logic to src/ui/ and delete.
+// #TODO DEPRECATED: Migrate to src/ui and use src/core/state.
 /**
  * AI Model Selector Component
  *

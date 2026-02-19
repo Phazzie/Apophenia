@@ -68,6 +68,9 @@ export const useUserStore = create<UserState>((set) => ({
 export async function initializeUserAuth(): Promise<void> {
   const state = useUserStore.getState();
 
+  // #TODO: See #TODO.md - Critical Recovery Plan
+  // Fix TypeScript implicit 'any' errors in supabase callbacks below.
+
   // Prevent double initialization
   if (state.initialized) {
     console.warn('User auth already initialized');

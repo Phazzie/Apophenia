@@ -6,6 +6,7 @@ import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 
+// #TODO FIX: Project strictly requires vitest@^2.1.8. Current usage of v3 causes ERR_MODULE_NOT_FOUND errors. Downgrade required.
 export default defineConfig({
   plugins: [react()],
   test: {

@@ -70,7 +70,7 @@ A unified set of scripts that autonomously verify the health, integrity, and arc
 ### Core Architecture & Engines
 - [ ] **FifthWallEngine CSP**: Add Content Security Policy (CSP) verification in `src/core/engines/FifthWallEngine.ts` to ensure safe browser manipulation.
 - [ ] **QuantumNarrativeEngine Persistence**: Implement state persistence in `src/core/engines/QuantumNarrativeEngine.ts` (currently uses in-memory `Map`).
-- [ ] **TemporalRevisionEngine Upgrade**: specific `#TODO` to replace regex-based replacement with LLM-based narrative rewriting in `src/core/engines/TemporalRevisionEngine.ts`.
+- [ ] **TemporalRevisionEngine Upgrade**: Replace regex-based replacement with LLM-based narrative rewriting in `src/core/engines/TemporalRevisionEngine.ts`.
 - [ ] **PregenerateImageExecutor**: Implement `ImagePipeline` integration in `src/core/commands/pregenerateImage.ts`.
 - [ ] **GenerateAmbianceExecutor**: Integrate `AudioManager` singleton in `src/core/commands/generateAmbiance.ts`.
 

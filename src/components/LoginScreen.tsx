@@ -1,3 +1,4 @@
+// #TODO DEPRECATED: Migrate to src/ui and use src/core/state.
 import React, { useState } from 'react';
 import { useUserStore } from '../stores/userStore';
 

@@ -1,3 +1,4 @@
+// #TODO DEPRECATED: Migrate to src/ui and use src/core/state.
 /**
  * AI Model Selector Component
  *

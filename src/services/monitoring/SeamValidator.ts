@@ -1,17 +1,10 @@
-/**
- * #TODO: Implement the Runtime Seam Validator
- *
- * This system should wrap the EngineRegistry and validate that all engine outputs
- * conform to the schema defined in src/core/types/seams.ts.
- *
- * Features:
- * 1. Runtime type checking (Zod or TypeGuard)
- * 2. Error logging for seam violations
- * 3. Graceful degradation (sanitize invalid output)
- *
- * See #TODO.md for architecture details.
- */
+// #TODO: Implement the SeamValidator logic.
+// This file is currently a stub referenced by the AADS design.
+// It should enforce architectural boundaries (e.g., UI not importing from Core directly).
 
 export class SeamValidator {
-  // #TODO: Implement validation logic
+  static validate(): boolean {
+    console.log('SeamValidator: Validation logic not yet implemented.');
+    return true; // Placeholder
+  }
 }

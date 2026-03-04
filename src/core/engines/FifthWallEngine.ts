@@ -11,6 +11,7 @@ import { BaseEngine } from './base/Engine';
 
 export class FifthWallEngine extends BaseEngine implements IFifthWallEngine {
   readonly name = 'FifthWall';
+  // #TODO: Add Content Security Policy (CSP) verification to ensure safe browser manipulation.
   readonly description = 'Safely manipulates browser to create horror outside game space';
   readonly priority = 1; // Lowest priority - cosmetic enhancement
 

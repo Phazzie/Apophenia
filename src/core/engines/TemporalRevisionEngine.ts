@@ -106,8 +106,9 @@ export class TemporalRevisionEngine extends BaseEngine implements ITemporalRevis
   }
 
   async generateRevision(original: string, context: EngineContext): Promise<string> {
-    // #TODO: Upgrade to LLM-based rewriting. Current regex implementation is primitive.
-    // See #TODO.md for details.
+    // #TODO TEMPORAL_LLM: Upgrade this to use LLM-based rewriting.
+    // Current implementation uses simple regex replacement which is fragile.
+    // See #TODO.md.
 
     // Simple revision algorithm: introduce subtle contradictions
     const revisionTypes = [

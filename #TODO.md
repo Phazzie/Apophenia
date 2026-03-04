@@ -1,82 +1,79 @@
-# Apophenia Project Status & Roadmap (#TODO)
+# 📋 Project Status & Recovery Plan
 
-## 🚨 Current Deployment Status
-**Documentation Claim:** "Production Ready (Level 3 SDD)" - Nov 12, 2025
-**Actual Status:** **Development / Pre-Alpha**
+**Last Updated:** 2026-02-04
+**Status:** ⚠️ Recovery Mode
+**Deployment Readiness:** 20% (Code exists but architecture is split)
 
-While the architecture is sophisticated and the "Seams" system is in place, the project currently fails basic verification steps.
+## 🚨 Critical Issues: "Split-Brain" Architecture
 
-### 🔴 Critical Issues (Broken)
-- **Test Suite Failure:** `npm test` fails immediately with `ERR_MODULE_NOT_FOUND` due to `vitest` / `vite` path resolution issues. The claimed "91/91 tests passing" is currently verifying nothing.
-- **Legacy Code Debt:** The `src/stores` and `src/components` directories appear to be legacy artifacts from before the "Seams" refactor. They are still referenced by some files but `App.tsx` uses the new `src/core` and `src/ui` structure.
-- **Dependencies:** `vite` and `vitest` versions may be conflicting or incorrectly installed in the environment.
+The application currently suffers from a fundamental state management conflict known as the "Split-Brain" issue.
 
-## 📝 TODO List
+1.  **Type Mismatch:**
+    *   `src/types.ts` defines `GameState` as a numeric `enum`.
+    *   `src/core/types/seams.ts` defines `GameState` as a string `enum`.
+    *   Legacy stores (`src/stores/*.ts`) use the numeric enum.
+    *   The UI (`App.tsx`) and Engines (`src/core/engines/*.ts`) expect the string enum.
+    *   Result: `App.tsx` crashes or misbehaves when reading state from legacy stores via `src/core/state` bridge.
 
-### 🛠️ Infrastructure & Maintenance
-- [ ] **Fix Testing Pipeline:** Resolve `ERR_MODULE_NOT_FOUND` in `vitest`. Ensure `npm test` runs and passes.
-- [ ] **Legacy Cleanup:**
-    - [ ] Audit `src/stores/` and migrate any remaining logic to `src/core/state/`.
-    - [ ] Delete `src/stores/` directory.
-    - [ ] Audit `src/components/` and migrate any remaining logic to `src/ui/`.
-    - [ ] Delete `src/components/` directory.
+2.  **Auth Bypass:**
+    *   Authentication is largely bypassed/mocked (`src/services/supabaseClient.ts`), but `App.tsx` logic for checking session state is inconsistent or missing.
 
-### 🧠 AI Engine Improvements
-- [ ] **Temporal Revision Engine:**
-    - [ ] Upgrade from regex-based replacement to LLM-based narrative rewriting.
-    - [ ] Context: Currently uses simple regex (e.g., swapping "red" with "blue"). An LLM should rewrite entire sentences to subtly alter meaning while maintaining flow.
-- [ ] **Quantum Narrative Engine:**
-    - [ ] Implement persistent state storage.
-    - [ ] Context: Currently relies on in-memory state, meaning quantum branches are lost on page refresh.
-
-### 🛡️ Reliability & Stability
-- [ ] **Unified AI Service:**
-    - [ ] Implement Circuit Breaker pattern.
-    - [ ] Add explicit retry logic with exponential backoff for API calls.
-
-### 🧪 Quality Assurance
-- [ ] **Seam-Validation System:** Implement the proposed runtime validation system (see below).
+3.  **Missing Implementations:**
+    *   Several engines and commands are stubs or require persistence logic (`QuantumNarrativeEngine`).
 
 ---
 
-## 🏗️ Proposed System: Seam-Validation System
+## 🛡️ Reliability System Design
 
-To ensure the high accuracy and reliability required by the "Autonomous" nature of this project, we propose a three-pillar validation system.
+To solve the "Split-Brain" issue and ensure a reliable deployment, we will implement the following system:
 
-### 1. Runtime Validator (The Guard)
-**Location:** `src/services/monitoring/SeamValidator.ts`
-**Purpose:** Enforce architectural contracts at runtime.
+### 1. Single Source of Truth (SSOT)
+*   **Canon:** `src/core/types/seams.ts` is the **only** valid source for core types (`GameState`, `WorldState`, etc.).
+*   **Deprecation:** `src/types.ts` must be deprecated. All imports must be migrated to `seams.ts`.
 
-Instead of trusting that engines return valid output, we wrap the `EngineRegistry` in a validator.
+### 2. State Unification
+*   **Migration:** Rewrite `src/stores/gameStateStore.ts` (and others) to strictly use `seams.ts` types.
+*   **Persistence:** Ensure Zustand stores persist correctly using the string-based enums.
 
-```typescript
-// Conceptual design
-export class RuntimeSeamValidator {
-  validateEngineOutput(output: any, schema: ZodSchema): ValidationResult {
-    const result = schema.safeParse(output);
-    if (!result.success) {
-      console.error(`Seam Violation in ${output.engineName}:`, result.error);
-      return { valid: false, sanitized: this.sanitize(output) }; // Degrade gracefully
-    }
-    return { valid: true, data: result.data };
-  }
-}
-```
+### 3. Automated Guardrails
+*   **Validation Script (`scripts/validate-seams.ts`):** A script to statically analyze imports. It will fail the build if any "New" code (`src/core`, `src/ui`) imports from "Legacy" code (`src/components`, `src/stores`) without going through the sanctioned `src/core/state` bridge.
+*   **Health Check (`scripts/health-check.ts`):** A unified script to run type checks, linting, and seam validation before deployment.
 
-### 2. Chaos Monkey (The Stress Test)
-**Location:** `scripts/chaos-monkey.ts`
-**Purpose:** Verify system resilience by injecting failures.
+### 4. Runtime Verification
+*   **Zod Schemas:** Update Zod schemas to align 1:1 with `seams.ts` interfaces. Use these schemas to validate:
+    *   AI Engine outputs.
+    *   State transitions (in `StateManager`).
+    *   External inputs (if any).
 
-A script/mode that can be enabled during E2E testing:
-- **Network Latency:** artificial delays in `unifiedAIService`.
-- **Service Failure:** Randomly returning 500s from Mock/Grok services.
-- **State Corruption:** Randomly dropping keys from `localStorage`.
+---
 
-### 3. Narrative Consistency Monitor (The Editor)
-**Location:** `src/services/monitoring/NarrativeMonitor.ts`
-**Purpose:** Ensure the story remains coherent.
+## 📝 TODO List
 
-A background process (running potentially on a cheaper/faster model) that analyzes the last N segments:
-- **Input:** Last 3 story segments.
-- **Prompt:** "Does the latest segment contradict the established facts in the previous two? Answer YES/NO."
-- **Action:** If YES, flag for "Reality Corruption" engine to interpret it as a glitch, turning a bug into a feature.
+### High Priority (System Recovery)
+- [ ] **Fix GameState Enum:** Update `src/stores/gameStateStore.ts` to use `GameState` from `src/core/types/seams.ts`. (#TODO_STATE_CONFLICT)
+- [ ] **Deprecate Legacy Types:** Mark `src/types.ts` as deprecated and plan migration to `seams.ts`. (#TODO_DEPRECATION)
+- [ ] **Fix App.tsx:** Align `App.tsx` state consumption with the fixed store types. (#TODO_APP_STATE)
+- [ ] **Auth Configuration:** Formalize the optional auth logic in `App.tsx` using `VITE_ENABLE_AUTH`. (#TODO_AUTH)
+
+### Engine Implementation
+- [ ] **Quantum Narrative Persistence:** Implement `save/load` logic for `QuantumNarrativeEngine` (currently in-memory only). (#TODO_QUANTUM_PERSISTENCE)
+- [ ] **Temporal Revision Upgrade:** Replace regex-based `TemporalRevisionEngine` with proper LLM-based rewriting. (#TODO_TEMPORAL_LLM)
+- [ ] **Image Generation:** Implement `PregenerateImageExecutor` to use `ImagePipeline` (Agent 7). (#TODO_IMAGE_GEN)
+- [ ] **Audio Generation:** Implement `GenerateAmbianceExecutor` to use Web Audio API / Service. (#TODO_AUDIO_GEN)
+
+### Infrastructure & Tooling
+- [ ] **Seam Validator:** Implement `scripts/validate-seams.ts`. (#TODO_TOOLING)
+- [ ] **Health Check:** Implement `scripts/health-check.ts`. (#TODO_TOOLING)
+
+### Deployment
+- [ ] **Environment Check:** Ensure `vite.config.mjs` and `vitest.config.ts` align with Node/Vite versions.
+- [ ] **Production Build:** Verify `npm run build` passes with strict type checking (once types are fixed).
+
+---
+
+## 🔍 How to Work on This Repo
+1.  **Check this file first.**
+2.  **Pick a task.**
+3.  **Verify the Seams.** Do not import from `src/stores` directly in new code; use `src/core/state`.
+4.  **Run `npm run build`** (or `scripts/health-check.ts` once ready) to verify no regressions.
+

@@ -1,8 +1,5 @@
-<<<<<<< audit-todo-system-13448203675236679220
-// #TODO DEPRECATED: This file is part of the Legacy System. Migrate logic to src/core/state/ and delete.
-=======
 // #TODO DEPRECATED: Use src/core/state/gameStateStore.ts instead. See #TODO.md
->>>>>>> feature/main
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Choice, GameState } from '../types';

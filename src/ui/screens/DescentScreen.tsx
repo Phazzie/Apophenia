@@ -52,7 +52,7 @@ export const DescentScreen: React.FC<DescentScreenProps> = ({
   };
 
   return (
-    <div className="descent-screen screen-container">
+    <div className="descent-screen screen-container drip-panel">
       <CorruptionEffect level={worldState.corruptionLevel}>
         <div className="descent-layout">
           {/* Header with stats */}

@@ -119,7 +119,7 @@ function authenticateAPIKey(req, res, next) {
 
   const authorizationHeader = req.headers['authorization'];
   const bearerMatch = typeof authorizationHeader === 'string'
-    ? authorizationHeader.match(/^Bearer\s+(.+)$/i)
+    ? authorizationHeader.match(/^Bearer\s+([^\s]+)$/i)
     : null;
   const bearerApiKey = bearerMatch?.[1];
   const apiKey = req.headers['x-api-key'] || bearerApiKey;

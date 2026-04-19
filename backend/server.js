@@ -97,14 +97,32 @@ app.use('/api', rateLimiter);
 // API Key Authentication Middleware
 const VALID_API_KEYS = process.env.API_KEYS?.split(',').map(key => key.trim()).filter(Boolean) || [];
 
+// Warn once at startup if API_KEYS is not configured
+if (VALID_API_KEYS.length === 0) {
+  if (process.env.NODE_ENV === 'production') {
+    logger.error('FATAL: API_KEYS environment variable is not set in production. All /api/* requests will be rejected.');
+  } else {
+    logger.warn('API_KEYS environment variable not set - authentication bypassed (development mode only)');
+  }
+}
+
 function authenticateAPIKey(req, res, next) {
   // Skip authentication for health check endpoints
   if (req.path === '/health') {
     return next();
   }
 
-  const apiKey = req.headers['x-api-key'] ||
-                 req.headers['authorization']?.replace('Bearer ', '');
+  // Allow CORS preflight requests to pass through without authentication
+  if (req.method === 'OPTIONS') {
+    return next();
+  }
+
+  const authorizationHeader = req.headers['authorization'];
+  const bearerMatch = typeof authorizationHeader === 'string'
+    ? authorizationHeader.match(/^Bearer\s+(.+)$/i)
+    : null;
+  const bearerApiKey = bearerMatch?.[1];
+  const apiKey = req.headers['x-api-key'] || bearerApiKey;
 
   if (!apiKey) {
     logger.warn('API request without API key', {
@@ -118,7 +136,19 @@ function authenticateAPIKey(req, res, next) {
     });
   }
 
-  if (VALID_API_KEYS.length > 0 && !VALID_API_KEYS.includes(apiKey)) {
+  if (VALID_API_KEYS.length === 0) {
+    // In production, fail closed when no API keys are configured
+    if (process.env.NODE_ENV === 'production') {
+      return res.status(503).json({
+        error: 'Service misconfigured',
+        message: 'Authentication is not properly configured on this server'
+      });
+    }
+    // In development, allow the request to proceed (already warned at startup)
+    return next();
+  }
+
+  if (!VALID_API_KEYS.includes(apiKey)) {
     logger.warn('API request with invalid API key', {
       ip: req.ip,
       url: req.url,
@@ -128,11 +158,6 @@ function authenticateAPIKey(req, res, next) {
       error: 'Authentication failed',
       message: 'Invalid API key'
     });
-  }
-
-  // If API_KEYS not set, log warning but allow (for development)
-  if (VALID_API_KEYS.length === 0) {
-    logger.warn('API_KEYS environment variable not set - authentication bypassed');
   }
 
   next();

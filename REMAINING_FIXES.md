@@ -20,46 +20,18 @@
 
 ## ❌ CRITICAL ISSUES (Must Fix Before Deploy)
 
-### 2. **Security** ❌ - 3 CRITICAL ISSUES
+### 2. **Security** - 1 CRITICAL ISSUE REMAINING (2 FIXED)
 
-#### Issue 2.1: Open CORS Configuration 🔴
-**Status**: NOT FIXED
-**Risk**: CRITICAL (CVSS 7.5)
-**Impact**: Anyone can call your API, CSRF attacks, data exfiltration
+#### Issue 2.1: Open CORS Configuration ✅
+**Status**: FIXED (in this PR)
+**Risk**: CRITICAL (CVSS 7.5) → RESOLVED
+**Impact**: Strict origin allowlist now enforced in `backend/server.js`
 
-**Current Code**:
+`backend/server.js` now uses a whitelist-only CORS configuration:
 ```javascript
-// server.js:56
-app.use(cors());  // ❌ Allows ALL origins
-
-// backend/server.js:64-66
-app.use(cors({
-  origin: process.env.CORS_ORIGIN || '*',  // ❌ Defaults to allow all
-  methods: ['GET', 'POST'],
-}));
-```
-
-**Fix Required** (30 minutes):
-```javascript
-// Whitelist specific origins only
-const allowedOrigins = [
-  'http://localhost:5173',           // Dev
-  'https://your-app.vercel.app',     // Production
-  process.env.CUSTOM_ORIGIN,
-].filter(Boolean);
-
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+const allowedOrigins = ['http://localhost:5173', 'http://localhost:3000',
+  process.env.FRONTEND_URL, ...].filter(Boolean);
+app.use(cors({ origin: (origin, callback) => { /* allowlist check */ } }));
 ```
 
 ---
@@ -98,38 +70,16 @@ execFile('doctl', args, { maxBuffer: 10 * 1024 * 1024 }, (err, stdout, stderr) =
 
 ---
 
-#### Issue 2.3: No Backend Authentication 🔴
-**Status**: NOT FIXED
-**Risk**: CRITICAL
-**Impact**: API abuse, cost escalation, quota exhaustion
+#### Issue 2.3: No Backend Authentication ✅
+**Status**: FIXED (in this PR)
+**Risk**: CRITICAL → RESOLVED
+**Impact**: `backend/server.js` now enforces API key authentication for all `/api/*` routes.
 
-**Current Code**:
-```javascript
-// backend/server.js:140 - NO authentication check
-app.post('/api/generateImage', async (req, res, next) => {
-  // ❌ Anyone can call this and consume API quota
-});
-```
-
-**Fix Required** (2 hours):
-```javascript
-// Add API key middleware
-const API_KEYS = process.env.VALID_API_KEYS?.split(',') || [];
-
-function authenticateAPIKey(req, res, next) {
-  const apiKey = req.headers['x-api-key'] ||
-                 req.headers['authorization']?.replace('Bearer ', '');
-
-  if (!apiKey || !API_KEYS.includes(apiKey)) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
-  next();
-}
-
-// Apply to all API routes
-app.use('/api', authenticateAPIKey);
-```
+The middleware:
+- Passes CORS preflight (OPTIONS) requests through without auth checks
+- Strictly accepts only `Bearer` scheme from the `Authorization` header
+- Fails closed in `production` when `API_KEYS` env var is unset
+- Logs the "no API_KEYS" warning only once at startup (not per request)
 
 ---
 
@@ -331,9 +281,9 @@ npm audit fix
 ### **Current Status**: 85% Production Ready
 
 ### **MUST FIX** (Cannot deploy without):
-1. ❌ CORS configuration (30 min)
+1. ✅ CORS configuration — FIXED in this PR
 2. ❌ Command injection OR disable MCP (5 min or 1 hour)
-3. ❌ Backend authentication (2 hours)
+3. ✅ Backend authentication — FIXED in this PR
 4. ❌ Engine error handling (2 hours)
 
 **Total MUST FIX Time**: 4.5-5.5 hours
@@ -356,11 +306,11 @@ npm audit fix
 
 ## ⏱️ Fastest Path to Deploy
 
-### **Option 1: Minimum Viable (6 hours)**
-Fix only MUST FIX items:
-- CORS (30 min)
+### **Option 1: Minimum Viable (4 hours)**
+Fix only remaining MUST FIX items (CORS + auth already fixed in this PR):
+- ✅ CORS — DONE
 - Disable MCP server (5 min)
-- Add backend auth (2 hours)
+- ✅ Backend auth — DONE
 - Add engine error handling (2 hours)
 - Update dependencies (30 min)
 - Basic testing (1 hour)

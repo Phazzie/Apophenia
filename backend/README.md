@@ -7,6 +7,7 @@ A secure Express.js backend API server that provides Grok image generation capab
 - 🔐 **Secure API Key Management** - All xAI API keys stay on server side
 - 🚀 **Grok-2-image-1212 Integration** - Latest xAI image generation model
 - 🛡️ **Request Validation** - Joi-based validation for all inputs
+- 🧿 **CSRF Protection** - Signed CSRF tokens required for state-changing API requests
 - 📊 **Rate Limiting** - Configurable rate limits to prevent abuse
 - 📝 **Structured Logging** - Winston-based JSON logging
 - 🔄 **Retry Logic** - Automatic retries with exponential backoff
@@ -21,9 +22,21 @@ GET /health
 ```
 Returns server health status and service availability.
 
+### CSRF Token
+```
+GET /api/csrf-token
+```
+Returns a signed token for state-changing API requests. Send the token in the `x-csrf-token` header when calling `POST /api/generateImage`.
+
 ### Image Generation
 ```
 POST /api/generateImage
+```
+
+**Required Headers:**
+```http
+Content-Type: application/json
+x-csrf-token: <token from GET /api/csrf-token>
 ```
 
 **Request Body:**
@@ -89,6 +102,9 @@ RATE_LIMIT_MAX_REQUESTS=100
 LOG_LEVEL=info
 LOG_FORMAT=json
 
+# CSRF
+CSRF_SECRET=use-a-long-random-secret-in-production
+
 # CORS
 CORS_ORIGIN=*
 ```
@@ -122,8 +138,11 @@ curl http://localhost:3001/health
 
 Test image generation:
 ```bash
+CSRF_TOKEN=$(curl -s http://localhost:3001/api/csrf-token | node -e "process.stdin.on('data', d => console.log(JSON.parse(d).csrfToken))")
+
 curl -X POST http://localhost:3001/api/generateImage \
   -H "Content-Type: application/json" \
+  -H "x-csrf-token: ${CSRF_TOKEN}" \
   -d '{"prompt": "A cosmic horror scene with tentacles in space"}'
 ```
 
@@ -187,6 +206,10 @@ In production, logs are written to:
 - `logs/error.log` - Error level logs only
 - `logs/combined.log` - All logs
 
+### CSRF
+
+Set `CSRF_SECRET` to a long, random value in production. If it is omitted, the backend falls back to `XAI_API_KEY` and then a development-only default so local setup remains simple.
+
 ### CORS
 
 Configure allowed origins:
@@ -202,6 +225,7 @@ The server provides comprehensive error handling with appropriate HTTP status co
 
 - `400` - Validation errors
 - `401` - Invalid API key  
+- `403` - Missing or invalid CSRF token
 - `429` - Rate limit exceeded
 - `500` - Internal server errors
 - `503` - Service unavailable

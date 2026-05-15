@@ -2,6 +2,7 @@
  * Unit tests for GrokImageService
  */
 
+import { jest, describe, beforeEach, it, expect } from '@jest/globals';
 import GrokImageService from '../services/grokImageService.js';
 import axios from 'axios';
 

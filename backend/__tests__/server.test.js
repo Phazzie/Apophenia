@@ -2,6 +2,7 @@
  * Integration tests for Grok Image Proxy Backend
  */
 
+import { jest, describe, beforeEach, it, expect } from '@jest/globals';
 import request from 'supertest';
 
 // Mock the GrokImageService before importing the server
@@ -30,6 +31,28 @@ describe('Apophenia Backend API', () => {
     jest.clearAllMocks();
   });
 
+  async function getCsrfToken() {
+    const response = await request(app)
+      .get('/api/csrf-token')
+      .expect(200);
+
+    expect(response.body).toMatchObject({
+      csrfToken: expect.any(String),
+      headerName: 'x-csrf-token',
+      expiresInSeconds: expect.any(Number)
+    });
+
+    return response.body.csrfToken;
+  }
+
+  async function postGenerateImage(body) {
+    const csrfToken = await getCsrfToken();
+    return request(app)
+      .post('/api/generateImage')
+      .set('x-csrf-token', csrfToken)
+      .send(body);
+  }
+
   describe('GET /health', () => {
     it('should return health status', async () => {
       const response = await request(app)
@@ -44,6 +67,26 @@ describe('Apophenia Backend API', () => {
         services: {
           grok: expect.any(Boolean)
         }
+      });
+    });
+  });
+
+  describe('GET /api/csrf-token', () => {
+    it('should issue CSRF tokens for state-changing API calls', async () => {
+      await getCsrfToken();
+    });
+  });
+
+  describe('CSRF protection', () => {
+    it('should reject state-changing API calls without a valid CSRF token', async () => {
+      const response = await request(app)
+        .post('/api/generateImage')
+        .send({ prompt: 'A beautiful cosmic nebula with stars' })
+        .expect(403);
+
+      expect(response.body).toMatchObject({
+        error: 'Forbidden',
+        message: expect.stringContaining('CSRF token')
       });
     });
   });
@@ -70,9 +113,7 @@ describe('Apophenia Backend API', () => {
 
     describe('Success scenarios', () => {
       it('should generate images successfully with valid request', async () => {
-        const response = await request(app)
-          .post('/api/generateImage')
-          .send(validRequestBody)
+        const response = await postGenerateImage(validRequestBody)
           .expect(200);
 
         expect(response.body).toMatchObject({
@@ -116,9 +157,7 @@ describe('Apophenia Backend API', () => {
         
         mockGrokService.generateImages.mockResolvedValue(base64Response);
 
-        const response = await request(app)
-          .post('/api/generateImage')
-          .send(base64Request)
+        const response = await postGenerateImage(base64Request)
           .expect(200);
 
         expect(response.body.success).toBe(true);
@@ -133,9 +172,7 @@ describe('Apophenia Backend API', () => {
           prompt: 'A simple test image'
         };
 
-        await request(app)
-          .post('/api/generateImage')
-          .send(minimalRequest)
+        await postGenerateImage(minimalRequest)
           .expect(200);
 
         expect(mockGrokService.generateImages).toHaveBeenCalledWith(
@@ -148,9 +185,7 @@ describe('Apophenia Backend API', () => {
 
     describe('Validation errors', () => {
       it('should reject requests without prompt', async () => {
-        const response = await request(app)
-          .post('/api/generateImage')
-          .send({
+        const response = await postGenerateImage({
             imageCount: 2
           })
           .expect(400);
@@ -168,9 +203,7 @@ describe('Apophenia Backend API', () => {
       });
 
       it('should reject prompts that are too short', async () => {
-        const response = await request(app)
-          .post('/api/generateImage')
-          .send({
+        const response = await postGenerateImage({
             prompt: 'short'
           })
           .expect(400);
@@ -184,9 +217,7 @@ describe('Apophenia Backend API', () => {
       it('should reject prompts that are too long', async () => {
         const longPrompt = 'A'.repeat(1001);
         
-        const response = await request(app)
-          .post('/api/generateImage')
-          .send({
+        const response = await postGenerateImage({
             prompt: longPrompt
           })
           .expect(400);
@@ -198,9 +229,7 @@ describe('Apophenia Backend API', () => {
       });
 
       it('should reject invalid imageCount values', async () => {
-        const response = await request(app)
-          .post('/api/generateImage')
-          .send({
+        const response = await postGenerateImage({
             prompt: 'A valid prompt for testing',
             imageCount: 15
           })
@@ -213,9 +242,7 @@ describe('Apophenia Backend API', () => {
       });
 
       it('should reject invalid responseFormat values', async () => {
-        const response = await request(app)
-          .post('/api/generateImage')
-          .send({
+        const response = await postGenerateImage({
             prompt: 'A valid prompt for testing',
             responseFormat: 'invalid'
           })
@@ -234,9 +261,7 @@ describe('Apophenia Backend API', () => {
           new Error('XAI_API_KEY not configured')
         );
 
-        const response = await request(app)
-          .post('/api/generateImage')
-          .send(validRequestBody)
+        const response = await postGenerateImage(validRequestBody)
           .expect(500);
 
         expect(response.body).toMatchObject({
@@ -249,9 +274,7 @@ describe('Apophenia Backend API', () => {
           new Error('Request timeout')
         );
 
-        const response = await request(app)
-          .post('/api/generateImage')
-          .send(validRequestBody)
+        const response = await postGenerateImage(validRequestBody)
           .expect(500);
 
         expect(response.body.error).toBeDefined();
@@ -262,9 +285,7 @@ describe('Apophenia Backend API', () => {
           new Error('Rate limit exceeded for Grok API')
         );
 
-        const response = await request(app)
-          .post('/api/generateImage')
-          .send(validRequestBody)
+        const response = await postGenerateImage(validRequestBody)
           .expect(500);
 
         expect(response.body.error).toBeDefined();
@@ -275,9 +296,7 @@ describe('Apophenia Backend API', () => {
       it('should apply rate limits to API endpoints', async () => {
         // This is a basic test - in a real scenario you'd need to make multiple requests
         // to trigger rate limiting, but that would make the test slow and flaky
-        const response = await request(app)
-          .post('/api/generateImage')
-          .send(validRequestBody)
+        const response = await postGenerateImage(validRequestBody)
           .expect(200);
 
         expect(response.headers).toHaveProperty('ratelimit-limit');
@@ -298,6 +317,7 @@ describe('Apophenia Backend API', () => {
         message: expect.stringContaining('not found'),
         availableEndpoints: expect.arrayContaining([
           'GET /health',
+          'GET /api/csrf-token',
           'POST /api/generateImage'
         ])
       });

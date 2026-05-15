@@ -34,7 +34,8 @@
     "server:dev": "npx nodemon server.js",
     "fullstack:dev": "npx concurrently \"npm run server:dev\" \"npm run dev\"",
     "build:all": "npm run build && echo 'Frontend built. Deploy server.js separately for backend.'",
-    "start:prod": "node server.js"
+    "start:prod": "node server.js",
+    "check:features": "node scripts/check-features.js"
   },
   "dependencies": {
     "@genkit-ai/googleai": "^1.16.1",

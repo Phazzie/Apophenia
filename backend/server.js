@@ -10,6 +10,7 @@ import express from 'express';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import Joi from 'joi';
+import crypto from 'node:crypto';
 
 // Import services
 import GrokImageService from './services/grokImageService.js';
@@ -21,6 +22,71 @@ const logger = createLogger();
 
 // Initialize services - allow injection for testing
 let grokImageService = new GrokImageService(process.env.XAI_API_KEY, logger);
+
+
+const CSRF_HEADER_NAME = 'x-csrf-token';
+const CSRF_TOKEN_TTL_MS = 60 * 60 * 1000; // 1 hour
+const CSRF_SECRET = process.env.CSRF_SECRET || process.env.XAI_API_KEY || 'development-csrf-secret';
+
+function signCsrfPayload(payload) {
+  return crypto
+    .createHmac('sha256', CSRF_SECRET)
+    .update(payload)
+    .digest('base64url');
+}
+
+function createCsrfToken() {
+  const timestamp = Date.now().toString();
+  const nonce = crypto.randomBytes(16).toString('base64url');
+  const payload = `${timestamp}.${nonce}`;
+  return `${payload}.${signCsrfPayload(payload)}`;
+}
+
+function validateCsrfToken(token) {
+  if (typeof token !== 'string') {
+    return false;
+  }
+
+  const parts = token.split('.');
+  if (parts.length !== 3) {
+    return false;
+  }
+
+  const [timestamp, nonce, signature] = parts;
+  const issuedAt = Number(timestamp);
+  if (!Number.isFinite(issuedAt) || Date.now() - issuedAt > CSRF_TOKEN_TTL_MS) {
+    return false;
+  }
+
+  const payload = `${timestamp}.${nonce}`;
+  const expectedSignature = signCsrfPayload(payload);
+  const provided = Buffer.from(signature);
+  const expected = Buffer.from(expectedSignature);
+
+  return provided.length === expected.length && crypto.timingSafeEqual(provided, expected);
+}
+
+function csrfProtection(req, res, next) {
+  if (!['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) {
+    return next();
+  }
+
+  const token = req.get(CSRF_HEADER_NAME);
+  if (!validateCsrfToken(token)) {
+    logger.warn('CSRF validation failed', {
+      method: req.method,
+      path: req.path,
+      ip: req.ip
+    });
+
+    return res.status(403).json({
+      error: 'Forbidden',
+      message: 'Valid CSRF token required for state-changing API requests'
+    });
+  }
+
+  return next();
+}
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -64,13 +130,23 @@ const rateLimiter = rateLimit({
 app.use(cors({
   origin: process.env.CORS_ORIGIN || '*',
   methods: ['GET', 'POST'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', CSRF_HEADER_NAME]
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Apply rate limiting to API routes
 app.use('/api', rateLimiter);
+
+app.get('/api/csrf-token', (_req, res) => {
+  res.json({
+    csrfToken: createCsrfToken(),
+    headerName: CSRF_HEADER_NAME,
+    expiresInSeconds: CSRF_TOKEN_TTL_MS / 1000
+  });
+});
+
+app.use('/api', csrfProtection);
 
 // Request logging middleware
 app.use((req, res, next) => {
@@ -216,6 +292,7 @@ app.use((req, res) => {
     message: `Endpoint ${req.method} ${req.url} not found`,
     availableEndpoints: [
       'GET /health',
+      'GET /api/csrf-token',
       'POST /api/generateImage'
     ]
   });
